@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase";
 import { useSession } from "@/hooks/useSession";
 
-interface Notification {
+export interface Notification {
   id: string;
   user_id: string;
   type: string;
@@ -68,6 +68,23 @@ export function useNotifications() {
     }
   };
 
+  const markAllAsRead = async () => {
+    try {
+      const supabase = createClient();
+      await supabase
+        .from("notifications")
+        .update({ is_read: true })
+        .eq("user_id", user?.id)
+        .eq("is_read", false);
+
+      setNotifications((prev: Notification[]) =>
+        prev.map((n: Notification) => ({ ...n, is_read: true }))
+      );
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+    }
+  };
+
   const deleteNotification = async (notificationId: string) => {
     try {
       const supabase = createClient();
@@ -82,10 +99,16 @@ export function useNotifications() {
     }
   };
 
+  const unreadCount = notifications.filter((n) => !n.is_read).length;
+  const lastNotification = notifications.length > 0 ? notifications[0] : null;
+
   return {
     notifications,
     loading,
+    unreadCount,
+    lastNotification,
     markAsRead,
+    markAllAsRead,
     deleteNotification,
   };
 }
