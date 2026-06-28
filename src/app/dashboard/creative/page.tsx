@@ -42,9 +42,7 @@ const sectorTemplates = [
 ];
 
 export default function CreativeStudioPage() {
-  const plan = usePlan();
-  const isPro = plan?.type === "pro" || plan?.type === "premium";
-  const isPremium = plan?.type === "premium";
+  const { isPro, isPremium } = usePlan();
 
   return (
     <div className="space-y-8">
