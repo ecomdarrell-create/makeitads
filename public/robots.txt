@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://makeitads.com/sitemap.xml
+
+# Bloquer les pages privées
+Disallow: /dashboard/
+Disallow: /auth/
+Disallow: /api/
+
+# Autoriser les images
+Allow: /images/
