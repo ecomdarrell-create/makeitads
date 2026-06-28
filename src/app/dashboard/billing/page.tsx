@@ -16,7 +16,7 @@ export default function BillingPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useSession();
-  const { plan, loading } = usePlan();
+  const { isFree, isPro, isPremium, isEnterprise, loading } = usePlan();
   const [isYearly, setIsYearly] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
@@ -72,7 +72,7 @@ export default function BillingPage() {
     );
   }
 
-  const currentPlan = plan?.type || "free";
+  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
 
   const plans = [
     {
