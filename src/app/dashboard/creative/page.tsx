@@ -42,6 +42,7 @@ const sectorTemplates = [
 ];
 
 export default function CreativeStudioPage() {
+  // ✅ CORRECTION : Utilisation correcte des booléens retournés par usePlan()
   const { isPro, isPremium, isEnterprise, isPaid, isFree } = usePlan();
 
   return (
