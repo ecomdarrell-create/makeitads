@@ -12,10 +12,10 @@ export const CAMPAIGN_OBJECTIVES = [
 ];
 
 export const TARGET_AUDIENCES = [
-  { id: "b2c", label: "B2C Consumers", description: "Direct to consumer" },
-  { id: "b2b", label: "B2B Businesses", description: "Business to business" },
-  { id: "local", label: "Local Market", description: "Geographic targeting" },
-  { id: "global", label: "Global Market", description: "International reach" },
+  { id: "b2c", name: "B2C Consumers", description: "Direct to consumer" },
+  { id: "b2b", name: "B2B Businesses", description: "Business to business" },
+  { id: "local", name: "Local Market", description: "Geographic targeting" },
+  { id: "global", name: "Global Market", description: "International reach" },
 ];
 
 export const INDUSTRY_CATEGORIES = [
@@ -37,12 +37,12 @@ export const INDUSTRY_CATEGORIES = [
 ];
 
 export const PLATFORM_OPTIONS = [
-  { id: "google", name: "Google Ads", icon: "🔍", bestFor: "High-intent search traffic" },
+  { id: "google", name: "Google Ads", icon: "", bestFor: "High-intent search traffic" },
   { id: "meta", name: "Meta (Facebook/Instagram)", icon: "📘", bestFor: "Visual storytelling & retargeting" },
   { id: "tiktok", name: "TikTok Ads", icon: "🎵", bestFor: "Viral reach & Gen Z audience" },
   { id: "linkedin", name: "LinkedIn Ads", icon: "💼", bestFor: "B2B & professional targeting" },
   { id: "youtube", name: "YouTube Ads", icon: "▶️", bestFor: "Video engagement & brand awareness" },
-  { id: "twitter", name: "Twitter/X Ads", icon: "🐦", bestFor: "Real-time conversations & trends" },
+  { id: "twitter", name: "Twitter/X Ads", icon: "", bestFor: "Real-time conversations & trends" },
   { id: "pinterest", name: "Pinterest Ads", icon: "📌", bestFor: "Visual discovery & shopping intent" },
   { id: "snapchat", name: "Snapchat Ads", icon: "👻", bestFor: "Young audience & AR experiences" },
 ];
@@ -125,15 +125,15 @@ export const ALL_COUNTRIES = [
   { code: "NO", name: "Norway", flag: "🇳🇴" },
   { code: "DK", name: "Denmark", flag: "🇩🇰" },
   { code: "FI", name: "Finland", flag: "🇮" },
-  { code: "PL", name: "Poland", flag: "🇱" },
+  { code: "PL", name: "Poland", flag: "" },
   { code: "PT", name: "Portugal", flag: "🇵🇹" },
-  { code: "IE", name: "Ireland", flag: "🇮🇪" },
-  { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
-  { code: "SG", name: "Singapore", flag: "🇸🇬" },
+  { code: "IE", name: "Ireland", flag: "🇪" },
+  { code: "NZ", name: "New Zealand", flag: "🇿" },
+  { code: "SG", name: "Singapore", flag: "🇬" },
   { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
   { code: "JP", name: "Japan", flag: "🇯🇵" },
   { code: "KR", name: "South Korea", flag: "🇰" },
-  { code: "CN", name: "China", flag: "🇨" },
+  { code: "CN", name: "China", flag: "" },
   { code: "IN", name: "India", flag: "🇮" },
   { code: "BR", name: "Brazil", flag: "🇧" },
   { code: "MX", name: "Mexico", flag: "🇲🇽" },
@@ -144,7 +144,7 @@ export const ALL_COUNTRIES = [
   { code: "AE", name: "United Arab Emirates", flag: "🇦🇪" },
   { code: "SA", name: "Saudi Arabia", flag: "🇸" },
   { code: "IL", name: "Israel", flag: "🇮" },
-  { code: "TR", name: "Turkey", flag: "🇹" },
+  { code: "TR", name: "Turkey", flag: "" },
   { code: "RU", name: "Russia", flag: "🇷" },
   { code: "UA", name: "Ukraine", flag: "🇺" },
   { code: "CZ", name: "Czech Republic", flag: "🇿" },
@@ -152,7 +152,7 @@ export const ALL_COUNTRIES = [
   { code: "RO", name: "Romania", flag: "🇷🇴" },
   { code: "GR", name: "Greece", flag: "🇬🇷" },
   { code: "MY", name: "Malaysia", flag: "🇲🇾" },
-  { code: "TH", name: "Thailand", flag: "🇹🇭" },
+  { code: "TH", name: "Thailand", flag: "🇹" },
   { code: "PH", name: "Philippines", flag: "🇵" },
   { code: "ID", name: "Indonesia", flag: "🇮🇩" },
   { code: "VN", name: "Vietnam", flag: "🇳" },
@@ -170,3 +170,184 @@ export const searchCountries = (query: string) => {
       c.code.toLowerCase().includes(lowerQuery)
   );
 };
+
+// ======================================================
+// GENERATION MESSAGES
+// ======================================================
+
+export const GENERATION_MESSAGES = [
+  {
+    title: "Analyzing your business profile...",
+    description: "We're scanning your industry, competitors, and market position.",
+    duration: 3000,
+  },
+  {
+    title: "Scanning market trends...",
+    description: "Identifying current opportunities and emerging patterns in your sector.",
+    duration: 4000,
+  },
+  {
+    title: "Analyzing competitors...",
+    description: "Studying your top competitors' strategies and market share.",
+    duration: 4000,
+  },
+  {
+    title: "Generating AI recommendations...",
+    description: "Our AI is crafting a tailored strategy for your business.",
+    duration: 5000,
+  },
+  {
+    title: "Optimizing budget allocation...",
+    description: "Distributing your budget across the most effective channels.",
+    duration: 3000,
+  },
+  {
+    title: "Finalizing your strategy...",
+    description: "Compiling insights and preparing your actionable roadmap.",
+    duration: 2000,
+  },
+];
+
+// ======================================================
+// INDUSTRIES (avec images)
+// ======================================================
+
+export const INDUSTRIES = [
+  { id: "ecommerce", name: "E-commerce", image: "/images/industries/ecommerce.jpg" },
+  { id: "saas", name: "SaaS & Tech", image: "/images/industries/saas.jpg" },
+  { id: "healthcare", name: "Healthcare", image: "/images/industries/healthcare.jpg" },
+  { id: "finance", name: "Finance", image: "/images/industries/finance.jpg" },
+  { id: "education", name: "Education", image: "/images/industries/education.jpg" },
+  { id: "real-estate", name: "Real Estate", image: "/images/industries/real-estate.jpg" },
+  { id: "food-beverage", name: "Food & Beverage", image: "/images/industries/food.jpg" },
+  { id: "fashion-beauty", name: "Fashion & Beauty", image: "/images/industries/fashion.jpg" },
+  { id: "technology", name: "Technology", image: "/images/industries/technology.jpg" },
+  { id: "travel", name: "Travel & Hospitality", image: "/images/industries/travel.jpg" },
+  { id: "fitness", name: "Fitness & Wellness", image: "/images/industries/fitness.jpg" },
+  { id: "entertainment", name: "Entertainment", image: "/images/industries/entertainment.jpg" },
+  { id: "automotive", name: "Automotive", image: "/images/industries/automotive.jpg" },
+  { id: "home-services", name: "Home Services", image: "/images/industries/home-services.jpg" },
+  { id: "professional-services", name: "Professional Services", image: "/images/industries/professional.jpg" },
+];
+
+// ======================================================
+// TYPES POUR STRATEGY BUILDER
+// ======================================================
+
+export type FormStep =
+  | "industry"
+  | "business-name"
+  | "location"
+  | "business-model"
+  | "products-services"
+  | "goals"
+  | "target-audience"
+  | "customer-pain-points"
+  | "budget"
+  | "competitors"
+  | "brand-positioning"
+  | "channels"
+  | "challenges"
+  | "generating";
+
+export interface BusinessData {
+  name: string;
+  industry: string;
+  country: string;
+  city: string;
+  businessModel: string;
+  maturity: string;
+  products: string[];
+  services: string[];
+  goals: string[];
+  targetAudience: string;
+  idealCustomer: string;
+  customerPainPoints: string[];
+  budget: number;
+  competitors: string[];
+  competitiveAdvantages: string[];
+  brandPositioning: string;
+  positioningStatement: string;
+  tone: string;
+  existingChannels: string[];
+  marketingChannels: string[];
+  keyChallenges: string[];
+  uniqueValueProposition: string;
+  additionalNotes: string;
+}
+
+// ======================================================
+// BUSINESS MODELS
+// ======================================================
+
+export const BUSINESS_MODELS = [
+  { id: "b2c", name: "B2C", description: "Direct to consumer" },
+  { id: "b2b", name: "B2B", description: "Business to business" },
+  { id: "b2b2c", name: "B2B2C", description: "Business to business to consumer" },
+  { id: "d2c", name: "D2C", description: "Direct to consumer (manufacturer)" },
+  { id: "marketplace", name: "Marketplace", description: "Platform connecting buyers and sellers" },
+  { id: "subscription", name: "Subscription", description: "Recurring revenue model" },
+  { id: "freemium", name: "Freemium", description: "Free tier with paid upgrades" },
+  { id: "saas", name: "SaaS", description: "Software as a Service" },
+];
+
+// ======================================================
+// MATURITY STAGES
+// ======================================================
+
+export const MATURITY_STAGES = [
+  { id: "idea", name: "Idea Stage", description: "Concept validation" },
+  { id: "startup", name: "Startup", description: "0-2 years, finding product-market fit" },
+  { id: "growth", name: "Growth", description: "2-5 years, scaling operations" },
+  { id: "established", name: "Established", description: "5+ years, stable business" },
+  { id: "enterprise", name: "Enterprise", description: "Large scale, multiple markets" },
+];
+
+// ======================================================
+// GOALS (avec 'name' pour cohérence avec SelectionGrid)
+// ======================================================
+
+export const GOALS = [
+  { id: "brand-awareness", name: "Brand Awareness" },
+  { id: "lead-generation", name: "Lead Generation" },
+  { id: "sales-conversions", name: "Sales & Conversions" },
+  { id: "customer-retention", name: "Customer Retention" },
+  { id: "market-expansion", name: "Market Expansion" },
+  { id: "product-launch", name: "Product Launch" },
+  { id: "website-traffic", name: "Website Traffic" },
+  { id: "app-downloads", name: "App Downloads" },
+];
+
+// ======================================================
+// TONES
+// ======================================================
+
+export const TONES = [
+  { id: "professional", name: "Professional" },
+  { id: "friendly", name: "Friendly & Approachable" },
+  { id: "authoritative", name: "Authoritative" },
+  { id: "playful", name: "Playful & Fun" },
+  { id: "luxury", name: "Luxury & Premium" },
+  { id: "inspirational", name: "Inspirational" },
+  { id: "educational", name: "Educational" },
+  { id: "bold", name: "Bold & Direct" },
+];
+
+// ======================================================
+// MARKETING CHANNELS
+// ======================================================
+
+export const MARKETING_CHANNELS = [
+  { id: "google-ads", name: "Google Ads" },
+  { id: "facebook-ads", name: "Facebook Ads" },
+  { id: "instagram-ads", name: "Instagram Ads" },
+  { id: "tiktok-ads", name: "TikTok Ads" },
+  { id: "linkedin-ads", name: "LinkedIn Ads" },
+  { id: "youtube-ads", name: "YouTube Ads" },
+  { id: "twitter-ads", name: "Twitter/X Ads" },
+  { id: "pinterest-ads", name: "Pinterest Ads" },
+  { id: "email-marketing", name: "Email Marketing" },
+  { id: "seo", name: "SEO" },
+  { id: "content-marketing", name: "Content Marketing" },
+  { id: "influencer-marketing", name: "Influencer Marketing" },
+];

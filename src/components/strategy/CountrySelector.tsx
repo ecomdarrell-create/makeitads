@@ -15,8 +15,9 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
   const [customCountry, setCustomCountry] = useState("");
 
   const filteredCountries = useMemo(() => {
-    return ALL_COUNTRIES.filter((c) =>
-      c.toLowerCase().includes(search.toLowerCase())
+    return ALL_COUNTRIES.filter((country) =>
+      country.name.toLowerCase().includes(search.toLowerCase()) ||
+      country.code.toLowerCase().includes(search.toLowerCase())
     );
   }, [search]);
 
@@ -72,18 +73,18 @@ export default function CountrySelector({ selectedCountry, onSelect }: CountrySe
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4 max-h-[300px] overflow-y-auto pr-2">
-        {filteredCountries.map((c) => (
+        {filteredCountries.map((country) => (
           <button 
-            key={c} 
-            onClick={() => onSelect(c)} 
+            key={country.code} 
+            onClick={() => onSelect(country.name)} 
             className={`rounded-lg border px-3 py-2.5 text-xs font-medium transition-all text-left truncate ${
-              selectedCountry === c 
+              selectedCountry === country.name 
                 ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
                 : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
             }`}
           >
-            {selectedCountry === c && <Check className="inline h-3 w-3 mr-1" />}
-            {c}
+            {selectedCountry === country.name && <Check className="inline h-3 w-3 mr-1" />}
+            {country.flag} {country.name}
           </button>
         ))}
       </div>

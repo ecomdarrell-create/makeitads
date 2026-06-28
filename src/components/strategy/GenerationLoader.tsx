@@ -18,6 +18,8 @@ export default function GenerationLoader({ error }: GenerationLoaderProps) {
     return () => clearInterval(interval);
   }, []);
 
+  const currentMessage = GENERATION_MESSAGES[msgIndex];
+
   return (
     <motion.div
       key="generating"
@@ -56,19 +58,23 @@ export default function GenerationLoader({ error }: GenerationLoaderProps) {
         </motion.div>
 
         <AnimatePresence mode="wait">
-          <motion.p
+          <motion.div
             key={msgIndex}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
             transition={{ duration: 0.3 }}
-            className="text-xl font-bold text-white mb-4"
           >
-            {GENERATION_MESSAGES[msgIndex]}
-          </motion.p>
+            <p className="text-xl font-bold text-white mb-2">
+              {currentMessage.title}
+            </p>
+            <p className="text-sm text-slate-400 max-w-md mx-auto">
+              {currentMessage.description}
+            </p>
+          </motion.div>
         </AnimatePresence>
 
-        <div className="flex items-center justify-center gap-2 mt-4">
+        <div className="flex items-center justify-center gap-2 mt-6">
           {GENERATION_MESSAGES.map((_, i) => (
             <motion.div
               key={i}
