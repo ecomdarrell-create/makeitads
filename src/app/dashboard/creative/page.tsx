@@ -46,7 +46,6 @@ export default function CreativeStudioPage() {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-white">Ad Copy & Visuals</h1>
@@ -60,7 +59,6 @@ export default function CreativeStudioPage() {
         )}
       </div>
 
-      {/* Section A: Enriched Visual Brief (Débloqué pour tous) */}
       <div>
         <div className="flex items-center gap-2 mb-6">
           <Wand2 className="h-5 w-5 text-[#8b5cf6]" />
@@ -115,7 +113,6 @@ export default function CreativeStudioPage() {
         </div>
       </div>
 
-      {/* Section B: Sector Templates Library (Premium - Verrouillé) */}
       <div className="relative rounded-2xl border border-white/[0.06] bg-white/[0.02] p-6">
         {!isPremium && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-[#0f0f1a]/60 backdrop-blur-md">
@@ -154,7 +151,6 @@ export default function CreativeStudioPage() {
         </div>
       </div>
 
-      {/* Section C: Soon - AI Visual Generation (Premium - Verrouillé) */}
       <div className="relative rounded-2xl border border-dashed border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/5 to-[#8b5cf6]/5 p-8">
         {!isPremium && (
           <div className="absolute inset-0 z-10 flex items-center justify-center rounded-2xl bg-[#0f0f1a]/60 backdrop-blur-md">
