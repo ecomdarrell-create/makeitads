@@ -16,7 +16,7 @@ export interface UsageData {
 
 export function useUsage() {
   const { user } = useSession();
-  const { plan } = usePlan();
+  const { isFree, isPro, isPremium, isEnterprise } = usePlan();
   const [usage, setUsage] = useState<UsageData>({
     strategiesUsed: 0,
     strategiesLimit: 1,
@@ -27,11 +27,14 @@ export function useUsage() {
   });
   const [loading, setLoading] = useState(true);
 
+  // Calculer planType à partir des booléens
+  const planType = isEnterprise ? 'enterprise' : isPremium ? 'premium' : isPro ? 'pro' : 'free';
+
   useEffect(() => {
     if (user) {
       loadUsage();
     }
-  }, [user, plan]);
+  }, [user, isFree, isPro, isPremium, isEnterprise]);
 
   const loadUsage = async () => {
     if (!user) return;
@@ -56,7 +59,6 @@ export function useUsage() {
       const pdfExportsUsed = pdfData || 0;
 
       // Déterminer les limites selon le plan
-      const planType = plan?.type?.toLowerCase() || 'free';
       let strategiesLimit = 1;
       let pdfExportsLimit = 0;
 

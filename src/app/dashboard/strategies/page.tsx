@@ -27,6 +27,7 @@ import {
   Megaphone
 } from "lucide-react";
 import { usePlan } from "@/hooks/usePlan";
+import { useUsage } from "@/hooks/useUsage";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase";
 
@@ -73,7 +74,8 @@ interface ImagePrompt {
 
 export default function StrategiesPage() {
   const router = useRouter();
-  const { plan, loading: planLoading } = usePlan();
+  const { isFree, loading: planLoading } = usePlan();
+  const { usage: usageData } = useUsage();
   const { user, loading: sessionLoading } = useSession();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [loading, setLoading] = useState(true);
@@ -120,9 +122,8 @@ export default function StrategiesPage() {
     }
   }, [user]);
 
-  const isFree = plan?.type === "free";
   const quotaUsed = strategies.length;
-  const quotaLimit = plan?.strategies_limit || 1;
+  const quotaLimit = usageData?.strategiesLimit || 1;
   const isQuotaReached = isFree && quotaUsed >= quotaLimit;
 
   const handleNewStrategy = () => {

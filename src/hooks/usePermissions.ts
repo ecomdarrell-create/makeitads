@@ -1,31 +1,34 @@
 import { usePlan } from "./usePlan";
+import { useUsage } from "./useUsage";
 import { PRICING_CONFIG, PlanId, hasPermission as checkPermission } from "@/config/pricing.config";
 import { PLAN_PERMISSIONS, hasFeature, getFeatureLimit } from "@/config/permissions";
 
 export function usePermissions() {
-  const { plan, loading, error, refresh } = usePlan();
+  const { isFree, isPro, isPremium, isEnterprise, loading, error, refresh } = usePlan();
+  const { usage: usageData } = useUsage();
 
-  const userPlan = plan?.type || "free";
+  // Calculer userPlan à partir des booléens
+  const userPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
   const planPermissions = PLAN_PERMISSIONS[userPlan.toLowerCase()] || PLAN_PERMISSIONS.free;
 
   // ✅ ENTERPRISE DÉBLOQUE TOUT
-  const isEnterprise = userPlan === "enterprise";
+  const isEnterprisePlan = userPlan === "enterprise";
 
   const can = (feature: keyof (typeof PRICING_CONFIG)["free"]["limits"]): boolean => {
     // Enterprise a accès à TOUT
-    if (isEnterprise) return true;
-    return checkPermission(userPlan, feature);
+    if (isEnterprisePlan) return true;
+    return checkPermission(userPlan as PlanId, feature);
   };
 
   // Nouvelle fonction pour vérifier les features de PLAN_PERMISSIONS
   const hasFeatureAccess = (feature: keyof typeof PLAN_PERMISSIONS.free): boolean => {
-    if (isEnterprise) return true;
-    return hasFeature(userPlan, feature);
+    if (isEnterprisePlan) return true;
+    return hasFeature(userPlan as PlanId, feature);
   };
 
   // Obtenir la limite d'une feature
   const getLimit = (feature: keyof typeof PLAN_PERMISSIONS.free): number => {
-    return getFeatureLimit(userPlan, feature);
+    return getFeatureLimit(userPlan as PlanId, feature);
   };
 
   // Vérifier si illimité
@@ -33,15 +36,11 @@ export function usePermissions() {
     return getLimit(feature) === -1;
   };
 
-  const isFree = userPlan === "free";
-  const isPro = userPlan === "pro";
-  const isPremium = userPlan === "premium";
-
   const isProOrAbove = isPro || isPremium || isEnterprise;
   const isPremiumOrAbove = isPremium || isEnterprise;
 
-  const quotaUsed = plan?.strategies_used || 0;
-  const quotaLimit = plan?.strategies_limit || 1;
+  const quotaUsed = usageData?.strategiesUsed || 0;
+  const quotaLimit = usageData?.strategiesLimit || 1;
   const quotaReached = isFree && quotaUsed >= quotaLimit;
   const quotaRemaining = isFree ? Math.max(0, quotaLimit - quotaUsed) : 9999;
 
@@ -198,7 +197,6 @@ export function usePermissions() {
   const hasEmailSupport = planPermissions.support.email;
 
   return {
-    plan,
     loading,
     error,
     refresh,

@@ -6,6 +6,7 @@ import { User, Mail, Bell, Lock, Save, Check, Shield, Globe, Loader2, Crown, Zap
 import { createClient } from "@/lib/supabase";
 import { usePlan } from "@/hooks/usePlan";
 import { usePermissions } from "@/hooks/usePermissions";
+import { useUsage } from "@/hooks/useUsage";
 import { useRouter } from "next/navigation";
 
 const supabase = createClient();
@@ -21,8 +22,9 @@ const Toggle = ({ enabled, onChange, label, description }: { enabled: boolean; o
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { plan, loading: planLoading } = usePlan();
-  const { isPremium, isEnterprise, canAccessAPI } = usePermissions();
+  const { isFree, isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
+  const { isPremium: hasPremium, isEnterprise: hasEnterprise, canAccessAPI } = usePermissions();
+  const { usage: usageData } = useUsage();
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -35,6 +37,10 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState("en");
   const [theme, setTheme] = useState("dark");
   const [timezone, setTimezone] = useState("UTC");
+
+  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
+  const strategiesUsed = usageData?.strategiesUsed || 0;
+  const strategiesLimit = usageData?.strategiesLimit || 1;
 
   useEffect(() => {
     const getUser = async () => {
@@ -156,11 +162,11 @@ export default function SettingsPage() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-6">
-            <div className="flex items-center gap-2 mb-3">{plan?.type === "enterprise" ? <Crown className="h-4 w-4 text-amber-400" /> : plan?.type === "premium" ? <Crown className="h-4 w-4 text-[#a78bfa]" /> : plan?.type === "pro" ? <Zap className="h-4 w-4 text-[#a78bfa]" /> : null}<h3 className="text-sm font-bold text-white">Current Plan</h3></div>
-            <p className="text-2xl font-bold text-white mb-1 capitalize">{plan?.type || "Free"}</p>
-            <p className="text-xs text-slate-400 mb-4">{plan?.type === "free" ? "Limited features. Upgrade anytime." : plan?.type === "enterprise" ? "All features unlocked. Full access." : "All features unlocked."}</p>
-            <div className="space-y-2 mb-4"><div className="flex items-center justify-between text-xs"><span className="text-slate-400">Strategies</span><span className="text-white font-bold">{plan?.strategies_used || 0} / {plan?.strategies_limit === 9999 ? "∞" : plan?.strategies_limit || 1}</span></div><div className="h-1.5 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" style={{ width: `${Math.min(100, ((plan?.strategies_used || 0) / (plan?.strategies_limit || 1)) * 100)}%` }} /></div></div>
-            {plan?.type !== "enterprise" && <button onClick={() => router.push("/dashboard/billing")} className="w-full rounded-lg bg-white/10 border border-white/10 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors">{plan?.type === "free" ? "Upgrade Plan" : "Manage Plan"}</button>}
+            <div className="flex items-center gap-2 mb-3">{isEnterprise ? <Crown className="h-4 w-4 text-amber-400" /> : isPremium ? <Crown className="h-4 w-4 text-[#a78bfa]" /> : isPro ? <Zap className="h-4 w-4 text-[#a78bfa]" /> : null}<h3 className="text-sm font-bold text-white">Current Plan</h3></div>
+            <p className="text-2xl font-bold text-white mb-1 capitalize">{currentPlan}</p>
+            <p className="text-xs text-slate-400 mb-4">{isFree ? "Limited features. Upgrade anytime." : isEnterprise ? "All features unlocked. Full access." : "All features unlocked."}</p>
+            <div className="space-y-2 mb-4"><div className="flex items-center justify-between text-xs"><span className="text-slate-400">Strategies</span><span className="text-white font-bold">{strategiesUsed} / {strategiesLimit === 9999 ? "∞" : strategiesLimit}</span></div><div className="h-1.5 bg-white/5 rounded-full overflow-hidden"><div className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" style={{ width: `${Math.min(100, (strategiesUsed / strategiesLimit) * 100)}%` }} /></div></div>
+            {!isEnterprise && <button onClick={() => router.push("/dashboard/billing")} className="w-full rounded-lg bg-white/10 border border-white/10 py-2 text-xs font-semibold text-white hover:bg-white/20 transition-colors">{isFree ? "Upgrade Plan" : "Manage Plan"}</button>}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="rounded-2xl border border-white/[0.06] bg-[#0f0f1a] p-6">

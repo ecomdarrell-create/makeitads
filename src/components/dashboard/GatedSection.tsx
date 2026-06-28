@@ -21,9 +21,10 @@ export default function GatedSection({
   blurIntensity = "medium",
 }: GatedSectionProps) {
   const router = useRouter();
-  const plan = usePlan();
+  const { isPro, isPremium, isEnterprise } = usePlan();
 
-  const isLocked = plan?.type !== requiredPlan && plan?.type !== "premium";
+  const isLocked = (requiredPlan === "pro" && !isPro && !isPremium && !isEnterprise) || 
+                   (requiredPlan === "premium" && !isPremium && !isEnterprise);
 
   const blurClasses = {
     light: "blur-[2px]",

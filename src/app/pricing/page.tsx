@@ -229,13 +229,13 @@ const faqData = [
 
 export default function PricingPage() {
   const { user } = useSession();
-  const { plan, loading: planLoading } = usePlan();
+  const { isFree, isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
   const [isYearly, setIsYearly] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   // Récupérer le plan actuel de l'utilisateur
-  const currentPlan = plan?.type?.toLowerCase() || "free";
+  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
 
   // Handler pour upgrade vers un plan payant (Pro/Premium)
   const handleUpgrade = async (planName: string) => {
@@ -319,19 +319,19 @@ export default function PricingPage() {
 
           {/* Plans Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-            {pricingPlans.map((plan, index) => {
-              const Icon = plan.icon;
-              const isCurrentPlan = currentPlan === plan.key;
+            {pricingPlans.map((planItem, index) => {
+              const Icon = planItem.icon;
+              const isCurrentPlan = currentPlan === planItem.key;
 
               return (
                 <motion.div
-                  key={plan.key}
+                  key={planItem.key}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative rounded-2xl border ${plan.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5" : `${plan.borderColor} ${plan.bg}`} p-6 flex flex-col`}
+                  className={`relative rounded-2xl border ${planItem.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5" : `${planItem.borderColor} ${planItem.bg}`} p-6 flex flex-col`}
                 >
-                  {plan.popular && (
+                  {planItem.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                       <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-lg shadow-[#6366f1]/25">
                         Most Popular
@@ -348,25 +348,25 @@ export default function PricingPage() {
                   )}
 
                   <div className="mb-6">
-                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${plan.color} mb-4 shadow-lg`}>
+                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${planItem.color} mb-4 shadow-lg`}>
                       <Icon className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">{plan.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1">{plan.description}</p>
+                    <h3 className="text-xl font-bold text-white">{planItem.name}</h3>
+                    <p className="text-sm text-slate-400 mt-1">{planItem.description}</p>
                   </div>
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">${isYearly ? plan.price.yearly : plan.price.monthly}</span>
+                      <span className="text-4xl font-bold text-white">${isYearly ? planItem.price.yearly : planItem.price.monthly}</span>
                       <span className="text-slate-400">/month</span>
                     </div>
-                    {isYearly && plan.price.monthly > 0 && (
-                      <p className="text-xs text-slate-500 mt-1">Billed annually (${plan.price.yearly * 12}/year)</p>
+                    {isYearly && planItem.price.monthly > 0 && (
+                      <p className="text-xs text-slate-500 mt-1">Billed annually (${planItem.price.yearly * 12}/year)</p>
                     )}
                   </div>
 
                   {/* Boutons dynamiques selon le plan */}
-                  {plan.name === "Free" ? (
+                  {planItem.name === "Free" ? (
                     <button 
                       disabled
                       className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all mb-6 ${
@@ -377,26 +377,26 @@ export default function PricingPage() {
                     >
                       {isCurrentPlan ? "Current Plan" : "Free"}
                     </button>
-                  ) : plan.name === "Enterprise" ? (
+                  ) : planItem.name === "Enterprise" ? (
                     <Link 
                       href="/contact" 
                       className="w-full rounded-xl py-3 text-sm font-semibold text-center transition-all border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] mb-6 block"
                     >
-                      {plan.cta}
+                      {planItem.cta}
                     </Link>
                   ) : (
                     <button
-                      onClick={() => handleUpgrade(plan.name)}
-                      disabled={loadingPlan === plan.name || isCurrentPlan}
+                      onClick={() => handleUpgrade(planItem.name)}
+                      disabled={loadingPlan === planItem.name || isCurrentPlan}
                       className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
                         isCurrentPlan
                           ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                          : plan.popular
+                          : planItem.popular
                           ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
                           : "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] disabled:opacity-60 disabled:cursor-not-allowed"
                       }`}
                     >
-                      {loadingPlan === plan.name ? (
+                      {loadingPlan === planItem.name ? (
                         <>
                           <Loader2 className="h-4 w-4 animate-spin" />
                           Loading...
@@ -407,15 +407,15 @@ export default function PricingPage() {
                           Current Plan
                         </>
                       ) : (
-                        plan.cta
+                        planItem.cta
                       )}
                     </button>
                   )}
 
                   <div className="space-y-3 flex-1">
-                    {plan.features.map((feature, i) => (
+                    {planItem.features.map((feature, i) => (
                       <div key={i} className="flex items-start gap-2.5">
-                        <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${plan.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                        <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${planItem.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                           <Check className="h-3 w-3 text-white" />
                         </div>
                         <span className="text-sm text-slate-300">{feature}</span>
