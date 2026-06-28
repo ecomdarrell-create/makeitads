@@ -33,9 +33,7 @@ const platformComparison = [
 ];
 
 export default function AudienceLabPage() {
-  const plan = usePlan();
-  const isPro = plan?.type === "pro" || plan?.type === "premium";
-  const isPremium = plan?.type === "premium";
+  const { isPro, isPremium } = usePlan();
 
   const [ageRange, setAgeRange] = useState([25, 40]);
   const [gender, setGender] = useState("All");
