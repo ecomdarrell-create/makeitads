@@ -3,7 +3,7 @@ import { sendStrategyReadyEmail } from '@/lib/email';
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, strategyName } = await req.json();
+    const { email, userName, strategyName, strategyId } = await req.json();
 
     if (!email || !strategyName) {
       return NextResponse.json(
@@ -12,7 +12,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = await sendStrategyReadyEmail(email, strategyName);
+    const result = await sendStrategyReadyEmail({
+      to: email,
+      userName: userName || 'there',
+      strategyName,
+      strategyId: strategyId || 'unknown',
+    });
 
     if (result.success) {
       return NextResponse.json({ success: true, message: 'Email envoyé !' });
