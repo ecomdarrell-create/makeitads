@@ -15,8 +15,6 @@ import { exportDashboardToPDF } from "@/utils/exportDashboard";
 
 const supabase = createClient();
 
-// ... (Tous les interfaces et constantes restent identiques à avant)
-
 interface Strategy {
   id: string;
   title: string;
@@ -48,7 +46,6 @@ interface ActivityEvent {
 type TrendPeriod = "7d" | "30d";
 type ActivityFilter = "all" | "strategy" | "competitor" | "campaign" | "profile" | "export";
 
-// ... (Tous les composants utilitaires AnimatedNumber, TrendIndicator restent identiques)
 function AnimatedNumber({ value, duration = 1 }: { value: number; duration?: number }) {
   const [display, setDisplay] = useState(0);
   useEffect(() => {
@@ -74,7 +71,7 @@ function TrendIndicator({ current, previous }: { current: number; previous: numb
 export default function DashboardPage() {
   const router = useRouter();
   const { user, loading: sessionLoading } = useSession();
-  const { plan, loading: planLoading } = usePlan();
+  const { isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
   const { usage: usageData, loading: usageLoading } = useUsage();
   const [strategies, setStrategies] = useState<Strategy[]>([]);
   const [competitors, setCompetitors] = useState<Competitor[]>([]);
@@ -85,7 +82,6 @@ export default function DashboardPage() {
   const [trendPeriod, setTrendPeriod] = useState<TrendPeriod>("7d");
   const [activityFilter, setActivityFilter] = useState<ActivityFilter>("all");
 
-  // ... (Tous les useEffect de chargement restent identiques)
   useEffect(() => {
     const fetchAllData = async () => {
       if (!user) return;
@@ -104,12 +100,10 @@ export default function DashboardPage() {
     if (user) fetchAllData();
   }, [user]);
 
-  // ✅ FONCTION D'EXPORT PDF
   const handleExportPDF = async () => {
     setIsExporting(true);
     try {
       await exportDashboardToPDF("dashboard-export-content");
-      // Créer une notification après export
       if (user) {
         await supabase.from("notifications").insert({
           user_id: user.id,
@@ -128,7 +122,6 @@ export default function DashboardPage() {
     }
   };
 
-  // ... (Tous les calculs useMemo restent identiques)
   const totalStrategies = strategies.length;
   const totalCompetitors = competitors.length;
   const totalCampaigns = strategies.reduce((sum, s) => sum + (s.data?.campaigns?.length || 0), 0);
@@ -155,7 +148,6 @@ export default function DashboardPage() {
     return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
   }, [profileCompletion, competitorCoverage, avgMarketScore, aiReadiness, totalStrategies]);
 
-  // ... (Tous les autres useMemo restent identiques)
   const trendData = useMemo(() => {
     const now = new Date();
     const currentPeriodStart = new Date();
@@ -256,22 +248,20 @@ export default function DashboardPage() {
   const firstName = user?.user_metadata?.first_name || user?.email?.split("@")[0] || "there";
 
   return (
-    // ✅ WRAPPER D'EXPORT (tout le contenu sera capturé)
     <div id="dashboard-export-content" className="space-y-8">
       {/* HEADER */}
       <div className="flex items-start justify-between gap-6">
         <div>
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-2 flex-wrap">
             <h1 className="text-3xl font-bold text-white">Welcome back, {firstName}</h1>
-            {plan?.type === "enterprise" && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold text-white flex items-center gap-1"><Star className="h-3 w-3" /> ENTERPRISE</span>}
-            {plan?.type === "premium" && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-xs font-bold text-white">PREMIUM</span>}
-            {plan?.type === "pro" && <span className="px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] text-xs font-bold">PRO</span>}
+            {isEnterprise && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold text-white flex items-center gap-1"><Star className="h-3 w-3" /> ENTERPRISE</span>}
+            {isPremium && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-xs font-bold text-white">PREMIUM</span>}
+            {isPro && <span className="px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] text-xs font-bold">PRO</span>}
           </motion.div>
           <p className="text-slate-400">Here's your marketing command center.</p>
         </div>
         
         <div className="flex items-center gap-3">
-          {/* ✅ COMPTEUR D'USAGE */}
           {!usageLoading && usageData.strategiesLimit !== -1 && (
             <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
               <div className="flex items-center gap-2 mb-1">
@@ -296,7 +286,6 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* ✅ BOUTON EXPORT */}
           <button
             onClick={handleExportPDF}
             disabled={isExporting}
@@ -306,7 +295,6 @@ export default function DashboardPage() {
             {isExporting ? "Generating..." : "Export PDF"}
           </button>
 
-          {/* ✅ BOUTON UPGRADE SI LIMITE ATTEINTE */}
           {!usageLoading && usageData.strategiesLimit !== -1 && usageData.strategiesUsed >= usageData.strategiesLimit && (
             <button
               onClick={() => router.push("/dashboard/billing")}

@@ -280,12 +280,12 @@ function ReviewsCarousel() {
 
 export default function LandingPage() {
   const { user } = useSession();
-  const { plan } = usePlan();
+  const { isFree, isPro, isPremium, isEnterprise } = usePlan();
   const [isYearly, setIsYearly] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
 
-  const currentPlan = plan?.type?.toLowerCase() || "free";
+  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
 
   const handleUpgrade = async (planName: string) => {
     if (!user) {
@@ -442,38 +442,38 @@ export default function LandingPage() {
             </div>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {pricingPlans.map((plan, index) => {
-              const isCurrentPlan = currentPlan === plan.name.toLowerCase();
+            {pricingPlans.map((planItem, index) => {
+              const isCurrentPlan = currentPlan === planItem.name.toLowerCase();
               return (
-                <motion.div key={plan.name} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: index * 0.1 }} className={`relative rounded-2xl border ${plan.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5" : "border-white/10 bg-white/[0.02]"} p-6 flex flex-col`}>
-                  {plan.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 py-1 text-xs font-bold text-white">Most Popular</div>}
+                <motion.div key={planItem.name} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: index * 0.1 }} className={`relative rounded-2xl border ${planItem.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5" : "border-white/10 bg-white/[0.02]"} p-6 flex flex-col`}>
+                  {planItem.popular && <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 py-1 text-xs font-bold text-white">Most Popular</div>}
                   {isCurrentPlan && (
                     <div className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
                       <Check className="h-3 w-3" />Current Plan
                     </div>
                   )}
-                  <div className="mb-6"><h3 className="text-xl font-bold text-white mb-2">{plan.name}</h3><p className="text-sm text-slate-400">{plan.description}</p></div>
-                  <div className="mb-6"><div className="flex items-baseline gap-1"><span className="text-4xl font-bold text-white">${isYearly ? plan.price.yearly : plan.price.monthly}</span><span className="text-slate-400">/month</span></div>{isYearly && plan.price.monthly > 0 && <p className="text-xs text-slate-500 mt-1">Billed annually (${plan.price.yearly * 12}/year)</p>}</div>
-                  <ul className="space-y-3 mb-8 flex-1">{plan.features.map((feature, i) => (<li key={i} className="flex items-start gap-3 text-sm text-slate-300"><Check className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" /><span>{feature}</span></li>))}</ul>
-                  {plan.name === "Free" ? (
+                  <div className="mb-6"><h3 className="text-xl font-bold text-white mb-2">{planItem.name}</h3><p className="text-sm text-slate-400">{planItem.description}</p></div>
+                  <div className="mb-6"><div className="flex items-baseline gap-1"><span className="text-4xl font-bold text-white">${isYearly ? planItem.price.yearly : planItem.price.monthly}</span><span className="text-slate-400">/month</span></div>{isYearly && planItem.price.monthly > 0 && <p className="text-xs text-slate-500 mt-1">Billed annually (${planItem.price.yearly * 12}/year)</p>}</div>
+                  <ul className="space-y-3 mb-8 flex-1">{planItem.features.map((feature, i) => (<li key={i} className="flex items-start gap-3 text-sm text-slate-300"><Check className="h-4 w-4 text-emerald-400 flex-shrink-0 mt-0.5" /><span>{feature}</span></li>))}</ul>
+                  {planItem.name === "Free" ? (
                     <button disabled className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all ${isCurrentPlan ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default" : "border border-white/10 bg-white/[0.03] text-slate-500 cursor-not-allowed"}`}>
                       {isCurrentPlan ? "Current Plan" : "Free"}
                     </button>
-                  ) : plan.name === "Enterprise" ? (
+                  ) : planItem.name === "Enterprise" ? (
                     <Link href="/contact" className="w-full rounded-xl py-3 text-sm font-semibold text-center transition-all border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06]">
-                      {plan.cta}
+                      {planItem.cta}
                     </Link>
                   ) : (
                     <button
-                      onClick={() => handleUpgrade(plan.name)}
-                      disabled={loadingPlan === plan.name || isCurrentPlan}
+                      onClick={() => handleUpgrade(planItem.name)}
+                      disabled={loadingPlan === planItem.name || isCurrentPlan}
                       className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 ${
                         isCurrentPlan ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                        : plan.popular ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                        : planItem.popular ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
                         : "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] disabled:opacity-60 disabled:cursor-not-allowed"
                       }`}
                     >
-                      {loadingPlan === plan.name ? (<><Loader2 className="h-4 w-4 animate-spin" />Loading...</>) : isCurrentPlan ? (<><Check className="h-4 w-4" />Current Plan</>) : (plan.cta)}
+                      {loadingPlan === planItem.name ? (<><Loader2 className="h-4 w-4 animate-spin" />Loading...</>) : isCurrentPlan ? (<><Check className="h-4 w-4" />Current Plan</>) : (planItem.cta)}
                     </button>
                   )}
                 </motion.div>
