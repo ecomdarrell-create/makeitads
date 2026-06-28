@@ -10,7 +10,6 @@ import { useSession } from "@/hooks/useSession";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useUsage } from "@/hooks/useUsage";
 import { createClient } from "@/lib/supabase";
-import { generateMockDashboard } from "@/lib/demo/mockData";
 import { FormStep, BusinessData } from "@/lib/constants/strategy";
 import {
   BUSINESS_MODELS,
@@ -34,8 +33,7 @@ import GenerationLoader from "./GenerationLoader";
 const supabase = createClient();
 
 interface StrategyBuilderProps {
-  demoMode?: boolean;
-  onComplete?: (strategyId?: string, mockData?: any) => void;
+  onComplete?: (strategyId?: string) => void;
   onClose?: () => void;
 }
 
@@ -57,7 +55,6 @@ const STEPS: FormStep[] = [
 ];
 
 export default function StrategyBuilder({
-  demoMode = false,
   onComplete,
   onClose,
 }: StrategyBuilderProps) {
@@ -104,13 +101,8 @@ export default function StrategyBuilder({
   const strategiesLimit = usage.strategiesLimit;
   const isUnlimited = strategiesLimit === -1;
 
-  // Charger le profil sauvegardé (uniquement en mode réel)
+  // Charger le profil sauvegardé
   useEffect(() => {
-    if (demoMode) {
-      setProfileLoaded(true);
-      return;
-    }
-
     const loadSavedProfile = async () => {
       if (!user) {
         setProfileLoaded(true);
@@ -157,7 +149,7 @@ export default function StrategyBuilder({
     };
 
     loadSavedProfile();
-  }, [user, demoMode]);
+  }, [user]);
 
   // Navigation
   const currentIndex = STEPS.indexOf(step);
@@ -195,7 +187,7 @@ export default function StrategyBuilder({
 
   // Génération
   const startGeneration = async () => {
-    if (!demoMode && !canGenerate) {
+    if (!canGenerate) {
       setShowUpgradeModal(true);
       return;
     }
@@ -228,15 +220,6 @@ export default function StrategyBuilder({
       uniqueValueProposition,
       additionalNotes,
     };
-
-    // MODE DÉMO : générer des données fictives
-    if (demoMode) {
-      setTimeout(() => {
-        const mockData = generateMockDashboard(businessData);
-        onComplete?.(undefined, mockData);
-      }, 6000);
-      return;
-    }
 
     // MODE RÉEL : sauvegarder + appeler l'API
     try {
@@ -330,7 +313,7 @@ export default function StrategyBuilder({
     }
   };
 
-  if (sessionLoading || !profileLoaded || (!demoMode && usageLoading)) {
+  if (sessionLoading || !profileLoaded || usageLoading) {
     return (
       <div className="min-h-screen bg-[#080810] flex items-center justify-center">
         <div className="text-center">
@@ -357,11 +340,10 @@ export default function StrategyBuilder({
           )}
           <span className="text-sm font-bold text-white">
             Make<span className="text-[#8b5cf6]">ItAds</span> — Strategy Builder
-            {demoMode && <span className="ml-2 text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">Demo</span>}
           </span>
         </div>
 
-        {!demoMode && !isUnlimited && (
+        {!isUnlimited && (
           <div className="hidden md:flex items-center gap-3">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
               <Sparkles className="h-3.5 w-3.5 text-[#8b5cf6]" />
@@ -384,7 +366,7 @@ export default function StrategyBuilder({
       </div>
 
       {/* Profile loaded banner */}
-      {hasSavedProfile && !demoMode && step !== "generating" && (
+      {hasSavedProfile && step !== "generating" && (
         <div className="bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border-b border-emerald-500/20 px-6 py-3">
           <div className="max-w-3xl mx-auto flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/20">
@@ -495,11 +477,11 @@ export default function StrategyBuilder({
               subtitle="What obstacles are you facing?"
               onNext={handleNext}
               onBack={handleBack}
-              canProceed={!demoMode ? canGenerate : true}
-              nextLabel={demoMode ? "Generate Strategy" : canGenerate ? "Generate Strategy" : "Limit Reached"}
+              canProceed={canGenerate}
+              nextLabel={canGenerate ? "Generate Strategy" : "Limit Reached"}
               nextAction={startGeneration}
             >
-              {!demoMode && !canGenerate && (
+              {!canGenerate && (
                 <div className="mb-6 p-4 rounded-xl border border-amber-500/30 bg-amber-500/10">
                   <div className="flex items-start gap-3">
                     <Lock className="h-5 w-5 text-amber-400 mt-0.5" />
@@ -517,17 +499,15 @@ export default function StrategyBuilder({
               <TagInput label="Key Challenges (Optional)" tags={keyChallenges} onAdd={(t) => setKeyChallenges([...keyChallenges, t])} onRemove={(i) => setKeyChallenges(keyChallenges.filter((_, idx) => idx !== i))} placeholder="e.g., Limited brand awareness" />
               <TextInput label="Additional Notes (Optional)" value={additionalNotes} onChange={setAdditionalNotes} type="textarea" placeholder="Any other information..." rows={4} />
 
-              {!demoMode && (
-                <div className="mt-6 p-4 rounded-xl border border-[#6366f1]/30 bg-[#6366f1]/5">
-                  <label className="flex items-start gap-3 cursor-pointer">
-                    <input type="checkbox" checked={saveAsDefault} onChange={(e) => setSaveAsDefault(e.target.checked)} className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-[#6366f1]" />
-                    <div>
-                      <p className="text-sm font-semibold text-white">Save as my default business profile</p>
-                      <p className="text-xs text-slate-400 mt-1">Your information will be pre-filled next time.</p>
-                    </div>
-                  </label>
-                </div>
-              )}
+              <div className="mt-6 p-4 rounded-xl border border-[#6366f1]/30 bg-[#6366f1]/5">
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" checked={saveAsDefault} onChange={(e) => setSaveAsDefault(e.target.checked)} className="mt-1 h-4 w-4 rounded border-white/10 bg-white/5 text-[#6366f1]" />
+                  <div>
+                    <p className="text-sm font-semibold text-white">Save as my default business profile</p>
+                    <p className="text-xs text-slate-400 mt-1">Your information will be pre-filled next time.</p>
+                  </div>
+                </label>
+              </div>
             </StepLayout>
           )}
 
