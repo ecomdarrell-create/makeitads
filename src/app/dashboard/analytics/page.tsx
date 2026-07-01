@@ -44,8 +44,6 @@ import {
   Legend
 } from "recharts";
 
-const supabase = createClient();
-
 // Custom Tooltip
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
@@ -110,6 +108,7 @@ export default function AnalyticsPage() {
       if (!user) return;
 
       try {
+        const supabase = createClient();
         const { data, error } = await supabase
           .from("strategies")
           .select("*")
