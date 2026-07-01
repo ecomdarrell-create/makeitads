@@ -3,7 +3,7 @@ import { getStripeClient } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
 
 export async function GET(req: Request) {
-  const stripe = getStripeClient();
+  const stripe = await getStripeClient();
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
@@ -47,7 +47,7 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { paymentMethodId } = await req.json();
-    const stripe = getStripeClient();
+    const stripe = await getStripeClient();
 
     await stripe.paymentMethods.detach(paymentMethodId);
 

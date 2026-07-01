@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { getStripeClient } from '@/lib/stripe';
 
 export async function GET(req: Request) {
-  const stripe = getStripeClient();
+  const stripe = await getStripeClient();
   try {
     // Récupérer l'email de l'utilisateur depuis les headers (simplifié)
     // En production, utilise l'auth proper

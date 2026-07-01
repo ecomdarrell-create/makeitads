@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { sendPaymentConfirmationEmail } from '@/lib/email';
 
 export async function POST(req: Request) {
-  const stripe = getStripeClient();
+  const stripe = await getStripeClient();
   const webhookSecret = getStripeWebhookSecret();
   const body = await req.text();
   const signature = req.headers.get('stripe-signature')!;

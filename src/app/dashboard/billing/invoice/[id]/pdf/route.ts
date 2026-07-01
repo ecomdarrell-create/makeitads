@@ -15,7 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const stripe = getStripeClient();
+    const stripe = await getStripeClient();
     const { id: invoiceId } = await params;
 
     const invoice = await stripe.invoices.retrieve(invoiceId);

@@ -3,7 +3,7 @@ import { getRequiredEnv, getPublicEnv } from '@/lib/env';
 import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(req: Request) {
-  const stripe = getStripeClient();
+  const stripe = await getStripeClient();
   try {
     const { planName, billingCycle, userId, userEmail } = await req.json();
 
