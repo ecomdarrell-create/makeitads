@@ -1,9 +1,8 @@
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResendClient } from './resend';
 
 export async function sendWelcomeEmail(userEmail: string, userName: string) {
   try {
+    const resend = getResendClient();
     await resend.emails.send({
       from: 'MakeItAds <onboarding@resend.dev>',
       to: [userEmail],
@@ -79,6 +78,7 @@ export async function sendPaymentConfirmationEmail(
   amount: number
 ) {
   try {
+    const resend = getResendClient();
     await resend.emails.send({
       from: 'MakeItAds <onboarding@resend.dev>',
       to: [userEmail],
@@ -164,6 +164,7 @@ export async function sendStrategyReadyEmail({
   strategyId: string;
 }) {
   try {
+    const resend = getResendClient();
     await resend.emails.send({
       from: 'MakeItAds <onboarding@resend.dev>',
       to: [to],

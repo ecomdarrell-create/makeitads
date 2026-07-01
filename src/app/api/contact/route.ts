@@ -1,10 +1,9 @@
 import { NextResponse } from 'next/server';
-import { Resend } from 'resend';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { getResendClient } from '@/lib/resend';
 
 export async function POST(req: Request) {
   try {
+    const resend = getResendClient();
     const { name, email, company, phone, teamSize, message } = await req.json();
 
     // Validation

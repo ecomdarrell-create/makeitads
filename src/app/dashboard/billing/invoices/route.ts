@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-05-27.dahlia',
-});
+import { getStripeClient } from '@/lib/stripe';
 
 export async function GET(req: Request) {
+  const stripe = getStripeClient();
   try {
     // Récupérer l'email de l'utilisateur depuis les headers (simplifié)
     // En production, utilise l'auth proper

@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase";
 import { createBrowserClient } from "@supabase/ssr";
+import { getPublicEnv } from '@/lib/env';
 import Link from "next/link";
 import { motion } from "framer-motion";
 import AuthVisualPanel from "@/components/AuthVisualPanel";
@@ -56,8 +57,8 @@ function LoginForm() {
     setError("");
     try {
       const supabaseBrowser = createBrowserClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        getPublicEnv('NEXT_PUBLIC_SUPABASE_URL'),
+        getPublicEnv('NEXT_PUBLIC_SUPABASE_ANON_KEY')
       );
       const { error } = await supabaseBrowser.auth.signInWithOAuth({
         provider: "google",

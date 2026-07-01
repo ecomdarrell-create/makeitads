@@ -1,11 +1,9 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-05-27.dahlia',
-});
+import { getRequiredEnv, getPublicEnv } from '@/lib/env';
+import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(req: Request) {
+  const stripe = getStripeClient();
   try {
     const { planName, billingCycle, userId, userEmail } = await req.json();
 
@@ -17,10 +15,10 @@ export async function POST(req: Request) {
     }
 
     const prices: Record<string, string> = {
-      pro_monthly: process.env.STRIPE_PRICE_PRO_MONTHLY!,
-      pro_yearly: process.env.STRIPE_PRICE_PRO_YEARLY!,
-      premium_monthly: process.env.STRIPE_PRICE_PREMIUM_MONTHLY!,
-      premium_yearly: process.env.STRIPE_PRICE_PREMIUM_YEARLY!,
+      pro_monthly: getRequiredEnv('STRIPE_PRICE_PRO_MONTHLY'),
+      pro_yearly: getRequiredEnv('STRIPE_PRICE_PRO_YEARLY'),
+      premium_monthly: getRequiredEnv('STRIPE_PRICE_PREMIUM_MONTHLY'),
+      premium_yearly: getRequiredEnv('STRIPE_PRICE_PREMIUM_YEARLY'),
     };
 
     const priceKey = `${planName.toLowerCase()}_${billingCycle}`;
@@ -37,8 +35,8 @@ export async function POST(req: Request) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/dashboard/billing?canceled=true`,
+      success_url: `${getPublicEnv('NEXT_PUBLIC_APP_URL')}/dashboard/billing?success=true`,
+      cancel_url: `${getPublicEnv('NEXT_PUBLIC_APP_URL')}/dashboard/billing?canceled=true`,
       customer_email: userEmail,
       metadata: {
         userId,

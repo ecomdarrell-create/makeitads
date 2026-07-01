@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import Stripe from "stripe";
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2026-05-27.dahlia",
-});
+import { getRequiredEnv, getPublicEnv } from '@/lib/env';
+import { getStripeClient } from '@/lib/stripe';
 
 export async function POST(req: NextRequest) {
+  const stripe = getStripeClient();
   try {
     const { planName, userId, userEmail, isYearly } = await req.json();
 
@@ -16,12 +14,12 @@ export async function POST(req: NextRequest) {
     // Price IDs pour Monthly et Yearly
     const priceIds: Record<string, Record<string, string>> = {
       Pro: {
-        monthly: process.env.STRIPE_PRICE_ID_PRO!,
-        yearly: process.env.STRIPE_PRICE_ID_PRO_YEARLY!,
+        monthly: getRequiredEnv('STRIPE_PRICE_ID_PRO'),
+        yearly: getRequiredEnv('STRIPE_PRICE_ID_PRO_YEARLY'),
       },
       Premium: {
-        monthly: process.env.STRIPE_PRICE_ID_PREMIUM!,
-        yearly: process.env.STRIPE_PRICE_ID_PREMIUM_YEARLY!,
+        monthly: getRequiredEnv('STRIPE_PRICE_ID_PREMIUM'),
+        yearly: getRequiredEnv('STRIPE_PRICE_ID_PREMIUM_YEARLY'),
       },
     };
 

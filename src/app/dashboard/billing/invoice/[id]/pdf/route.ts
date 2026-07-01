@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-05-27.dahlia',
-});
 
 export async function GET(
   req: Request,
@@ -19,6 +15,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const stripe = getStripeClient();
     const { id: invoiceId } = await params;
 
     const invoice = await stripe.invoices.retrieve(invoiceId);

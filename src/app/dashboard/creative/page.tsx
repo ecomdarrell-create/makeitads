@@ -76,7 +76,7 @@ const sectorTemplates = [
 
 export default function CreativeStudioPage() {
   const { isPremium, isEnterprise } = usePlan();
-  
+
   const isLocked = !isPremium && !isEnterprise;
 
   return (

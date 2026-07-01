@@ -1,12 +1,9 @@
 import { NextResponse } from 'next/server';
-import Stripe from 'stripe';
+import { getStripeClient } from '@/lib/stripe';
 import { createClient } from '@/lib/supabase/server';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2026-05-27.dahlia',
-});
-
 export async function GET(req: Request) {
+  const stripe = getStripeClient();
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
@@ -50,6 +47,7 @@ export async function GET(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const { paymentMethodId } = await req.json();
+    const stripe = getStripeClient();
 
     await stripe.paymentMethods.detach(paymentMethodId);
 
