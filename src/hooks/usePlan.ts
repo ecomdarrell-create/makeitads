@@ -92,14 +92,14 @@ export function usePlan() {
     } finally {
       setLoading(false);
     }
-  }, []); // ✅ CORRECTION : Tableau de dépendances VIDE
+  }, []);
 
   useEffect(() => {
     fetchPlan();
 
     const supabase = createClient();
     const { data: { subscription: authSubscription } } = supabase.auth.onAuthStateChange(
-      (event) => {
+      (event: string) => {  // ✅ TYPE AJOUTÉ
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
           fetchPlan();
         } else if (event === "SIGNED_OUT") {
@@ -112,7 +112,7 @@ export function usePlan() {
     return () => {
       authSubscription.unsubscribe();
     };
-  }, [fetchPlan]); // ✅ fetchPlan est stable grâce à useCallback avec []
+  }, [fetchPlan]);
 
   const refresh = useCallback(() => {
     return fetchPlan();

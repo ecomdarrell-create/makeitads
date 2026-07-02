@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase';
 import { useSession } from './useSession';
 import { usePlan } from './usePlan';
 
-const supabase = createClient();
+// ❌ SUPPRIMÉ : const supabase = createClient(); (au niveau module)
 
 export interface UsageData {
   strategiesUsed: number;
@@ -38,6 +38,9 @@ export function useUsage() {
 
   const loadUsage = async () => {
     if (!user) return;
+
+    // ✅ CRÉÉ ICI, DANS LA FONCTION
+    const supabase = createClient();
 
     setLoading(true);
     try {
@@ -93,6 +96,9 @@ export function useUsage() {
 
   const recordUsage = async (actionType: string, metadata: any = {}) => {
     if (!user) return;
+
+    // ✅ CRÉÉ ICI, DANS LA FONCTION
+    const supabase = createClient();
 
     try {
       await supabase.from('usage').insert({

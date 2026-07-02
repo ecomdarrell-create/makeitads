@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -18,7 +20,6 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // ✅ Supabase créé UNIQUEMENT côté client (pas au build)
     const supabase = createClient();
 
     const checkOnboarding = async () => {
