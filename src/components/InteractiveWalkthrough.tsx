@@ -82,7 +82,7 @@ export default function InteractiveWalkthrough() {
   const Icon = currentStep.icon;
 
   return (
-    <section id="walkthrough" className="relative w-full min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <section id="walkthrough" className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
       
       {/* IMAGE DE FOND */}
       <div className="absolute inset-0">
@@ -104,7 +104,8 @@ export default function InteractiveWalkthrough() {
             />
           </motion.div>
         </AnimatePresence>
-        <div className="absolute inset-0 bg-white/85" />
+        {/* ✅ Overlay sombre pour garder l'image visible mais assombrie */}
+        <div className="absolute inset-0 bg-[#080810]/85" />
       </div>
 
       {/* CONTENU */}
@@ -126,7 +127,7 @@ export default function InteractiveWalkthrough() {
                     ? "border-[#6366f1] bg-[#6366f1]/20"
                     : index < activeStep
                     ? "border-emerald-500 bg-emerald-500/20"
-                    : "border-slate-200 bg-slate-100"
+                    : "border-white/20 bg-white/5"
                 }`}>
                   {index < activeStep ? (
                     <Check className="h-4 w-4 text-emerald-400" />
@@ -135,7 +136,7 @@ export default function InteractiveWalkthrough() {
                   )}
                 </div>
                 <span className={`text-xs font-bold hidden md:block ${
-                  index === activeStep ? "text-slate-900" : "text-slate-500"
+                  index === activeStep ? "text-white" : "text-slate-400"
                 }`}>
                   {step.title}
                 </span>
@@ -165,10 +166,10 @@ export default function InteractiveWalkthrough() {
             <p className="text-sm font-bold uppercase tracking-[0.32em] text-[#6366f1] mb-4">
               Step {currentStep.id} of {steps.length}
             </p>
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-white">
               {currentStep.title}
             </h2>
-            <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
+            <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
               {currentStep.description}
             </p>
           </motion.div>
@@ -178,9 +179,9 @@ export default function InteractiveWalkthrough() {
         <div className="flex items-center gap-4">
           <button
             onClick={prevStep}
-            className="h-12 w-12 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center hover:bg-slate-100 transition-all"
+            className="h-12 w-12 rounded-full border border-white/10 bg-white/5 shadow-sm flex items-center justify-center hover:bg-white/10 transition-all"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-700" />
+            <ChevronLeft className="h-5 w-5 text-white" />
           </button>
           
           <div className="flex gap-2">
@@ -189,7 +190,7 @@ export default function InteractiveWalkthrough() {
                 key={index}
                 onClick={() => setActiveStep(index)}
                 className={`h-2 rounded-full transition-all ${
-                  index === activeStep ? "bg-[#6366f1] w-8" : "bg-white/30 w-2 hover:bg-white/50"
+                  index === activeStep ? "bg-[#6366f1] w-8" : "bg-white/20 w-2 hover:bg-white/40"
                 }`}
               />
             ))}
@@ -197,9 +198,9 @@ export default function InteractiveWalkthrough() {
 
           <button
             onClick={nextStep}
-            className="h-12 w-12 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center hover:bg-slate-100 transition-all"
+            className="h-12 w-12 rounded-full border border-white/10 bg-white/5 shadow-sm flex items-center justify-center hover:bg-white/10 transition-all"
           >
-            <ChevronRight className="h-5 w-5 text-slate-700" />
+            <ChevronRight className="h-5 w-5 text-white" />
           </button>
         </div>
 
@@ -223,7 +224,7 @@ export default function InteractiveWalkthrough() {
         )}
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#080810] to-transparent z-10" />
     </section>
   );
 }

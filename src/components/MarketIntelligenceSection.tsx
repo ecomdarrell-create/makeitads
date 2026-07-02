@@ -66,7 +66,7 @@ export default function MarketIntelligenceSection() {
   const current = marketSlides[currentIndex];
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden bg-slate-50 text-slate-900">
+    <section className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
       
       {/* IMAGE PLEIN ÉCRAN */}
       <div className="absolute inset-0">
@@ -88,7 +88,8 @@ export default function MarketIntelligenceSection() {
             />
           </motion.div>
         </AnimatePresence>
-        <div className="absolute inset-0 bg-white/80" />
+        {/* ✅ Overlay sombre pour garder l'image visible */}
+        <div className="absolute inset-0 bg-[#080810]/80" />
       </div>
 
       {/* CONTENU CENTRÉ */}
@@ -106,10 +107,10 @@ export default function MarketIntelligenceSection() {
             <p className="text-sm font-bold uppercase tracking-[0.32em] text-[#6366f1] mb-4">
               Market Intelligence
             </p>
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-slate-950">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white">
               {current.title}
             </h2>
-            <p className="text-lg md:text-xl text-slate-600 max-w-2xl mx-auto mb-10">
+            <p className="text-lg md:text-xl text-slate-300 max-w-2xl mx-auto mb-10">
               {current.subtitle}
             </p>
           </motion.div>
@@ -119,9 +120,9 @@ export default function MarketIntelligenceSection() {
         <div className="flex items-center gap-4 mb-12">
           <button
             onClick={prevSlide}
-            className="h-12 w-12 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center hover:bg-slate-100 transition-all"
+            className="h-12 w-12 rounded-full border border-white/10 bg-white/5 shadow-sm flex items-center justify-center hover:bg-white/10 transition-all"
           >
-            <ChevronLeft className="h-5 w-5 text-slate-700" />
+            <ChevronLeft className="h-5 w-5 text-white" />
           </button>
           
           <div className="flex gap-2">
@@ -130,7 +131,7 @@ export default function MarketIntelligenceSection() {
                 key={index}
                 onClick={() => setCurrentIndex(index)}
                 className={`h-2 rounded-full transition-all ${
-                  index === currentIndex ? "bg-[#6366f1] w-8" : "bg-slate-300 w-2 hover:bg-slate-400"
+                  index === currentIndex ? "bg-[#6366f1] w-8" : "bg-white/20 w-2 hover:bg-white/40"
                 }`}
               />
             ))}
@@ -138,9 +139,9 @@ export default function MarketIntelligenceSection() {
 
           <button
             onClick={nextSlide}
-            className="h-12 w-12 rounded-full border border-slate-200 bg-white shadow-sm flex items-center justify-center hover:bg-slate-100 transition-all"
+            className="h-12 w-12 rounded-full border border-white/10 bg-white/5 shadow-sm flex items-center justify-center hover:bg-white/10 transition-all"
           >
-            <ChevronRight className="h-5 w-5 text-slate-700" />
+            <ChevronRight className="h-5 w-5 text-white" />
           </button>
         </div>
 
@@ -157,7 +158,7 @@ export default function MarketIntelligenceSection() {
         </motion.button>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#080810] to-transparent z-10" />
     </section>
   );
 }

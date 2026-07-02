@@ -3,50 +3,50 @@ import { Mail } from "lucide-react";
 
 export default function GlobalFooter() {
   return (
-    <footer className="relative z-10 border-t border-slate-200 bg-slate-50 pt-20 pb-10 px-6">
+    <footer className="relative z-10 border-t border-white/10 bg-[#0a0a14] pt-20 pb-10 px-6">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-1.5 mb-6">
-              <span className="text-xl font-bold tracking-tight text-slate-900">Make<span className="text-[#6366f1]">ItAds</span></span>
+              <span className="text-xl font-bold tracking-tight text-white">Make<span className="text-[#6366f1]">ItAds</span></span>
             </Link>
-            <p className="text-sm text-slate-600 mb-6 leading-relaxed">AI-powered market intelligence for modern businesses. Stop guessing, start growing.</p>
+            <p className="text-sm text-slate-400 mb-6 leading-relaxed">AI-powered market intelligence for modern businesses. Stop guessing, start growing.</p>
             <div className="space-y-3">
-              <p className="text-xs font-bold uppercase tracking-wider text-slate-500">Subscribe to newsletter</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-400">Subscribe to newsletter</p>
               <div className="flex gap-2">
-                <input type="email" placeholder="Enter your email" className="flex-1 rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-[#6366f1] transition-colors placeholder:text-slate-400" />
+                <input type="email" placeholder="Enter your email" className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors placeholder:text-slate-500" />
                 <button className="rounded-lg bg-[#6366f1] px-3 py-2 text-white hover:bg-[#5558e6] transition-colors"><Mail className="h-4 w-4" /></button>
               </div>
             </div>
           </div>
 
           <div>
-            <h4 className="text-sm font-bold text-slate-900 mb-6">Product</h4>
-            <ul className="space-y-4 text-sm text-slate-600">
-              <li><Link href="/#features" className="hover:text-slate-900 transition-colors">Features</Link></li>
-              <li><Link href="/pricing" className="hover:text-slate-900 transition-colors">Pricing</Link></li>
-              <li><Link href="/dashboard" className="hover:text-slate-900 transition-colors">Dashboard</Link></li>
-              <li><Link href="/resources" className="hover:text-slate-900 transition-colors">Resources</Link></li>
+            <h4 className="text-sm font-bold text-white mb-6">Product</h4>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
+              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Resources</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-sm font-bold text-slate-900 mb-6">Resources</h4>
-            <ul className="space-y-4 text-sm text-slate-600">
-              <li><Link href="/resources" className="hover:text-slate-900 transition-colors">Documentation</Link></li>
-              <li><Link href="/resources" className="hover:text-slate-900 transition-colors">Community</Link></li>
-              <li><Link href="/help" className="hover:text-slate-900 transition-colors">Help Center</Link></li>
-              <li><Link href="/resources" className="hover:text-slate-900 transition-colors">Blog</Link></li>
+            <h4 className="text-sm font-bold text-white mb-6">Resources</h4>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link href="/resources" className="hover:text-white transition-colors">Documentation</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Community</Link></li>
+              <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Blog</Link></li>
             </ul>
           </div>
 
           <div>
-            <h4 className="text-sm font-bold text-slate-900 mb-6">Company</h4>
-            <ul className="space-y-4 text-sm text-slate-600">
-              <li><Link href="/about" className="hover:text-slate-900 transition-colors">About</Link></li>
-              <li><Link href="/resources" className="hover:text-slate-900 transition-colors">Blog</Link></li>
-              <li><Link href="/careers" className="hover:text-slate-900 transition-colors">Careers</Link></li>
-              <li><Link href="/contact" className="hover:text-slate-900 transition-colors">Contact</Link></li>
+            <h4 className="text-sm font-bold text-white mb-6">Company</h4>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
+              <li><Link href="/resources" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+              <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
           </div>
         </div>
@@ -54,9 +54,9 @@ export default function GlobalFooter() {
         <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-6">
           <p className="text-xs text-slate-500">© 2026 MakeItAds Inc. All rights reserved.</p>
           <div className="flex items-center gap-6 text-xs text-slate-500">
-            <Link href="/privacy" className="hover:text-slate-900 transition-colors">Privacy Policy</Link>
-            <Link href="/terms" className="hover:text-slate-900 transition-colors">Terms of Service</Link>
-            <Link href="/cookies" className="hover:text-slate-900 transition-colors">Cookie Settings</Link>
+            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+            <Link href="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
+            <Link href="/cookies" className="hover:text-white transition-colors">Cookie Settings</Link>
           </div>
           <div className="flex items-center gap-4">
             {/* LinkedIn */}

@@ -13,7 +13,7 @@ import { useUsage } from "@/hooks/useUsage";
 import { createClient } from "@/lib/supabase";
 import { exportDashboardToPDF } from "@/utils/exportDashboard";
 
-const supabase = createClient();
+// ❌ SUPPRIMÉ : const supabase = createClient(); (au niveau global)
 
 interface Strategy {
   id: string;
@@ -85,6 +85,7 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchAllData = async () => {
       if (!user) return;
+      const supabase = createClient(); // ✅ CRÉÉ ICI
       try {
         const { data: stratData } = await supabase.from("strategies").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
         const { data: compData } = await supabase.from("competitors").select("*").eq("user_id", user.id).order("created_at", { ascending: false });
@@ -102,6 +103,7 @@ export default function DashboardPage() {
 
   const handleExportPDF = async () => {
     setIsExporting(true);
+    const supabase = createClient(); // ✅ CRÉÉ ICI
     try {
       await exportDashboardToPDF("dashboard-export-content");
       if (user) {
@@ -236,7 +238,7 @@ export default function DashboardPage() {
 
   if (sessionLoading || planLoading || loading || usageLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[60vh]">
+      <div className="flex items-center justify-center min-h-[60vh] bg-[#080810]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366f1] mx-auto mb-4" />
           <p className="text-slate-400">Loading your workspace...</p>
@@ -515,7 +517,7 @@ export default function DashboardPage() {
             );
           })}
         </div>
-      </motion.div>
+      </motion.div> 
     </div>
   );
 }
