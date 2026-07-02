@@ -124,10 +124,10 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-slate-200/70 bg-white shadow-lg">
-      <div className="flex h-16 flex-col justify-center px-6 border-b border-slate-200/70">
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-white/10 bg-[#0a0a14] shadow-lg">
+      <div className="flex h-16 flex-col justify-center px-6 border-b border-white/10">
         <Link href="/" className="flex items-center gap-0.5 transition-transform hover:scale-105">
-          <span className="text-[17px] font-bold text-slate-950 tracking-tight">Make</span>
+          <span className="text-[17px] font-bold text-white tracking-tight">Make</span>
           <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-[17px] font-bold text-transparent tracking-tight">
             ItAds
           </span>
@@ -138,7 +138,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-0.5">
-        <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
+        <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
           Workspace
         </p>
         
@@ -152,8 +152,8 @@ export default function Sidebar() {
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-slate-100 text-slate-950"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  ? "bg-white/10 text-white"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
               } ${isLocked ? "opacity-50" : ""}`}
             >
               {isActive && (
@@ -174,9 +174,9 @@ export default function Sidebar() {
           );
         })}
 
-        <div className="my-4 border-t border-slate-200/70" />
+        <div className="my-4 border-t border-white/10" />
 
-        <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
+        <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
           Account
         </p>
 
@@ -189,8 +189,8 @@ export default function Sidebar() {
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-slate-100 text-slate-950"
-                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+                  ? "bg-white/10 text-white"
+                  : "text-slate-400 hover:bg-white/5 hover:text-white"
               }`}
             >
               {isActive && (
@@ -206,9 +206,9 @@ export default function Sidebar() {
         })}
       </nav>
 
-      <div className="border-t border-white/[0.06] p-3 space-y-2">
+      <div className="border-t border-white/10 p-3 space-y-2">
         {isFree && (
-          <div className="rounded-lg bg-white/[0.02] border border-white/[0.06] p-2.5">
+          <div className="rounded-lg bg-white/[0.02] border border-white/10 p-2.5">
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Monthly Quota
@@ -232,7 +232,7 @@ export default function Sidebar() {
           </div>
         )}
 
-        <div className="flex items-center justify-between rounded-lg bg-white/[0.02] border border-white/[0.06] p-2.5">
+        <div className="flex items-center justify-between rounded-lg bg-white/[0.02] border border-white/10 p-2.5">
           {getPlanBadge()}
           {isFree && (
             <button 
@@ -245,17 +245,17 @@ export default function Sidebar() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 rounded-lg bg-slate-50 border border-slate-200/70 px-3 py-2.5 hover:bg-slate-100 transition-all group">
+        <div className="flex items-center gap-3 rounded-lg bg-white/[0.02] border border-white/10 px-3 py-2.5 hover:bg-white/[0.05] transition-all group">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-[11px] font-bold text-white">
             {userName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-slate-900 truncate">{userName}</p>
-            <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
+            <p className="text-[12px] font-semibold text-white truncate">{userName}</p>
+            <p className="text-[10px] text-slate-400 truncate">{userEmail}</p>
           </div>
           <button
             onClick={handleLogout}
-            className="text-slate-600 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+            className="text-slate-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
             title="Logout"
           >
             <LogOut className="h-3.5 w-3.5" />
@@ -264,7 +264,7 @@ export default function Sidebar() {
 
         <a 
           href="mailto:contact@makeitads.com?subject=Help%20%26%20Support%20Request"
-          className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-slate-500 hover:bg-white/[0.03] hover:text-slate-300 transition-all"
+          className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-slate-400 hover:bg-white/[0.05] hover:text-white transition-all"
         >
           <HelpCircle className="h-3.5 w-3.5" />
           <span>Help & Support</span>

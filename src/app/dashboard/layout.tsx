@@ -8,8 +8,6 @@ import Topbar from "@/components/dashboard/Topbar";
 import Onboarding from "@/components/Onboarding";
 import { ToastProvider } from "@/components/providers/NotificationsProvider";
 
-const supabase = createClient();
-
 export default function DashboardLayout({
   children,
 }: {
@@ -20,6 +18,9 @@ export default function DashboardLayout({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // ✅ Supabase créé UNIQUEMENT côté client (pas au build)
+    const supabase = createClient();
+
     const checkOnboarding = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       
@@ -46,7 +47,7 @@ export default function DashboardLayout({
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-50">
+      <div className="flex items-center justify-center min-h-screen bg-[#080810]">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366f1]" />
       </div>
     );
@@ -54,7 +55,7 @@ export default function DashboardLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-[#080810]">
         <Sidebar />
         <Topbar />
         <main className="ml-[260px] pt-16 p-8">

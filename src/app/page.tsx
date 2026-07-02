@@ -106,7 +106,7 @@ function AnimatedCounter({ target }: { target: number }) {
 const LogoCarousel = () => (
   <div className="relative overflow-hidden">
     <div className="flex animate-[scroll_30s_linear_infinite] hover:[animation-play-state:paused]">
-      {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => { const Icon = logo.icon; return (<div key={index} className="flex-shrink-0 mx-8 flex items-center justify-center"><Icon className="w-10 h-10 text-gray-400 hover:text-white transition-colors duration-300" /></div>); })}
+      {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => { const Icon = logo.icon; return (<div key={index} className="flex-shrink-0 mx-8 flex items-center justify-center"><Icon className="w-10 h-10 text-slate-500 hover:text-white transition-colors duration-300" /></div>); })}
     </div>
     <style jsx>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-33.333%); } }`}</style>
   </div>
@@ -317,13 +317,13 @@ export default function LandingPage() {
   const handleFinalCta = () => { window.location.href = getCTAHref("finalCta", !!user); };
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900 overflow-hidden selection:bg-[#6366f1]/20 selection:text-slate-900">
+    <main className="min-h-screen bg-[#080810] text-white overflow-hidden selection:bg-[#6366f1]/20 selection:text-white">
       
       {/* BACKGROUND */}
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[#6366f1]/15 rounded-full blur-[120px] opacity-80" />
         <div className="absolute bottom-0 right-0 w-[800px] h-[600px] bg-[#8b5cf6]/10 rounded-full blur-[100px] opacity-60" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#cbd5e1_1px,transparent_1px),linear-gradient(to_bottom,#cbd5e1_1px,transparent_1px)] bg-[size:24px_24px]" style={{ maskImage: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,255,255,0.85) 70%, transparent 100%)" }} />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1e293b_1px,transparent_1px),linear-gradient(to_bottom,#1e293b_1px,transparent_1px)] bg-[size:24px_24px]" style={{ maskImage: "radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,255,255,0.85) 70%, transparent 100%)" }} />
       </div>
 
       <GlobalNavbar />
@@ -332,7 +332,7 @@ export default function LandingPage() {
       <HeroSection />
 
       {/* 2. SOCIAL PROOF LOGOS */}
-      <section className="relative z-10 py-10 border-y border-slate-200/70 bg-slate-100/80">
+      <section className="relative z-10 py-10 border-y border-white/10 bg-[#0a0a14]/80">
         <div className="max-w-5xl mx-auto text-center">
           <p className="text-xs uppercase tracking-[0.3em] text-[#6366f1] font-semibold mb-6">Trusted integrations & platforms</p>
           <LogoCarousel />
@@ -347,13 +347,13 @@ export default function LandingPage() {
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {painPoints.map((point, index) => (
-              <motion.div key={point.id} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} className={`group relative rounded-3xl overflow-hidden border ${point.borderColor.replace('/30','/20')} bg-white/90 shadow-sm hover:shadow-lg transition-all duration-500`}>
+              <motion.div key={point.id} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} className={`group relative rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}>
                 <div className="aspect-[16/10] overflow-hidden relative rounded-t-3xl">
                   <Image src={point.image} alt={point.title} fill className="object-cover transition duration-700 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
                 </div>
                 <div className="p-6 space-y-3">
-                  <h3 className="text-xl font-bold text-slate-900">{point.title}</h3>
-                  <p className="text-slate-600 text-sm leading-relaxed">{point.subtitle}</p>
+                  <h3 className="text-xl font-bold text-white">{point.title}</h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">{point.subtitle}</p>
                   <p className="text-slate-500 text-xs italic">{point.description}</p>
                   <div className="pt-2"><span className={`text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${point.color} text-white shadow-lg`}>{point.stat} {point.statLabel}</span></div>
                 </div>
@@ -364,7 +364,7 @@ export default function LandingPage() {
       </section>
 
       {/* 4. HOW IT WORKS */}
-      <section className="relative z-10 py-16 md:py-24 px-6 bg-slate-100/80">
+      <section className="relative z-10 py-16 md:py-24 px-6 bg-[#0a0a14]/80">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12 md:mb-16 max-w-3xl mx-auto px-4">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">From business idea to <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">growth plan</span> in minutes.</h2>
@@ -375,13 +375,13 @@ export default function LandingPage() {
               const Icon = step.icon;
               return (
                 <motion.div key={step.id} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: index * 0.15 }} className="relative group">
-                  <div className="absolute -top-4 -left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-slate-50 border border-slate-200 text-sm font-bold text-slate-600">{step.number}</div>
-                  <div className="rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video mb-5 relative">
+                  <div className="absolute -top-4 -left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#0f0f1a] border border-white/10 text-sm font-bold text-slate-400">{step.number}</div>
+                  <div className="rounded-3xl overflow-hidden border border-white/10 bg-[#0a0a14] aspect-video mb-5 relative">
                     <Image src={step.image} alt={step.title} fill className="object-cover transition duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white/70 backdrop-blur-[2px]"><Icon className="h-8 w-8 text-slate-900 drop-shadow-lg" /></div>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[#080810]/70 backdrop-blur-[2px]"><Icon className="h-8 w-8 text-white drop-shadow-lg" /></div>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-1">{step.title}</h3>
-                  <p className="text-slate-600 text-sm">{step.subtitle}</p>
+                  <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
+                  <p className="text-slate-400 text-sm">{step.subtitle}</p>
                 </motion.div>
               );
             })}
