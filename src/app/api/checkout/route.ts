@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getRequiredEnv, getPublicEnv } from '@/lib/env';
-import { getStripeClient } from '@/lib/stripe';
+import Stripe from 'stripe';
+import { getStripePriceId } from '@/config/stripe.config';
 
-export async function POST(req: Request) {
-  const stripe = await getStripeClient();
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2026-05-27.dahlia',
+});
+
+export async function POST(request: Request) {
   try {
-    const { planName, billingCycle, userId, userEmail } = await req.json();
+    const { planName, billingCycle, userId, userEmail } = await request.json();
 
     if (!planName || !billingCycle || !userId || !userEmail) {
       return NextResponse.json(
@@ -14,30 +17,37 @@ export async function POST(req: Request) {
       );
     }
 
-    const prices: Record<string, string> = {
-      pro_monthly: getRequiredEnv('STRIPE_PRICE_PRO_MONTHLY'),
-      pro_yearly: getRequiredEnv('STRIPE_PRICE_PRO_YEARLY'),
-      premium_monthly: getRequiredEnv('STRIPE_PRICE_PREMIUM_MONTHLY'),
-      premium_yearly: getRequiredEnv('STRIPE_PRICE_PREMIUM_YEARLY'),
-    };
+    const priceId = getStripePriceId(planName as any, billingCycle);
 
-    const priceKey = `${planName.toLowerCase()}_${billingCycle}`;
-    const priceId = prices[priceKey];
+    const customers = await stripe.customers.list({
+      email: userEmail,
+      limit: 1,
+    });
 
-    if (!priceId) {
-      return NextResponse.json(
-        { error: `Invalid plan or billing cycle: ${priceKey}` },
-        { status: 400 }
-      );
+    let customerId = customers.data[0]?.id;
+
+    if (!customerId) {
+      const customer = await stripe.customers.create({
+        email: userEmail,
+        metadata: {
+          userId,
+        },
+      });
+      customerId = customer.id;
     }
 
     const session = await stripe.checkout.sessions.create({
+      customer: customerId,
       payment_method_types: ['card'],
-      line_items: [{ price: priceId, quantity: 1 }],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
       mode: 'subscription',
-      success_url: `${getPublicEnv('NEXT_PUBLIC_APP_URL')}/dashboard/billing?success=true`,
-      cancel_url: `${getPublicEnv('NEXT_PUBLIC_APP_URL')}/dashboard/billing?canceled=true`,
-      customer_email: userEmail,
+      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=true`,
       metadata: {
         userId,
         planName,
@@ -49,7 +59,7 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error('Checkout error:', error);
     return NextResponse.json(
-      { error: error.message || 'Checkout failed' },
+      { error: error.message || 'Internal server error' },
       { status: 500 }
     );
   }
