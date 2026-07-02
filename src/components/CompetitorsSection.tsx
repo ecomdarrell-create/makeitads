@@ -22,7 +22,7 @@ export default function CompetitorsSection() {
   if (!mounted) return null;
 
   return (
-    <section className="relative w-full min-h-screen overflow-hidden">
+    <section className="relative w-full min-h-screen overflow-hidden bg-slate-50 text-slate-900">
       
       {/* IMAGE ÉDITORIALE PLEIN ÉCRAN */}
       <div className="absolute inset-0">
@@ -46,7 +46,7 @@ export default function CompetitorsSection() {
             sizes="100vw"
           />
         </div>
-        <div className="absolute inset-0 bg-[#080810]/60" />
+        <div className="absolute inset-0 bg-white/80" />
       </div>
 
       {/* CONTENU CENTRÉ */}
@@ -59,13 +59,13 @@ export default function CompetitorsSection() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 max-w-4xl"
         >
-          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4">
+          <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-slate-950">
             Know what competitors are doing{" "}
             <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
               before it affects your business.
             </span>
           </h2>
-          <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
+          <p className="text-base md:text-lg text-slate-600 max-w-2xl mx-auto">
             Real-time competitive intelligence that keeps you one step ahead.
           </p>
         </motion.div>
@@ -87,7 +87,7 @@ export default function CompetitorsSection() {
         </motion.div>
       </div>
 
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#080810] to-transparent z-10" />
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-white to-transparent z-10" />
     </section>
   );
 }

@@ -124,10 +124,10 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-white/[0.06] bg-[#080810]/95 backdrop-blur-2xl">
-      <div className="flex h-16 flex-col justify-center px-6 border-b border-white/[0.06]">
+    <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-slate-200/70 bg-white shadow-lg">
+      <div className="flex h-16 flex-col justify-center px-6 border-b border-slate-200/70">
         <Link href="/" className="flex items-center gap-0.5 transition-transform hover:scale-105">
-          <span className="text-[17px] font-bold text-white tracking-tight">Make</span>
+          <span className="text-[17px] font-bold text-slate-950 tracking-tight">Make</span>
           <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-[17px] font-bold text-transparent tracking-tight">
             ItAds
           </span>
@@ -152,8 +152,8 @@ export default function Sidebar() {
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-white/[0.06] text-white"
-                  : "text-slate-400 hover:bg-white/[0.03] hover:text-slate-200"
+                  ? "bg-slate-100 text-slate-950"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               } ${isLocked ? "opacity-50" : ""}`}
             >
               {isActive && (
@@ -174,7 +174,7 @@ export default function Sidebar() {
           );
         })}
 
-        <div className="my-4 border-t border-white/[0.06]" />
+        <div className="my-4 border-t border-slate-200/70" />
 
         <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
           Account
@@ -189,8 +189,8 @@ export default function Sidebar() {
               href={item.href}
               className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
                 isActive
-                  ? "bg-white/[0.06] text-white"
-                  : "text-slate-400 hover:bg-white/[0.03] hover:text-slate-200"
+                  ? "bg-slate-100 text-slate-950"
+                  : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
               }`}
             >
               {isActive && (
@@ -245,12 +245,12 @@ export default function Sidebar() {
           )}
         </div>
 
-        <div className="flex items-center gap-3 rounded-lg bg-white/[0.02] border border-white/[0.06] px-3 py-2.5 hover:bg-white/[0.04] transition-all group">
+        <div className="flex items-center gap-3 rounded-lg bg-slate-50 border border-slate-200/70 px-3 py-2.5 hover:bg-slate-100 transition-all group">
           <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-[11px] font-bold text-white">
             {userName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[12px] font-semibold text-white truncate">{userName}</p>
+            <p className="text-[12px] font-semibold text-slate-900 truncate">{userName}</p>
             <p className="text-[10px] text-slate-500 truncate">{userEmail}</p>
           </div>
           <button

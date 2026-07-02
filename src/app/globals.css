@@ -25,15 +25,28 @@
   }
 }
 
-/* ✅ Styles de base - SANS @apply */
+/* ✅ Styles de base - THÈME SOMBRE PREMIUM */
 html,
 body {
   background-color: #080810;
-  color: white;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  color: #ffffff;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ✅ Scrollbar personnalisée */
+h1, h2, h3, h4, h5, h6 {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+p {
+  color: #94a3b8;
+  line-height: 1.625;
+}
+
+/* ✅ Scrollbar personnalisée - VERSION SOMBRE */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -71,4 +84,175 @@ body {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* ========================================
+   ✅ COMPOSANTS PREMIUM - THÈME SOMBRE
+   ======================================== */
+
+/* --- CARTES PREMIUM SOMBRE --- */
+.card {
+  background-color: #0a0a14;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  transition: all 250ms ease;
+}
+
+.card-hover {
+  background-color: #0a0a14;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1rem;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3);
+  transition: all 250ms ease;
+}
+
+.card-hover:hover {
+  background-color: #0f0f1a;
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  transform: translateY(-2px);
+}
+
+/* --- BOUTONS PREMIUM SOMBRE --- */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  background-color: #6366f1;
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  box-shadow: 0 4px 12px rgb(99 102 241 / 0.3);
+  transition: all 200ms ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: #4f46e5;
+  box-shadow: 0 6px 20px rgb(99 102 241 / 0.5);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.625rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 200ms ease;
+  cursor: pointer;
+}
+
+.btn-secondary:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+}
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.625rem;
+  background-color: transparent;
+  color: #94a3b8;
+  font-weight: 500;
+  font-size: 0.875rem;
+  transition: all 200ms ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-ghost:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+}
+
+/* --- INPUTS PREMIUM SOMBRE --- */
+.input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border-radius: 0.625rem;
+  background-color: #080810;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 0.875rem;
+  transition: all 200ms ease;
+  outline: none;
+}
+
+.input::placeholder {
+  color: #64748b;
+}
+
+.input:focus {
+  border-color: #6366f1;
+  box-shadow: 0 0 0 2px rgb(99 102 241 / 0.2);
+  background-color: #0a0a14;
+}
+
+/* --- BADGES PREMIUM SOMBRE --- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.125rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.badge-brand {
+  background-color: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+}
+
+.badge-success {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #6ee7b7;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.badge-warning {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fcd34d;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.badge-danger {
+  background-color: rgba(239, 68, 68, 0.15);
+  color: #fca5a5;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.badge-neutral {
+  background-color: rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }

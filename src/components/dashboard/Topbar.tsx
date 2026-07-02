@@ -40,16 +40,16 @@ export default function Topbar() {
   }, [unreadCount]);
 
   return (
-    <div className="fixed top-0 left-[260px] right-0 h-16 z-30 border-b border-white/5 bg-[#080810]/80 backdrop-blur-xl flex items-center justify-between px-8">
+    <div className="fixed top-0 left-[260px] right-0 h-16 z-30 border-b border-slate-200/70 bg-white/80 backdrop-blur-xl flex items-center justify-between px-8">
       {/* Search */}
       <div className="relative w-96">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
         <input
           type="text"
           placeholder="Search strategies, competitors..."
-          className="w-full rounded-lg border border-white/5 bg-white/[0.03] py-2 pl-10 pr-4 text-sm text-white outline-none transition-all focus:border-[#6366f1]/50 focus:ring-1 focus:ring-[#6366f1]/20 placeholder:text-slate-600"
+          className="w-full rounded-lg border border-slate-200 bg-white py-2 pl-10 pr-4 text-sm text-slate-900 outline-none transition-all focus:border-[#6366f1]/50 focus:ring-1 focus:ring-[#6366f1]/20 placeholder:text-slate-400"
         />
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded border border-white/10 bg-white/[0.03] px-1.5 py-0.5">
+        <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5">
           <span className="text-[10px] font-bold text-slate-500">⌘</span>
           <span className="text-[10px] font-bold text-slate-500">K</span>
         </div>
@@ -61,7 +61,7 @@ export default function Topbar() {
         <div className="relative">
           <button
             onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-            className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-white/5 bg-white/[0.03] text-slate-400 hover:text-white hover:bg-white/[0.06] transition-all"
+            className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition-all"
           >
             <Bell className="h-4 w-4" />
             
@@ -71,7 +71,7 @@ export default function Topbar() {
                 key={unreadCount}
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[#6366f1] ring-2 ring-[#080810] flex items-center justify-center px-1"
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[#6366f1] ring-2 ring-white flex items-center justify-center px-1"
               >
                 <span className="text-[10px] font-bold text-white">
                   {unreadCount > 99 ? "99+" : unreadCount}
