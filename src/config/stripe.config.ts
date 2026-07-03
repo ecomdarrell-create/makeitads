@@ -19,13 +19,30 @@ export const STRIPE_PRICES = {
 export type PlanName = 'pro' | 'premium' | 'enterprise';
 export type BillingCycle = 'monthly' | 'yearly';
 
-// Mapping des noms de plans vers les Price IDs Stripe
+// ✅ CORRECTION : Vérification améliorée
 export function getStripePriceId(planName: PlanName, billingCycle: BillingCycle): string {
-  const priceId = STRIPE_PRICES[planName][billingCycle];
-  if (!priceId) {
-    throw new Error(`Price ID not found for ${planName} ${billingCycle}`);
+  // Vérifier que le plan existe
+  if (!(planName in STRIPE_PRICES)) {
+    throw new Error(`Invalid plan: ${planName}. Available plans: pro, premium, enterprise.`);
   }
+
+  const priceId = STRIPE_PRICES[planName][billingCycle];
+  
+  if (!priceId) {
+    throw new Error(`Price ID not found for ${planName} ${billingCycle}. Check environment variables.`);
+  }
+  
   return priceId;
+}
+
+// ✅ NOUVELLE FONCTION : Vérifier si Stripe est configuré
+export function isStripeConfigured(): boolean {
+  return !!(
+    process.env.STRIPE_PRICE_PRO_MONTHLY &&
+    process.env.STRIPE_PRICE_PRO_YEARLY &&
+    process.env.STRIPE_PRICE_PREMIUM_MONTHLY &&
+    process.env.STRIPE_PRICE_PREMIUM_YEARLY
+  );
 }
 
 // Configuration des plans pour l'affichage
