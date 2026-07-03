@@ -54,6 +54,18 @@ export async function POST(request: Request) {
       );
     }
 
+    // ✅ CORRECTION : Utiliser une valeur par défaut pour l'URL
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://makeitads.vercel.app';
+    
+    // ✅ Vérifier que l'URL est valide
+    if (!appUrl.startsWith('http://') && !appUrl.startsWith('https://')) {
+      console.error('❌ Invalid NEXT_PUBLIC_APP_URL:', appUrl);
+      return NextResponse.json(
+        { error: 'Invalid application URL configuration. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     // Créer ou récupérer le customer Stripe
     const customers = await stripe.customers.list({
       email: userEmail,
@@ -70,7 +82,7 @@ export async function POST(request: Request) {
       customerId = customer.id;
     }
 
-    // Créer la session de checkout
+    // ✅ Créer la session de checkout avec URL valide
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -81,8 +93,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard/billing?canceled=true`,
+      success_url: `${appUrl}/dashboard/billing?success=true`,
+      cancel_url: `${appUrl}/dashboard/billing?canceled=true`,
       metadata: {
         userId,
         planName,
