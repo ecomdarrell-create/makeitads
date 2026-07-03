@@ -34,16 +34,31 @@ export default function BillingPage() {
     }
   }, [searchParams]);
 
-  const handleUpgrade = async (planName: string) => {
+  const handleUpgrade = async (planKey: string) => {
     if (!user) return;
-    setLoadingPlan(planName);
+    
+    // ✅ CORRECTION : Ne pas permettre l'upgrade vers free ou enterprise via Stripe
+    if (planKey === "free" || planKey === "enterprise") {
+      setErrorMessage(planKey === "enterprise" 
+        ? "Enterprise plan requires contacting our sales team." 
+        : "You are already on the Free plan.");
+      setTimeout(() => setErrorMessage(""), 5000);
+      return;
+    }
+    
+    setLoadingPlan(planKey);
     setErrorMessage("");
     try {
       const billingCycle = isYearly ? 'yearly' : 'monthly';
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planName, billingCycle, userId: user.id, userEmail: user.email }),
+        body: JSON.stringify({ 
+          planName: planKey.toLowerCase(), // ✅ CORRECTION : forcer en minuscules
+          billingCycle, 
+          userId: user.id, 
+          userEmail: user.email 
+        }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Server error");
@@ -123,6 +138,7 @@ export default function BillingPage() {
       bg: "bg-[#0a0a14]",
       description: "For agencies & teams",
       features: ["Everything in Premium", "Multi-brand management", "Team collaboration", "Custom AI training", "Dedicated account manager", "SLA guarantee"],
+      custom: true, // ✅ Enterprise = plan sur mesure
     },
   ];
 
@@ -202,6 +218,8 @@ export default function BillingPage() {
               <p className="text-sm text-slate-400 max-w-md">
                 {currentPlan === "free" 
                   ? "Upgrade to unlock AI-powered strategies and competitor intelligence." 
+                  : currentPlan === "enterprise"
+                  ? "You're on the Enterprise plan. Contact us for custom solutions."
                   : `You're on the ${currentPlan} plan. Manage your subscription and billing below.`}
               </p>
             </div>
@@ -213,7 +231,7 @@ export default function BillingPage() {
                 </span>
                 <span className="text-sm text-slate-500">/month</span>
               </div>
-              {currentPlan !== "free" && (
+              {currentPlan !== "free" && currentPlan !== "enterprise" && (
                 <p className="text-xs text-slate-500 mt-1">
                   Next billing: {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </p>
@@ -291,6 +309,7 @@ export default function BillingPage() {
                 const Icon = p.icon;
                 const isCurrent = currentPlan === p.key;
                 const displayPrice = isYearly && p.yearlyPrice > 0 ? Math.round(p.yearlyPrice / 12) : p.price;
+                const isCustomPlan = p.key === "enterprise"; // ✅ Enterprise = plan sur mesure
                 
                 return (
                   <motion.div
@@ -327,17 +346,19 @@ export default function BillingPage() {
                     </div>
 
                     <button
-                      onClick={() => !isCurrent && p.key !== "free" && handleUpgrade(p.name)}
-                      disabled={isCurrent || loadingPlan === p.name || p.key === "free"}
+                      onClick={() => !isCurrent && p.key !== "free" && !isCustomPlan && handleUpgrade(p.key)}
+                      disabled={isCurrent || loadingPlan === p.key || p.key === "free" || isCustomPlan}
                       className={`w-full rounded-xl px-4 py-3 text-sm font-semibold transition-all mb-5 flex items-center justify-center gap-2 ${
                         isCurrent
                           ? "bg-white/5 text-slate-500 cursor-default"
                           : p.key === "free"
                           ? "bg-white/5 text-slate-600 cursor-default"
+                          : isCustomPlan
+                          ? "bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 cursor-default border border-amber-500/30"
                           : `bg-gradient-to-r ${p.color} text-white hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]`
                       } disabled:opacity-60`}
                     >
-                      {loadingPlan === p.name ? (
+                      {loadingPlan === p.key ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : isCurrent ? (
                         <>
@@ -346,6 +367,11 @@ export default function BillingPage() {
                         </>
                       ) : p.key === "free" ? (
                         "Free"
+                      ) : isCustomPlan ? (
+                        <>
+                          Contact Sales
+                          <ExternalLink className="h-4 w-4" />
+                        </>
                       ) : (
                         <>
                           Upgrade to {p.name}
@@ -371,7 +397,7 @@ export default function BillingPage() {
           </motion.div>
         )}
 
-        {/* PAYMENT METHOD TAB - SIMPLIFIÉ */}
+        {/* PAYMENT METHOD TAB */}
         {activeTab === "card" && (
           <motion.div
             key="card"
@@ -388,7 +414,7 @@ export default function BillingPage() {
                 Payment Method
               </h2>
 
-              {currentPlan !== "free" ? (
+              {currentPlan !== "free" && currentPlan !== "enterprise" ? (
                 <div className="text-center py-12">
                   <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="h-8 w-8 text-slate-600" />
@@ -412,8 +438,14 @@ export default function BillingPage() {
                   <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
                     <CreditCard className="h-8 w-8 text-slate-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No payment method</h3>
-                  <p className="text-sm text-slate-500 mb-6">Add a payment method when you upgrade to a paid plan</p>
+                  <h3 className="text-lg font-semibold text-white mb-2">
+                    {currentPlan === "enterprise" ? "Custom billing" : "No payment method"}
+                  </h3>
+                  <p className="text-sm text-slate-500 mb-6">
+                    {currentPlan === "enterprise" 
+                      ? "Enterprise plans have custom billing arrangements." 
+                      : "Add a payment method when you upgrade to a paid plan"}
+                  </p>
                   <button
                     onClick={() => setActiveTab("plans")}
                     className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-3 text-sm font-semibold text-white hover:shadow-lg transition-all"
@@ -426,7 +458,7 @@ export default function BillingPage() {
           </motion.div>
         )}
 
-        {/* BILLING HISTORY TAB - SIMPLIFIÉ */}
+        {/* BILLING HISTORY TAB */}
         {activeTab === "history" && (
           <motion.div
             key="history"
@@ -443,37 +475,23 @@ export default function BillingPage() {
                 Billing History
               </h2>
 
-              {currentPlan !== "free" ? (
-                <div className="text-center py-12">
-                  <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-8 w-8 text-slate-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No invoices yet</h3>
-                  <p className="text-sm text-slate-500 mb-6">
-                    Your billing history will appear here after your first payment
-                  </p>
-                  <button
-                    onClick={() => setActiveTab("plans")}
-                    className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-3 text-sm font-semibold text-white hover:shadow-lg transition-all"
-                  >
-                    View Plans
-                  </button>
+              <div className="text-center py-12">
+                <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-8 w-8 text-slate-600" />
                 </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto mb-4">
-                    <FileText className="h-8 w-8 text-slate-600" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">No invoices yet</h3>
-                  <p className="text-sm text-slate-500 mb-6">Your billing history will appear here after your first payment</p>
-                  <button
-                    onClick={() => setActiveTab("plans")}
-                    className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-3 text-sm font-semibold text-white hover:shadow-lg transition-all"
-                  >
-                    View Plans
-                  </button>
-                </div>
-              )}
+                <h3 className="text-lg font-semibold text-white mb-2">No invoices yet</h3>
+                <p className="text-sm text-slate-500 mb-6">
+                  {currentPlan === "enterprise" 
+                    ? "Enterprise billing is handled separately." 
+                    : "Your billing history will appear here after your first payment"}
+                </p>
+                <button
+                  onClick={() => setActiveTab("plans")}
+                  className="rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-3 text-sm font-semibold text-white hover:shadow-lg transition-all"
+                >
+                  View Plans
+                </button>
+              </div>
             </div>
           </motion.div>
         )}

@@ -9,8 +9,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import AuthVisualPanel from "@/components/AuthVisualPanel";
 
-const supabase = createClient();
-
 // ✅ COMPOSANT SÉPARÉ pour le formulaire (utilise useSearchParams)
 function LoginForm() {
   const router = useRouter();
@@ -37,6 +35,9 @@ function LoginForm() {
       setLoading(false);
       return;
     }
+
+    // ✅ CRÉÉ ICI, DANS LA FONCTION
+    const supabase = createClient();
 
     const { error: authError } = await supabase.auth.signInWithPassword({
       email,
