@@ -1,4 +1,3 @@
-export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 import { NextResponse } from 'next/server';
@@ -16,9 +15,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-      apiVersion: '2026-05-27.dahlia',
-    });
+    // ✅ Stripe initialisé avec la bonne variable
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
     const body = await request.json();
     const planName = body.planName?.toLowerCase();
@@ -42,7 +40,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // ✅ Récupérer le Price ID avec gestion d'erreur
+    // ✅ Récupérer le Price ID
     let priceId: string;
     try {
       priceId = getStripePriceId(planName as any, billingCycle as any);
@@ -54,17 +52,19 @@ export async function POST(request: Request) {
       );
     }
 
-    // ✅ CORRECTION : Utiliser une valeur par défaut pour l'URL
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://makeitads.vercel.app';
+    // ✅ URL de l'application depuis la variable d'environnement
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
     
-    // ✅ Vérifier que l'URL est valide
-    if (!appUrl.startsWith('http://') && !appUrl.startsWith('https://')) {
-      console.error('❌ Invalid NEXT_PUBLIC_APP_URL:', appUrl);
+    if (!appUrl) {
+      console.error('❌ NEXT_PUBLIC_APP_URL is not defined');
       return NextResponse.json(
-        { error: 'Invalid application URL configuration. Please contact support.' },
+        { error: 'Application URL not configured' },
         { status: 500 }
       );
     }
+
+    console.log('✅ Using app URL:', appUrl);
+    console.log('✅ Creating checkout for:', { planName, billingCycle, priceId });
 
     // Créer ou récupérer le customer Stripe
     const customers = await stripe.customers.list({
@@ -82,7 +82,7 @@ export async function POST(request: Request) {
       customerId = customer.id;
     }
 
-    // ✅ Créer la session de checkout avec URL valide
+    // ✅ Créer la session de checkout avec les bons URLs
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
@@ -93,8 +93,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'subscription',
-      success_url: `${appUrl}/dashboard/billing?success=true`,
-      cancel_url: `${appUrl}/dashboard/billing?canceled=true`,
+      success_url: `${appUrl}/dashboard?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/pricing?payment=cancelled`,
       metadata: {
         userId,
         planName,
@@ -102,9 +102,10 @@ export async function POST(request: Request) {
       },
     });
 
+    console.log('✅ Stripe session created:', session.id);
     return NextResponse.json({ url: session.url });
   } catch (error: any) {
-    console.error('Checkout error:', error);
+    console.error('❌ Checkout error:', error);
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }

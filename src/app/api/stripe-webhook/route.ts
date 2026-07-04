@@ -1,15 +1,15 @@
+export const dynamic = 'force-dynamic';
+
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@/lib/supabase/server';
 
-export const dynamic = 'force-dynamic';
-
 export async function POST(request: Request) {
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2026-05-27.dahlia',
-  });
-
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+  
+  // ✅ Webhook secret depuis la variable d'environnement
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  
   const body = await request.text();
   const signature = request.headers.get('stripe-signature')!;
 
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   try {
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+    console.error('❌ Webhook signature verification failed:', err.message);
     return NextResponse.json(
       { error: `Webhook Error: ${err.message}` },
       { status: 400 }
@@ -99,13 +99,13 @@ export async function POST(request: Request) {
 
     case 'invoice.payment_succeeded': {
       const invoice = event.data.object as Stripe.Invoice;
-      console.log('Payment succeeded for invoice:', invoice.id);
+      console.log('✅ Payment succeeded for invoice:', invoice.id);
       break;
     }
 
     case 'invoice.payment_failed': {
       const invoice = event.data.object as Stripe.Invoice;
-      console.error('Payment failed for invoice:', invoice.id);
+      console.error('❌ Payment failed for invoice:', invoice.id);
       break;
     }
 
