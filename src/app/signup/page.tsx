@@ -9,7 +9,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import AuthVisualPanel from "@/components/AuthVisualPanel";
 
-const supabase = createClient();
+// ✅ SUPPRIMÉ : const supabase = createClient(); (qui était au niveau module)
 
 export default function SignupPage() {
   const router = useRouter();
@@ -42,6 +42,9 @@ export default function SignupPage() {
       setLoading(false);
       return;
     }
+
+    // ✅ CRÉÉ ICI, DANS LA FONCTION (pas au niveau module)
+    const supabase = createClient();
 
     const { data, error: authError } = await supabase.auth.signUp({
       email,
@@ -227,7 +230,7 @@ export default function SignupPage() {
               <div className="flex-1 border-t border-white/10" />
             </div>
 
-            {/* Google Sign In - ✅ MAINTENANT FONCTIONNEL */}
+            {/* Google Sign In */}
             <motion.button
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}

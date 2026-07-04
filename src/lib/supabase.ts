@@ -13,6 +13,10 @@ export function createClient() {
         getSession: async () => ({ data: { session: null }, error: null }),
         onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
         signOut: async () => ({ error: null }),
+        signInWithPassword: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signUp: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        signInWithOAuth: async () => ({ data: null, error: new Error('Supabase not configured') }),
+        exchangeCodeForSession: async () => ({ data: null, error: new Error('Supabase not configured') }),
       },
       from: () => ({
         select: () => ({ data: [], error: null }),

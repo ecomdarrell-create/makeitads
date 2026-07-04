@@ -36,7 +36,7 @@ function LoginForm() {
       return;
     }
 
-    // ✅ CRÉÉ ICI, DANS LA FONCTION
+    // ✅ CRÉÉ ICI, DANS LA FONCTION (pas au niveau module)
     const supabase = createClient();
 
     const { error: authError } = await supabase.auth.signInWithPassword({
