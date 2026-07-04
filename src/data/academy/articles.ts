@@ -95,7 +95,7 @@ export const articles: Article[] = [
       },
       {
         type: "quote",
-        content: "The future of marketing isn't about replacing humans with AI—it's about augmenting human creativity with AI capabilities.",
+        content: "The future of marketing isn't about replacing humans with AI. It's about augmenting human creativity with AI capabilities.",
         author: "Darrell Kamga",
       },
       {
@@ -134,7 +134,7 @@ export const articles: Article[] = [
     slug: "facebook-ads-scaling-2026",
     title: "The Ultimate Facebook Ads Scaling Playbook for 2026",
     excerpt: "Master the advanced strategies top advertisers use to scale Facebook Ads from $1K to $100K per month profitably.",
-    coverImage: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?w=1200&q=80",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-78b631d13b24?w=1200&q=80",
     category: "Facebook Ads",
     level: "Advanced",
     author: {
@@ -149,7 +149,7 @@ export const articles: Article[] = [
     sections: [
       {
         type: "paragraph",
-        content: "Scaling Facebook Ads isn't about spending more—it's about spending smarter. In this guide, we'll break down the exact framework used by 7-figure advertisers.",
+        content: "Scaling Facebook Ads isn't about spending more. It's about spending smarter. In this guide, we'll break down the exact framework used by 7-figure advertisers.",
       },
       {
         type: "h2",
@@ -157,16 +157,7 @@ export const articles: Article[] = [
       },
       {
         type: "paragraph",
-        content: "Most advertisers fail at scaling because they skip the fundamentals. Before increasing budget, ensure you have:",
-      },
-      {
-        type: "list",
-        items: [
-          "A winning creative with proven ROAS",
-          "Pixel data from at least 1,000 conversions",
-          "Clear unit economics and profit margins",
-          "A scalable offer that doesn't fatigue audiences",
-        ],
+        content: "Most advertisers fail at scaling because they skip the fundamentals. Before increasing budget, ensure you have a winning creative with proven ROAS, pixel data from at least 1,000 conversions, clear unit economics and profit margins, and a scalable offer that doesn't fatigue audiences.",
       },
       {
         type: "h2",
@@ -216,7 +207,7 @@ export const articles: Article[] = [
     slug: "seo-ai-era",
     title: "SEO in the Age of AI: What Actually Works Now",
     excerpt: "Google's AI Overviews changed everything. Here's how to rank in 2026 with strategies that actually move the needle.",
-    coverImage: "https://images.unsplash.com/photo-1432888622747-4eb9a8efeb07?w=1200&q=80",
+    coverImage: "https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?w=1200&q=80",
     category: "SEO",
     level: "Intermediate",
     author: {
@@ -322,7 +313,7 @@ export const articles: Article[] = [
     sections: [
       {
         type: "paragraph",
-        content: "Performance Max has evolved from a experimental campaign type to the backbone of Google Ads strategy. Here's how to master it.",
+        content: "Performance Max has evolved from an experimental campaign type to the backbone of Google Ads strategy. Here's how to master it.",
       },
     ],
     comments: [],
@@ -345,7 +336,7 @@ export const articles: Article[] = [
     sections: [
       {
         type: "paragraph",
-        content: "Real growth hacking isn't about tricks—it's about systematic experimentation backed by data.",
+        content: "Real growth hacking isn't about tricks. It's about systematic experimentation backed by data.",
       },
     ],
     comments: [],
@@ -369,7 +360,7 @@ export const articles: Article[] = [
     sections: [
       {
         type: "paragraph",
-        content: "Great copy isn't magic—it's a formula. Learn the 7 frameworks that have generated billions in revenue.",
+        content: "Great copy isn't magic. It's a formula. Learn the 7 frameworks that have generated billions in revenue.",
       },
     ],
     comments: [],
@@ -378,7 +369,7 @@ export const articles: Article[] = [
     slug: "social-media-organic-2026",
     title: "Organic Social Media in 2026: What's Working Now",
     excerpt: "The algorithms changed. Here's how to grow organically on social media without paid ads in 2026.",
-    coverImage: "https://images.unsplash.com/photo-1611162616305-c69b3fa7fbe0?w=1200&q=80",
+    coverImage: "https://images.unsplash.com/photo-1611926653458-09294b3142bf?w=1200&q=80",
     category: "Social Media",
     level: "Intermediate",
     author: {
@@ -392,7 +383,7 @@ export const articles: Article[] = [
     sections: [
       {
         type: "paragraph",
-        content: "Organic reach isn't dead—it's just evolved. Here's how to win in 2026's social landscape.",
+        content: "Organic reach isn't dead. It's just evolved. Here's how to win in 2026's social landscape.",
       },
     ],
     comments: [],

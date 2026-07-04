@@ -6,11 +6,12 @@ import { createClient } from "@/lib/supabase";
 import { ChevronDown, Menu, X, LogOut, User, ExternalLink } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 export default function GlobalNavbar() {
   const { user, loading } = useSession();
   const router = useRouter();
+  const pathname = usePathname();
   
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -37,9 +38,21 @@ export default function GlobalNavbar() {
   const scrollToSection = (href: string) => {
     setMobileMenuOpen(false);
     if (href.startsWith("#")) {
-      const element = document.querySelector(href);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
+      // Si on n'est pas sur la landing page, on y va d'abord
+      if (pathname !== "/") {
+        router.push("/");
+        // Attendre que la page charge puis scroller
+        setTimeout(() => {
+          const element = document.querySelector(href);
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 300);
+      } else {
+        const element = document.querySelector(href);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
       }
     } else {
       router.push(href);
@@ -69,12 +82,12 @@ export default function GlobalNavbar() {
               Résultats
             </button>
             
-            <Link 
-              href="/resources" 
+            <button 
+              onClick={() => scrollToSection("#academy")}
               className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
               Academy
-            </Link>
+            </button>
 
             <button 
               onClick={() => scrollToSection("#pricing")}
@@ -191,13 +204,12 @@ export default function GlobalNavbar() {
                   Résultats
                 </button>
                 
-                <Link
-                  href="/resources"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
+                <button
+                  onClick={() => scrollToSection("#academy")}
+                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
                 >
                   Academy
-                </Link>
+                </button>
 
                 <button
                   onClick={() => scrollToSection("#pricing")}

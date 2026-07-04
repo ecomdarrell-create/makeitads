@@ -11,14 +11,14 @@ interface Props {
 
 export default function ArticleCard({ article }: Props) {
   const levelColors = {
-    Beginner: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    Intermediate: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
-    Advanced: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+    Beginner: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    Intermediate: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    Advanced: "bg-rose-500/10 text-rose-400 border-rose-500/20",
   };
 
   return (
     <Link href={`/academy/${article.slug}`} className="group block h-full">
-      <article className="h-full rounded-3xl border border-black/5 dark:border-white/10 bg-white dark:bg-white/[0.02] overflow-hidden hover:shadow-2xl hover:shadow-[#6366f1]/5 hover:border-[#6366f1]/20 transition-all duration-500">
+      <article className="h-full rounded-3xl border border-white/10 bg-white/[0.02] overflow-hidden hover:shadow-2xl hover:shadow-[#6366f1]/10 hover:border-[#6366f1]/30 transition-all duration-500">
         <div className="relative aspect-[16/10] overflow-hidden">
           <img
             src={article.coverImage}
@@ -30,7 +30,7 @@ export default function ArticleCard({ article }: Props) {
             Read article
           </div>
           <div className="absolute top-3 left-3">
-            <span className="rounded-full bg-white/90 dark:bg-black/80 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-slate-900 dark:text-white uppercase tracking-wider shadow-sm">
+            <span className="rounded-full bg-[#080810]/80 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm border border-white/10">
               {article.category}
             </span>
           </div>
@@ -38,26 +38,26 @@ export default function ArticleCard({ article }: Props) {
 
         <div className="p-6">
           <div className="flex items-center gap-2 mb-3 flex-wrap">
-            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${levelColors[article.level]}`}>
+            <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border ${levelColors[article.level]}`}>
               {article.level}
             </span>
-            <span className="text-[10px] text-slate-400">•</span>
+            <span className="text-[10px] text-slate-500">•</span>
             <span className="text-[10px] text-slate-500">{formatDate(article.publishedAt)}</span>
           </div>
 
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2 line-clamp-2 group-hover:text-[#6366f1] transition-colors">
+          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#6366f1] transition-colors">
             {article.title}
           </h3>
 
-          <p className="text-sm text-slate-600 dark:text-slate-400 mb-5 line-clamp-2 leading-relaxed">
+          <p className="text-sm text-slate-400 mb-5 line-clamp-2 leading-relaxed">
             {article.excerpt}
           </p>
 
-          <div className="flex items-center justify-between pt-4 border-t border-black/5 dark:border-white/5">
+          <div className="flex items-center justify-between pt-4 border-t border-white/5">
             <div className="flex items-center gap-2">
-              <img src={article.author.avatar} alt={article.author.name} className="h-7 w-7 rounded-full" />
+              <img src={article.author.avatar} alt={article.author.name} className="h-7 w-7 rounded-full border border-white/10" />
               <div>
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">{article.author.name}</p>
+                <p className="text-xs font-semibold text-white">{article.author.name}</p>
               </div>
             </div>
             <div className="flex items-center gap-3 text-[10px] text-slate-500">

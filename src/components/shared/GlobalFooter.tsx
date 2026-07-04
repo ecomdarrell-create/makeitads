@@ -24,19 +24,19 @@ export default function GlobalFooter() {
             <h4 className="text-sm font-bold text-white mb-6">Product</h4>
             <ul className="space-y-4 text-sm text-slate-400">
               <li><Link href="/#features" className="hover:text-white transition-colors">Features</Link></li>
-              <li><Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link></li>
+              <li><Link href="/#pricing" className="hover:text-white transition-colors">Pricing</Link></li>
               <li><Link href="/dashboard" className="hover:text-white transition-colors">Dashboard</Link></li>
-              <li><Link href="/resources" className="hover:text-white transition-colors">Resources</Link></li>
+              <li><Link href="/#academy" className="hover:text-white transition-colors">Academy</Link></li>
             </ul>
           </div>
 
           <div>
             <h4 className="text-sm font-bold text-white mb-6">Resources</h4>
             <ul className="space-y-4 text-sm text-slate-400">
-              <li><Link href="/resources" className="hover:text-white transition-colors">Documentation</Link></li>
-              <li><Link href="/resources" className="hover:text-white transition-colors">Community</Link></li>
+              <li><Link href="/#faq" className="hover:text-white transition-colors">Documentation</Link></li>
+              <li><a href="https://t.me/makeitads" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Community</a></li>
               <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
-              <li><Link href="/resources" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/#academy" className="hover:text-white transition-colors">Blog</Link></li>
             </ul>
           </div>
 
@@ -44,7 +44,7 @@ export default function GlobalFooter() {
             <h4 className="text-sm font-bold text-white mb-6">Company</h4>
             <ul className="space-y-4 text-sm text-slate-400">
               <li><Link href="/about" className="hover:text-white transition-colors">About</Link></li>
-              <li><Link href="/resources" className="hover:text-white transition-colors">Blog</Link></li>
+              <li><Link href="/#academy" className="hover:text-white transition-colors">Blog</Link></li>
               <li><Link href="/careers" className="hover:text-white transition-colors">Careers</Link></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>

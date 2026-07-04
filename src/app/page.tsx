@@ -6,7 +6,8 @@ import Image from "next/image";
 import { 
   ArrowRight, TrendingUp, BarChart3, Eye, Map, Target, 
   MessageSquare, Brain, Lightbulb, Rocket, Check, X,
-  ChevronDown, ShieldCheck, Loader2, ChevronLeft, ChevronRight
+  ChevronDown, ShieldCheck, Loader2, ChevronLeft, ChevronRight,
+  BookOpen, Clock, Sparkles
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import { SiShopify, SiStripe, SiMeta, SiGoogle, SiTiktok, SiHubspot } from "react-icons/si";
@@ -40,6 +41,39 @@ const pricingPlans = [
 ];
 
 const successStories: SuccessStory[] = ALL_SUCCESS_STORIES;
+
+const academyArticles = [
+  {
+    slug: "ai-powered-marketing-2026",
+    title: "How AI is Reshaping Marketing in 2026",
+    excerpt: "Discover how artificial intelligence is transforming the marketing landscape and what strategies will dominate the next decade.",
+    coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
+    category: "AI",
+    readTime: 12,
+    views: "24.8K",
+    featured: true,
+  },
+  {
+    slug: "facebook-ads-scaling-2026",
+    title: "The Ultimate Facebook Ads Scaling Playbook",
+    excerpt: "Master the advanced strategies top advertisers use to scale Facebook Ads from $1K to $100K per month profitably.",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-78b631d13b24?w=1200&q=80",
+    category: "Facebook Ads",
+    readTime: 15,
+    views: "18.4K",
+    featured: false,
+  },
+  {
+    slug: "seo-ai-era",
+    title: "SEO in the Age of AI: What Actually Works",
+    excerpt: "Google's AI Overviews changed everything. Here's how to rank in 2026 with strategies that actually move the needle.",
+    coverImage: "https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?w=1200&q=80",
+    category: "SEO",
+    readTime: 10,
+    views: "15.2K",
+    featured: false,
+  },
+];
 
 const painPoints = [
   { id: 1, title: "Guesswork", subtitle: "You don't know which channel deserves your budget.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Throwing money at Facebook, Google, TikTok – hoping something sticks.", stat: "63%", statLabel: "of marketers admit they're guessing" },
@@ -501,7 +535,146 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 11. FAQ */}
+      {/* 11. ACADEMY */}
+      <section id="academy" className="relative z-10 py-16 md:py-24 px-6">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080810] via-[#0a0a14]/50 to-[#080810] pointer-events-none" />
+        <div className="max-w-7xl mx-auto relative z-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            whileInView={{ opacity: 1, y: 0 }} 
+            viewport={{ once: true }} 
+            transition={{ duration: 0.6 }} 
+            className="text-center mb-16 max-w-3xl mx-auto"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 px-4 py-1.5 mb-6">
+              <BookOpen className="h-3.5 w-3.5 text-[#6366f1]" />
+              <span className="text-xs font-semibold text-[#6366f1] uppercase tracking-wider">Academy</span>
+            </div>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+              Master modern marketing with{" "}
+              <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+                expert insights
+              </span>
+            </h2>
+            <p className="text-base md:text-lg text-slate-400">
+              Proven strategies, AI insights, and actionable guides from top marketers.
+            </p>
+          </motion.div>
+
+          {/* Featured Article */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="mb-12"
+          >
+            <Link href="/academy/ai-powered-marketing-2026" className="group block">
+              <div className="grid md:grid-cols-2 gap-8 rounded-3xl border border-white/10 bg-[#0f0f1a] overflow-hidden hover:border-[#6366f1]/30 hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500">
+                <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden">
+                  <Image 
+                    src={academyArticles[0].coverImage} 
+                    alt={academyArticles[0].title} 
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <div className="absolute top-4 left-4 flex items-center gap-2">
+                    <span className="rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-slate-900 shadow-sm">Featured</span>
+                    <span className="rounded-full bg-[#6366f1] px-3 py-1 text-xs font-bold text-white shadow-sm">{academyArticles[0].category}</span>
+                  </div>
+                </div>
+                <div className="p-8 md:p-10 flex flex-col justify-center">
+                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 group-hover:text-[#6366f1] transition-colors">
+                    {academyArticles[0].title}
+                  </h3>
+                  <p className="text-slate-400 mb-6 leading-relaxed">{academyArticles[0].excerpt}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-xs text-slate-500">
+                      <span className="flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" />{academyArticles[0].views}</span>
+                      <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{academyArticles[0].readTime} min</span>
+                    </div>
+                    <span className="flex items-center gap-1 text-sm font-semibold text-[#6366f1] group-hover:gap-2 transition-all">
+                      Read article <ArrowRight className="h-4 w-4" />
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          </motion.div>
+
+          {/* Articles Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {academyArticles.slice(1).map((article, i) => (
+              <motion.div
+                key={article.slug}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+              >
+                <Link href={`/academy/${article.slug}`} className="group block h-full">
+                  <article className="h-full rounded-3xl border border-white/10 bg-[#0f0f1a] overflow-hidden hover:shadow-2xl hover:shadow-[#6366f1]/10 hover:border-[#6366f1]/30 transition-all duration-500">
+                    <div className="relative aspect-[16/10] overflow-hidden">
+                      <Image
+                        src={article.coverImage}
+                        alt={article.title}
+                        fill
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                        sizes="(max-width: 768px) 100vw, 33vw"
+                      />
+                      <div className="absolute bottom-3 right-3 rounded-full bg-white/70 dark:bg-black/60 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider shadow-sm">
+                        Read article
+                      </div>
+                      <div className="absolute top-3 left-3">
+                        <span className="rounded-full bg-[#080810]/80 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm border border-white/10">
+                          {article.category}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="p-6">
+                      <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#6366f1] transition-colors">
+                        {article.title}
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-5 line-clamp-2 leading-relaxed">
+                        {article.excerpt}
+                      </p>
+                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                        <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{article.views}</span>
+                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{article.readTime}m</span>
+                        </div>
+                        <span className="text-xs font-semibold text-[#6366f1] group-hover:translate-x-1 transition-transform">
+                          Read →
+                        </span>
+                      </div>
+                    </div>
+                  </article>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* CTA Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-center"
+          >
+            <Link 
+              href="/academy" 
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-4 text-sm font-bold text-white shadow-[0_20px_60px_rgba(99,102,241,0.3)] hover:shadow-[0_25px_80px_rgba(139,92,246,0.4)] transition-all hover:scale-105"
+            >
+              View all articles <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 12. FAQ */}
       <section id="faq" className="relative z-10 py-16 md:py-24 px-6 bg-[#080810]/50">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
@@ -536,7 +709,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 12. FINAL CTA */}
+      {/* 13. FINAL CTA */}
       <section className="relative z-10 py-24 md:py-32 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0" style={{ backgroundImage: "url('/images/final-cta-bg.png')", backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.4 }} />
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#080810]/90 via-[#080810]/70 to-[#000000]" />
