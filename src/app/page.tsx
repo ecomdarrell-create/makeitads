@@ -73,6 +73,16 @@ const academyArticles = [
     views: "15.2K",
     featured: false,
   },
+  {
+    slug: "email-automation-ecommerce",
+    title: "Email Automation That Converts: E-commerce Blueprint",
+    excerpt: "Build email sequences that generate 30% of your revenue on autopilot with this proven framework.",
+    coverImage: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=1200&q=80",
+    category: "Email Marketing",
+    readTime: 8,
+    views: "12.8K",
+    featured: false,
+  },
 ];
 
 const painPoints = [
@@ -308,6 +318,55 @@ function ReviewsCarousel() {
   );
 }
 
+// Carousel pour Pain Points (mobile-friendly, sans flèches)
+function PainPointsCarousel() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const interval = setInterval(() => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      if (scrollLeft >= scrollWidth - clientWidth - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 400, behavior: "smooth" });
+      }
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div
+      ref={scrollRef}
+      className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2 scrollbar-hide"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
+      <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+      {painPoints.map((point, index) => (
+        <motion.div 
+          key={point.id} 
+          initial={{ opacity: 0, y: 50 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} 
+          className={`flex-shrink-0 w-[320px] md:w-auto snap-center group relative rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}
+        >
+          <div className="aspect-[16/10] overflow-hidden relative rounded-t-3xl">
+            <Image src={point.image} alt={point.title} fill className="object-cover transition duration-700 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
+          </div>
+          <div className="p-6 space-y-3">
+            <h3 className="text-xl font-bold text-white">{point.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">{point.subtitle}</p>
+            <p className="text-slate-500 text-xs italic">{point.description}</p>
+            <div className="pt-2"><span className={`text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${point.color} text-white shadow-lg`}>{point.stat} {point.statLabel}</span></div>
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 // ======================================================
 // PAGE PRINCIPALE
 // ======================================================
@@ -373,13 +432,15 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. PAIN POINTS */}
+      {/* 3. PAIN POINTS - CAROUSEL AUTO-DÉFILANT SANS FLÈCHES */}
       <section className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10 md:mb-16 max-w-4xl mx-auto px-4">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">Most businesses don't fail because they lack effort.{" "}<span className="font-bold bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">They fail because they're making decisions without market intelligence.</span></h2>
           </motion.div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          
+          {/* Desktop: Grid / Mobile: Carousel */}
+          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {painPoints.map((point, index) => (
               <motion.div key={point.id} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} className={`group relative rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}>
                 <div className="aspect-[16/10] overflow-hidden relative rounded-t-3xl">
@@ -393,6 +454,11 @@ export default function LandingPage() {
                 </div>
               </motion.div>
             ))}
+          </div>
+          
+          {/* Mobile: Carousel */}
+          <div className="md:hidden">
+            <PainPointsCarousel />
           </div>
         </div>
       </section>
@@ -434,45 +500,52 @@ export default function LandingPage() {
 
       <StatisticsSection />
 
-      {/* 8. COMPARISON */}
-      <section className="relative z-10 py-16 md:py-24 px-6">
-        <div className="max-w-5xl mx-auto">
+      {/* 8. COMPARISON - TABLEAU AMÉLIORÉ */}
+      <section className="relative z-10 py-16 md:py-24 px-6 overflow-x-hidden">
+        <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12 md:mb-16">
             <h2 className="text-2xl md:text-5xl font-bold tracking-tight mb-4">Why not use <span className="text-slate-400">Generic AI?</span></h2>
             <p className="text-base md:text-lg text-slate-400">Specialized Intelligence vs General Purpose Chatbots</p>
           </motion.div>
-          <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] overflow-hidden">
-            <div className="grid grid-cols-3 gap-4 p-6 border-b border-white/10 bg-white/[0.02]">
-              <div className="text-sm font-semibold text-slate-400">Capability</div>
-              <div className="text-center"><div className="text-lg font-bold text-slate-300">Generic AI</div></div>
-              <div className="text-center"><div className="text-lg font-bold text-[#8b5cf6]">MakeItAds</div></div>
+          <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] overflow-hidden overflow-x-auto">
+            <div className="min-w-[600px]">
+              <div className="grid grid-cols-3 gap-4 p-6 border-b border-white/10 bg-white/[0.02]">
+                <div className="text-sm font-semibold text-slate-400">Capability</div>
+                <div className="text-center"><div className="text-lg font-bold text-slate-300">Generic AI</div></div>
+                <div className="text-center"><div className="text-lg font-bold text-[#8b5cf6]">MakeItAds</div></div>
+              </div>
+              {comparisonData.map((row, index) => (
+                <motion.div key={index} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }} className="grid grid-cols-3 gap-4 p-6 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center">
+                  <div className="text-sm text-white font-medium">{row.feature}</div>
+                  <div className="text-center text-sm text-slate-500">{row.generic}</div>
+                  <div className="flex items-center justify-center gap-3">
+                    <span className="text-sm font-bold text-emerald-400">{row.makeitads}</span>
+                    <span className="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">{row.diff}</span>
+                  </div>
+                </motion.div>
+              ))}
             </div>
-            {comparisonData.map((row, index) => (
-              <motion.div key={index} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }} className="grid grid-cols-3 gap-4 p-6 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center">
-                <div className="text-sm text-white font-medium">{row.feature}</div>
-                <div className="text-center text-sm text-slate-500">{row.generic}</div>
-                <div className="flex items-center justify-center gap-3">
-                  <span className="text-sm font-bold text-emerald-400">{row.makeitads}</span>
-                  <span className="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">{row.diff}</span>
-                </div>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>
 
-      {/* 9. PRICING */}
+      {/* 9. PRICING - "COMPARE ALL PLANS" DÉPLACÉ */}
       <section id="pricing" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Simple, transparent <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">pricing</span></h2>
             <p className="text-base md:text-lg text-slate-400 mb-8">Choose the plan that fits your business needs.</p>
-            <div className="flex items-center justify-center gap-4 mb-12">
-              <span className={`text-sm ${!isYearly ? "text-white font-semibold" : "text-slate-400"}`}>Monthly</span>
-              <button onClick={() => setIsYearly(!isYearly)} className="relative h-6 w-11 rounded-full bg-white/10 transition-colors focus:outline-none">
-                <span className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-[#8b5cf6] transition-transform ${isYearly ? "translate-x-5" : ""}`} />
-              </button>
-              <span className={`text-sm ${isYearly ? "text-white font-semibold" : "text-slate-400"}`}>Yearly <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">Save 20%</span></span>
+            <div className="flex flex-col items-center gap-4 mb-6">
+              <div className="flex items-center gap-4">
+                <span className={`text-sm ${!isYearly ? "text-white font-semibold" : "text-slate-400"}`}>Monthly</span>
+                <button onClick={() => setIsYearly(!isYearly)} className="relative h-6 w-11 rounded-full bg-white/10 transition-colors focus:outline-none">
+                  <span className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-[#8b5cf6] transition-transform ${isYearly ? "translate-x-5" : ""}`} />
+                </button>
+                <span className={`text-sm ${isYearly ? "text-white font-semibold" : "text-slate-400"}`}>Yearly <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">Save 20%</span></span>
+              </div>
+              <Link href="/pricing" className="text-sm font-bold text-[#8b5cf6] hover:text-white transition-colors border-b border-[#8b5cf6]/50 hover:border-white pb-1">
+                Compare all plans
+              </Link>
             </div>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -514,11 +587,6 @@ export default function LandingPage() {
               );
             })}
           </div>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.4 }} className="text-center">
-            <button onClick={handlePricingCta} className="inline-flex items-center gap-2 text-sm font-bold text-[#8b5cf6] hover:text-white transition-colors border-b border-[#8b5cf6]/50 hover:border-white pb-1">
-              {getCTAText("pricing", !!user)} <ArrowRight className="h-3.5 w-3.5" />
-            </button>
-          </motion.div>
         </div>
       </section>
 

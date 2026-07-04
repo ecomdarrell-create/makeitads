@@ -12,54 +12,44 @@ const steps = [
     title: "Business Profile",
     description: "The more information you provide, the more accurate your marketing strategy becomes.",
     icon: Sparkles,
-    image: "/images/business-profile-desktop.png",
-    mobileImage: "/images/business-profile-mobile.png",
+    image: "/images/step1-describe.png",
   },
   {
     id: 2,
     title: "Market Intelligence",
     description: "Track your competitors in real-time and discover opportunities they're missing.",
     icon: TrendingUp,
-    image: "/images/analytics-desktop.png",
-    mobileImage: "/images/analytics-mobile.png",
+    image: "/images/step2-analyze.png",
   },
   {
     id: 3,
     title: "Competitor Watch",
     description: "Get a complete SWOT analysis and AI-powered insights on your competitive landscape.",
     icon: Eye,
-    image: "/images/competitor-watch-desktop.png",
-    mobileImage: "/images/competitor-watch-mobile.png",
+    image: "/images/step3-discover.png",
   },
   {
     id: 4,
     title: "Strategy Engine",
     description: "Receive a data-backed strategy with budget allocation and growth roadmap.",
     icon: BarChart3,
-    image: "/images/strategy-engine-desktop.png",
-    mobileImage: "/images/strategy-engine-mobile.png",
+    image: "/images/step4-execute.png",
   },
   {
     id: 5,
     title: "Executive Dashboard",
     description: "Your complete marketing command center with all insights in one place.",
     icon: LayoutDashboard,
-    image: "/images/executive-dashboard-desktop.png",
-    mobileImage: "/images/executive-dashboard-mobile.png",
+    image: "/images/step5-results.png",
   },
 ];
 
 export default function InteractiveWalkthrough() {
   const [activeStep, setActiveStep] = useState(0);
-  const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-    const checkMobile = () => setIsMobile(window.innerWidth < 768);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const nextStep = () => {
@@ -82,47 +72,43 @@ export default function InteractiveWalkthrough() {
   const Icon = currentStep.icon;
 
   return (
-    <section id="walkthrough" className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
+    <section id="walkthrough" className="relative w-full py-16 md:py-24 px-6 overflow-hidden bg-[#080810] text-white">
       
-      {/* IMAGE DE FOND */}
-      <div className="absolute inset-0">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={activeStep}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8 }}
-            className="absolute inset-0 w-full h-full"
-          >
-            <Image
-              src={isMobile ? currentStep.mobileImage : currentStep.image}
-              alt={currentStep.title}
-              fill
-              className="object-cover"
-              sizes="100vw"
-            />
-          </motion.div>
-        </AnimatePresence>
-        {/* ✅ Overlay sombre pour garder l'image visible mais assombrie */}
-        <div className="absolute inset-0 bg-[#080810]/85" />
-      </div>
-
       {/* CONTENU */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-20">
+      <div className="relative z-10 max-w-7xl mx-auto">
         
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ duration: 0.6 }} 
+          className="text-center mb-12 md:mb-16"
+        >
+          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            From business idea to{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              growth plan
+            </span>{" "}
+            in minutes.
+          </h2>
+          <p className="text-base md:text-lg text-slate-400">
+            No complex setup. Just describe your business and let our AI handle the rest.
+          </p>
+        </motion.div>
+
         {/* Timeline */}
-        <div className="mb-8">
-          <div className="flex items-center gap-2">
+        <div className="mb-8 md:mb-12">
+          <div className="flex items-center justify-center gap-2 md:gap-4 overflow-x-auto pb-2 scrollbar-hide">
             {steps.map((step, index) => (
               <button
                 key={step.id}
                 onClick={() => setActiveStep(index)}
-                className={`flex items-center gap-2 transition-all ${
+                className={`flex items-center gap-2 transition-all flex-shrink-0 ${
                   index === activeStep ? "scale-110" : "opacity-50 hover:opacity-80"
                 }`}
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${
+                <div className={`flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-full border-2 transition-all ${
                   index === activeStep
                     ? "border-[#6366f1] bg-[#6366f1]/20"
                     : index < activeStep
@@ -130,9 +116,9 @@ export default function InteractiveWalkthrough() {
                     : "border-white/20 bg-white/5"
                 }`}>
                   {index < activeStep ? (
-                    <Check className="h-4 w-4 text-emerald-400" />
+                    <Check className="h-4 w-4 md:h-5 md:w-5 text-emerald-400" />
                   ) : (
-                    <Icon className={`h-4 w-4 ${index === activeStep ? "text-[#8b5cf6]" : "text-slate-400"}`} />
+                    <step.icon className={`h-4 w-4 md:h-5 md:w-5 ${index === activeStep ? "text-[#8b5cf6]" : "text-slate-400"}`} />
                   )}
                 </div>
                 <span className={`text-xs font-bold hidden md:block ${
@@ -161,22 +147,47 @@ export default function InteractiveWalkthrough() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -30 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mb-10"
+            className="text-center max-w-3xl mx-auto mb-8 md:mb-12"
           >
             <p className="text-sm font-bold uppercase tracking-[0.32em] text-[#6366f1] mb-4">
               Step {currentStep.id} of {steps.length}
             </p>
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-white">
+            <h3 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-white">
               {currentStep.title}
-            </h2>
-            <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto">
+            </h3>
+            <p className="text-base md:text-lg text-slate-300 max-w-2xl mx-auto px-4">
               {currentStep.description}
             </p>
           </motion.div>
         </AnimatePresence>
 
-        {/* Navigation */}
-        <div className="flex items-center gap-4">
+        {/* Image en format carré 1:1 */}
+        <div className="relative max-w-2xl mx-auto mb-8 md:mb-12">
+          <div className="relative aspect-square rounded-3xl overflow-hidden border border-white/10 bg-[#0f0f1a]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeStep}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={currentStep.image}
+                  alt={currentStep.title}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, 672px"
+                  priority={activeStep === 0}
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        {/* Navigation - Desktop uniquement */}
+        <div className="hidden md:flex items-center justify-center gap-4 mb-8">
           <button
             onClick={prevStep}
             className="h-12 w-12 rounded-full border border-white/10 bg-white/5 shadow-sm flex items-center justify-center hover:bg-white/10 transition-all"
@@ -204,13 +215,26 @@ export default function InteractiveWalkthrough() {
           </button>
         </div>
 
+        {/* Mobile - Dots uniquement, swipeable */}
+        <div className="md:hidden flex items-center justify-center gap-2 mb-8">
+          {steps.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setActiveStep(index)}
+              className={`h-2 rounded-full transition-all ${
+                index === activeStep ? "bg-[#6366f1] w-8" : "bg-white/20 w-2"
+              }`}
+            />
+          ))}
+        </div>
+
         {/* CTA final */}
         {activeStep === steps.length - 1 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="mt-10 text-center"
+            className="text-center"
           >
             <p className="text-lg text-slate-300 mb-4">Ready to build your own strategy?</p>
             <Link
@@ -223,8 +247,6 @@ export default function InteractiveWalkthrough() {
           </motion.div>
         )}
       </div>
-
-      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#080810] to-transparent z-10" />
     </section>
   );
 }
