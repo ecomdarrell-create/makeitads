@@ -80,10 +80,10 @@ export default function HeroSection() {
         <div className="absolute inset-0 bg-gradient-to-b from-[#080810]/70 via-[#080810]/50 to-[#080810]/90 lg:via-[#080810]/40" />
       </div>
 
-      {/* Contenu centré par-dessus */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+      {/* Contenu centré par-dessus - REMONTÉ */}
+      <div className="relative z-10 max-w-5xl mx-auto px-6 text-center pt-16 pb-8">
         
-        {/* ✅ Badge compteur déplacé en HAUT */}
+        {/* Badge compteur déplacé en HAUT */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -103,7 +103,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 leading-[1.1] text-white"
+          className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-4 leading-[1.1] text-white"
         >
           Still guessing which ads will actually{" "}
           <motion.span
@@ -120,7 +120,7 @@ export default function HeroSection() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-base sm:text-lg md:text-xl text-slate-300 mb-10 leading-relaxed max-w-3xl mx-auto px-2"
+          className="text-base sm:text-lg md:text-xl text-slate-300 mb-8 leading-relaxed max-w-3xl mx-auto px-2"
         >
           MakeItAds analyzes your market, benchmarks your competitors, and builds data-backed strategies so every dollar you spend has a clear reason behind it.
         </motion.p>
@@ -147,8 +147,6 @@ export default function HeroSection() {
             See How It Works
           </a>
         </motion.div>
-
-        {/* ✅ Badge "Trusted by" supprimé - déjà retiré */}
       </div>
     </section>
   );

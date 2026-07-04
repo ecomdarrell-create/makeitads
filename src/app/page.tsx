@@ -46,7 +46,7 @@ const academyArticles = [
   {
     slug: "ai-powered-marketing-2026",
     title: "How AI is Reshaping Marketing in 2026",
-    excerpt: "Discover how artificial intelligence is transforming the marketing landscape and what strategies will dominate the next decade.",
+    excerpt: "Discover how artificial intelligence is transforming the marketing landscape.",
     coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1200&q=80",
     category: "AI",
     readTime: 12,
@@ -56,8 +56,8 @@ const academyArticles = [
   {
     slug: "facebook-ads-scaling-2026",
     title: "The Ultimate Facebook Ads Scaling Playbook",
-    excerpt: "Master the advanced strategies top advertisers use to scale Facebook Ads from $1K to $100K per month profitably.",
-    coverImage: "https://images.unsplash.com/photo-1611162616475-78b631d13b24?w=1200&q=80",
+    excerpt: "Master the advanced strategies top advertisers use to scale Facebook Ads profitably.",
+    coverImage: "https://images.unsplash.com/photo-1611162616475-78b631d13b24?w=800&q=80",
     category: "Facebook Ads",
     readTime: 15,
     views: "18.4K",
@@ -66,8 +66,8 @@ const academyArticles = [
   {
     slug: "seo-ai-era",
     title: "SEO in the Age of AI: What Actually Works",
-    excerpt: "Google's AI Overviews changed everything. Here's how to rank in 2026 with strategies that actually move the needle.",
-    coverImage: "https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?w=1200&q=80",
+    excerpt: "Google's AI Overviews changed everything. Here's how to rank in 2026.",
+    coverImage: "https://images.unsplash.com/photo-1553949345-eb786bb3f7ba?w=800&q=80",
     category: "SEO",
     readTime: 10,
     views: "15.2K",
@@ -76,8 +76,8 @@ const academyArticles = [
   {
     slug: "email-automation-ecommerce",
     title: "Email Automation That Converts: E-commerce Blueprint",
-    excerpt: "Build email sequences that generate 30% of your revenue on autopilot with this proven framework.",
-    coverImage: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=1200&q=80",
+    excerpt: "Build email sequences that generate 30% of your revenue on autopilot.",
+    coverImage: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?w=800&q=80",
     category: "Email Marketing",
     readTime: 8,
     views: "12.8K",
@@ -156,170 +156,8 @@ const LogoCarousel = () => (
   </div>
 );
 
+// Carousel Testimonials - Sans flèches, auto-scroll infinite loop
 function ReviewsCarousel() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-
-  const checkScroll = () => {
-    if (scrollRef.current) {
-      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      setCanScrollLeft(scrollLeft > 0);
-      setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10);
-    }
-  };
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) {
-      el.addEventListener("scroll", checkScroll);
-      checkScroll();
-      return () => el.removeEventListener("scroll", checkScroll);
-    }
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const interval = setInterval(() => {
-      const { scrollLeft, scrollWidth, clientWidth } = el;
-      if (scrollLeft >= scrollWidth - clientWidth - 10) {
-        el.scrollTo({ left: 0, behavior: "smooth" });
-      } else {
-        el.scrollBy({ left: 400, behavior: "smooth" });
-      }
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollRef.current) {
-      const amount = direction === "left" ? -400 : 400;
-      scrollRef.current.scrollBy({ left: amount, behavior: "smooth" });
-    }
-  };
-
-  return (
-    <div className="relative group">
-      <button
-        onClick={() => scroll("left")}
-        className={`absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 md:-translate-x-16 z-20 h-12 w-12 rounded-full bg-[#6366f1]/90 hover:bg-[#6366f1] flex items-center justify-center transition-all shadow-xl ${
-          !canScrollLeft ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        <ChevronLeft className="h-6 w-6 text-white" />
-      </button>
-
-      <button
-        onClick={() => scroll("right")}
-        className={`absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 md:translate-x-16 z-20 h-12 w-12 rounded-full bg-[#6366f1]/90 hover:bg-[#6366f1] flex items-center justify-center transition-all shadow-xl ${
-          !canScrollRight ? "opacity-0 pointer-events-none" : "opacity-100"
-        }`}
-      >
-        <ChevronRight className="h-6 w-6 text-white" />
-      </button>
-
-      <div
-        ref={scrollRef}
-        className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2"
-        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-      >
-        <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-        {successStories.map((story) => (
-          <div
-            key={story.id}
-            className="flex-shrink-0 w-[320px] md:w-[380px] snap-start group relative rounded-[24px] overflow-hidden border border-white/10 bg-[#0f0f1a] hover:border-[#6366f1]/50 transition-all duration-500"
-          >
-            <div className="absolute inset-0 z-0">
-              <Image 
-                src={story.image} 
-                alt={story.name} 
-                fill
-                className="object-cover transition duration-700 group-hover:scale-110"
-                sizes="(max-width: 768px) 100vw, 380px"
-              />
-              <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
-            </div>
-            
-            {story.isNew && (
-              <div className="absolute top-4 right-4 z-20">
-                <span className="px-3 py-1 rounded-full bg-[#6366f1]/80 backdrop-blur-md text-xs font-bold text-white border border-[#6366f1]/50">
-                  New
-                </span>
-              </div>
-            )}
-            
-            <div className="relative z-10 p-8 flex flex-col h-full">
-              <div className="mb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-xs text-slate-300">{story.countryFlag} {story.country}</span>
-                  <span className="w-1 h-1 rounded-full bg-slate-600" />
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-slate-300">
-                    {story.industry}
-                  </span>
-                </div>
-                <h3 className="text-xl font-bold text-white">{story.name}</h3>
-                <p className="text-sm text-slate-400">{story.role} • {story.company}</p>
-              </div>
-              
-              <div className="mb-6">
-                <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent tracking-tight">
-                  {story.metric}
-                </p>
-                <p className="text-xs text-slate-400 mt-1">{story.timeToResult}</p>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4 mb-6 py-4 border-y border-white/10">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Before</p>
-                  <ul className="space-y-1.5">
-                    {story.before.slice(0, 2).map((item, i) => (
-                      <li key={i} className="text-xs text-slate-400 flex items-start gap-2">
-                        <span className="w-1 h-1 rounded-full bg-slate-600 mt-1.5 flex-shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-500/70 mb-2">After</p>
-                  <ul className="space-y-1.5">
-                    {story.after.slice(0, 2).map((item, i) => (
-                      <li key={i} className="text-xs text-emerald-200/80 flex items-start gap-2">
-                        <Check className="w-3 h-3 text-emerald-500 mt-0.5 flex-shrink-0" />
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-              
-              <blockquote className="mb-6 flex-1">
-                <p className="text-sm text-slate-300 leading-relaxed italic">"{story.quote}"</p>
-              </blockquote>
-              
-              <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                <div className="flex flex-wrap gap-2">
-                  {story.modules.slice(0, 2).map((mod, i) => (
-                    <span key={i} className="text-[10px] px-2 py-1 rounded-md bg-[#6366f1]/20 text-[#a5b4fc] border border-[#6366f1]/30 font-medium">
-                      {mod}
-                    </span>
-                  ))}
-                </div>
-                <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400/80 uppercase tracking-wider">
-                  <ShieldCheck className="h-3 w-3" />Verified
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// Carousel pour Pain Points (mobile-friendly, sans flèches)
-function PainPointsCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -343,25 +181,163 @@ function PainPointsCarousel() {
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
       <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-      {painPoints.map((point, index) => (
-        <motion.div 
-          key={point.id} 
-          initial={{ opacity: 0, y: 50 }} 
-          whileInView={{ opacity: 1, y: 0 }} 
-          viewport={{ once: true }} 
-          transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} 
-          className={`flex-shrink-0 w-[320px] md:w-auto snap-center group relative rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}
+      {successStories.map((story) => (
+        <div
+          key={story.id}
+          className="flex-shrink-0 w-[320px] md:w-[380px] snap-start group relative rounded-[24px] overflow-hidden border border-white/10 bg-[#0f0f1a] hover:border-[#6366f1]/50 transition-all duration-500"
         >
-          <div className="aspect-[16/10] overflow-hidden relative rounded-t-3xl">
-            <Image src={point.image} alt={point.title} fill className="object-cover transition duration-700 group-hover:scale-110" sizes="(max-width: 768px) 100vw, 33vw" />
+          <div className="absolute inset-0 z-0">
+            <Image 
+              src={story.image} 
+              alt={story.name} 
+              fill
+              className="object-cover transition duration-700 group-hover:scale-110"
+              sizes="(max-width: 768px) 100vw, 380px"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
           </div>
-          <div className="p-6 space-y-3">
-            <h3 className="text-xl font-bold text-white">{point.title}</h3>
-            <p className="text-slate-400 text-sm leading-relaxed">{point.subtitle}</p>
-            <p className="text-slate-500 text-xs italic">{point.description}</p>
-            <div className="pt-2"><span className={`text-xs font-bold px-3 py-1.5 rounded-full bg-gradient-to-r ${point.color} text-white shadow-lg`}>{point.stat} {point.statLabel}</span></div>
+          
+          {story.isNew && (
+            <div className="absolute top-4 right-4 z-20">
+              <span className="px-3 py-1 rounded-full bg-[#6366f1]/80 backdrop-blur-md text-xs font-bold text-white border border-[#6366f1]/50">
+                New
+              </span>
+            </div>
+          )}
+          
+          <div className="relative z-10 p-8 flex flex-col h-full">
+            <div className="mb-6">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs text-slate-300">{story.countryFlag} {story.country}</span>
+                <span className="w-1 h-1 rounded-full bg-slate-600" />
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-slate-300">
+                  {story.industry}
+                </span>
+              </div>
+              <h3 className="text-xl font-bold text-white">{story.name}</h3>
+              <p className="text-sm text-slate-400">{story.role} • {story.company}</p>
+            </div>
+            
+            <div className="mb-6">
+              <p className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent tracking-tight">
+                {story.metric}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">{story.timeToResult}</p>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4 mb-6 py-4 border-y border-white/10">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-2">Before</p>
+                <ul className="space-y-1.5">
+                  {story.before.slice(0, 2).map((item, i) => (
+                    <li key={i} className="text-xs text-slate-400 flex items-start gap-2">
+                      <span className="w-1 h-1 rounded-full bg-slate-600 mt-1.5 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-500/70 mb-2">After</p>
+                <ul className="space-y-1.5">
+                  {story.after.slice(0, 2).map((item, i) => (
+                    <li key={i} className="text-xs text-emerald-200/80 flex items-start gap-2">
+                      <Check className="w-3 h-3 text-emerald-500 mt-0.5 flex-shrink-0" />
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            
+            <blockquote className="mb-6 flex-1">
+              <p className="text-sm text-slate-300 leading-relaxed italic">"{story.quote}"</p>
+            </blockquote>
+            
+            <div className="flex items-center justify-between pt-4 border-t border-white/10">
+              <div className="flex flex-wrap gap-2">
+                {story.modules.slice(0, 2).map((mod, i) => (
+                  <span key={i} className="text-[10px] px-2 py-1 rounded-md bg-[#6366f1]/20 text-[#a5b4fc] border border-[#6366f1]/30 font-medium">
+                    {mod}
+                  </span>
+                ))}
+              </div>
+              <div className="flex items-center gap-1.5 text-[10px] font-bold text-emerald-400/80 uppercase tracking-wider">
+                <ShieldCheck className="h-3 w-3" />Verified
+              </div>
+            </div>
           </div>
-        </motion.div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// Carousel Academy - Sans flèches, auto-scroll
+function AcademyCarousel() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const interval = setInterval(() => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      if (scrollLeft >= scrollWidth - clientWidth - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 400, behavior: "smooth" });
+      }
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <div
+      ref={scrollRef}
+      className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2 scrollbar-hide"
+      style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+    >
+      <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+      {academyArticles.map((article) => (
+        <Link key={article.slug} href={`/academy/${article.slug}`} className="group block flex-shrink-0 w-[320px] md:w-[380px] snap-start">
+          <article className="h-full rounded-3xl border border-white/10 bg-[#0f0f1a] overflow-hidden hover:shadow-2xl hover:shadow-[#6366f1]/10 hover:border-[#6366f1]/30 transition-all duration-500">
+            <div className="relative aspect-[16/10] overflow-hidden">
+              <Image
+                src={article.coverImage}
+                alt={article.title}
+                fill
+                className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 768px) 320px, 380px"
+              />
+              <div className="absolute bottom-3 right-3 rounded-full bg-white/70 dark:bg-black/60 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider shadow-sm">
+                Read article
+              </div>
+              <div className="absolute top-3 left-3">
+                <span className="rounded-full bg-[#080810]/80 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm border border-white/10">
+                  {article.category}
+                </span>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#6366f1] transition-colors">
+                {article.title}
+              </h3>
+              <p className="text-sm text-slate-400 mb-5 line-clamp-2 leading-relaxed">
+                {article.excerpt}
+              </p>
+              <div className="flex items-center justify-between pt-4 border-t border-white/5">
+                <div className="flex items-center gap-3 text-[10px] text-slate-500">
+                  <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{article.views}</span>
+                  <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{article.readTime}m</span>
+                </div>
+                <span className="text-xs font-semibold text-[#6366f1] group-hover:translate-x-1 transition-transform">
+                  Read →
+                </span>
+              </div>
+            </div>
+          </article>
+        </Link>
       ))}
     </div>
   );
@@ -432,15 +408,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. PAIN POINTS - CAROUSEL AUTO-DÉFILANT SANS FLÈCHES */}
+      {/* 3. PAIN POINTS - Section sombre */}
       <section className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10 md:mb-16 max-w-4xl mx-auto px-4">
             <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">Most businesses don't fail because they lack effort.{" "}<span className="font-bold bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">They fail because they're making decisions without market intelligence.</span></h2>
           </motion.div>
-          
-          {/* Desktop: Grid / Mobile: Carousel */}
-          <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {painPoints.map((point, index) => (
               <motion.div key={point.id} initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7, delay: index * 0.2, type: "spring" }} className={`group relative rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}>
                 <div className="aspect-[16/10] overflow-hidden relative rounded-t-3xl">
@@ -455,33 +429,28 @@ export default function LandingPage() {
               </motion.div>
             ))}
           </div>
-          
-          {/* Mobile: Carousel */}
-          <div className="md:hidden">
-            <PainPointsCarousel />
-          </div>
         </div>
       </section>
 
-      {/* 4. HOW IT WORKS */}
-      <section className="relative z-10 py-16 md:py-24 px-6 bg-[#0a0a14]/80">
+      {/* 4. HOW IT WORKS - Section blanche avec Hero plein écran */}
+      <section className="relative z-10 py-16 md:py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12 md:mb-16 max-w-3xl mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4">From business idea to <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">growth plan</span> in minutes.</h2>
-            <p className="text-base md:text-lg text-slate-400">No complex setup. Just describe your business and let our AI handle the rest.</p>
+            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 text-slate-900">From business idea to <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">growth plan</span> in minutes.</h2>
+            <p className="text-base md:text-lg text-slate-600">No complex setup. Just describe your business and let our AI handle the rest.</p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-6">
             {steps.map((step, index) => {
               const Icon = step.icon;
               return (
                 <motion.div key={step.id} initial={{ opacity: 0, x: index % 2 === 0 ? -30 : 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: index * 0.15 }} className="relative group">
-                  <div className="absolute -top-4 -left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-[#0f0f1a] border border-white/10 text-sm font-bold text-slate-400">{step.number}</div>
-                  <div className="rounded-3xl overflow-hidden border border-white/10 bg-[#0a0a14] aspect-video mb-5 relative">
+                  <div className="absolute -top-4 -left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white border border-slate-200 text-sm font-bold text-slate-600 shadow-sm">{step.number}</div>
+                  <div className="rounded-3xl overflow-hidden border border-slate-200 bg-white aspect-video mb-5 relative shadow-lg">
                     <Image src={step.image} alt={step.title} fill className="object-cover transition duration-700 group-hover:scale-105" sizes="(max-width: 768px) 100vw, 25vw" />
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-[#080810]/70 backdrop-blur-[2px]"><Icon className="h-8 w-8 text-white drop-shadow-lg" /></div>
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-1">{step.title}</h3>
-                  <p className="text-slate-400 text-sm">{step.subtitle}</p>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">{step.title}</h3>
+                  <p className="text-slate-600 text-sm">{step.subtitle}</p>
                 </motion.div>
               );
             })}
@@ -489,38 +458,38 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. INTERACTIVE WALKTHROUGH (CARROUSEL PLEIN ÉCRAN) */}
+      {/* 5. INTERACTIVE WALKTHROUGH */}
       <InteractiveWalkthrough />
 
-      {/* 6. COMPETITORS (SIMPLIFIÉ) */}
+      {/* 6. COMPETITORS - Section Hero plein écran */}
       <CompetitorsSection />
 
-      {/* 7. MARKET INTELLIGENCE (CARROUSEL PLEIN ÉCRAN) */}
+      {/* 7. MARKET INTELLIGENCE - Section Hero plein écran */}
       <MarketIntelligenceSection />
 
       <StatisticsSection />
 
-      {/* 8. COMPARISON - TABLEAU AMÉLIORÉ */}
-      <section className="relative z-10 py-16 md:py-24 px-6 overflow-x-hidden">
+      {/* 8. COMPARISON - Tableau amélioré */}
+      <section className="relative z-10 py-16 md:py-24 px-6 bg-white">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12 md:mb-16">
-            <h2 className="text-2xl md:text-5xl font-bold tracking-tight mb-4">Why not use <span className="text-slate-400">Generic AI?</span></h2>
-            <p className="text-base md:text-lg text-slate-400">Specialized Intelligence vs General Purpose Chatbots</p>
+            <h2 className="text-2xl md:text-5xl font-bold tracking-tight mb-4 text-slate-900">Why not use <span className="text-slate-500">Generic AI?</span></h2>
+            <p className="text-base md:text-lg text-slate-600">Specialized Intelligence vs General Purpose Chatbots</p>
           </motion.div>
-          <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] overflow-hidden overflow-x-auto">
+          <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xl overflow-x-auto">
             <div className="min-w-[600px]">
-              <div className="grid grid-cols-3 gap-4 p-6 border-b border-white/10 bg-white/[0.02]">
-                <div className="text-sm font-semibold text-slate-400">Capability</div>
-                <div className="text-center"><div className="text-lg font-bold text-slate-300">Generic AI</div></div>
-                <div className="text-center"><div className="text-lg font-bold text-[#8b5cf6]">MakeItAds</div></div>
+              <div className="grid grid-cols-3 gap-4 p-6 border-b border-slate-200 bg-slate-50">
+                <div className="text-sm font-semibold text-slate-600">Capability</div>
+                <div className="text-center"><div className="text-lg font-bold text-slate-700">Generic AI</div></div>
+                <div className="text-center"><div className="text-lg font-bold text-[#6366f1]">MakeItAds</div></div>
               </div>
               {comparisonData.map((row, index) => (
-                <motion.div key={index} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }} className="grid grid-cols-3 gap-4 p-6 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center">
-                  <div className="text-sm text-white font-medium">{row.feature}</div>
+                <motion.div key={index} initial={{ opacity: 0, x: -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.1 }} className="grid grid-cols-3 gap-4 p-6 border-b border-slate-100 hover:bg-slate-50 transition-colors items-center">
+                  <div className="text-sm text-slate-900 font-medium">{row.feature}</div>
                   <div className="text-center text-sm text-slate-500">{row.generic}</div>
                   <div className="flex items-center justify-center gap-3">
-                    <span className="text-sm font-bold text-emerald-400">{row.makeitads}</span>
-                    <span className="text-xs font-mono bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">{row.diff}</span>
+                    <span className="text-sm font-bold text-emerald-600">{row.makeitads}</span>
+                    <span className="text-xs font-mono bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full border border-emerald-200">{row.diff}</span>
                   </div>
                 </motion.div>
               ))}
@@ -529,7 +498,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 9. PRICING - "COMPARE ALL PLANS" DÉPLACÉ */}
+      {/* 9. PRICING - Section sombre */}
       <section id="pricing" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
@@ -590,23 +559,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 10. SUCCESS STORIES */}
-      <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#6366f1]/5 via-transparent to-transparent pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
+      {/* 10. SUCCESS STORIES - Section blanche */}
+      <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6 bg-white">
+        <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">How businesses are growing with <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">MakeItAds</span></h2>
-            <p className="text-base md:text-lg text-slate-400">Real stories from founders and marketers who stopped guessing.</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-slate-900">How businesses are growing with <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">MakeItAds</span></h2>
+            <p className="text-base md:text-lg text-slate-600">Real stories from founders and marketers who stopped guessing.</p>
           </motion.div>
           
           <ReviewsCarousel />
         </div>
       </section>
 
-      {/* 11. ACADEMY */}
+      {/* 11. ACADEMY - Section sombre */}
       <section id="academy" className="relative z-10 py-16 md:py-24 px-6">
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080810] via-[#0a0a14]/50 to-[#080810] pointer-events-none" />
-        <div className="max-w-7xl mx-auto relative z-10">
+        <div className="max-w-7xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }} 
             whileInView={{ opacity: 1, y: 0 }} 
@@ -629,108 +596,14 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Featured Article */}
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="mb-12"
-          >
-            <Link href="/academy/ai-powered-marketing-2026" className="group block">
-              <div className="grid md:grid-cols-2 gap-8 rounded-3xl border border-white/10 bg-[#0f0f1a] overflow-hidden hover:border-[#6366f1]/30 hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500">
-                <div className="relative aspect-[16/10] md:aspect-auto overflow-hidden">
-                  <Image 
-                    src={academyArticles[0].coverImage} 
-                    alt={academyArticles[0].title} 
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
-                    sizes="(max-width: 768px) 100vw, 50vw"
-                  />
-                  <div className="absolute top-4 left-4 flex items-center gap-2">
-                    <span className="rounded-full bg-white/90 backdrop-blur-md px-3 py-1 text-xs font-bold text-slate-900 shadow-sm">Featured</span>
-                    <span className="rounded-full bg-[#6366f1] px-3 py-1 text-xs font-bold text-white shadow-sm">{academyArticles[0].category}</span>
-                  </div>
-                </div>
-                <div className="p-8 md:p-10 flex flex-col justify-center">
-                  <h3 className="text-2xl md:text-3xl font-bold text-white mb-4 group-hover:text-[#6366f1] transition-colors">
-                    {academyArticles[0].title}
-                  </h3>
-                  <p className="text-slate-400 mb-6 leading-relaxed">{academyArticles[0].excerpt}</p>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-xs text-slate-500">
-                      <span className="flex items-center gap-1.5"><Eye className="h-3.5 w-3.5" />{academyArticles[0].views}</span>
-                      <span className="flex items-center gap-1.5"><Clock className="h-3.5 w-3.5" />{academyArticles[0].readTime} min</span>
-                    </div>
-                    <span className="flex items-center gap-1 text-sm font-semibold text-[#6366f1] group-hover:gap-2 transition-all">
-                      Read article <ArrowRight className="h-4 w-4" />
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </Link>
-          </motion.div>
+          <AcademyCarousel />
 
-          {/* Articles Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            {academyArticles.slice(1).map((article, i) => (
-              <motion.div
-                key={article.slug}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-              >
-                <Link href={`/academy/${article.slug}`} className="group block h-full">
-                  <article className="h-full rounded-3xl border border-white/10 bg-[#0f0f1a] overflow-hidden hover:shadow-2xl hover:shadow-[#6366f1]/10 hover:border-[#6366f1]/30 transition-all duration-500">
-                    <div className="relative aspect-[16/10] overflow-hidden">
-                      <Image
-                        src={article.coverImage}
-                        alt={article.title}
-                        fill
-                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                        sizes="(max-width: 768px) 100vw, 33vw"
-                      />
-                      <div className="absolute bottom-3 right-3 rounded-full bg-white/70 dark:bg-black/60 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider shadow-sm">
-                        Read article
-                      </div>
-                      <div className="absolute top-3 left-3">
-                        <span className="rounded-full bg-[#080810]/80 backdrop-blur-md px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-sm border border-white/10">
-                          {article.category}
-                        </span>
-                      </div>
-                    </div>
-
-                    <div className="p-6">
-                      <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-[#6366f1] transition-colors">
-                        {article.title}
-                      </h3>
-                      <p className="text-sm text-slate-400 mb-5 line-clamp-2 leading-relaxed">
-                        {article.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                        <div className="flex items-center gap-3 text-[10px] text-slate-500">
-                          <span className="flex items-center gap-1"><Eye className="h-3 w-3" />{article.views}</span>
-                          <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{article.readTime}m</span>
-                        </div>
-                        <span className="text-xs font-semibold text-[#6366f1] group-hover:translate-x-1 transition-transform">
-                          Read →
-                        </span>
-                      </div>
-                    </div>
-                  </article>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* CTA Button */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center"
+            className="text-center mt-12"
           >
             <Link 
               href="/academy" 
@@ -742,18 +615,18 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 12. FAQ */}
-      <section id="faq" className="relative z-10 py-16 md:py-24 px-6 bg-[#080810]/50">
+      {/* 12. FAQ - Section blanche */}
+      <section id="faq" className="relative z-10 py-16 md:py-24 px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">Frequently asked <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">questions</span></h2>
-            <p className="text-base md:text-lg text-slate-400">Everything you need to know about MakeItAds</p>
+            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-slate-900">Frequently asked <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">questions</span></h2>
+            <p className="text-base md:text-lg text-slate-600">Everything you need to know about MakeItAds</p>
           </motion.div>
           <div className="space-y-4">
             {faqData.map((faq, index) => (
-              <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.05 }} className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
-                <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors">
-                  <span className="text-base font-semibold text-white pr-4">{faq.question}</span>
+              <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.05 }} className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex items-center justify-between p-6 text-left hover:bg-slate-50 transition-colors">
+                  <span className="text-base font-semibold text-slate-900 pr-4">{faq.question}</span>
                   <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
                 </button>
                 <AnimatePresence>
@@ -766,7 +639,7 @@ export default function LandingPage() {
                       className="overflow-hidden"
                     >
                       <div className="px-6 pb-6">
-                        <p className="text-sm text-slate-400 leading-relaxed">{faq.answer}</p>
+                        <p className="text-sm text-slate-600 leading-relaxed">{faq.answer}</p>
                       </div>
                     </motion.div>
                   )}

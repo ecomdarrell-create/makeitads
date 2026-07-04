@@ -62,91 +62,72 @@ export default function MarketIntelligenceSection() {
   const current = marketSlides[currentIndex];
 
   return (
-    <section className="relative w-full py-16 md:py-24 px-6 overflow-hidden bg-[#080810] text-white">
+    <section className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
       
-      {/* Background subtil */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 right-1/4 w-[600px] h-[400px] bg-[#8b5cf6]/10 rounded-full blur-[120px]" />
-      </div>
-
-      {/* CONTENU */}
-      <div className="relative z-10 max-w-7xl mx-auto">
-        
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-12 md:mb-16 max-w-4xl mx-auto"
-        >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 px-4 py-1.5 mb-6">
-            <BarChart3 className="h-3.5 w-3.5 text-[#6366f1]" />
-            <span className="text-xs font-semibold text-[#6366f1] uppercase tracking-wider">Market Intelligence</span>
-          </div>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">
-            Data-driven insights for{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-              smarter decisions
-            </span>
-          </h2>
-          <p className="text-base md:text-lg text-slate-400 max-w-2xl mx-auto">
-            Real-time market intelligence that keeps you ahead of the competition.
-          </p>
-        </motion.div>
-
-        {/* Carousel d'images en format carré 1:1 */}
-        <div className="relative max-w-2xl mx-auto mb-10 md:mb-12">
-          <div className="relative aspect-square rounded-3xl overflow-hidden border border-white/10 bg-[#0f0f1a] shadow-2xl shadow-[#6366f1]/10">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentIndex}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.5 }}
-                className="absolute inset-0"
-              >
-                <Image
-                  src={current.image}
-                  alt={current.title}
-                  fill
-                  className="object-cover"
-                  sizes="(max-width: 768px) 100vw, 672px"
-                  priority={currentIndex === 0}
-                />
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Texte animé sous l'image */}
+      {/* IMAGES PLEIN ÉCRAN EN CAROUSEL */}
+      <div className="absolute inset-0 z-0">
         <AnimatePresence mode="wait">
           <motion.div
             key={currentIndex}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4 }}
-            className="text-center max-w-2xl mx-auto mb-8"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2 }}
+            className="absolute inset-0 w-full h-full"
           >
-            <h3 className="text-2xl md:text-3xl font-bold text-white mb-2">
+            <Image
+              src={current.image}
+              alt={current.title}
+              fill
+              className="object-cover"
+              sizes="100vw"
+              priority={currentIndex === 0}
+            />
+          </motion.div>
+        </AnimatePresence>
+        
+        {/* Overlay sombre 40% */}
+        <div className="absolute inset-0 bg-[#080810]/40" />
+        
+        {/* Gradient radial pour focus central */}
+        <div className="absolute inset-0 bg-radial-gradient from-transparent via-transparent to-[#080810]/60" />
+      </div>
+
+      {/* CONTENU CENTRÉ - Style Apple/Stripe */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-20">
+        
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentIndex}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -30 }}
+            transition={{ duration: 0.6 }}
+            className="text-center max-w-4xl"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 mb-6">
+              <BarChart3 className="h-3.5 w-3.5 text-white" />
+              <span className="text-xs font-semibold text-white uppercase tracking-wider">Market Intelligence</span>
+            </div>
+            
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
               {current.title}
-            </h3>
-            <p className="text-base md:text-lg text-slate-400">
+            </h2>
+            
+            <p className="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed mb-10">
               {current.subtitle}
             </p>
           </motion.div>
         </AnimatePresence>
 
-        {/* Dots de navigation (sans flèches) */}
-        <div className="flex items-center justify-center gap-2 mb-10">
+        {/* Dots de pagination discrets */}
+        <div className="flex items-center justify-center gap-2 mb-8">
           {marketSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`h-2 rounded-full transition-all ${
-                index === currentIndex ? "bg-[#6366f1] w-8" : "bg-white/20 w-2 hover:bg-white/40"
+              className={`h-1.5 rounded-full transition-all ${
+                index === currentIndex ? "bg-white w-8" : "bg-white/30 w-1.5 hover:bg-white/50"
               }`}
               aria-label={`Go to slide ${index + 1}`}
             />
@@ -154,22 +135,19 @@ export default function MarketIntelligenceSection() {
         </div>
 
         {/* CTA */}
-        <motion.div
+        <motion.button
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-center"
+          onClick={handleMarketCta}
+          className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-slate-900 shadow-2xl hover:bg-slate-100 transition-all hover:scale-105"
         >
-          <button
-            onClick={handleMarketCta}
-            className="group inline-flex items-center gap-2 rounded-full bg-[#6366f1] px-8 py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105"
-          >
-            {getCTAText("marketIntelligence", !!user)}
-            <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-          </button>
-        </motion.div>
+          {getCTAText("marketIntelligence", !!user)}
+          <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+        </motion.button>
       </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-[#080810] to-transparent z-10" />
     </section>
   );
 }
