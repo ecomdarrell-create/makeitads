@@ -5,7 +5,7 @@ import { ArrowRight, Eye } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "@/hooks/useSession";
-import { getCTAText, getCTAHref } from "@/config/cta.config";
+import { getCTAHref } from "@/config/cta.config";
 
 export default function CompetitorsSection() {
   const { user } = useSession();
@@ -23,11 +23,10 @@ export default function CompetitorsSection() {
 
   return (
     <section className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
-      
       {/* IMAGE PLEIN ÉCRAN */}
       <div className="absolute inset-0 z-0">
         {/* Desktop */}
-        <div className="hidden lg:block absolute inset-0">
+        <div className="hidden md:block absolute inset-0">
           <Image
             src="/images/competitors-editorial-desktop.webp"
             alt="Competitive Intelligence War Room"
@@ -37,26 +36,26 @@ export default function CompetitorsSection() {
             sizes="100vw"
           />
         </div>
-        
+
         {/* Mobile */}
-        <div className="lg:hidden absolute inset-0">
+        <div className="md:hidden absolute inset-0">
           <Image
             src="/images/competitors-editorial-mobile.webp"
             alt="Competitive Intelligence"
             fill
-            className="object-cover"
+            className="object-cover object-center"
             priority
             sizes="100vw"
+            quality={85}
           />
         </div>
-        
-        {/* Overlay sombre 40% */}
-        <div className="absolute inset-0 bg-[#080810]/40" />
+
+        {/* Overlay sombre */}
+        <div className="absolute inset-0 bg-[#080810]/60" />
       </div>
 
-      {/* CONTENU CENTRÉ - Style Apple/Stripe */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-6 py-20">
-        
+      {/* CONTENU */}
+      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 sm:px-6 py-20">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -66,17 +65,24 @@ export default function CompetitorsSection() {
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 mb-6">
             <Eye className="h-3.5 w-3.5 text-white" />
-            <span className="text-xs font-semibold text-white uppercase tracking-wider">Competitive Intelligence</span>
-          </div>
-          
-          <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6 text-white leading-tight">
-            Know what competitors are doing{" "}
-            <span className="bg-gradient-to-r from-white to-slate-300 bg-clip-text text-transparent">
-              before it affects your business.
+            <span className="text-xs font-semibold text-white uppercase tracking-wider">
+              Competitive Intelligence
             </span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white leading-tight">
+            Know what{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              competitors
+            </span>{" "}
+            are doing{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              before it affects
+            </span>{" "}
+            your business.
           </h2>
-          
-          <p className="text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed">
+
+          <p className="text-base sm:text-lg md:text-xl text-slate-200 max-w-2xl mx-auto leading-relaxed">
             Real-time competitive intelligence that keeps you one step ahead.
           </p>
         </motion.div>
@@ -86,13 +92,13 @@ export default function CompetitorsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-center"
+          className="text-center w-full max-w-sm"
         >
-          <button 
+          <button
             onClick={handleCompetitorCta}
-            className="group inline-flex items-center gap-2 rounded-full bg-white px-8 py-4 text-sm font-bold text-slate-900 shadow-2xl hover:bg-slate-100 transition-all hover:scale-105"
+            className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-8 py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105 w-full"
           >
-            {getCTAText("competitorIntelligence", !!user)} 
+            Start Tracking Competitors
             <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </motion.div>

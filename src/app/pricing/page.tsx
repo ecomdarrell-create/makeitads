@@ -1,13 +1,25 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import { Check, Zap, Crown, Building2, Sparkles, ArrowRight, Loader2, ChevronDown, X } from "lucide-react";
-import { useState } from "react";
+import { 
+  Check, 
+  Zap, 
+  Crown, 
+  Building2, 
+  Sparkles, 
+  ArrowRight, 
+  ArrowLeft,
+  Loader2, 
+  ChevronDown, 
+  X,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useSession } from "@/hooks/useSession";
 import { usePlan } from "@/hooks/usePlan";
 
-// IMPORTS DES COMPOSANTS GLOBAUX
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 
@@ -24,6 +36,8 @@ const pricingPlans = [
     color: "from-slate-500 to-slate-600",
     borderColor: "border-white/10",
     bg: "bg-[#0a0a14]",
+    accentColor: "text-slate-300",
+    badgeColor: "bg-slate-500/20 text-slate-300 border-slate-500/30",
     description: "Perfect for testing the waters and exploring basic features.",
     features: [
       "1 AI-generated strategy per month",
@@ -46,6 +60,8 @@ const pricingPlans = [
     color: "from-[#6366f1] to-[#8b5cf6]",
     borderColor: "border-[#6366f1]/40",
     bg: "bg-gradient-to-br from-[#6366f1]/8 to-[#8b5cf6]/4",
+    accentColor: "text-[#6366f1]",
+    badgeColor: "bg-[#6366f1]/20 text-[#a5b4fc] border-[#6366f1]/30",
     description: "For growing businesses ready to scale their marketing efforts.",
     features: [
       "Everything in Free plan",
@@ -74,6 +90,8 @@ const pricingPlans = [
     color: "from-violet-500 to-fuchsia-500",
     borderColor: "border-violet-500/30",
     bg: "bg-[#0a0a14]",
+    accentColor: "text-violet-400",
+    badgeColor: "bg-violet-500/20 text-violet-300 border-violet-500/30",
     description: "For serious marketers who need unlimited power and insights.",
     features: [
       "Everything in Pro plan",
@@ -106,6 +124,8 @@ const pricingPlans = [
     color: "from-amber-500 to-orange-500",
     borderColor: "border-amber-500/30",
     bg: "bg-[#0a0a14]",
+    accentColor: "text-amber-400",
+    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
     description: "For agencies and large teams requiring full customization.",
     features: [
       "Everything in Premium plan",
@@ -233,14 +253,14 @@ export default function PricingPage() {
   const [isYearly, setIsYearly] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  
+  // État pour le sélecteur mobile de plan
+  const [selectedMobilePlan, setSelectedMobilePlan] = useState<string>("pro");
 
-  // Récupérer le plan actuel de l'utilisateur
   const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
 
-  // Handler pour upgrade vers un plan payant (Pro/Premium)
   const handleUpgrade = async (planName: string) => {
     if (!user) {
-      // Si non connecté, rediriger vers login
       window.location.href = `/auth/login?redirect=/pricing&plan=${planName}`;
       return;
     }
@@ -270,7 +290,6 @@ export default function PricingPage() {
     }
   };
 
-  // Fonction pour afficher les valeurs dans le tableau comparatif
   const renderValue = (value: boolean | string) => {
     if (typeof value === 'boolean') {
       return value ? (
@@ -282,20 +301,39 @@ export default function PricingPage() {
     return <span className="text-sm text-slate-300">{value}</span>;
   };
 
+  // Trouver le plan sélectionné pour mobile
+  const currentMobilePlan = pricingPlans.find(p => p.key === selectedMobilePlan) || pricingPlans[1];
+
   return (
     <main className="min-h-screen bg-[#05050a] text-white">
-      {/* NAVBAR GLOBALE */}
       <GlobalNavbar />
 
       <div className="pt-28 pb-20 px-4">
         <div className="max-w-7xl mx-auto">
-          {/* Header */}
+          
+          {/* BOUTON BACK TO HOME */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-8"
+          >
+            <Link
+              href="/"
+              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] hover:border-white/20 transition-all"
+            >
+              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+              Back to Home
+            </Link>
+          </motion.div>
+
+          {/* HEADER */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent leading-tight">
               Simple, transparent pricing
             </h1>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
@@ -317,8 +355,8 @@ export default function PricingPage() {
             </div>
           </motion.div>
 
-          {/* Plans Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+          {/* PLANS GRID - DESKTOP */}
+          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {pricingPlans.map((planItem, index) => {
               const Icon = planItem.icon;
               const isCurrentPlan = currentPlan === planItem.key;
@@ -329,7 +367,7 @@ export default function PricingPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative rounded-2xl border ${planItem.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5" : `${planItem.borderColor} ${planItem.bg}`} p-6 flex flex-col`}
+                  className={`relative rounded-2xl border ${planItem.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5 shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]" : `${planItem.borderColor} ${planItem.bg}`} p-6 flex flex-col`}
                 >
                   {planItem.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -339,7 +377,6 @@ export default function PricingPage() {
                     </div>
                   )}
 
-                  {/* Badge "Current Plan" */}
                   {isCurrentPlan && (
                     <div className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
                       <Check className="h-3 w-3" />
@@ -365,7 +402,6 @@ export default function PricingPage() {
                     )}
                   </div>
 
-                  {/* Boutons dynamiques selon le plan */}
                   {planItem.name === "Free" ? (
                     <button 
                       disabled
@@ -397,15 +433,9 @@ export default function PricingPage() {
                       }`}
                     >
                       {loadingPlan === planItem.name ? (
-                        <>
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          Loading...
-                        </>
+                        <><Loader2 className="h-4 w-4 animate-spin" />Loading...</>
                       ) : isCurrentPlan ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          Current Plan
-                        </>
+                        <><Check className="h-4 w-4" />Current Plan</>
                       ) : (
                         planItem.cta
                       )}
@@ -427,12 +457,141 @@ export default function PricingPage() {
             })}
           </div>
 
-          {/* TABLEAU COMPARATIF */}
+          {/* PLANS - MOBILE (CAROUSEL PREMIUM) */}
+          <div className="md:hidden mb-12">
+            {/* Sélecteur de plan (tabs) */}
+            <div className="mb-6">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+                {pricingPlans.map((plan) => {
+                  const Icon = plan.icon;
+                  const isSelected = selectedMobilePlan === plan.key;
+                  return (
+                    <button
+                      key={plan.key}
+                      onClick={() => setSelectedMobilePlan(plan.key)}
+                      className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all border ${
+                        isSelected 
+                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-lg`
+                          : "bg-white/[0.03] text-slate-400 border-white/10 hover:border-white/20"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      {plan.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Carte du plan sélectionné */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentMobilePlan.key}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className={`relative rounded-2xl border ${currentMobilePlan.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5 shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]" : `${currentMobilePlan.borderColor} ${currentMobilePlan.bg}`} p-6`}
+              >
+                {currentMobilePlan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-lg">
+                      Most Popular
+                    </span>
+                  </div>
+                )}
+
+                {currentPlan === currentMobilePlan.key && (
+                  <div className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
+                    <Check className="h-3 w-3" />
+                    Current Plan
+                  </div>
+                )}
+
+                <div className="mb-6">
+                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${currentMobilePlan.color} mb-4 shadow-lg`}>
+                    <currentMobilePlan.icon className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-white">{currentMobilePlan.name}</h3>
+                  <p className="text-sm text-slate-400 mt-1">{currentMobilePlan.description}</p>
+                </div>
+
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-bold text-white">
+                      ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}
+                    </span>
+                    <span className="text-slate-400">/month</span>
+                  </div>
+                  {isYearly && currentMobilePlan.price.monthly > 0 && (
+                    <p className="text-xs text-slate-500 mt-1">Billed annually (${currentMobilePlan.price.yearly * 12}/year)</p>
+                  )}
+                </div>
+
+                {/* Bouton CTA */}
+                {currentMobilePlan.name === "Free" ? (
+                  <button 
+                    disabled
+                    className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all mb-6 ${
+                      currentPlan === currentMobilePlan.key
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                        : "border border-white/10 bg-white/[0.03] text-slate-500 cursor-not-allowed"
+                    }`}
+                  >
+                    {currentPlan === currentMobilePlan.key ? "Current Plan" : "Free"}
+                  </button>
+                ) : currentMobilePlan.name === "Enterprise" ? (
+                  <Link 
+                    href="/contact" 
+                    className="w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] mb-6 block"
+                  >
+                    {currentMobilePlan.cta}
+                  </Link>
+                ) : (
+                  <button
+                    onClick={() => handleUpgrade(currentMobilePlan.name)}
+                    disabled={loadingPlan === currentMobilePlan.name || currentPlan === currentMobilePlan.key}
+                    className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
+                      currentPlan === currentMobilePlan.key
+                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                        : currentMobilePlan.popular
+                        ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
+                        : "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] disabled:opacity-60 disabled:cursor-not-allowed"
+                    }`}
+                  >
+                    {loadingPlan === currentMobilePlan.name ? (
+                      <><Loader2 className="h-4 w-4 animate-spin" />Loading...</>
+                    ) : currentPlan === currentMobilePlan.key ? (
+                      <><Check className="h-4 w-4" />Current Plan</>
+                    ) : (
+                      currentMobilePlan.cta
+                    )}
+                  </button>
+                )}
+
+                {/* Liste des features */}
+                <div className="space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">What's included</h4>
+                  {currentMobilePlan.features.map((feature, i) => (
+                    <div key={i} className="flex items-start gap-2.5">
+                      <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                        <Check className="h-3 w-3 text-white" />
+                      </div>
+                      <span className="text-sm text-slate-300">{feature}</span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* TABLEAU COMPARATIF - DESKTOP */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="mb-20"
+            className="hidden md:block mb-20"
           >
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
@@ -441,8 +600,7 @@ export default function PricingPage() {
               <p className="text-base md:text-lg text-slate-400">See exactly what you get with each plan</p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0a0a14] overflow-hidden">
-              {/* Header du tableau */}
+            <div className="rounded-2xl border border-white/10 bg-[#0a0a14]/80 backdrop-blur-sm overflow-hidden">
               <div className="grid grid-cols-5 gap-4 p-6 border-b border-white/10 bg-white/[0.02]">
                 <div className="text-sm font-semibold text-slate-400">Feature</div>
                 <div className="text-center">
@@ -463,15 +621,12 @@ export default function PricingPage() {
                 </div>
               </div>
 
-              {/* Catégories et fonctionnalités */}
               {comparisonCategories.map((category, catIndex) => (
                 <div key={catIndex} className="border-b border-white/5 last:border-b-0">
-                  {/* Titre de catégorie */}
                   <div className="px-6 py-4 bg-white/[0.01] border-b border-white/5">
                     <h3 className="text-sm font-bold text-white uppercase tracking-wider">{category.category}</h3>
                   </div>
                   
-                  {/* Fonctionnalités */}
                   {category.features.map((feature, featIndex) => (
                     <motion.div 
                       key={featIndex}
@@ -491,6 +646,107 @@ export default function PricingPage() {
                 </div>
               ))}
             </div>
+          </motion.div>
+
+          {/* TABLEAU COMPARATIF - MOBILE (SÉLECTEUR DYNAMIQUE) */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="md:hidden mb-20"
+          >
+            <div className="text-center mb-8">
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
+                Compare <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">features</span>
+              </h2>
+              <p className="text-sm text-slate-400">Select a plan to see its features</p>
+            </div>
+
+            {/* Sélecteur de plan pour comparaison */}
+            <div className="mb-6 sticky top-20 z-10 bg-[#05050a]/95 backdrop-blur-md py-3 -mx-4 px-4">
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+                <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
+                {pricingPlans.map((plan) => {
+                  const Icon = plan.icon;
+                  const isSelected = selectedMobilePlan === plan.key;
+                  return (
+                    <button
+                      key={plan.key}
+                      onClick={() => setSelectedMobilePlan(plan.key)}
+                      className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all border ${
+                        isSelected 
+                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-lg`
+                          : "bg-white/[0.03] text-slate-400 border-white/10"
+                      }`}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                      {plan.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Features du plan sélectionné */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedMobilePlan}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.3 }}
+                className="rounded-2xl border border-white/10 bg-[#0a0a14]/80 backdrop-blur-sm overflow-hidden"
+              >
+                {/* Header */}
+                <div className={`px-5 py-4 border-b border-white/10 bg-gradient-to-r ${currentMobilePlan.color} bg-opacity-10`}>
+                  <div className="flex items-center gap-3">
+                    <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center shadow-lg`}>
+                      <currentMobilePlan.icon className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-white">{currentMobilePlan.name} Plan</h3>
+                      <p className="text-xs text-white/70">
+                        ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}/month
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Features par catégorie */}
+                {comparisonCategories.map((category, catIndex) => (
+                  <div key={catIndex} className="border-b border-white/5 last:border-b-0">
+                    <div className="px-5 py-3 bg-white/[0.01] border-b border-white/5">
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">{category.category}</h4>
+                    </div>
+                    
+                    {category.features.map((feature, featIndex) => {
+                      const value = feature[currentMobilePlan.key as keyof typeof feature];
+                      return (
+                        <div 
+                          key={featIndex}
+                          className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 last:border-b-0"
+                        >
+                          <span className="text-sm text-slate-300 flex-1 pr-3">{feature.name}</span>
+                          <div className="flex-shrink-0">
+                            {typeof value === 'boolean' ? (
+                              value ? (
+                                <Check className="h-5 w-5 text-emerald-400" />
+                              ) : (
+                                <X className="h-5 w-5 text-slate-600" />
+                              )
+                            ) : (
+                              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${currentMobilePlan.badgeColor}`}>
+                                {value}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ))}
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
 
           {/* FAQ SECTION */}
@@ -520,20 +776,24 @@ export default function PricingPage() {
                     onClick={() => setOpenFaq(openFaq === index ? null : index)} 
                     className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors"
                   >
-                    <span className="text-base font-semibold text-white">{faq.question}</span>
-                    <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform ${openFaq === index ? "rotate-180" : ""}`} />
+                    <span className="text-base font-semibold text-white pr-4">{faq.question}</span>
+                    <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
                   </button>
-                  {openFaq === index && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="px-6 pb-6"
-                    >
-                      <p className="text-sm text-slate-400 leading-relaxed">{faq.answer}</p>
-                    </motion.div>
-                  )}
+                  <AnimatePresence>
+                    {openFaq === index && (
+                      <motion.div 
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 pb-6">
+                          <p className="text-sm text-slate-400 leading-relaxed">{faq.answer}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))}
             </div>
@@ -546,8 +806,8 @@ export default function PricingPage() {
             viewport={{ once: true }}
             className="text-center"
           >
-            <div className="rounded-3xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-12 max-w-4xl mx-auto">
-              <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to scale your business?</h2>
+            <div className="rounded-3xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-8 md:p-12 max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-4xl font-bold mb-4">Ready to scale your business?</h2>
               <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
                 Join thousands of marketers using MakeItAds to dominate their niche.
               </p>
@@ -562,7 +822,6 @@ export default function PricingPage() {
         </div>
       </div>
 
-      {/* FOOTER GLOBAL */}
       <GlobalFooter />
     </main>
   );

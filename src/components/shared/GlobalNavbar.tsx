@@ -8,6 +8,8 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 
+const TELEGRAM_URL = "https://t.me/makeitads";
+
 export default function GlobalNavbar() {
   const { user, loading } = useSession();
   const router = useRouter();
@@ -38,10 +40,8 @@ export default function GlobalNavbar() {
   const scrollToSection = (href: string) => {
     setMobileMenuOpen(false);
     if (href.startsWith("#")) {
-      // Si on n'est pas sur la landing page, on y va d'abord
       if (pathname !== "/") {
         router.push("/");
-        // Attendre que la page charge puis scroller
         setTimeout(() => {
           const element = document.querySelector(href);
           if (element) {
@@ -73,21 +73,21 @@ export default function GlobalNavbar() {
             </span>
           </Link>
 
-          {/* Desktop Navigation - Centre */}
+          {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 z-10">
             <button 
               onClick={() => scrollToSection("#success-stories")}
               className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
-              Résultats
+              Results
             </button>
-            
-            <button 
-              onClick={() => scrollToSection("#academy")}
+
+            <Link 
+              href="/community"
               className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
             >
-              Academy
-            </button>
+              Community
+            </Link>
 
             <button 
               onClick={() => scrollToSection("#pricing")}
@@ -104,12 +104,12 @@ export default function GlobalNavbar() {
             </button>
 
             <a
-              href="https://t.me/makeitads"
+              href={TELEGRAM_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#a78bfa] hover:text-[#c4b5fd] transition-colors rounded-full hover:bg-white/5"
             >
-              Community
+              Telegram
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
@@ -145,6 +145,13 @@ export default function GlobalNavbar() {
                         className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
                       >
                         <User className="h-4 w-4" /> Dashboard
+                      </Link>
+                      <Link
+                        href="/community"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4" /> Community
                       </Link>
                       <button 
                         onClick={handleLogout} 
@@ -201,15 +208,27 @@ export default function GlobalNavbar() {
                   onClick={() => scrollToSection("#success-stories")}
                   className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
                 >
-                  Résultats
+                  Results
                 </button>
-                
-                <button
-                  onClick={() => scrollToSection("#academy")}
-                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
+
+                <Link
+                  href="/community"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
                 >
-                  Academy
-                </button>
+                  Community
+                </Link>
+
+                <a
+                  href={TELEGRAM_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="flex items-center justify-between px-4 py-3 text-sm text-[#a78bfa] hover:text-[#c4b5fd] hover:bg-white/5 rounded-2xl transition-colors"
+                >
+                  <span>Join The Boardroom</span>
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
 
                 <button
                   onClick={() => scrollToSection("#pricing")}
@@ -224,16 +243,6 @@ export default function GlobalNavbar() {
                 >
                   FAQ
                 </button>
-
-                <a
-                  href="https://t.me/makeitads"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-between px-4 py-3 text-sm text-[#a78bfa] hover:text-[#c4b5fd] hover:bg-white/5 rounded-2xl transition-colors"
-                >
-                  <span>Community</span>
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
 
                 <div className="my-2 border-t border-white/10" />
 

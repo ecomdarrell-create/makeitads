@@ -7,6 +7,9 @@ import Sidebar from "@/components/dashboard/Sidebar";
 import Topbar from "@/components/dashboard/Topbar";
 import Onboarding from "@/components/Onboarding";
 import { ToastProvider } from "@/components/providers/NotificationsProvider";
+import { MobileDrawer } from "@/components/ui/MobileDrawer";
+import MobileSidebar from "@/components/dashboard/MobileSidebar";
+import PageTransition from "@/components/ui/PageTransition";
 
 export default function DashboardLayoutClient({
   children,
@@ -16,6 +19,7 @@ export default function DashboardLayoutClient({
   const router = useRouter();
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
 
   useEffect(() => {
     const supabase = createClient();
@@ -44,6 +48,9 @@ export default function DashboardLayoutClient({
     router.refresh();
   };
 
+  const openMobileDrawer = () => setIsMobileDrawerOpen(true);
+  const closeMobileDrawer = () => setIsMobileDrawerOpen(false);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-[#080810]">
@@ -55,11 +62,31 @@ export default function DashboardLayoutClient({
   return (
     <ToastProvider>
       <div className="min-h-screen bg-[#080810]">
-        <Sidebar />
-        <Topbar />
-        <main className="ml-[260px] pt-16 p-8">
-          {children}
+        {/* Sidebar Desktop - cachée sur mobile */}
+        <div className="hidden md:block">
+          <Sidebar />
+        </div>
+
+        {/* Topbar responsive avec logo cliquable */}
+        <Topbar onMenuClick={openMobileDrawer} />
+
+        {/* Main content - padding adaptatif corrigé */}
+        <main className="md:ml-[260px] min-h-screen pt-[64px]">
+          <div className="p-4 sm:p-6 lg:p-8">
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </div>
         </main>
+
+        {/* Mobile Drawer avec animation fluide */}
+        <MobileDrawer
+          isOpen={isMobileDrawerOpen}
+          onClose={closeMobileDrawer}
+          position="left"
+        >
+          <MobileSidebar onClose={closeMobileDrawer} />
+        </MobileDrawer>
 
         {showOnboarding && <Onboarding onComplete={handleOnboardingComplete} />}
       </div>

@@ -1,6 +1,5 @@
 // ======================================================
-// SUCCESS STORIES - TOUTES LES HISTOIRES
-// Les nouvelles sont en PREMIÈRE POSITION
+// SUCCESS STORIES - CHEMINS CORRIGÉS SELON TES FICHIERS
 // ======================================================
 
 export interface SuccessStory {
@@ -22,7 +21,6 @@ export interface SuccessStory {
 }
 
 export const NEW_SUCCESS_STORIES: SuccessStory[] = [
-  // ✅ 4 NOUVELLES IMAGES AJOUTÉES
   {
     id: 7,
     name: "Amara Johnson",
@@ -91,7 +89,6 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     image: "/images/testimonial-agency.webp",
     isNew: true,
   },
-  // ✅ LES ANCIENNES NOUVELLES
   {
     id: 4,
     name: "Priya Patel",
@@ -102,16 +99,8 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     industry: "E-commerce Fashion",
     metric: "+287% Qualified Leads",
     timeToResult: "in 60 days",
-    before: [
-      "High customer acquisition cost",
-      "Inconsistent ad performance",
-      "No clear audience targeting",
-    ],
-    after: [
-      "Precision audience segments",
-      "4.3x ROAS on Meta campaigns",
-      "Predictable lead generation",
-    ],
+    before: ["High customer acquisition cost", "Inconsistent ad performance", "No clear audience targeting"],
+    after: ["Precision audience segments", "4.3x ROAS on Meta campaigns", "Predictable lead generation"],
     quote: "MakeItAds identified audience segments we never considered. Our CPA dropped by 41% in the first month alone.",
     modules: ["Audience Lab", "Campaign Builder", "Analytics"],
     image: "/images/story-priya-patel.jpg",
@@ -127,16 +116,8 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     industry: "B2B SaaS",
     metric: "+4.3x ROI",
     timeToResult: "in 90 days",
-    before: [
-      "Stagnant MRR growth",
-      "Inefficient ad spend across channels",
-      "Weak competitive positioning",
-    ],
-    after: [
-      "Clear market differentiation",
-      "Optimized channel allocation",
-      "3 new enterprise clients",
-    ],
+    before: ["Stagnant MRR growth", "Inefficient ad spend across channels", "Weak competitive positioning"],
+    after: ["Clear market differentiation", "Optimized channel allocation", "3 new enterprise clients"],
     quote: "The competitor intelligence alone was worth the subscription. We discovered a positioning gap that doubled our conversion rate.",
     modules: ["Competitor Intelligence", "Market Intelligence", "Growth Roadmap"],
     image: "/images/story-david-kim.jpg",
@@ -148,20 +129,12 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     role: "Marketing Director",
     company: "Bella Vita Cosmetics",
     country: "Spain",
-    countryFlag: "🇪🇸",
+    countryFlag: "🇪",
     industry: "Beauty & Cosmetics",
     metric: "-41% CAC",
     timeToResult: "in 45 days",
-    before: [
-      "Overspending on underperforming channels",
-      "No visibility into competitor strategies",
-      "Generic creative that didn't convert",
-    ],
-    after: [
-      "Data-driven creative strategy",
-      "Focused budget on top 2 channels",
-      "Clear brand positioning",
-    ],
+    before: ["Overspending on underperforming channels", "No visibility into competitor strategies", "Generic creative that didn't convert"],
+    after: ["Data-driven creative strategy", "Focused budget on top 2 channels", "Clear brand positioning"],
     quote: "We stopped guessing and started executing with confidence. The AI recommendations were spot-on from day one.",
     modules: ["Creative Studio", "Trend Intelligence", "Budget Optimizer"],
     image: "/images/story-elena-rodriguez.jpg",
@@ -192,7 +165,7 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
     role: "CMO",
     company: "Luxe Skincare",
     country: "United States",
-    countryFlag: "🇺🇸",
+    countryFlag: "🇸",
     industry: "Beauty",
     metric: "-31% CPA",
     timeToResult: "in 60 days",
@@ -220,5 +193,4 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
   },
 ];
 
-// Toutes les stories combinées (nouvelles en premier)
 export const ALL_SUCCESS_STORIES = [...NEW_SUCCESS_STORIES, ...EXISTING_SUCCESS_STORIES];

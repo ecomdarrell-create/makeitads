@@ -94,7 +94,7 @@ export default function Sidebar() {
     if (isEnterprise) {
       return (
         <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 px-3 py-2 text-xs font-bold text-white shadow-lg shadow-amber-500/30">
-          <Crown className="h-3.5 w-3.5" />
+          <Crown className="h-3.5 w-3.5" strokeWidth={2} />
           <span>Enterprise</span>
         </div>
       );
@@ -102,7 +102,7 @@ export default function Sidebar() {
     if (isPremium) {
       return (
         <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#a78bfa] px-3 py-2 text-xs font-bold text-white shadow-lg shadow-[#6366f1]/30">
-          <Crown className="h-3.5 w-3.5" />
+          <Crown className="h-3.5 w-3.5" strokeWidth={2} />
           <span>Premium</span>
         </div>
       );
@@ -110,7 +110,7 @@ export default function Sidebar() {
     if (isPro) {
       return (
         <div className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#8b5cf6] to-[#a78bfa] px-3 py-2 text-xs font-bold text-white">
-          <Zap className="h-3.5 w-3.5" />
+          <Zap className="h-3.5 w-3.5" strokeWidth={2} />
           <span>Pro</span>
         </div>
       );
@@ -125,8 +125,9 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-white/10 bg-[#0a0a14] shadow-lg">
-      <div className="flex h-16 flex-col justify-center px-6 border-b border-white/10">
-        <Link href="/" className="flex items-center gap-0.5 transition-transform hover:scale-105">
+      {/* Header avec logo cliquable */}
+      <div className="flex h-[64px] flex-col justify-center px-6 border-b border-white/10">
+        <Link href="/" className="flex items-center gap-0.5 transition-opacity hover:opacity-80 cursor-pointer">
           <span className="text-[17px] font-bold text-white tracking-tight">Make</span>
           <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-[17px] font-bold text-transparent tracking-tight">
             ItAds
@@ -137,6 +138,7 @@ export default function Sidebar() {
         </span>
       </div>
 
+      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto px-3 py-5 space-y-0.5">
         <p className="px-3 mb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-400">
           Workspace
@@ -150,7 +152,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+              className={`group relative flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-white/10 text-white"
                   : "text-slate-400 hover:bg-white/5 hover:text-white"
@@ -162,11 +164,11 @@ export default function Sidebar() {
                   className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-[#6366f1] to-[#8b5cf6]"
                 />
               )}
-              <item.icon className={`h-[15px] w-[15px] ${isActive ? "text-[#8b5cf6]" : ""}`} strokeWidth={2} />
+              <item.icon className={`h-5 w-5 ${isActive ? "text-[#8b5cf6]" : ""}`} strokeWidth={2} />
               <span className="flex-1">{item.label}</span>
               {isLocked && (
                 <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-white/[0.03] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-slate-500">
-                  <Lock className="h-2.5 w-2.5" />
+                  <Lock className="h-2.5 w-2.5" strokeWidth={2} />
                   {item.requiredPlan}
                 </span>
               )}
@@ -187,7 +189,7 @@ export default function Sidebar() {
             <Link
               key={item.href}
               href={item.href}
-              className={`group relative flex items-center gap-3 rounded-lg px-3 py-2 text-[13px] font-medium transition-all ${
+              className={`group relative flex items-center gap-3 rounded-[10px] px-3 py-2.5 text-[13px] font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-white/10 text-white"
                   : "text-slate-400 hover:bg-white/5 hover:text-white"
@@ -199,13 +201,14 @@ export default function Sidebar() {
                   className="absolute left-0 top-1/2 -translate-y-1/2 h-5 w-[3px] rounded-r-full bg-gradient-to-b from-[#6366f1] to-[#8b5cf6]"
                 />
               )}
-              <item.icon className={`h-[15px] w-[15px] ${isActive ? "text-[#8b5cf6]" : ""}`} strokeWidth={2} />
+              <item.icon className={`h-5 w-5 ${isActive ? "text-[#8b5cf6]" : ""}`} strokeWidth={2} />
               <span className="flex-1">{item.label}</span>
             </Link>
           );
         })}
       </nav>
 
+      {/* Footer */}
       <div className="border-t border-white/10 p-3 space-y-2">
         {isFree && (
           <div className="rounded-lg bg-white/[0.02] border border-white/10 p-2.5">
@@ -237,16 +240,16 @@ export default function Sidebar() {
           {isFree && (
             <button 
               onClick={() => router.push("/dashboard/billing")}
-              className="flex items-center gap-1 rounded-md bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-2.5 py-1 text-[11px] font-bold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#6366f1]/30"
+              className="flex items-center gap-1 rounded-md bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-2.5 py-1 text-[11px] font-bold text-white transition-all hover:scale-105 hover:shadow-lg hover:shadow-[#6366f1]/30 active:scale-95"
             >
               Upgrade
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-3 w-3" strokeWidth={2} />
             </button>
           )}
         </div>
 
         <div className="flex items-center gap-3 rounded-lg bg-white/[0.02] border border-white/10 px-3 py-2.5 hover:bg-white/[0.05] transition-all group">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-[11px] font-bold text-white">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-[11px] font-bold text-white flex-shrink-0">
             {userName.charAt(0).toUpperCase()}
           </div>
           <div className="flex-1 min-w-0">
@@ -255,10 +258,10 @@ export default function Sidebar() {
           </div>
           <button
             onClick={handleLogout}
-            className="text-slate-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+            className="text-slate-400 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 p-1"
             title="Logout"
           >
-            <LogOut className="h-3.5 w-3.5" />
+            <LogOut className="h-3.5 w-3.5" strokeWidth={2} />
           </button>
         </div>
 
@@ -266,7 +269,7 @@ export default function Sidebar() {
           href="mailto:contact@makeitads.com?subject=Help%20%26%20Support%20Request"
           className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-slate-400 hover:bg-white/[0.05] hover:text-white transition-all"
         >
-          <HelpCircle className="h-3.5 w-3.5" />
+          <HelpCircle className="h-3.5 w-3.5" strokeWidth={2} />
           <span>Help & Support</span>
         </a>
       </div>
