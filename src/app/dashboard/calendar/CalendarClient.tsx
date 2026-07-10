@@ -17,11 +17,13 @@ import {
   Zap,
   Filter,
   List,
-  LayoutGrid
+  LayoutGrid,
+  X
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase";
+import PageTransition from "@/components/ui/PageTransition";
 
 interface Campaign {
   id: string;
@@ -56,19 +58,31 @@ export default function CalendarClient() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(true);
-  const [view, setView] = useState<"calendar" | "list">("calendar");
+  // ✅ Par défaut "list" sur mobile, "calendar" sur desktop
+  const [view, setView] = useState<"calendar" | "list">("list");
   const [selectedPlatform, setSelectedPlatform] = useState<string>("all");
   const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+
+  // Auto-détection mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setView("list");
+      }
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();
 
-  // Charger les VRAIES campagnes depuis Supabase
   useEffect(() => {
     const loadCampaigns = async () => {
       if (!user) return;
 
-      const supabase = createClient(); // ✅ CRÉÉ ICI, DANS LA FONCTION
+      const supabase = createClient();
       setLoading(true);
       try {
         const { data: strategies, error } = await supabase
@@ -84,7 +98,7 @@ export default function CalendarClient() {
 
         const allCampaigns: Campaign[] = [];
         
-        strategies?.forEach((strategy: any) => { // ✅ TYPE AJOUTÉ
+        strategies?.forEach((strategy: any) => {
           const strategyCampaigns = strategy.data?.campaigns || [];
           const strategyDate = new Date(strategy.created_at);
           
@@ -244,18 +258,9 @@ export default function CalendarClient() {
     }
 
     const headers = [
-      "Strategy",
-      "Platform",
-      "Headline",
-      "Text",
-      "Objective",
-      "Budget",
-      "Reach",
-      "Scheduled Date",
-      "Duration",
-      "CTA",
-      "Hook",
-      "Target Persona"
+      "Strategy", "Platform", "Headline", "Text", "Objective",
+      "Budget", "Reach", "Scheduled Date", "Duration", "CTA",
+      "Hook", "Target Persona"
     ];
 
     const rows = campaigns.map(c => [
@@ -293,473 +298,539 @@ export default function CalendarClient() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#6366f1] mx-auto mb-4" />
-          <p className="text-slate-400">Loading your campaigns...</p>
+          <p className="text-xs sm:text-sm text-slate-400">Loading campaigns...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
+    <PageTransition>
+      <div className="space-y-5 sm:space-y-6 lg:space-y-8">
+        
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER RESPONSIVE
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
               <CalendarIcon className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Campaign Planner</h1>
+            <div className="flex-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white no-hyphens">
+                Campaign Planner
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                Visualize and export your AI-generated campaigns
+              </p>
+            </div>
           </div>
-          <p className="text-slate-400">
-            Visualize and export your AI-generated campaigns across all platforms
-          </p>
+          
+          {/* Export buttons */}
+          <div className="flex gap-2 flex-shrink-0">
+            <button
+              onClick={handleExportICS}
+              disabled={!canExportPDF}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all active:scale-95 ${
+                canExportPDF 
+                  ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white" 
+                  : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
+              }`}
+            >
+              <CalendarIcon className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Export .ics</span>
+              <span className="sm:hidden">ICS</span>
+              {!canExportPDF && <Lock className="h-3 w-3 ml-1" />}
+            </button>
+
+            <button
+              onClick={handleExportCSV}
+              disabled={!canExportPDF}
+              className={`flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-all active:scale-95 ${
+                canExportPDF 
+                  ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white" 
+                  : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
+              }`}
+            >
+              <FileText className="h-3.5 w-3.5" />
+              <span className="hidden sm:inline">Export CSV</span>
+              <span className="sm:hidden">CSV</span>
+              {!canExportPDF && <Lock className="h-3 w-3 ml-1" />}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={handleExportICS}
-            disabled={!canExportPDF}
-            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-              canExportPDF 
-                ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white" 
-                : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
-            }`}
-          >
-            <CalendarIcon className="h-4 w-4" />
-            <span>Export .ics</span>
-            {!canExportPDF && <Lock className="h-3 w-3 ml-1" />}
-          </button>
 
-          <button
-            onClick={handleExportCSV}
-            disabled={!canExportPDF}
-            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-              canExportPDF 
-                ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white" 
-                : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
-            }`}
+        {/* ═══════════════════════════════════════════════════════════
+            STATS CARDS - 2 colonnes mobile, 4 desktop
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-5"
           >
-            <FileText className="h-4 w-4" />
-            <span>Export CSV</span>
-            {!canExportPDF && <Lock className="h-3 w-3 ml-1" />}
-          </button>
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-[#6366f1]/10 flex items-center justify-center">
+                <Target className="h-4 w-4 sm:h-5 sm:w-5 text-[#8b5cf6]" />
+              </div>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-white no-hyphens">{stats.total}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 label-nowrap">Campaigns</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-5"
+          >
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
+              </div>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-white no-hyphens">
+              ${stats.totalBudget.toLocaleString()}
+            </p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 label-nowrap">Budget</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-5"
+          >
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-[#38bdf8]/10 flex items-center justify-center">
+                <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-[#38bdf8]" />
+              </div>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-white no-hyphens">
+              {Object.keys(stats.byPlatform).length}
+            </p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 label-nowrap">Platforms</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-5"
+          >
+            <div className="flex items-center justify-between mb-2 sm:mb-3">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-amber-500/10 flex items-center justify-center">
+                <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
+              </div>
+            </div>
+            <p className="text-lg sm:text-2xl font-bold text-white no-hyphens">{stats.strategies}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1 label-nowrap">Strategies</p>
+          </motion.div>
         </div>
-      </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-[#6366f1]/10 flex items-center justify-center">
-              <Target className="h-5 w-5 text-[#8b5cf6]" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.total}</p>
-          <p className="text-xs text-slate-400 mt-1">Total Campaigns</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-emerald-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">
-            ${stats.totalBudget.toLocaleString()}
-          </p>
-          <p className="text-xs text-slate-400 mt-1">Total Budget</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-[#38bdf8]/10 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-[#38bdf8]" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">
-            {Object.keys(stats.byPlatform).length}
-          </p>
-          <p className="text-xs text-slate-400 mt-1">Platforms Used</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <FileText className="h-5 w-5 text-amber-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.strategies}</p>
-          <p className="text-xs text-slate-400 mt-1">Strategies</p>
-        </motion.div>
-      </div>
-
-      {/* Platform Distribution */}
-      {Object.keys(stats.byPlatform).length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6"
-        >
-          <h3 className="text-base font-bold text-white mb-4">Campaign Distribution by Platform</h3>
-          <div className="space-y-3">
-            {Object.entries(stats.byPlatform).map(([platform, count]) => {
-              const percentage = Math.round((count / stats.total) * 100);
-              return (
-                <div key={platform}>
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2.5 w-2.5 rounded-full ${getPlatformDotColor(platform)}`} />
-                      <span className="text-sm font-medium text-white capitalize">{platform}</span>
+        {/* ═══════════════════════════════════════════════════════════
+            PLATFORM DISTRIBUTION
+            ═══════════════════════════════════════════════════════════ */}
+        {Object.keys(stats.byPlatform).length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-4 sm:p-6"
+          >
+            <h3 className="text-sm sm:text-base font-bold text-white mb-3 sm:mb-4 no-hyphens">
+              Campaign Distribution
+            </h3>
+            <div className="space-y-2 sm:space-y-3">
+              {Object.entries(stats.byPlatform).map(([platform, count]) => {
+                const percentage = Math.round((count / stats.total) * 100);
+                return (
+                  <div key={platform}>
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <span className={`h-2 w-2 sm:h-2.5 sm:w-2.5 rounded-full flex-shrink-0 ${getPlatformDotColor(platform)}`} />
+                        <span className="text-xs sm:text-sm font-medium text-white capitalize truncate">{platform}</span>
+                      </div>
+                      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                        <span className="text-[10px] sm:text-xs text-slate-400">{count}</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-white">{percentage}%</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400">{count} campaigns</span>
-                      <span className="text-xs font-bold text-white">{percentage}%</span>
+                    <div className="h-1.5 sm:h-2 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percentage}%` }}
+                        transition={{ duration: 0.8 }}
+                        className={`h-full ${
+                          platform.toLowerCase().includes("meta") ? "bg-blue-500" :
+                          platform.toLowerCase().includes("tiktok") ? "bg-pink-500" :
+                          platform.toLowerCase().includes("google") ? "bg-emerald-500" :
+                          platform.toLowerCase().includes("linkedin") ? "bg-blue-700" :
+                          "bg-slate-500"
+                        }`}
+                      />
                     </div>
                   </div>
-                  <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percentage}%` }}
-                      transition={{ duration: 0.8 }}
-                      className={`h-full ${
-                        platform.toLowerCase().includes("meta") ? "bg-blue-500" :
-                        platform.toLowerCase().includes("tiktok") ? "bg-pink-500" :
-                        platform.toLowerCase().includes("google") ? "bg-emerald-500" :
-                        platform.toLowerCase().includes("linkedin") ? "bg-blue-700" :
-                        "bg-slate-500"
-                      }`}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </motion.div>
-      )}
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
 
-      {/* Empty State */}
-      {campaigns.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-16 text-center"
-        >
-          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 mb-4">
-            <CalendarIcon className="h-8 w-8 text-amber-400" />
-          </div>
-          <h3 className="text-lg font-bold text-white mb-2">No campaigns yet</h3>
-          <p className="text-sm text-slate-400 mb-6 max-w-md mx-auto">
-            Generate your first strategy to see AI-powered campaigns scheduled across platforms.
-          </p>
-          <button
-            onClick={() => router.push("/dashboard/strategies/new")}
-            className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all"
+        {/* ═══════════════════════════════════════════════════════════
+            EMPTY STATE
+            ═══════════════════════════════════════════════════════════ */}
+        {campaigns.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 sm:p-16 text-center"
           >
-            <Zap className="h-4 w-4" />
-            Create your first strategy
-          </button>
-        </motion.div>
-      ) : (
-        <>
-          {/* Controls */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex items-center gap-2 flex-1 overflow-x-auto">
-              <Filter className="h-4 w-4 text-slate-400 flex-shrink-0" />
-              <button
-                onClick={() => setSelectedPlatform("all")}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
-                  selectedPlatform === "all"
-                    ? "bg-[#6366f1] text-white"
-                    : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.05]"
-                }`}
-              >
-                All ({stats.total})
-              </button>
-              {Object.entries(stats.byPlatform).map(([platform, count]) => (
+            <div className="inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 mb-4">
+              <CalendarIcon className="h-7 w-7 sm:h-8 sm:w-8 text-amber-400" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-2 no-hyphens">No campaigns yet</h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-5 sm:mb-6 max-w-md mx-auto">
+              Generate your first strategy to see AI-powered campaigns.
+            </p>
+            <button
+              onClick={() => router.push("/dashboard/strategies/new")}
+              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all active:scale-95"
+            >
+              <Zap className="h-4 w-4" />
+              Create first strategy
+            </button>
+          </motion.div>
+        ) : (
+          <>
+            {/* ═══════════════════════════════════════════════════════
+                CONTROLS - Filters + View Toggle
+                ═══════════════════════════════════════════════════════ */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+              {/* Platform filters - scrollables sur mobile */}
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+                <Filter className="h-4 w-4 text-slate-400 flex-shrink-0" />
                 <button
-                  key={platform}
-                  onClick={() => setSelectedPlatform(platform)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
-                    selectedPlatform.toLowerCase() === platform.toLowerCase()
+                  onClick={() => setSelectedPlatform("all")}
+                  className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 ${
+                    selectedPlatform === "all"
                       ? "bg-[#6366f1] text-white"
                       : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.05]"
                   }`}
                 >
-                  <span className={`h-2 w-2 rounded-full ${getPlatformDotColor(platform)}`} />
-                  {platform} ({count})
+                  All ({stats.total})
                 </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
-              <button
-                onClick={() => setView("calendar")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  view === "calendar"
-                    ? "bg-[#6366f1] text-white"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <LayoutGrid className="h-3 w-3" />
-                Calendar
-              </button>
-              <button
-                onClick={() => setView("list")}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  view === "list"
-                    ? "bg-[#6366f1] text-white"
-                    : "text-slate-400 hover:text-white"
-                }`}
-              >
-                <List className="h-3 w-3" />
-                List
-              </button>
-            </div>
-          </div>
-
-          {/* Calendar View */}
-          {view === "calendar" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  {monthNames[month]} {year}
-                </h2>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => changeMonth(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button 
-                    onClick={() => setCurrentDate(new Date())} 
-                    className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-xs font-medium text-slate-300 hover:text-white transition-colors"
+                {Object.entries(stats.byPlatform).map(([platform, count]) => (
+                  <button
+                    key={platform}
+                    onClick={() => setSelectedPlatform(platform)}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] sm:text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                      selectedPlatform.toLowerCase() === platform.toLowerCase()
+                        ? "bg-[#6366f1] text-white"
+                        : "bg-white/[0.03] text-slate-400 hover:bg-white/[0.05]"
+                    }`}
                   >
-                    Today
+                    <span className={`h-2 w-2 rounded-full ${getPlatformDotColor(platform)}`} />
+                    <span className="capitalize">{platform}</span>
+                    <span className="opacity-60">({count})</span>
                   </button>
-                  <button onClick={() => changeMonth(1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-7 gap-px mb-2">
-                {dayNames.map((day) => (
-                  <div key={day} className="text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 py-2">
-                    {day}
-                  </div>
                 ))}
               </div>
 
-              <div className="grid grid-cols-7 gap-px bg-white/5 rounded-xl overflow-hidden border border-white/5">
-                {calendarDays.map((dayObj, index) => {
-                  const isToday = dayObj.day === new Date().getDate() && 
-                                 month === new Date().getMonth() && 
-                                 year === new Date().getFullYear();
-                  
-                  return (
-                    <div 
-                      key={index} 
-                      className={`min-h-[120px] bg-[#0f0f1a] p-2 transition-colors hover:bg-white/[0.02] ${
-                        isToday ? "bg-[#6366f1]/5" : ""
-                      }`}
-                    >
-                      {dayObj.day && (
-                        <>
-                          <div className="flex items-center justify-between mb-1">
-                            <span className={`text-xs font-medium ${isToday ? "text-[#8b5cf6] font-bold" : "text-slate-400"}`}>
-                              {dayObj.day}
-                            </span>
-                            {dayObj.campaigns.length > 0 && (
-                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
-                                {dayObj.campaigns.length}
-                              </span>
-                            )}
-                          </div>
-                          <div className="mt-1 space-y-1">
-                            {dayObj.campaigns.slice(0, 3).map((campaign) => (
-                              <div 
-                                key={campaign.id} 
-                                onClick={() => setSelectedCampaign(campaign)}
-                                className={`rounded-md border px-1.5 py-1 text-[10px] font-medium truncate flex items-center gap-1.5 cursor-pointer hover:brightness-125 transition-all ${getPlatformColor(campaign.platform)}`}
-                              >
-                                <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${getPlatformDotColor(campaign.platform)}`} />
-                                <span className="truncate">{campaign.headline}</span>
-                              </div>
-                            ))}
-                            {dayObj.campaigns.length > 3 && (
-                              <div className="text-[10px] text-slate-500 text-center">
-                                +{dayObj.campaigns.length - 3} more
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+              {/* View toggle */}
+              <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 self-start sm:self-auto">
+                <button
+                  onClick={() => setView("calendar")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-medium transition-all ${
+                    view === "calendar"
+                      ? "bg-[#6366f1] text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <LayoutGrid className="h-3 w-3" />
+                  <span className="hidden sm:inline">Calendar</span>
+                </button>
+                <button
+                  onClick={() => setView("list")}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[10px] sm:text-xs font-medium transition-all ${
+                    view === "list"
+                      ? "bg-[#6366f1] text-white"
+                      : "text-slate-400 hover:text-white"
+                  }`}
+                >
+                  <List className="h-3 w-3" />
+                  <span className="hidden sm:inline">List</span>
+                </button>
               </div>
-            </motion.div>
-          )}
+            </div>
 
-          {/* List View */}
-          {view === "list" && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6"
-            >
-              <h2 className="text-xl font-bold text-white mb-6">All Campaigns</h2>
-              <div className="space-y-3">
-                {campaigns
-                  .filter(c => selectedPlatform === "all" || c.platform.toLowerCase() === selectedPlatform.toLowerCase())
-                  .map((campaign, index) => (
-                    <motion.div
-                      key={campaign.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      onClick={() => setSelectedCampaign(campaign)}
-                      className="rounded-xl border border-white/5 bg-white/[0.02] p-4 hover:border-[#6366f1]/30 transition-all cursor-pointer"
+            {/* ═══════════════════════════════════════════════════════
+                CALENDAR VIEW - Desktop only
+                ═══════════════════════════════════════════════════════ */}
+            {view === "calendar" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="hidden md:block rounded-2xl border border-white/10 bg-[#0f0f1a] p-6"
+              >
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-bold text-white">
+                    {monthNames[month]} {year}
+                  </h2>
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => changeMonth(-1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => setCurrentDate(new Date())} 
+                      className="px-3 py-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-xs font-medium text-slate-300 hover:text-white transition-colors"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="flex items-center gap-2">
-                          <span className={`px-2 py-1 rounded-md text-xs font-bold ${getPlatformColor(campaign.platform)}`}>
-                            {campaign.platform}
-                          </span>
-                          <span className="text-xs text-slate-400">{campaign.objective}</span>
-                        </div>
-                        <div className="flex items-center gap-3 text-xs text-slate-400">
-                          {campaign.scheduledDay && (
-                            <span>Day {campaign.scheduledDay}</span>
-                          )}
-                          <span className="text-emerald-400">{campaign.budget}</span>
-                        </div>
-                      </div>
-                      <h4 className="text-sm font-bold text-white mb-1">{campaign.headline}</h4>
-                      <p className="text-xs text-slate-400 line-clamp-2">{campaign.text}</p>
-                      <div className="flex items-center gap-3 mt-3 pt-3 border-t border-white/5 text-xs">
-                        <span className="text-slate-500">From: {campaign.strategyName}</span>
-                        {campaign.reach && (
-                          <span className="text-[#8b5cf6]">👥 {campaign.reach}</span>
+                      Today
+                    </button>
+                    <button onClick={() => changeMonth(1)} className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-7 gap-px mb-2">
+                  {dayNames.map((day) => (
+                    <div key={day} className="text-center text-[11px] font-bold uppercase tracking-wider text-slate-500 py-2">
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-7 gap-px bg-white/5 rounded-xl overflow-hidden border border-white/5">
+                  {calendarDays.map((dayObj, index) => {
+                    const isToday = dayObj.day === new Date().getDate() && 
+                                   month === new Date().getMonth() && 
+                                   year === new Date().getFullYear();
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className={`min-h-[120px] bg-[#0f0f1a] p-2 transition-colors hover:bg-white/[0.02] ${
+                          isToday ? "bg-[#6366f1]/5" : ""
+                        }`}
+                      >
+                        {dayObj.day && (
+                          <>
+                            <div className="flex items-center justify-between mb-1">
+                              <span className={`text-xs font-medium ${isToday ? "text-[#8b5cf6] font-bold" : "text-slate-400"}`}>
+                                {dayObj.day}
+                              </span>
+                              {dayObj.campaigns.length > 0 && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
+                                  {dayObj.campaigns.length}
+                                </span>
+                              )}
+                            </div>
+                            <div className="mt-1 space-y-1">
+                              {dayObj.campaigns.slice(0, 3).map((campaign) => (
+                                <div 
+                                  key={campaign.id} 
+                                  onClick={() => setSelectedCampaign(campaign)}
+                                  className={`rounded-md border px-1.5 py-1 text-[10px] font-medium truncate flex items-center gap-1.5 cursor-pointer hover:brightness-125 transition-all ${getPlatformColor(campaign.platform)}`}
+                                >
+                                  <span className={`h-1.5 w-1.5 rounded-full flex-shrink-0 ${getPlatformDotColor(campaign.platform)}`} />
+                                  <span className="truncate">{campaign.headline}</span>
+                                </div>
+                              ))}
+                              {dayObj.campaigns.length > 3 && (
+                                <div className="text-[10px] text-slate-500 text-center">
+                                  +{dayObj.campaigns.length - 3} more
+                                </div>
+                              )}
+                            </div>
+                          </>
                         )}
                       </div>
-                    </motion.div>
-                  ))}
-              </div>
-            </motion.div>
-          )}
+                    );
+                  })}
+                </div>
+              </motion.div>
+            )}
 
-          {/* Selected Campaign Detail */}
-          {selectedCampaign && (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-8"
-            >
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className={`px-2 py-1 rounded-md text-xs font-bold ${getPlatformColor(selectedCampaign.platform)}`}>
-                      {selectedCampaign.platform}
-                    </span>
-                    {selectedCampaign.scheduledDay && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-[#6366f1]/20 text-[#a5b4fc]">
-                        Day {selectedCampaign.scheduledDay}
+            {/* ═══════════════════════════════════════════════════════
+                LIST VIEW - Mobile & Desktop
+                ═══════════════════════════════════════════════════════ */}
+            {view === "list" && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-4 sm:p-6"
+              >
+                <div className="flex items-center justify-between mb-4 sm:mb-6">
+                  <h2 className="text-base sm:text-xl font-bold text-white no-hyphens">
+                    {view === "list" ? "All Campaigns" : `${monthNames[month]} ${year}`}
+                  </h2>
+                  {view === "list" && (
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => changeMonth(-1)} className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
+                        <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      </button>
+                      <span className="text-xs sm:text-sm font-medium text-white">
+                        {monthNames[month].slice(0, 3)} {year}
                       </span>
+                      <button onClick={() => changeMonth(1)} className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors">
+                        <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="space-y-2 sm:space-y-3">
+                  {campaigns
+                    .filter(c => selectedPlatform === "all" || c.platform.toLowerCase() === selectedPlatform.toLowerCase())
+                    .map((campaign, index) => (
+                      <motion.div
+                        key={campaign.id}
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.03 }}
+                        onClick={() => setSelectedCampaign(campaign)}
+                        className="rounded-lg sm:rounded-xl border border-white/5 bg-white/[0.02] p-3 sm:p-4 hover:border-[#6366f1]/30 transition-all cursor-pointer active:scale-[0.99]"
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-wrap min-w-0">
+                            <span className={`px-2 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-bold flex-shrink-0 ${getPlatformColor(campaign.platform)}`}>
+                              {campaign.platform}
+                            </span>
+                            <span className="text-[10px] sm:text-xs text-slate-400 truncate">{campaign.objective}</span>
+                          </div>
+                          <div className="flex items-center gap-2 sm:gap-3 text-[10px] sm:text-xs text-slate-400 flex-shrink-0">
+                            {campaign.scheduledDay && (
+                              <span>Day {campaign.scheduledDay}</span>
+                            )}
+                            <span className="text-emerald-400 font-bold">{campaign.budget}</span>
+                          </div>
+                        </div>
+                        <h4 className="text-xs sm:text-sm font-bold text-white mb-1 break-words">
+                          {campaign.headline}
+                        </h4>
+                        <p className="text-[10px] sm:text-xs text-slate-400 line-clamp-2">{campaign.text}</p>
+                        <div className="flex items-center gap-2 sm:gap-3 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5 text-[10px] sm:text-xs flex-wrap">
+                          <span className="text-slate-500 truncate">From: {campaign.strategyName}</span>
+                          {campaign.reach && (
+                            <span className="text-[#8b5cf6] flex-shrink-0">👥 {campaign.reach}</span>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════
+                SELECTED CAMPAIGN DETAIL - Modal bottom sheet sur mobile
+                ═══════════════════════════════════════════════════════ */}
+            {selectedCampaign && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-sm p-0 sm:p-4"
+                onClick={() => setSelectedCampaign(null)}
+              >
+                <motion.div
+                  initial={{ y: 100, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: 100, opacity: 0 }}
+                  transition={{ type: "spring", damping: 25 }}
+                  onClick={(e) => e.stopPropagation()}
+                  className="relative w-full sm:max-w-3xl max-h-[90vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-5 sm:p-8"
+                >
+                  <div className="flex items-start justify-between gap-3 mb-4 sm:mb-6">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-2 flex-wrap">
+                        <span className={`px-2 py-1 rounded-md text-[10px] sm:text-xs font-bold flex-shrink-0 ${getPlatformColor(selectedCampaign.platform)}`}>
+                          {selectedCampaign.platform}
+                        </span>
+                        {selectedCampaign.scheduledDay && (
+                          <span className="text-[10px] sm:text-xs px-2 py-1 rounded-full bg-[#6366f1]/20 text-[#a5b4fc]">
+                            Day {selectedCampaign.scheduledDay}
+                          </span>
+                        )}
+                      </div>
+                      <h2 className="text-lg sm:text-2xl font-bold text-white break-words">
+                        {selectedCampaign.headline}
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-400 mt-1 truncate">
+                        From: {selectedCampaign.strategyName}
+                      </p>
+                    </div>
+                    <button 
+                      onClick={() => setSelectedCampaign(null)}
+                      className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-lg hover:bg-white/5 transition-colors flex-shrink-0"
+                    >
+                      <X className="h-4 w-4 sm:h-5 sm:w-5 text-slate-400" />
+                    </button>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-slate-300 leading-relaxed mb-4 sm:mb-6 break-words">
+                    {selectedCampaign.text}
+                  </p>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-4 sm:mb-6">
+                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 mb-0.5 sm:mb-1">Objective</p>
+                      <p className="text-xs sm:text-sm font-bold text-white break-words">{selectedCampaign.objective}</p>
+                    </div>
+                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 mb-0.5 sm:mb-1">Budget</p>
+                      <p className="text-xs sm:text-sm font-bold text-emerald-400">{selectedCampaign.budget}</p>
+                    </div>
+                    <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 mb-0.5 sm:mb-1">Reach</p>
+                      <p className="text-xs sm:text-sm font-bold text-[#8b5cf6]">{selectedCampaign.reach}</p>
+                    </div>
+                    {selectedCampaign.duration && (
+                      <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+                        <p className="text-[9px] sm:text-[10px] text-slate-500 mb-0.5 sm:mb-1">Duration</p>
+                        <p className="text-xs sm:text-sm font-bold text-white">{selectedCampaign.duration}</p>
+                      </div>
                     )}
                   </div>
-                  <h2 className="text-2xl font-bold text-white">{selectedCampaign.headline}</h2>
-                  <p className="text-sm text-slate-400 mt-1">From: {selectedCampaign.strategyName}</p>
-                </div>
-                <button 
-                  onClick={() => setSelectedCampaign(null)}
-                  className="text-sm text-slate-400 hover:text-white transition-colors"
-                >
-                  ✕ Close
-                </button>
-              </div>
 
-              <p className="text-sm text-slate-300 leading-relaxed mb-6">{selectedCampaign.text}</p>
+                  {selectedCampaign.hook && (
+                    <div className="mb-3 sm:mb-4">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hook</p>
+                      <span className="inline-block px-2 py-1 rounded bg-amber-500/10 text-amber-400 text-[10px] sm:text-xs break-words">
+                        {selectedCampaign.hook}
+                      </span>
+                    </div>
+                  )}
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                  <p className="text-[10px] text-slate-500 mb-1">Objective</p>
-                  <p className="text-sm font-bold text-white">{selectedCampaign.objective}</p>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                  <p className="text-[10px] text-slate-500 mb-1">Budget</p>
-                  <p className="text-sm font-bold text-emerald-400">{selectedCampaign.budget}</p>
-                </div>
-                <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                  <p className="text-[10px] text-slate-500 mb-1">Reach</p>
-                  <p className="text-sm font-bold text-[#8b5cf6]">{selectedCampaign.reach}</p>
-                </div>
-                {selectedCampaign.duration && (
-                  <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                    <p className="text-[10px] text-slate-500 mb-1">Duration</p>
-                    <p className="text-sm font-bold text-white">{selectedCampaign.duration}</p>
+                  {selectedCampaign.cta && (
+                    <div className="mb-3 sm:mb-4">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Call to Action</p>
+                      <span className="inline-block px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-[10px] sm:text-xs break-words">
+                        {selectedCampaign.cta}
+                      </span>
+                    </div>
+                  )}
+
+                  {selectedCampaign.targetPersona && (
+                    <div className="mb-4 sm:mb-6">
+                      <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Persona</p>
+                      <p className="text-[10px] sm:text-xs text-slate-300 break-words">{selectedCampaign.targetPersona}</p>
+                    </div>
+                  )}
+
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-white/5">
+                    <button
+                      onClick={() => router.push(`/dashboard/strategies/${selectedCampaign.strategyId}`)}
+                      className="text-xs sm:text-sm text-[#8b5cf6] hover:text-white transition-colors"
+                    >
+                      View full strategy →
+                    </button>
                   </div>
-                )}
-              </div>
-
-              {selectedCampaign.hook && (
-                <div className="mb-4">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Hook</p>
-                  <span className="inline-block px-2 py-1 rounded bg-amber-500/10 text-amber-400 text-xs">
-                    {selectedCampaign.hook}
-                  </span>
-                </div>
-              )}
-
-              {selectedCampaign.cta && (
-                <div className="mb-4">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Call to Action</p>
-                  <span className="inline-block px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 text-xs">
-                    {selectedCampaign.cta}
-                  </span>
-                </div>
-              )}
-
-              {selectedCampaign.targetPersona && (
-                <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Target Persona</p>
-                  <p className="text-xs text-slate-300">{selectedCampaign.targetPersona}</p>
-                </div>
-              )}
-
-              <div className="mt-6 pt-6 border-t border-white/5">
-                <button
-                  onClick={() => router.push(`/dashboard/strategies/${selectedCampaign.strategyId}`)}
-                  className="text-sm text-[#8b5cf6] hover:text-white transition-colors"
-                >
-                  View full strategy →
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </>
-      )}
-    </div>
+                </motion.div>
+              </motion.div>
+            )}
+          </>
+        )}
+      </div>
+    </PageTransition>
   );
 }

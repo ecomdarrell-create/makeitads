@@ -41,7 +41,7 @@ const howItWorksSteps = [
     number: "02",
     title: "AI analyzes your market",
     description: "MakeItAds studies your competitors, positioning, trends and opportunities to build a complete market overview.",
-    image: "/images/step2-ai-research.webp",
+    image: "/images/howitworks-step2.webp",
   },
   {
     number: "03",
@@ -95,7 +95,7 @@ function HowItWorksSection() {
                   alt={step.title}
                   fill
                   className="object-cover"
-                  sizes="100vw"
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   priority={index === 0}
                 />
                 <div className="absolute inset-0 bg-[#080810]/40" />
@@ -166,7 +166,7 @@ function HowItWorksSection() {
 }
 
 // ======================================================
-// PAIN POINTS CAROUSEL
+// PAIN POINTS CAROUSEL - GLASSMORPHISM SUBTIL
 // ======================================================
 
 function PainPointsCarousel() {
@@ -199,7 +199,21 @@ function PainPointsCarousel() {
           className={`flex-shrink-0 w-[280px] sm:w-[320px] md:w-[380px] snap-start group relative rounded-2xl sm:rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}
         >
           <div className="aspect-[16/10] overflow-hidden relative">
-            <Image src={point.image} alt={point.title} fill className="object-cover transition duration-700 group-hover:scale-110" sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 380px" />
+            <Image 
+              src={point.image} 
+              alt={point.title} 
+              fill 
+              className="object-cover transition duration-700 group-hover:scale-110" 
+              sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 380px" 
+            />
+            
+            {/* Glassmorphism subtil - UNIQUE overlay léger */}
+            {point.glassmorphism && (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-amber-500/5 pointer-events-none" />
+                <div className="absolute inset-0 border border-white/10 pointer-events-none" />
+              </>
+            )}
           </div>
           <div className="p-5 sm:p-6 space-y-2 sm:space-y-3">
             <h3 className="text-lg sm:text-xl font-bold text-white">{point.title}</h3>
@@ -241,7 +255,7 @@ const successStories: SuccessStory[] = ALL_SUCCESS_STORIES;
 
 const painPoints = [
   { id: 1, title: "Guesswork", subtitle: "You don't know which channel deserves your budget.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Throwing money at Facebook, Google, TikTok – hoping something sticks.", stat: "63%", statLabel: "of marketers admit they're guessing" },
-  { id: 2, title: "Blind Competition", subtitle: "Your competitors move faster because they understand the market better.", image: "/images/pain-competition.png", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "While you're guessing, they're scaling with data you don't have.", stat: "78%", statLabel: "lose to competitors with better data" },
+  { id: 2, title: "Blind Competition", subtitle: "Your competitors move faster because they understand the market better.", image: "/images/pain-competition.webp", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "While you're guessing, they're scaling with data you don't have.", stat: "78%", statLabel: "lose to competitors with better data", glassmorphism: true },
   { id: 3, title: "Wasted Spending", subtitle: "Money gets spent on campaigns without clear reasoning.", image: "/images/pain-wasted.png", borderColor: "border-rose-500/30", color: "from-rose-500 to-pink-500", description: "Up to 70% of ad budgets are wasted on channels that don't convert.", stat: "$200B", statLabel: "wasted annually on bad ads" },
 ];
 
@@ -312,7 +326,6 @@ function ReviewsCarousel() {
           key={story.id}
           className="flex-shrink-0 w-[320px] md:w-[380px] snap-start group relative rounded-2xl overflow-hidden border border-white/10 bg-[#0f0f1a] hover:border-[#6366f1]/50 transition-all duration-500"
         >
-          {/* IMAGE 100% DE LA CARTE */}
           <div className="relative w-full h-[500px] md:h-[550px]">
             <Image
               src={story.image}
@@ -323,7 +336,6 @@ function ReviewsCarousel() {
               priority
             />
             
-            {/* Overlay gradient pour lisibilité */}
             <div 
               className="absolute inset-0 pointer-events-none"
               style={{
@@ -332,16 +344,13 @@ function ReviewsCarousel() {
             />
           </div>
 
-          {/* Badge New */}
           {story.isNew && (
             <div className="absolute top-4 right-4 z-20">
               <span className="px-3 py-1 rounded-full bg-[#6366f1]/90 backdrop-blur-md text-xs font-bold text-white border border-[#6366f1]/50">New</span>
             </div>
           )}
 
-          {/* CONTENU SUR L'IMAGE */}
           <div className="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-8">
-            {/* Infos personne */}
             <div className="mb-4">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs text-white/80">{story.countryFlag} {story.country}</span>
@@ -352,18 +361,15 @@ function ReviewsCarousel() {
               <p className="text-sm text-white/70">{story.role} • {story.company}</p>
             </div>
 
-            {/* Résultat */}
             <div className="mb-4">
               <p className="text-3xl md:text-4xl font-bold text-white tracking-tight">{story.metric}</p>
               <p className="text-xs text-white/60 mt-1">{story.timeToResult}</p>
             </div>
 
-            {/* Témoignage */}
             <blockquote className="mb-4">
               <p className="text-sm text-white/90 leading-relaxed italic">"{story.quote}"</p>
             </blockquote>
 
-            {/* Modules */}
             <div className="flex flex-wrap gap-2">
               {story.modules.slice(0, 2).map((mod, i) => (
                 <span key={i} className="text-[10px] px-2 py-1 rounded-md bg-white/10 backdrop-blur-sm text-white/90 border border-white/20 font-medium">{mod}</span>
@@ -455,7 +461,6 @@ export default function LandingPage() {
 
       <CompetitorsSection />
 
-      {/* AI LIVE INTELLIGENCE - VERSION SANS EMOJIS */}
       <section className="relative z-10 py-20 md:py-32 px-4 sm:px-6 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a1a] via-[#0f0f2a] to-[#0a0a1a]" />
@@ -483,7 +488,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* SPHÈRE CENTRALE SIMPLIFIÉE */}
           <div className="relative max-w-3xl mx-auto">
             <div className="relative aspect-square max-w-lg mx-auto mb-16">
               <motion.div
@@ -515,7 +519,6 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* GRID DE MODULES SANS EMOJIS */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {[
                 { label: "Market", status: "Demand increasing" },
@@ -550,7 +553,6 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* SOUS-TITRE FINAL - SANS LONG TIRET */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

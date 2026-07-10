@@ -32,10 +32,10 @@ import {
 import { usePermissions } from "@/hooks/usePermissions";
 import { FeatureGate } from "@/components/FeatureGate";
 import { createClient } from "@/lib/supabase";
+import PageTransition from "@/components/ui/PageTransition";
 
 const supabase = createClient();
 
-// Interface complète pour typer la stratégie
 interface StrategyData {
   id: string;
   name: string;
@@ -251,7 +251,7 @@ export default function StrategyDetailPage() {
   if (loading || permsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366f1]" />
+        <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#6366f1]" />
       </div>
     );
   }
@@ -260,10 +260,10 @@ export default function StrategyDetailPage() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
-          <p className="text-slate-400 mb-4">Strategy not found</p>
+          <p className="text-sm sm:text-base text-slate-400 mb-4">Strategy not found</p>
           <button
             onClick={() => router.push("/dashboard/strategies")}
-            className="rounded-lg bg-[#6366f1] px-4 py-2 text-sm font-bold text-white"
+            className="rounded-lg bg-[#6366f1] px-4 py-2 text-xs sm:text-sm font-bold text-white active:scale-95 transition-transform"
           >
             Back to Strategies
           </button>
@@ -272,6 +272,9 @@ export default function StrategyDetailPage() {
     );
   }
 
+  // ══════════════════════════════════════════════════════════
+  // SECTION CARD - RESPONSIVE
+  // ═══════════════════════════════════════════════════════════
   const SectionCard = ({ 
     title, 
     icon: Icon, 
@@ -283,12 +286,12 @@ export default function StrategyDetailPage() {
     children: React.ReactNode;
     badge?: string;
   }) => (
-    <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6 relative overflow-hidden">
-      <h3 className="text-sm font-bold uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2">
-        <Icon className="h-4 w-4 text-[#8b5cf6]" />
-        {title}
+    <div className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0f0f1a] p-4 sm:p-6 relative overflow-hidden">
+      <h3 className="text-[10px] sm:text-sm font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-slate-400 mb-3 sm:mb-4 flex items-center gap-2">
+        <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#8b5cf6] flex-shrink-0" />
+        <span className="truncate">{title}</span>
         {badge && (
-          <span className="ml-auto text-[9px] px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
+          <span className="ml-auto text-[8px] sm:text-[9px] px-1.5 sm:px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold flex-shrink-0">
             {badge}
           </span>
         )}
@@ -297,18 +300,23 @@ export default function StrategyDetailPage() {
     </div>
   );
 
-  // ===== SECTION 1 : OVERVIEW (Toujours visible) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 1 : OVERVIEW
+  // ═══════════════════════════════════════════════════════════
   const renderOverview = () => {
     const overview = strategy.overview;
     if (!overview) return null;
     
     return (
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
         {/* Market Score */}
         <SectionCard title="Market Score" icon={BarChart3}>
-          <div className="flex items-center gap-6">
-            <div className="relative h-24 w-24">
-              <svg className="h-24 w-24 -rotate-90">
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+            <div className="relative h-20 w-20 sm:h-24 sm:w-24 flex-shrink-0">
+              <svg 
+                viewBox="0 0 96 96" 
+                className="h-20 w-20 sm:h-24 sm:w-24 -rotate-90"
+              >
                 <circle cx="48" cy="48" r="40" stroke="currentColor" strokeWidth="6" fill="none" className="text-white/10" />
                 <circle 
                   cx="48" cy="48" r="40" 
@@ -326,21 +334,21 @@ export default function StrategyDetailPage() {
                 </defs>
               </svg>
               <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-2xl font-bold text-white">{overview.marketScore || 0}</span>
+                <span className="text-xl sm:text-2xl font-bold text-white">{overview.marketScore || 0}</span>
               </div>
             </div>
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-1.5 sm:space-y-2 w-full">
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Growth Potential</span>
-                <span className="text-sm font-bold text-emerald-400">{overview.growthPotential || "High"}</span>
+                <span className="text-[10px] sm:text-xs text-slate-400">Growth Potential</span>
+                <span className="text-xs sm:text-sm font-bold text-emerald-400">{overview.growthPotential || "High"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Competition</span>
-                <span className="text-sm font-bold text-white">{overview.competition || "Medium"}</span>
+                <span className="text-[10px] sm:text-xs text-slate-400">Competition</span>
+                <span className="text-xs sm:text-sm font-bold text-white">{overview.competition || "Medium"}</span>
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-xs text-slate-400">Est. ROI</span>
-                <span className="text-sm font-bold text-[#8b5cf6]">{overview.estimatedROI || "250%"}</span>
+                <span className="text-[10px] sm:text-xs text-slate-400">Est. ROI</span>
+                <span className="text-xs sm:text-sm font-bold text-[#8b5cf6]">{overview.estimatedROI || "250%"}</span>
               </div>
             </div>
           </div>
@@ -349,19 +357,19 @@ export default function StrategyDetailPage() {
         {/* Budget Allocation */}
         <SectionCard title="Budget Allocation" icon={DollarSign}>
           {overview.budgetSplit ? (
-            <div className="space-y-3">
+            <div className="space-y-2 sm:space-y-3">
               {Object.entries(overview.budgetSplit).map(([platform, percentage]) => (
                 <div key={platform}>
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-sm text-slate-300 capitalize">{platform}</span>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-slate-500">
+                    <span className="text-xs sm:text-sm text-slate-300 capitalize truncate pr-2">{platform}</span>
+                    <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+                      <span className="text-[10px] sm:text-xs text-slate-500">
                         ${strategy.budget ? Math.round((strategy.budget * (percentage as number)) / 100).toLocaleString() : "—"}
                       </span>
-                      <span className="text-sm font-bold text-white">{percentage as number}%</span>
+                      <span className="text-xs sm:text-sm font-bold text-white">{percentage as number}%</span>
                     </div>
                   </div>
-                  <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                  <div className="h-1.5 sm:h-2 rounded-full bg-white/5 overflow-hidden">
                     <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${percentage}%` }}
@@ -373,48 +381,50 @@ export default function StrategyDetailPage() {
               ))}
             </div>
           ) : (
-            <p className="text-sm text-slate-400">No budget data available</p>
+            <p className="text-xs sm:text-sm text-slate-400">No budget data available</p>
           )}
         </SectionCard>
       </div>
     );
   };
 
-  // ===== SECTION 2 : MARKET ANALYSIS (Premium+) =====
+  // ══════════════════════════════════════════════════════════
+  // SECTION 2 : MARKET ANALYSIS
+  // ═══════════════════════════════════════════════════════════
   const renderMarket = () => {
     if (!strategy.market) return null;
 
     return (
       <FeatureGate feature="predictiveTrends" requiredPlan="premium">
         <SectionCard title="Market Analysis" icon={Globe} badge="Premium">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-              <p className="text-xs text-slate-500 mb-1">Market Size</p>
-              <p className="text-lg font-bold text-white">{strategy.market.marketSize || "N/A"}</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-0.5 sm:mb-1">Market Size</p>
+              <p className="text-base sm:text-lg font-bold text-white no-hyphens">{strategy.market.marketSize || "N/A"}</p>
             </div>
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-              <p className="text-xs text-slate-500 mb-1">Growth Rate</p>
-              <p className="text-lg font-bold text-emerald-400">
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-0.5 sm:mb-1">Growth Rate</p>
+              <p className="text-base sm:text-lg font-bold text-emerald-400 no-hyphens">
                 {strategy.market.growthRate ? `${strategy.market.growthRate}%` : "N/A"}
               </p>
             </div>
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-              <p className="text-xs text-slate-500 mb-1">Trends</p>
-              <p className="text-lg font-bold text-[#8b5cf6]">
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+              <p className="text-[10px] sm:text-xs text-slate-500 mb-0.5 sm:mb-1">Trends</p>
+              <p className="text-base sm:text-lg font-bold text-[#8b5cf6] no-hyphens">
                 {strategy.market.trends?.length || 0} identified
               </p>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             {/* Trends */}
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Market Trends</p>
-              <div className="space-y-2">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Market Trends</p>
+              <div className="space-y-1.5 sm:space-y-2">
                 {strategy.market.trends?.map((trend, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                    <TrendingUp className="h-3 w-3 text-emerald-400 mt-1 flex-shrink-0" />
-                    <span>{trend}</span>
+                  <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+                    <TrendingUp className="h-3 w-3 text-emerald-400 mt-0.5 flex-shrink-0" />
+                    <span className="break-words">{trend}</span>
                   </div>
                 ))}
               </div>
@@ -422,12 +432,12 @@ export default function StrategyDetailPage() {
 
             {/* Opportunities */}
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Opportunities</p>
-              <div className="space-y-2">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Opportunities</p>
+              <div className="space-y-1.5 sm:space-y-2">
                 {strategy.market.opportunities?.map((opp, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                    <Lightbulb className="h-3 w-3 text-amber-400 mt-1 flex-shrink-0" />
-                    <span>{opp}</span>
+                  <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+                    <Lightbulb className="h-3 w-3 text-amber-400 mt-0.5 flex-shrink-0" />
+                    <span className="break-words">{opp}</span>
                   </div>
                 ))}
               </div>
@@ -435,12 +445,12 @@ export default function StrategyDetailPage() {
 
             {/* Threats */}
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Threats</p>
-              <div className="space-y-2">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Threats</p>
+              <div className="space-y-1.5 sm:space-y-2">
                 {strategy.market.threats?.map((threat, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                    <Shield className="h-3 w-3 text-red-400 mt-1 flex-shrink-0" />
-                    <span>{threat}</span>
+                  <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+                    <Shield className="h-3 w-3 text-red-400 mt-0.5 flex-shrink-0" />
+                    <span className="break-words">{threat}</span>
                   </div>
                 ))}
               </div>
@@ -448,12 +458,12 @@ export default function StrategyDetailPage() {
 
             {/* Pain Points */}
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Customer Pain Points</p>
-              <div className="space-y-2">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Customer Pain Points</p>
+              <div className="space-y-1.5 sm:space-y-2">
                 {strategy.market.customerPainPoints?.map((pain, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm text-slate-300">
-                    <Target className="h-3 w-3 text-[#8b5cf6] mt-1 flex-shrink-0" />
-                    <span>{pain}</span>
+                  <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-slate-300">
+                    <Target className="h-3 w-3 text-[#8b5cf6] mt-0.5 flex-shrink-0" />
+                    <span className="break-words">{pain}</span>
                   </div>
                 ))}
               </div>
@@ -464,71 +474,73 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 3 : COMPETITORS (Pro+) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 3 : COMPETITORS
+  // ═══════════════════════════════════════════════════════════
   const renderCompetitors = () => {
     if (!strategy.competitors || strategy.competitors.length === 0) return null;
 
     return (
       <FeatureGate feature="competitorIntelligence" requiredPlan="pro">
         <SectionCard title="Competitor Intelligence" icon={Target} badge="Pro">
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {strategy.competitors.map((comp, index) => (
-              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-bold text-white flex items-center gap-2">
+              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2 mb-3">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-white flex items-center gap-2 break-words">
                       {comp.name}
                       {comp.website && (
                         <a 
                           href={comp.website.startsWith("http") ? comp.website : `https://${comp.website}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-[10px] text-[#8b5cf6] hover:text-white transition-colors"
+                          className="text-[10px] text-[#8b5cf6] hover:text-white transition-colors flex-shrink-0"
                         >
                           ↗
                         </a>
                       )}
                     </h4>
                     {comp.mainOffer && (
-                      <p className="text-xs text-slate-400 mt-1">{comp.mainOffer}</p>
+                      <p className="text-[10px] sm:text-xs text-slate-400 mt-1 break-words">{comp.mainOffer}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-2 py-1 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap flex-shrink-0">
+                    <span className="text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
                       {comp.position}
                     </span>
                     {comp.opportunity !== undefined && (
-                      <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
+                      <span className="text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-bold">
                         {comp.opportunity}% opp.
                       </span>
                     )}
                   </div>
                 </div>
 
-                {/* Metrics */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mb-3 text-xs">
+                {/* Metrics - 2 colonnes mobile, 4 desktop */}
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2 mb-3">
                   {comp.traffic && (
-                    <div className="rounded-md bg-white/[0.03] px-2 py-1.5">
-                      <p className="text-slate-500">Traffic</p>
-                      <p className="font-bold text-white">{comp.traffic}</p>
+                    <div className="rounded-md bg-white/[0.03] px-2 py-1 sm:px-2 sm:py-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500">Traffic</p>
+                      <p className="text-xs sm:text-sm font-bold text-white truncate">{comp.traffic}</p>
                     </div>
                   )}
                   {comp.share && (
-                    <div className="rounded-md bg-white/[0.03] px-2 py-1.5">
-                      <p className="text-slate-500">Market Share</p>
-                      <p className="font-bold text-white">{comp.share}</p>
+                    <div className="rounded-md bg-white/[0.03] px-2 py-1 sm:px-2 sm:py-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500">Market Share</p>
+                      <p className="text-xs sm:text-sm font-bold text-white truncate">{comp.share}</p>
                     </div>
                   )}
                   {comp.ads && (
-                    <div className="rounded-md bg-white/[0.03] px-2 py-1.5">
-                      <p className="text-slate-500">Ads Activity</p>
-                      <p className="font-bold text-white">{comp.ads}</p>
+                    <div className="rounded-md bg-white/[0.03] px-2 py-1 sm:px-2 sm:py-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500">Ads Activity</p>
+                      <p className="text-xs sm:text-sm font-bold text-white truncate">{comp.ads}</p>
                     </div>
                   )}
                   {comp.customerSentiment && (
-                    <div className="rounded-md bg-white/[0.03] px-2 py-1.5">
-                      <p className="text-slate-500">Sentiment</p>
-                      <p className={`font-bold ${
+                    <div className="rounded-md bg-white/[0.03] px-2 py-1 sm:px-2 sm:py-1.5">
+                      <p className="text-[9px] sm:text-[10px] text-slate-500">Sentiment</p>
+                      <p className={`text-xs sm:text-sm font-bold truncate ${
                         comp.customerSentiment === "positive" ? "text-emerald-400" :
                         comp.customerSentiment === "negative" ? "text-red-400" : "text-amber-400"
                       }`}>
@@ -539,20 +551,20 @@ export default function StrategyDetailPage() {
                 </div>
 
                 {/* Strengths & Weaknesses */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                   <div>
-                    <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Strengths</p>
-                    <div className="space-y-1">
+                    <p className="text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Strengths</p>
+                    <div className="space-y-0.5 sm:space-y-1">
                       {comp.strengths?.map((s, i) => (
-                        <p key={i} className="text-xs text-slate-300">+ {s}</p>
+                        <p key={i} className="text-[10px] sm:text-xs text-slate-300 break-words">+ {s}</p>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Weaknesses</p>
-                    <div className="space-y-1">
+                    <p className="text-[9px] sm:text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Weaknesses</p>
+                    <div className="space-y-0.5 sm:space-y-1">
                       {comp.weaknesses?.map((w, i) => (
-                        <p key={i} className="text-xs text-slate-300">- {w}</p>
+                        <p key={i} className="text-[10px] sm:text-xs text-slate-300 break-words">- {w}</p>
                       ))}
                     </div>
                   </div>
@@ -560,20 +572,20 @@ export default function StrategyDetailPage() {
 
                 {/* Advertising Activity */}
                 {comp.advertisingActivity && (
-                  <div className="mt-3 pt-3 border-t border-white/5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Ad Platforms Active</p>
-                    <div className="flex flex-wrap gap-2">
+                  <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5">
+                    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2">Ad Platforms Active</p>
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
                       {comp.advertisingActivity.googleAds && (
-                        <span className="text-[10px] px-2 py-1 rounded bg-blue-500/10 text-blue-400">Google Ads</span>
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-blue-500/10 text-blue-400">Google Ads</span>
                       )}
                       {comp.advertisingActivity.metaAds && (
-                        <span className="text-[10px] px-2 py-1 rounded bg-sky-500/10 text-sky-400">Meta Ads</span>
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-sky-500/10 text-sky-400">Meta Ads</span>
                       )}
                       {comp.advertisingActivity.linkedinAds && (
-                        <span className="text-[10px] px-2 py-1 rounded bg-blue-700/10 text-blue-300">LinkedIn Ads</span>
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-blue-700/10 text-blue-300">LinkedIn Ads</span>
                       )}
                       {comp.advertisingActivity.tiktokAds && (
-                        <span className="text-[10px] px-2 py-1 rounded bg-pink-500/10 text-pink-400">TikTok Ads</span>
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-pink-500/10 text-pink-400">TikTok Ads</span>
                       )}
                     </div>
                   </div>
@@ -586,7 +598,9 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 4 : AUDIENCE PERSONAS (Pro+) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 4 : AUDIENCE PERSONAS
+  // ═══════════════════════════════════════════════════════════
   const renderAudience = () => {
     const personas = strategy.personas || [];
     const audience = strategy.audience;
@@ -600,58 +614,58 @@ export default function StrategyDetailPage() {
     return (
       <FeatureGate feature="audienceInsights" requiredPlan="pro">
         <SectionCard title="Audience Personas" icon={Users} badge="Pro">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:gap-4">
             {displayPersonas.map((persona, index) => (
-              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h4 className="font-bold text-white">{persona.name}</h4>
-                    <p className="text-xs text-slate-400">{persona.occupation}</p>
+              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2 mb-2 sm:mb-3">
+                  <div className="min-w-0">
+                    <h4 className="text-sm sm:text-base font-bold text-white truncate">{persona.name}</h4>
+                    <p className="text-[10px] sm:text-xs text-slate-400 truncate">{persona.occupation}</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs text-slate-400">{persona.age}</p>
-                    <p className="text-xs text-slate-500">{persona.gender}</p>
+                  <div className="text-right flex-shrink-0">
+                    <p className="text-[10px] sm:text-xs text-slate-400">{persona.age}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-500">{persona.gender}</p>
                   </div>
                 </div>
 
-                <div className="space-y-2 mb-3">
-                  <div className="flex items-center justify-between text-xs">
+                <div className="space-y-1.5 sm:space-y-2 mb-2 sm:mb-3">
+                  <div className="flex items-center justify-between text-[10px] sm:text-xs">
                     <span className="text-slate-500">Income</span>
-                    <span className="text-white font-medium">{persona.income}</span>
+                    <span className="text-white font-medium truncate pl-2">{persona.income}</span>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <p className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Goals</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-[9px] sm:text-[10px] font-bold text-emerald-400 uppercase tracking-wider mb-1">Goals</p>
                   <div className="flex flex-wrap gap-1">
                     {persona.goals?.map((g: string, i: number) => (
-                      <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">{g}</span>
+                      <span key={i} className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">{g}</span>
                     ))}
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <p className="text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Pain Points</p>
+                <div className="mb-2 sm:mb-3">
+                  <p className="text-[9px] sm:text-[10px] font-bold text-red-400 uppercase tracking-wider mb-1">Pain Points</p>
                   <div className="flex flex-wrap gap-1">
                     {persona.painPoints?.map((p: string, i: number) => (
-                      <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-red-500/10 text-red-400">{p}</span>
+                      <span key={i} className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-red-500/10 text-red-400">{p}</span>
                     ))}
                   </div>
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-bold text-[#8b5cf6] uppercase tracking-wider mb-1">Preferred Channels</p>
+                  <p className="text-[9px] sm:text-[10px] font-bold text-[#8b5cf6] uppercase tracking-wider mb-1">Preferred Channels</p>
                   <div className="flex flex-wrap gap-1">
                     {persona.preferredChannels?.map((c: string, i: number) => (
-                      <span key={i} className="text-[10px] px-2 py-0.5 rounded bg-[#6366f1]/10 text-[#a5b4fc]">{c}</span>
+                      <span key={i} className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#6366f1]/10 text-[#a5b4fc]">{c}</span>
                     ))}
                   </div>
                 </div>
 
                 {persona.buyingBehavior && (
-                  <div className="mt-3 pt-3 border-t border-white/5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Buying Behavior</p>
-                    <p className="text-xs text-slate-300">{persona.buyingBehavior}</p>
+                  <div className="mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-white/5">
+                    <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Buying Behavior</p>
+                    <p className="text-[10px] sm:text-xs text-slate-300 break-words">{persona.buyingBehavior}</p>
                   </div>
                 )}
               </div>
@@ -660,13 +674,13 @@ export default function StrategyDetailPage() {
 
           {/* Demographics */}
           {audience?.demographics && (
-            <div className="mt-4 pt-4 border-t border-white/5">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Demographics</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+            <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/5">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Demographics</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 sm:gap-2">
                 {Object.entries(audience.demographics).map(([key, value]) => (
-                  <div key={key} className="rounded-md bg-white/[0.03] px-3 py-2">
-                    <p className="text-[10px] text-slate-500 capitalize">{key}</p>
-                    <p className="text-xs font-bold text-white">{String(value)}</p>
+                  <div key={key} className="rounded-md bg-white/[0.03] px-2 sm:px-3 py-1.5 sm:py-2">
+                    <p className="text-[9px] sm:text-[10px] text-slate-500 capitalize truncate">{key}</p>
+                    <p className="text-[10px] sm:text-xs font-bold text-white truncate">{String(value)}</p>
                   </div>
                 ))}
               </div>
@@ -677,49 +691,51 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 5 : CAMPAIGNS (Toujours visible) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 5 : CAMPAIGNS
+  // ═══════════════════════════════════════════════════════════
   const renderCampaigns = () => {
     if (!strategy.campaigns || strategy.campaigns.length === 0) return null;
 
     return (
       <SectionCard title="Campaign Strategy" icon={Zap}>
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {strategy.campaigns.map((camp, index) => (
-            <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-1 rounded-md bg-[#6366f1]/20 text-[#8b5cf6] text-xs font-bold">
+            <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 mb-2">
+                <span className="px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-[#6366f1]/20 text-[#8b5cf6] text-[10px] sm:text-xs font-bold flex-shrink-0">
                   {camp.platform}
                 </span>
-                <span className="text-xs text-slate-400">{camp.objective}</span>
+                <span className="text-[10px] sm:text-xs text-slate-400 truncate">{camp.objective}</span>
                 {camp.duration && (
-                  <span className="ml-auto text-[10px] text-slate-500">{camp.duration}</span>
+                  <span className="ml-auto text-[9px] sm:text-[10px] text-slate-500 flex-shrink-0">{camp.duration}</span>
                 )}
               </div>
-              <h4 className="text-sm font-bold text-white mb-2">{camp.headline}</h4>
-              <p className="text-xs text-slate-300 mb-3 leading-relaxed">{camp.text}</p>
+              <h4 className="text-xs sm:text-sm font-bold text-white mb-1.5 sm:mb-2 break-words">{camp.headline}</h4>
+              <p className="text-[10px] sm:text-xs text-slate-300 mb-2 sm:mb-3 leading-relaxed break-words">{camp.text}</p>
               
               {camp.hook && (
-                <div className="mb-3">
-                  <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">
+                <div className="mb-2 sm:mb-3">
+                  <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 break-words">
                     Hook: {camp.hook}
                   </span>
                 </div>
               )}
 
-              <div className="flex items-center justify-between text-xs pt-3 border-t border-white/5">
-                <div className="flex items-center gap-4">
-                  <span className="text-[#8b5cf6]">💰 {camp.budget}</span>
-                  <span className="text-emerald-400">👥 {camp.reach}</span>
+              <div className="flex flex-wrap items-center justify-between gap-2 text-[10px] sm:text-xs pt-2 sm:pt-3 border-t border-white/5">
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-[#8b5cf6] flex-shrink-0">💰 {camp.budget}</span>
+                  <span className="text-emerald-400 flex-shrink-0">👥 {camp.reach}</span>
                 </div>
                 {camp.cta && (
-                  <span className="text-[10px] px-2 py-1 rounded bg-white/5 text-slate-300">
+                  <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 sm:py-1 rounded bg-white/5 text-slate-300 truncate">
                     CTA: {camp.cta}
                   </span>
                 )}
               </div>
 
               {camp.targetPersona && (
-                <p className="text-[10px] text-slate-500 mt-2">
+                <p className="text-[9px] sm:text-[10px] text-slate-500 mt-1.5 sm:mt-2 break-words">
                   🎯 Target: {camp.targetPersona}
                 </p>
               )}
@@ -730,7 +746,9 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 6 : CREATIVE DIRECTION (Pro+) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 6 : CREATIVE DIRECTION
+  // ═══════════════════════════════════════════════════════════
   const renderCreative = () => {
     if (!strategy.creative) return null;
 
@@ -739,32 +757,32 @@ export default function StrategyDetailPage() {
         <SectionCard title="Creative Direction" icon={Palette} badge="Pro">
           {/* Visual Direction */}
           {strategy.creative.visualDirection && (
-            <div className="mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Visual Direction</p>
-              <p className="text-sm text-slate-300 leading-relaxed">{strategy.creative.visualDirection}</p>
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2">Visual Direction</p>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed break-words">{strategy.creative.visualDirection}</p>
             </div>
           )}
 
           {/* Brand Voice */}
           {strategy.creative.brandVoice && (
-            <div className="mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Brand Voice</p>
-              <p className="text-sm text-slate-300 leading-relaxed">{strategy.creative.brandVoice}</p>
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2">Brand Voice</p>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed break-words">{strategy.creative.brandVoice}</p>
             </div>
           )}
 
           {/* Color Palette */}
           {strategy.creative.colorPalette && strategy.creative.colorPalette.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Color Palette</p>
-              <div className="flex gap-2">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2">Color Palette</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {strategy.creative.colorPalette.map((color, i) => (
-                  <div key={i} className="flex items-center gap-2">
+                  <div key={i} className="flex items-center gap-1.5 sm:gap-2">
                     <div 
-                      className="h-10 w-10 rounded-lg border border-white/10"
+                      className="h-8 w-8 sm:h-10 sm:w-10 rounded-md sm:rounded-lg border border-white/10 flex-shrink-0"
                       style={{ backgroundColor: color }}
                     />
-                    <span className="text-xs text-slate-400 font-mono">{color}</span>
+                    <span className="text-[10px] sm:text-xs text-slate-400 font-mono">{color}</span>
                   </div>
                 ))}
               </div>
@@ -774,30 +792,30 @@ export default function StrategyDetailPage() {
           {/* Ad Copy */}
           {strategy.creative.adCopy && strategy.creative.adCopy.length > 0 && (
             <div>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Ad Copy Examples</p>
-              <div className="space-y-3">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-1.5 sm:mb-2">Ad Copy Examples</p>
+              <div className="space-y-2 sm:space-y-3">
                 {strategy.creative.adCopy.map((copy, index) => (
-                  <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
+                  <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
                     {copy.platform && (
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-[#6366f1]/20 text-[#8b5cf6] font-bold mb-2 inline-block">
+                      <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#6366f1]/20 text-[#8b5cf6] font-bold mb-1.5 sm:mb-2 inline-block">
                         {copy.platform}
                       </span>
                     )}
-                    <p className="text-sm font-bold text-white mb-2">{copy.headline}</p>
-                    <p className="text-xs text-slate-300 leading-relaxed mb-3">{copy.primaryText}</p>
-                    <div className="flex items-center gap-2">
+                    <p className="text-xs sm:text-sm font-bold text-white mb-1.5 sm:mb-2 break-words">{copy.headline}</p>
+                    <p className="text-[10px] sm:text-xs text-slate-300 leading-relaxed mb-2 sm:mb-3 break-words">{copy.primaryText}</p>
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
                       {copy.hook && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-amber-500/10 text-amber-400">
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-amber-500/10 text-amber-400 break-words">
                           {copy.hook}
                         </span>
                       )}
                       {copy.cta && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400">
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 break-words">
                           CTA: {copy.cta}
                         </span>
                       )}
                       {copy.tone && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#8b5cf6]/10 text-[#a5b4fc]">
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#8b5cf6]/10 text-[#a5b4fc] break-words">
                           {copy.tone}
                         </span>
                       )}
@@ -812,7 +830,9 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 7 : ANALYTICS & KPIs (Premium+) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 7 : ANALYTICS & KPIs
+  // ══════════════════════════════════════════════════════════
   const renderAnalytics = () => {
     if (!strategy.analytics) return null;
 
@@ -821,19 +841,19 @@ export default function StrategyDetailPage() {
         <SectionCard title="Analytics & KPIs" icon={LineChart} badge="Premium">
           {/* KPIs */}
           {strategy.analytics.kpis && strategy.analytics.kpis.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Key Performance Indicators</p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Key Performance Indicators</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
                 {strategy.analytics.kpis.map((kpi, i) => (
-                  <div key={i} className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-xs font-bold text-white">{kpi.name}</p>
-                      {kpi.trend === "up" && <TrendingUp className="h-3 w-3 text-emerald-400" />}
-                      {kpi.trend === "down" && <TrendingUp className="h-3 w-3 text-red-400 rotate-180" />}
+                  <div key={i} className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+                    <div className="flex items-center justify-between mb-0.5 sm:mb-1">
+                      <p className="text-[10px] sm:text-xs font-bold text-white truncate pr-2">{kpi.name}</p>
+                      {kpi.trend === "up" && <TrendingUp className="h-3 w-3 text-emerald-400 flex-shrink-0" />}
+                      {kpi.trend === "down" && <TrendingUp className="h-3 w-3 text-red-400 rotate-180 flex-shrink-0" />}
                     </div>
-                    <p className="text-sm font-bold text-[#8b5cf6]">{kpi.target}</p>
+                    <p className="text-xs sm:text-sm font-bold text-[#8b5cf6] break-words">{kpi.target}</p>
                     {kpi.current && (
-                      <p className="text-[10px] text-slate-500 mt-1">Current: {kpi.current}</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500 mt-0.5 sm:mt-1">Current: {kpi.current}</p>
                     )}
                   </div>
                 ))}
@@ -843,11 +863,11 @@ export default function StrategyDetailPage() {
 
           {/* Tracking Setup */}
           {strategy.analytics.trackingSetup && strategy.analytics.trackingSetup.length > 0 && (
-            <div className="mb-4">
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tracking Setup</p>
-              <div className="flex flex-wrap gap-2">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Tracking Setup</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {strategy.analytics.trackingSetup.map((tool, i) => (
-                  <span key={i} className="text-xs px-3 py-1.5 rounded-lg bg-white/[0.03] text-slate-300 border border-white/5">
+                  <span key={i} className="text-[10px] sm:text-xs px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-white/[0.03] text-slate-300 border border-white/5">
                     {tool}
                   </span>
                 ))}
@@ -857,9 +877,9 @@ export default function StrategyDetailPage() {
 
           {/* Reporting Cadence */}
           {strategy.analytics.reportingCadence && (
-            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-3">
-              <p className="text-xs text-slate-400">Reporting Cadence</p>
-              <p className="text-sm font-bold text-white">{strategy.analytics.reportingCadence}</p>
+            <div className="rounded-lg border border-white/5 bg-white/[0.02] p-2.5 sm:p-3">
+              <p className="text-[10px] sm:text-xs text-slate-400">Reporting Cadence</p>
+              <p className="text-xs sm:text-sm font-bold text-white">{strategy.analytics.reportingCadence}</p>
             </div>
           )}
         </SectionCard>
@@ -867,22 +887,24 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 8 : ROADMAP (Toujours visible) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 8 : ROADMAP
+  // ═══════════════════════════════════════════════════════════
   const renderRoadmap = () => {
     if (!strategy.roadmap || strategy.roadmap.length === 0) return null;
 
     return (
       <SectionCard title="90-Day Roadmap" icon={Calendar}>
-        <div className="space-y-3">
+        <div className="space-y-2 sm:space-y-3">
           {strategy.roadmap.map((item, index) => (
-            <div key={index} className="flex items-start gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 flex items-center justify-center flex-shrink-0 text-sm font-bold text-[#8b5cf6]">
+            <div key={index} className="flex items-start gap-2 sm:gap-3 rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+              <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 flex items-center justify-center flex-shrink-0 text-xs sm:text-sm font-bold text-[#8b5cf6]">
                 {index + 1}
               </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-1">
-                  <h4 className="text-sm font-bold text-white">{item.task}</h4>
-                  <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center justify-between gap-2 mb-0.5 sm:mb-1">
+                  <h4 className="text-xs sm:text-sm font-bold text-white truncate">{item.task}</h4>
+                  <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0 ${
                     item.priority === "High" ? "bg-red-500/20 text-red-400" : 
                     item.priority === "Medium" ? "bg-amber-500/20 text-amber-400" : 
                     "bg-emerald-500/20 text-emerald-400"
@@ -890,14 +912,14 @@ export default function StrategyDetailPage() {
                     {item.priority}
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 mb-2">{item.month}</p>
+                <p className="text-[10px] sm:text-xs text-slate-400 mb-1.5 sm:mb-2">{item.month}</p>
                 {item.impact && (
-                  <p className="text-xs text-slate-300 mb-1">💡 {item.impact}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-300 mb-0.5 sm:mb-1 break-words">💡 {item.impact}</p>
                 )}
                 {item.difficulty && (
-                  <p className="text-xs text-slate-500 mb-1">⚙️ Difficulty: {item.difficulty}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-0.5 sm:mb-1 break-words">️ Difficulty: {item.difficulty}</p>
                 )}
-                <p className="text-xs text-emerald-400">✓ {item.results}</p>
+                <p className="text-[10px] sm:text-xs text-emerald-400 break-words">✓ {item.results}</p>
               </div>
             </div>
           ))}
@@ -906,25 +928,27 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 9 : RECOMMENDATIONS (Pro+) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 9 : RECOMMENDATIONS
+  // ═══════════════════════════════════════════════════════════
   const renderRecommendations = () => {
     if (!strategy.recommendations || strategy.recommendations.length === 0) return null;
 
     return (
       <FeatureGate feature="swotAnalysis" requiredPlan="pro">
         <SectionCard title="Strategic Recommendations" icon={Rocket} badge="Pro">
-          <div className="space-y-3">
+          <div className="space-y-2 sm:space-y-3">
             {strategy.recommendations.map((rec, index) => (
-              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
+              <div key={index} className="rounded-lg border border-white/5 bg-white/[0.02] p-3 sm:p-4">
+                <div className="flex items-start justify-between gap-2 mb-1.5 sm:mb-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 mb-0.5 sm:mb-1">
                       {rec.category && (
-                        <span className="text-[10px] px-2 py-0.5 rounded bg-[#6366f1]/20 text-[#8b5cf6] font-bold uppercase">
+                        <span className="text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded bg-[#6366f1]/20 text-[#8b5cf6] font-bold uppercase truncate">
                           {rec.category}
                         </span>
                       )}
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full ${
+                      <span className={`text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-full flex-shrink-0 ${
                         rec.priority === "high" ? "bg-red-500/20 text-red-400" : 
                         rec.priority === "medium" ? "bg-amber-500/20 text-amber-400" : 
                         "bg-emerald-500/20 text-emerald-400"
@@ -932,22 +956,22 @@ export default function StrategyDetailPage() {
                         {rec.priority}
                       </span>
                     </div>
-                    <h4 className="text-sm font-bold text-white">{rec.title}</h4>
+                    <h4 className="text-xs sm:text-sm font-bold text-white break-words">{rec.title}</h4>
                   </div>
                   {rec.confidence !== undefined && (
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-[#8b5cf6]">{rec.confidence}%</p>
-                      <p className="text-[10px] text-slate-500">confidence</p>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-base sm:text-lg font-bold text-[#8b5cf6]">{rec.confidence}%</p>
+                      <p className="text-[9px] sm:text-[10px] text-slate-500">confidence</p>
                     </div>
                   )}
                 </div>
-                <p className="text-xs text-slate-300 leading-relaxed mb-2">{rec.description}</p>
-                <div className="flex items-center gap-4 text-xs">
+                <p className="text-[10px] sm:text-xs text-slate-300 leading-relaxed mb-1.5 sm:mb-2 break-words">{rec.description}</p>
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-[10px] sm:text-xs">
                   {rec.expectedImpact && (
-                    <span className="text-emerald-400">📈 {rec.expectedImpact}</span>
+                    <span className="text-emerald-400 flex-shrink-0">📈 {rec.expectedImpact}</span>
                   )}
                   {rec.effort && (
-                    <span className="text-slate-400">⚙️ Effort: {rec.effort}</span>
+                    <span className="text-slate-400 flex-shrink-0">⚙️ Effort: {rec.effort}</span>
                   )}
                 </div>
               </div>
@@ -958,7 +982,9 @@ export default function StrategyDetailPage() {
     );
   };
 
-  // ===== SECTION 10 : AI RECOMMENDATION (Toujours visible) =====
+  // ═══════════════════════════════════════════════════════════
+  // SECTION 10 : AI RECOMMENDATION
+  // ═══════════════════════════════════════════════════════════
   const renderAIRecommendation = () => {
     if (!strategy.aiRecommendation) return null;
 
@@ -966,34 +992,34 @@ export default function StrategyDetailPage() {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/10 p-6 relative overflow-hidden"
+        className="rounded-xl sm:rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/10 p-4 sm:p-6 relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#6366f1]/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-[#6366f1]/10 rounded-full blur-3xl pointer-events-none" />
         
-        <div className="flex items-start gap-4 relative z-10">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6366f1]/50">
-            <Brain className="h-6 w-6 text-white" />
+        <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4 relative z-10">
+          <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0 shadow-lg shadow-[#6366f1]/50">
+            <Brain className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
           </div>
-          <div className="flex-1">
-            <p className="text-xs font-bold uppercase tracking-wider text-[#8b5cf6] mb-2 flex items-center gap-2">
-              <Sparkles className="h-3 w-3" />
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#8b5cf6] mb-1.5 sm:mb-2 flex items-center gap-1.5 sm:gap-2">
+              <Sparkles className="h-3 w-3 flex-shrink-0" />
               AI Strategic Recommendation
             </p>
-            <h4 className="text-lg font-bold text-white mb-3">
+            <h4 className="text-sm sm:text-lg font-bold text-white mb-2 sm:mb-3 break-words">
               {strategy.aiRecommendation.opportunity}
             </h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="rounded-lg bg-white/5 p-3">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Confidence</p>
-                <p className="text-sm font-bold text-emerald-400">{strategy.aiRecommendation.confidence}</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3">
+              <div className="rounded-lg bg-white/5 p-2 sm:p-3">
+                <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1">Confidence</p>
+                <p className="text-xs sm:text-sm font-bold text-emerald-400">{strategy.aiRecommendation.confidence}</p>
               </div>
-              <div className="rounded-lg bg-white/5 p-3">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Expected Result</p>
-                <p className="text-sm font-bold text-[#8b5cf6]">{strategy.aiRecommendation.result}</p>
+              <div className="rounded-lg bg-white/5 p-2 sm:p-3">
+                <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1">Expected Result</p>
+                <p className="text-xs sm:text-sm font-bold text-[#8b5cf6] break-words">{strategy.aiRecommendation.result}</p>
               </div>
-              <div className="rounded-lg bg-white/5 p-3">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Priority</p>
-                <p className={`text-sm font-bold ${
+              <div className="rounded-lg bg-white/5 p-2 sm:p-3">
+                <p className="text-[9px] sm:text-[10px] text-slate-500 uppercase tracking-wider mb-0.5 sm:mb-1">Priority</p>
+                <p className={`text-xs sm:text-sm font-bold ${
                   strategy.aiRecommendation.priority === "High" ? "text-red-400" :
                   strategy.aiRecommendation.priority === "Medium" ? "text-amber-400" : "text-emerald-400"
                 }`}>
@@ -1008,74 +1034,85 @@ export default function StrategyDetailPage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
-      {/* Header */}
-      <div className="flex items-start justify-between gap-6">
-        <div className="flex items-start gap-4">
-          <button
-            onClick={() => router.back()}
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors flex-shrink-0"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </button>
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h1 className="text-3xl font-bold text-white">{strategy.name}</h1>
-              {strategy.overview?.marketScore && (
-                <span className="px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] text-xs font-bold">
-                  Score: {strategy.overview.marketScore}
-                </span>
-              )}
-            </div>
-            <p className="text-slate-400 mt-1">{strategy.goal}</p>
-            <div className="flex items-center gap-3 mt-2 text-xs text-slate-500">
-              <span className="capitalize">{strategy.industry}</span>
-              {(strategy.city || strategy.country) && (
-                <>
-                  <span>•</span>
-                  <span>{strategy.city ? `${strategy.city}, ` : ""}{strategy.country}</span>
-                </>
-              )}
-              {strategy.budget && (
-                <>
-                  <span>•</span>
-                  <span>${strategy.budget.toLocaleString()}/mo</span>
-                </>
-              )}
+    <PageTransition>
+      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 lg:space-y-8">
+        
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER - RESPONSIVE
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6">
+          <div className="flex items-start gap-2 sm:gap-4 min-w-0">
+            <button
+              onClick={() => router.back()}
+              className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors flex-shrink-0 active:scale-95"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </button>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 flex-wrap">
+                <h1 className="text-lg sm:text-2xl lg:text-3xl font-bold text-white break-words">{strategy.name}</h1>
+                {strategy.overview?.marketScore && (
+                  <span className="px-1.5 sm:px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] text-[10px] sm:text-xs font-bold flex-shrink-0">
+                    Score: {strategy.overview.marketScore}
+                  </span>
+                )}
+              </div>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5 sm:mt-1 break-words">{strategy.goal}</p>
+              <div className="flex items-center gap-1.5 sm:gap-3 mt-1.5 sm:mt-2 text-[10px] sm:text-xs text-slate-500 flex-wrap">
+                <span className="capitalize">{strategy.industry}</span>
+                {(strategy.city || strategy.country) && (
+                  <>
+                    <span>•</span>
+                    <span className="truncate">{strategy.city ? `${strategy.city}, ` : ""}{strategy.country}</span>
+                  </>
+                )}
+                {strategy.budget && (
+                  <>
+                    <span>•</span>
+                    <span>${strategy.budget.toLocaleString()}/mo</span>
+                  </>
+                )}
+              </div>
             </div>
           </div>
+          
+          {/* Boutons - empilés sur mobile */}
+          <div className="flex gap-2 sm:gap-2 flex-shrink-0 self-start sm:self-auto">
+            <button className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 sm:px-4 py-2 text-[10px] sm:text-sm font-medium text-slate-300 hover:bg-white/[0.05] transition-all active:scale-95">
+              <Copy className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Duplicate</span>
+              <span className="sm:hidden">Copy</span>
+            </button>
+            <button
+              onClick={handleExportPDF}
+              className={`flex items-center gap-1.5 sm:gap-2 rounded-lg border px-2.5 sm:px-4 py-2 text-[10px] sm:text-sm font-medium transition-all active:scale-95 ${
+                canExportPDF
+                  ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white"
+                  : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
+              }`}
+            >
+              <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+              <span className="hidden sm:inline">Export PDF</span>
+              <span className="sm:hidden">PDF</span>
+              {!canExportPDF && <Lock className="h-3 w-3 ml-0.5 sm:ml-1" />}
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/[0.05] transition-all">
-            <Copy className="h-4 w-4" />
-            Duplicate
-          </button>
-          <button
-            onClick={handleExportPDF}
-            className={`flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium transition-all ${
-              canExportPDF
-                ? "border-white/10 bg-white/[0.03] text-slate-300 hover:bg-white/[0.05] hover:text-white"
-                : "border-white/5 bg-white/[0.02] text-slate-600 cursor-not-allowed"
-            }`}
-          >
-            <Download className="h-4 w-4" />
-            Export PDF
-            {!canExportPDF && <Lock className="h-3 w-3 ml-1" />}
-          </button>
-        </div>
-      </div>
 
-      {/* Render all sections */}
-      {renderOverview()}
-      {renderAIRecommendation()}
-      {renderMarket()}
-      {renderCompetitors()}
-      {renderAudience()}
-      {renderCampaigns()}
-      {renderCreative()}
-      {renderAnalytics()}
-      {renderRoadmap()}
-      {renderRecommendations()}
-    </div>
+        {/* ═══════════════════════════════════════════════════════════
+            RENDER ALL SECTIONS
+            ═══════════════════════════════════════════════════════════ */}
+        {renderOverview()}
+        {renderAIRecommendation()}
+        {renderMarket()}
+        {renderCompetitors()}
+        {renderAudience()}
+        {renderCampaigns()}
+        {renderCreative()}
+        {renderAnalytics()}
+        {renderRoadmap()}
+        {renderRecommendations()}
+      </div>
+    </PageTransition>
   );
 }

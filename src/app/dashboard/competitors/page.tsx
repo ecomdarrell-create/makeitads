@@ -31,6 +31,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase";
 import { generateCompetitors, getCompetitors } from "@/lib/competitorGenerator";
+import PageTransition from "@/components/ui/PageTransition";
 
 const supabase = createClient();
 
@@ -153,7 +154,6 @@ export default function CompetitorsPage() {
       setCompetitors(data || []);
       setLastScan(new Date());
 
-      // ✅ NOTIFICATION AUTOMATIQUE : Scan terminé
       await supabase.from("notifications").insert({
         user_id: user.id,
         type: "competitor",
@@ -167,7 +167,6 @@ export default function CompetitorsPage() {
       console.error("Error scanning competitors:", error);
       alert("Error scanning competitors. Please try again.");
       
-      // ✅ NOTIFICATION D'ERREUR
       await supabase.from("notifications").insert({
         user_id: user.id,
         type: "warning",
@@ -229,7 +228,6 @@ export default function CompetitorsPage() {
 
   const handleTrack = async (competitorId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    
     if (!user) return;
 
     try {
@@ -241,7 +239,6 @@ export default function CompetitorsPage() {
         link: `/dashboard/competitors/${competitorId}`,
         is_read: false,
       });
-
       alert("✅ You are now tracking this competitor!");
     } catch (error) {
       console.error("Error tracking competitor:", error);
@@ -309,484 +306,554 @@ export default function CompetitorsPage() {
     URL.revokeObjectURL(url);
   };
 
-  const handleDelete = async (competitorId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    if (!confirm("Are you sure you want to delete this competitor?")) {
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from("competitors")
-        .delete()
-        .eq("id", competitorId);
-
-      if (error) {
-        console.error("Error deleting competitor:", error);
-        alert("Failed to delete competitor");
-        return;
-      }
-
-      setCompetitors(competitors.filter(c => c.id !== competitorId));
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Failed to delete competitor");
-    }
-  };
-
   if (loading || permsLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-[#6366f1] mx-auto mb-4" />
-          <p className="text-slate-400">Loading competitor intelligence...</p>
+          <p className="text-sm text-slate-400">Loading...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-[#38bdf8] flex items-center justify-center">
+    <PageTransition>
+      <div className="space-y-5 sm:space-y-6">
+        
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER RESPONSIVE
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-emerald-500 to-[#38bdf8] flex items-center justify-center">
               <Eye className="h-5 w-5 text-white" />
             </div>
-            <h1 className="text-3xl font-bold text-white">Competitor Intelligence Center</h1>
-            <button
-              onClick={() => setShowInfoModal(true)}
-              className="flex h-8 w-8 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors"
-              title="About this data"
-            >
-              <Info className="h-4 w-4" />
-            </button>
-          </div>
-          <p className="text-slate-400">
-            Smart competitive analysis based on your business profile.
-          </p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {lastScan && (
-            <div className="text-right">
-              <p className="text-xs text-slate-500">Last Scan</p>
-              <p className="text-sm font-bold text-white flex items-center gap-1">
-                <Clock className="h-3 w-3" />
-                {lastScan.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white no-hyphens break-words">
+                  Competitors
+                </h1>
+                <button
+                  onClick={() => setShowInfoModal(true)}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/10 bg-white/[0.03] text-slate-400 hover:text-white transition-colors flex-shrink-0"
+                  title="About this data"
+                >
+                  <Info className="h-3.5 w-3.5" />
+                </button>
+              </div>
+              <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                Smart competitive analysis
               </p>
             </div>
-          )}
+          </div>
           
-          <button
-            onClick={() => router.push("/dashboard/competitors/compare")}
-            disabled={competitors.length === 0}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <GitCompareArrows className="h-4 w-4" />
-            <span>Compare</span>
-          </button>
-
-          <button
-            onClick={handleNewScan}
-            disabled={scanning}
-            className="flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all disabled:opacity-50"
-          >
-            {scanning ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4" />
+          {/* Actions - empilées sur mobile, inline sur desktop */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3">
+            {lastScan && (
+              <div className="text-left sm:text-right px-1">
+                <p className="text-[10px] text-slate-500">Last Scan</p>
+                <p className="text-xs font-bold text-white flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {lastScan.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
             )}
-            <span>{scanning ? "Scanning..." : "Run New Scan"}</span>
-          </button>
-        </div>
-      </div>
+            
+            <button
+              onClick={() => router.push("/dashboard/competitors/compare")}
+              disabled={competitors.length === 0}
+              className="flex items-center justify-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <GitCompareArrows className="h-3.5 w-3.5" />
+              <span>Compare</span>
+            </button>
 
-      {!businessProfile && competitors.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 flex items-center gap-3"
-        >
-          <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-200">Business Profile Required</p>
-            <p className="text-xs text-amber-400/80 mt-0.5">
-              Create your business profile first to generate accurate competitor data for your industry and location.
-            </p>
-          </div>
-          <button 
-            onClick={() => router.push("/dashboard/strategies/new")}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600 transition-colors"
-          >
-            Create Profile
-          </button>
-        </motion.div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-[#6366f1]/10 flex items-center justify-center">
-              <Target className="h-5 w-5 text-[#8b5cf6]" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.total}</p>
-          <p className="text-xs text-slate-400 mt-1">Competitors Found</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
-              <Star className="h-5 w-5 text-amber-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.leaders}</p>
-          <p className="text-xs text-slate-400 mt-1">Market Leaders</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp className="h-5 w-5 text-emerald-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.strong}</p>
-          <p className="text-xs text-slate-400 mt-1">Strong Competitors</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-              <Zap className="h-5 w-5 text-blue-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.emerging}</p>
-          <p className="text-xs text-slate-400 mt-1">Emerging Competitors</p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5"
-        >
-          <div className="flex items-center justify-between mb-3">
-            <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-              <Activity className="h-5 w-5 text-purple-400" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-white">{stats.newEntrants}</p>
-          <p className="text-xs text-slate-400 mt-1">New Entrants</p>
-        </motion.div>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search competitors..."
-            className="w-full rounded-lg border border-white/10 bg-white/[0.03] pl-10 pr-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors"
-          />
-        </div>
-
-        <select
-          value={filterPosition}
-          onChange={(e) => setFilterPosition(e.target.value)}
-          className="rounded-lg border border-white/10 bg-[#0f0f1a] px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] cursor-pointer"
-        >
-          <option value="all">All Positions</option>
-          <option value="leader">Market Leaders</option>
-          <option value="challenger">Challengers</option>
-          <option value="niche">Niche Players</option>
-          <option value="emerging">Emerging</option>
-        </select>
-
-        <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              viewMode === "grid"
-                ? "bg-[#6366f1] text-white"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <Grid className="h-3 w-3" />
-            Grid
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-              viewMode === "list"
-                ? "bg-[#6366f1] text-white"
-                : "text-slate-400 hover:text-white"
-            }`}
-          >
-            <List className="h-3 w-3" />
-            List
-          </button>
-        </div>
-      </div>
-
-      {competitors.length === 0 && !scanning ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-16 text-center"
-        >
-          <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-[#38bdf8]/20 mb-6">
-            <Eye className="h-10 w-10 text-emerald-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-white mb-3">No competitors tracked yet</h3>
-          <p className="text-slate-400 mb-8 max-w-md mx-auto">
-            {businessProfile 
-              ? "Run your first scan to discover competitors in your market based on your business profile."
-              : "Create your business profile first, then run a scan to discover competitors."}
-          </p>
-          <div className="flex items-center gap-3 justify-center">
-            {!businessProfile && (
-              <button
-                onClick={() => router.push("/dashboard/strategies/new")}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-sm font-bold text-white hover:bg-white/[0.05] transition-all"
-              >
-                Create Business Profile
-              </button>
-            )}
             <button
               onClick={handleNewScan}
-              disabled={!businessProfile}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={scanning}
+              className="flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 py-2 text-xs font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-[1.02] transition-all disabled:opacity-50 active:scale-[0.98]"
             >
-              <RefreshCw className="h-4 w-4" />
-              Run First Scan
+              {scanning ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <RefreshCw className="h-3.5 w-3.5" />
+              )}
+              <span>{scanning ? "Scanning..." : "New Scan"}</span>
             </button>
           </div>
-        </motion.div>
-      ) : (
-        <>
-          {viewMode === "grid" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredCompetitors.map((competitor, index) => (
-                <motion.div
-                  key={competitor.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  onClick={() => router.push(`/dashboard/competitors/${competitor.id}`)}
-                  className="group relative rounded-2xl border border-white/10 bg-[#0f0f1a] p-6 hover:border-[#6366f1]/30 transition-all cursor-pointer"
-                >
-                  <div className="absolute top-3 right-3 px-2 py-1 rounded-md bg-[#6366f1]/10 border border-[#6366f1]/20">
-                    <span className="text-[9px] font-bold text-[#a5b4fc] uppercase">Smart Analysis</span>
-                  </div>
+        </div>
 
-                  <div className="flex items-start justify-between mb-4 pr-20">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-bold text-white truncate group-hover:text-[#8b5cf6] transition-colors">
-                        {competitor.data.name || "Unknown"}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <MapPin className="h-3 w-3 text-slate-500" />
-                        <p className="text-xs text-slate-500">{competitor.data.city || "N/A"}</p>
+        {/* ═══════════════════════════════════════════════════════════
+            ALERT BUSINESS PROFILE
+            ═══════════════════════════════════════════════════════════ */}
+        {!businessProfile && competitors.length === 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 sm:p-4 flex items-start gap-3"
+          >
+            <AlertCircle className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-200">Business Profile Required</p>
+              <p className="text-xs text-amber-400/80 mt-0.5">
+                Create your business profile first to generate accurate competitor data.
+              </p>
+            </div>
+            <button 
+              onClick={() => router.push("/dashboard/strategies/new")}
+              className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600 transition-colors flex-shrink-0"
+            >
+              Create
+            </button>
+          </motion.div>
+        )}
+
+        {/* ═══════════════════════════════════════════════════════════
+            STATS GRID - 2 colonnes sur mobile, 5 sur desktop
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 sm:gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-4"
+          >
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-[#6366f1]/10 flex items-center justify-center mb-2">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-[#8b5cf6]" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-white no-hyphens">{stats.total}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 label-nowrap">Competitors</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="rounded-xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-4"
+          >
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2">
+              <Star className="h-4 w-4 sm:h-5 sm:w-5 text-amber-400" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-white no-hyphens">{stats.leaders}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 label-nowrap">Leaders</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="rounded-xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-4"
+          >
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-emerald-500/10 flex items-center justify-center mb-2">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-400" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-white no-hyphens">{stats.strong}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 label-nowrap">Strong</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="rounded-xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-4"
+          >
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-blue-500/10 flex items-center justify-center mb-2">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-blue-400" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-white no-hyphens">{stats.emerging}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 label-nowrap">Emerging</p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="rounded-xl border border-white/10 bg-[#0f0f1a] p-3 sm:p-4 col-span-2 md:col-span-1"
+          >
+            <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-purple-500/10 flex items-center justify-center mb-2">
+              <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-purple-400" />
+            </div>
+            <p className="text-xl sm:text-2xl font-bold text-white no-hyphens">{stats.newEntrants}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 label-nowrap">New Entrants</p>
+          </motion.div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            SEARCH + FILTERS - Empilés sur mobile
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search competitors..."
+              className="w-full h-10 rounded-lg border border-white/10 bg-white/[0.03] pl-10 pr-4 text-sm text-white outline-none focus:border-[#6366f1] transition-colors"
+            />
+          </div>
+
+          <div className="flex gap-2">
+            <select
+              value={filterPosition}
+              onChange={(e) => setFilterPosition(e.target.value)}
+              className="flex-1 sm:flex-none h-10 rounded-lg border border-white/10 bg-[#0f0f1a] px-3 text-sm text-white outline-none focus:border-[#6366f1] cursor-pointer"
+            >
+              <option value="all">All Positions</option>
+              <option value="leader">Leaders</option>
+              <option value="challenger">Challengers</option>
+              <option value="niche">Niche</option>
+              <option value="emerging">Emerging</option>
+            </select>
+
+            <div className="flex items-center gap-0.5 rounded-lg border border-white/10 bg-white/[0.03] p-1">
+              <button
+                onClick={() => setViewMode("grid")}
+                className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === "grid"
+                    ? "bg-[#6366f1] text-white"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <Grid className="h-3 w-3" />
+              </button>
+              <button
+                onClick={() => setViewMode("list")}
+                className={`flex items-center justify-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  viewMode === "list"
+                    ? "bg-[#6366f1] text-white"
+                    : "text-slate-400 hover:text-white"
+                }`}
+              >
+                <List className="h-3 w-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            EMPTY STATE
+            ═══════════════════════════════════════════════════════════ */}
+        {competitors.length === 0 && !scanning ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-dashed border-white/10 bg-white/[0.02] p-8 sm:p-16 text-center"
+          >
+            <div className="inline-flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500/20 to-[#38bdf8]/20 mb-4 sm:mb-6">
+              <Eye className="h-8 w-8 sm:h-10 sm:w-10 text-emerald-400" />
+            </div>
+            <h3 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3 no-hyphens">
+              No competitors tracked yet
+            </h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-6 sm:mb-8 max-w-md mx-auto">
+              {businessProfile 
+                ? "Run your first scan to discover competitors in your market."
+                : "Create your business profile first, then run a scan."}
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-3 justify-center">
+              {!businessProfile && (
+                <button
+                  onClick={() => router.push("/dashboard/strategies/new")}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-5 py-2.5 text-sm font-bold text-white hover:bg-white/[0.05] transition-all"
+                >
+                  Create Profile
+                </button>
+              )}
+              <button
+                onClick={handleNewScan}
+                disabled={!businessProfile}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Run First Scan
+              </button>
+            </div>
+          </motion.div>
+        ) : (
+          <>
+            {/* ═══════════════════════════════════════════════════════
+                GRID VIEW
+                ═══════════════════════════════════════════════════════ */}
+            {viewMode === "grid" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+                {filteredCompetitors.map((competitor, index) => (
+                  <motion.div
+                    key={competitor.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    onClick={() => router.push(`/dashboard/competitors/${competitor.id}`)}
+                    className="group relative rounded-2xl border border-white/10 bg-[#0f0f1a] p-4 sm:p-6 hover:border-[#6366f1]/30 transition-all cursor-pointer"
+                  >
+                    <div className="absolute top-3 right-3 px-2 py-1 rounded-md bg-[#6366f1]/10 border border-[#6366f1]/20">
+                      <span className="text-[9px] font-bold text-[#a5b4fc] uppercase">Smart</span>
+                    </div>
+
+                    <div className="flex items-start justify-between mb-3 sm:mb-4 pr-16">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm sm:text-base font-bold text-white truncate group-hover:text-[#8b5cf6] transition-colors">
+                          {competitor.data.name || "Unknown"}
+                        </h3>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <MapPin className="h-3 w-3 text-slate-500 flex-shrink-0" />
+                          <p className="text-xs text-slate-500 truncate">{competitor.data.city || "N/A"}</p>
+                        </div>
+                      </div>
+                      <div className={`px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md text-[9px] sm:text-[10px] font-bold border flex-shrink-0 ${getPositionColor(competitor.data.position || "")}`}>
+                        {competitor.data.position || "N/A"}
                       </div>
                     </div>
-                    <div className={`px-2 py-1 rounded-md text-[10px] font-bold border ${getPositionColor(competitor.data.position || "")}`}>
-                      {competitor.data.position || "N/A"}
-                    </div>
-                  </div>
 
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className={`text-3xl font-bold ${getScoreColor(competitor.data.overallScore || 0)}`}>
-                      {competitor.data.overallScore || "N/A"}
+                    <div className="flex items-center gap-3 mb-3 sm:mb-4">
+                      <div className={`text-2xl sm:text-3xl font-bold ${getScoreColor(competitor.data.overallScore || 0)}`}>
+                        {competitor.data.overallScore || "N/A"}
+                      </div>
+                      <div className="flex-1">
+                        <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                          <motion.div
+                            initial={{ width: 0 }}
+                            animate={{ width: `${competitor.data.overallScore || 0}%` }}
+                            transition={{ duration: 0.8, delay: index * 0.05 }}
+                            className={`h-full ${
+                              (competitor.data.overallScore || 0) >= 80 ? "bg-emerald-500" :
+                              (competitor.data.overallScore || 0) >= 60 ? "bg-amber-500" : "bg-red-500"
+                            }`}
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-500 mt-1">Competitive Score</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+
+                    <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4">
+                      <div>
+                        <p className="text-[10px] text-slate-500 mb-0.5">Traffic</p>
+                        <p className="text-xs sm:text-sm font-bold text-white">{formatNumber(competitor.data.traffic || 0)}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-500 mb-0.5">Team</p>
+                        <p className="text-xs sm:text-sm font-bold text-white">{competitor.data.employees || "N/A"}</p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-slate-500 mb-0.5">Growth</p>
+                        <p className={`text-xs sm:text-sm font-bold ${
+                          (competitor.data.growth || 0) > 0 ? "text-emerald-400" : 
+                          (competitor.data.growth || 0) < 0 ? "text-red-400" : "text-slate-400"
+                        }`}>
+                          {(competitor.data.growth || 0) !== 0 ? `${(competitor.data.growth || 0) > 0 ? "+" : ""}${competitor.data.growth}%` : "N/A"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="pt-3 sm:pt-4 border-t border-white/5">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[10px] sm:text-xs text-slate-400">Market Share</span>
+                        <span className="text-[10px] sm:text-xs font-bold text-white">{competitor.data.marketShare || 0}%</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
                         <motion.div
                           initial={{ width: 0 }}
-                          animate={{ width: `${competitor.data.overallScore || 0}%` }}
+                          animate={{ width: `${competitor.data.marketShare || 0}%` }}
                           transition={{ duration: 0.8, delay: index * 0.05 }}
-                          className={`h-full ${
-                            (competitor.data.overallScore || 0) >= 80 ? "bg-emerald-500" :
-                            (competitor.data.overallScore || 0) >= 60 ? "bg-amber-500" : "bg-red-500"
-                          }`}
-                        />
-                      </div>
-                      <p className="text-[10px] text-slate-500 mt-1">Competitive Score</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div>
-                      <p className="text-[10px] text-slate-500 mb-1">Traffic</p>
-                      <p className="text-sm font-bold text-white">{formatNumber(competitor.data.traffic || 0)}/mo</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-500 mb-1">Employees</p>
-                      <p className="text-sm font-bold text-white">{competitor.data.employees || "N/A"}</p>
-                    </div>
-                    <div>
-                      <p className="text-[10px] text-slate-500 mb-1">Growth</p>
-                      <p className={`text-sm font-bold ${
-                        (competitor.data.growth || 0) > 0 ? "text-emerald-400" : 
-                        (competitor.data.growth || 0) < 0 ? "text-red-400" : "text-slate-400"
-                      }`}>
-                        {(competitor.data.growth || 0) !== 0 ? `${(competitor.data.growth || 0) > 0 ? "+" : ""}${competitor.data.growth}%` : "N/A"}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-slate-400">Market Share</span>
-                      <span className="text-xs font-bold text-white">{competitor.data.marketShare || 0}%</span>
-                    </div>
-                    <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
-                      <motion.div
-                        initial={{ width: 0 }}
-                        animate={{ width: `${competitor.data.marketShare || 0}%` }}
-                        transition={{ duration: 0.8, delay: index * 0.05 }}
-                        className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Active Ads</p>
-                    <div className="flex flex-wrap gap-1">
-                      {competitor.data.advertisingActivity?.googleAds && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">Google</span>
-                      )}
-                      {competitor.data.advertisingActivity?.metaAds && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400">Meta</span>
-                      )}
-                      {competitor.data.advertisingActivity?.linkedinAds && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-700/10 text-blue-300">LinkedIn</span>
-                      )}
-                      {competitor.data.advertisingActivity?.tiktokAds && (
-                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-400">TikTok</span>
-                      )}
-                      {(!competitor.data.advertisingActivity?.googleAds && 
-                        !competitor.data.advertisingActivity?.metaAds && 
-                        !competitor.data.advertisingActivity?.linkedinAds && 
-                        !competitor.data.advertisingActivity?.tiktokAds) && (
-                        <span className="text-[9px] text-slate-500">No ads detected</span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t border-white/5 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => handleTrack(competitor.id, e)}
-                      className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-                    >
-                      <Bell className="h-3 w-3" />
-                      Track
-                    </button>
-                    <button
-                      onClick={(e) => handleShare(competitor, e)}
-                      className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-                    >
-                      <Share2 className="h-3 w-3" />
-                      Share
-                    </button>
-                    <button
-                      onClick={(e) => handleExport(competitor, e)}
-                      className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-                    >
-                      <Download className="h-3 w-3" />
-                      Export
-                    </button>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-
-          {viewMode === "list" && (
-            <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] overflow-hidden">
-              <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/5 bg-white/[0.02]">
-                <div className="col-span-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Competitor</div>
-                <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Position</div>
-                <div className="col-span-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Score</div>
-                <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Traffic</div>
-                <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Market Share</div>
-                <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Growth</div>
-              </div>
-              
-              {filteredCompetitors.map((competitor, index) => (
-                <motion.div
-                  key={competitor.id}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: index * 0.03 }}
-                  onClick={() => router.push(`/dashboard/competitors/${competitor.id}`)}
-                  className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors"
-                >
-                  <div className="col-span-3">
-                    <p className="text-sm font-bold text-white">{competitor.data.name || "Unknown"}</p>
-                    <p className="text-xs text-slate-500">{competitor.data.city || "N/A"}</p>
-                  </div>
-                  <div className="col-span-2">
-                    <span className={`text-xs px-2 py-1 rounded-md border font-bold ${getPositionColor(competitor.data.position || "")}`}>
-                      {competitor.data.position || "N/A"}
-                    </span>
-                  </div>
-                  <div className="col-span-1">
-                    <p className={`text-sm font-bold ${getScoreColor(competitor.data.overallScore || 0)}`}>
-                      {competitor.data.overallScore || "N/A"}
-                    </p>
-                  </div>
-                  <div className="col-span-2">
-                    <p className="text-sm font-bold text-white">{formatNumber(competitor.data.traffic || 0)}/mo</p>
-                  </div>
-                  <div className="col-span-2">
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
-                        <div 
                           className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
-                          style={{ width: `${competitor.data.marketShare || 0}%` }}
                         />
                       </div>
-                      <span className="text-xs font-bold text-white">{competitor.data.marketShare || 0}%</span>
                     </div>
-                  </div>
-                  <div className="col-span-2">
-                    <p className={`text-sm font-bold ${
-                      (competitor.data.growth || 0) > 0 ? "text-emerald-400" : 
-                      (competitor.data.growth || 0) < 0 ? "text-red-400" : "text-slate-400"
-                    }`}>
-                      {(competitor.data.growth || 0) !== 0 ? `${(competitor.data.growth || 0) > 0 ? "+" : ""}${competitor.data.growth}%` : "N/A"}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          )}
-        </>
-      )}
 
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/5">
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Active Ads</p>
+                      <div className="flex flex-wrap gap-1">
+                        {competitor.data.advertisingActivity?.googleAds && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400">Google</span>
+                        )}
+                        {competitor.data.advertisingActivity?.metaAds && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-400">Meta</span>
+                        )}
+                        {competitor.data.advertisingActivity?.linkedinAds && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-blue-700/10 text-blue-300">LinkedIn</span>
+                        )}
+                        {competitor.data.advertisingActivity?.tiktokAds && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded bg-pink-500/10 text-pink-400">TikTok</span>
+                        )}
+                        {(!competitor.data.advertisingActivity?.googleAds && 
+                          !competitor.data.advertisingActivity?.metaAds && 
+                          !competitor.data.advertisingActivity?.linkedinAds && 
+                          !competitor.data.advertisingActivity?.tiktokAds) && (
+                          <span className="text-[9px] text-slate-500">No ads detected</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Boutons d'action - VISIBLES sur mobile, hover sur desktop */}
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/5 flex items-center gap-1.5 sm:gap-2 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => handleTrack(competitor.id, e)}
+                        className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all active:scale-95"
+                      >
+                        <Bell className="h-3 w-3" />
+                        <span className="hidden sm:inline">Track</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleShare(competitor, e)}
+                        className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all active:scale-95"
+                      >
+                        <Share2 className="h-3 w-3" />
+                        <span className="hidden sm:inline">Share</span>
+                      </button>
+                      <button
+                        onClick={(e) => handleExport(competitor, e)}
+                        className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1.5 text-[10px] font-medium text-slate-300 hover:bg-white/[0.05] transition-all active:scale-95"
+                      >
+                        <Download className="h-3 w-3" />
+                        <span className="hidden sm:inline">Export</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* ═══════════════════════════════════════════════════════
+                LIST VIEW - Devient cards sur mobile
+                ═══════════════════════════════════════════════════════ */}
+            {viewMode === "list" && (
+              <>
+                {/* Desktop : tableau classique */}
+                <div className="hidden md:block rounded-2xl border border-white/10 bg-[#0f0f1a] overflow-hidden">
+                  <div className="grid grid-cols-12 gap-4 px-6 py-3 border-b border-white/5 bg-white/[0.02]">
+                    <div className="col-span-3 text-xs font-bold text-slate-400 uppercase tracking-wider">Competitor</div>
+                    <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Position</div>
+                    <div className="col-span-1 text-xs font-bold text-slate-400 uppercase tracking-wider">Score</div>
+                    <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Traffic</div>
+                    <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Market Share</div>
+                    <div className="col-span-2 text-xs font-bold text-slate-400 uppercase tracking-wider">Growth</div>
+                  </div>
+                  
+                  {filteredCompetitors.map((competitor, index) => (
+                    <motion.div
+                      key={competitor.id}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: index * 0.03 }}
+                      onClick={() => router.push(`/dashboard/competitors/${competitor.id}`)}
+                      className="grid grid-cols-12 gap-4 px-6 py-4 border-b border-white/5 hover:bg-white/[0.02] cursor-pointer transition-colors"
+                    >
+                      <div className="col-span-3">
+                        <p className="text-sm font-bold text-white">{competitor.data.name || "Unknown"}</p>
+                        <p className="text-xs text-slate-500">{competitor.data.city || "N/A"}</p>
+                      </div>
+                      <div className="col-span-2">
+                        <span className={`text-xs px-2 py-1 rounded-md border font-bold ${getPositionColor(competitor.data.position || "")}`}>
+                          {competitor.data.position || "N/A"}
+                        </span>
+                      </div>
+                      <div className="col-span-1">
+                        <p className={`text-sm font-bold ${getScoreColor(competitor.data.overallScore || 0)}`}>
+                          {competitor.data.overallScore || "N/A"}
+                        </p>
+                      </div>
+                      <div className="col-span-2">
+                        <p className="text-sm font-bold text-white">{formatNumber(competitor.data.traffic || 0)}/mo</p>
+                      </div>
+                      <div className="col-span-2">
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-white/5 rounded-full overflow-hidden">
+                            <div 
+                              className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]"
+                              style={{ width: `${competitor.data.marketShare || 0}%` }}
+                            />
+                          </div>
+                          <span className="text-xs font-bold text-white">{competitor.data.marketShare || 0}%</span>
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <p className={`text-sm font-bold ${
+                          (competitor.data.growth || 0) > 0 ? "text-emerald-400" : 
+                          (competitor.data.growth || 0) < 0 ? "text-red-400" : "text-slate-400"
+                        }`}>
+                          {(competitor.data.growth || 0) !== 0 ? `${(competitor.data.growth || 0) > 0 ? "+" : ""}${competitor.data.growth}%` : "N/A"}
+                        </p>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Mobile : cards empilées */}
+                <div className="md:hidden space-y-3">
+                  {filteredCompetitors.map((competitor, index) => (
+                    <motion.div
+                      key={competitor.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      onClick={() => router.push(`/dashboard/competitors/${competitor.id}`)}
+                      className="rounded-xl border border-white/10 bg-[#0f0f1a] p-4 cursor-pointer active:scale-[0.99] transition-transform"
+                    >
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-sm font-bold text-white truncate">{competitor.data.name}</h3>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <MapPin className="h-3 w-3 text-slate-500" />
+                            <p className="text-xs text-slate-500 truncate">{competitor.data.city}</p>
+                          </div>
+                        </div>
+                        <div className={`px-2 py-1 rounded-md text-[10px] font-bold border flex-shrink-0 ${getPositionColor(competitor.data.position || "")}`}>
+                          {competitor.data.position || "N/A"}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-3 gap-2 mb-3">
+                        <div>
+                          <p className="text-[10px] text-slate-500">Score</p>
+                          <p className={`text-lg font-bold ${getScoreColor(competitor.data.overallScore || 0)}`}>
+                            {competitor.data.overallScore || "N/A"}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-slate-500">Traffic</p>
+                          <p className="text-sm font-bold text-white">{formatNumber(competitor.data.traffic || 0)}</p>
+                        </div>
+                        <div>
+                          <p className="text-[10px] text-slate-500">Share</p>
+                          <p className="text-sm font-bold text-white">{competitor.data.marketShare || 0}%</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pt-3 border-t border-white/5">
+                        <button
+                          onClick={(e) => handleTrack(competitor.id, e)}
+                          className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] py-2 text-[10px] font-medium text-slate-300 active:scale-95 transition-transform"
+                        >
+                          <Bell className="h-3 w-3" />
+                          Track
+                        </button>
+                        <button
+                          onClick={(e) => handleShare(competitor, e)}
+                          className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] py-2 text-[10px] font-medium text-slate-300 active:scale-95 transition-transform"
+                        >
+                          <Share2 className="h-3 w-3" />
+                          Share
+                        </button>
+                        <button
+                          onClick={(e) => handleExport(competitor, e)}
+                          className="flex-1 flex items-center justify-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] py-2 text-[10px] font-medium text-slate-300 active:scale-95 transition-transform"
+                        >
+                          <Download className="h-3 w-3" />
+                          Export
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* ═══════════════════════════════════════════════════════════
+          INFO MODAL
+          ═══════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {showInfoModal && (
           <motion.div
@@ -800,7 +867,7 @@ export default function CompetitorsPage() {
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-2xl w-full rounded-2xl border border-white/10 bg-[#0f0f1a] p-8"
+              className="relative max-w-2xl w-full rounded-2xl border border-white/10 bg-[#0f0f1a] p-6 sm:p-8 max-h-[90vh] overflow-y-auto"
               onClick={(e) => e.stopPropagation()}
             >
               <button
@@ -815,8 +882,8 @@ export default function CompetitorsPage() {
                   <Info className="h-6 w-6 text-[#8b5cf6]" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">About Competitor Data</h2>
-                  <p className="text-sm text-slate-400">How this data is generated</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">About Competitor Data</h2>
+                  <p className="text-xs sm:text-sm text-slate-400">How this data is generated</p>
                 </div>
               </div>
 
@@ -824,33 +891,32 @@ export default function CompetitorsPage() {
                 <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
                   <h3 className="text-sm font-bold text-emerald-200 mb-2">✅ Data Source</h3>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    All competitor data is <strong>generated based on your business profile</strong> (industry, location, business model). 
-                    The data is stored in Supabase and is fully verifiable - you can view, edit, or delete any competitor at any time.
+                    All competitor data is <strong>generated based on your business profile</strong>. 
+                    The data is stored in Supabase and is fully verifiable.
                   </p>
                 </div>
 
                 <div className="rounded-lg border border-[#6366f1]/20 bg-[#6366f1]/5 p-4">
                   <h3 className="text-sm font-bold text-[#a5b4fc] mb-2">🤖 How It Works</h3>
                   <ul className="text-xs text-slate-300 space-y-1">
-                    <li>• Our system analyzes your industry benchmarks and market data</li>
-                    <li>• Generates realistic competitors for your specific market</li>
+                    <li>• Analyzes your industry benchmarks and market data</li>
+                    <li>• Generates realistic competitors for your market</li>
                     <li>• Calculates scores using strategic frameworks</li>
-                    <li>• All data is saved and can be exported anytime</li>
+                    <li>• All data is saved and can be exported</li>
                   </ul>
                 </div>
 
                 <div className="rounded-lg border border-amber-500/20 bg-amber-500/5 p-4">
                   <h3 className="text-sm font-bold text-amber-200 mb-2">⚠️ Important</h3>
                   <p className="text-xs text-slate-300 leading-relaxed">
-                    These are <strong>smart estimated competitors</strong>, not real companies. Use this data for strategic planning 
-                    and competitive analysis frameworks. For real-time competitor data, we're integrating with APIs like SimilarWeb and SEMrush.
+                    These are <strong>smart estimated competitors</strong>, not real companies. Use for strategic planning.
                   </p>
                 </div>
               </div>
 
               <button
                 onClick={() => setShowInfoModal(false)}
-                className="mt-6 w-full rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-3 text-sm font-bold text-white hover:scale-[1.02] transition-transform"
+                className="mt-6 w-full rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-3 text-sm font-bold text-white hover:scale-[1.02] transition-transform active:scale-[0.98]"
               >
                 Got it!
               </button>
@@ -858,6 +924,6 @@ export default function CompetitorsPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </PageTransition>
   );
 }

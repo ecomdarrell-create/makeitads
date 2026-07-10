@@ -11,7 +11,7 @@ import { AuthInput } from "@/components/auth/AuthInput";
 import AuthButton from "@/components/auth/AuthButton";
 import SocialLogin from "@/components/auth/SocialLogin";
 
-export default function SignupPage() {
+export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");

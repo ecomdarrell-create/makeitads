@@ -23,32 +23,17 @@ export default function CompetitorsSection() {
 
   return (
     <section className="relative w-full min-h-screen overflow-hidden bg-[#080810] text-white">
-      {/* IMAGE PLEIN ÉCRAN */}
+      {/* IMAGE PLEIN ÉCRAN - RESPONSIVE MOBILE */}
       <div className="absolute inset-0 z-0">
-        {/* Desktop */}
-        <div className="hidden md:block absolute inset-0">
-          <Image
-            src="/images/competitors-editorial-desktop.webp"
-            alt="Competitive Intelligence War Room"
-            fill
-            className="object-cover"
-            priority
-            sizes="100vw"
-          />
-        </div>
-
-        {/* Mobile */}
-        <div className="md:hidden absolute inset-0">
-          <Image
-            src="/images/competitors-editorial-mobile.webp"
-            alt="Competitive Intelligence"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
-            quality={85}
-          />
-        </div>
+        <Image
+          src="/images/competitors-section.webp"
+          alt="Competitive Intelligence"
+          fill
+          className="object-cover object-center md:object-cover"
+          priority
+          sizes="100vw"
+          quality={90}
+        />
 
         {/* Overlay sombre */}
         <div className="absolute inset-0 bg-[#080810]/60" />

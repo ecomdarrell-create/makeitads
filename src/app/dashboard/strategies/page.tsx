@@ -30,6 +30,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useUsage } from "@/hooks/useUsage";
 import { useSession } from "@/hooks/useSession";
 import { createClient } from "@/lib/supabase";
+import PageTransition from "@/components/ui/PageTransition";
 
 const supabase = createClient();
 
@@ -82,17 +83,14 @@ export default function StrategiesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   
-  // ✅ NOUVEAU : Sélection multiple
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showBulkActions, setShowBulkActions] = useState(false);
   
-  // ✅ NOUVEAU : Modal de génération d'images
   const [showImageModal, setShowImageModal] = useState(false);
   const [selectedStrategyForImages, setSelectedStrategyForImages] = useState<Strategy | null>(null);
   const [imagePrompts, setImagePrompts] = useState<ImagePrompt[]>([]);
   const [generatingPrompts, setGeneratingPrompts] = useState(false);
 
-  // Fetch des VRAIES stratégies depuis Supabase
   useEffect(() => {
     const fetchStrategies = async () => {
       if (!user) return;
@@ -170,7 +168,6 @@ export default function StrategiesPage() {
     }
   };
 
-  // ✅ NOUVEAU : Gestion de la sélection
   const toggleSelection = (strategyId: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setSelectedIds((prev) => {
@@ -197,7 +194,6 @@ export default function StrategiesPage() {
     strategy.industry.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // ✅ NOUVEAU : Actions groupées
   const handleBulkDelete = async () => {
     if (selectedIds.size === 0) return;
     
@@ -249,7 +245,6 @@ export default function StrategiesPage() {
         }
       }
 
-      // Rafraîchir la liste
       const { data } = await supabase
         .from("strategies")
         .select("*")
@@ -290,7 +285,6 @@ export default function StrategiesPage() {
     URL.revokeObjectURL(url);
   };
 
-  // ✅ NOUVEAU : Génération de prompts d'images
   const generateImagePrompts = (strategy: Strategy): ImagePrompt[] => {
     const industry = strategy.industry || "business";
     const brandVoice = strategy.data?.creative?.brandVoice || "professional";
@@ -349,7 +343,6 @@ export default function StrategiesPage() {
     setGeneratingPrompts(true);
     setShowImageModal(true);
 
-    // Simuler un délai de génération (en production, on appellerait une API)
     setTimeout(() => {
       const prompts = generateImagePrompts(strategy);
       setImagePrompts(prompts);
@@ -359,404 +352,448 @@ export default function StrategiesPage() {
 
   const copyPromptToClipboard = (prompt: string) => {
     navigator.clipboard.writeText(prompt);
-    alert("Prompt copied to clipboard! You can now use it in Midjourney, DALL-E, or Stable Diffusion.");
+    alert("Prompt copied to clipboard!");
   };
 
   if (loading || planLoading || sessionLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#6366f1] mx-auto mb-4" />
-          <p className="text-slate-400">Loading your strategies...</p>
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#6366f1] mx-auto mb-3" />
+          <p className="text-sm text-slate-400">Loading strategies...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Strategies</h1>
-          <p className="text-slate-400 mt-1">
-            {isFree 
-              ? `${quotaUsed}/${quotaLimit} strategy used this month` 
-              : `${strategies.length} ${strategies.length === 1 ? 'strategy' : 'strategies'} created`}
-          </p>
-        </div>
-        <button
-          onClick={handleNewStrategy}
-          disabled={isQuotaReached}
-          className="group flex items-center gap-2 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[#8b5cf6]/40 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} />
-          <span>New Strategy</span>
-        </button>
-      </div>
-
-      {/* Quota warning (Free) */}
-      {isQuotaReached && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4 flex items-center gap-3"
-        >
-          <Lock className="h-5 w-5 text-amber-400" />
-          <div className="flex-1">
-            <p className="text-sm font-semibold text-amber-200">Monthly quota reached</p>
-            <p className="text-xs text-amber-400/80 mt-0.5">
-              Upgrade to Pro for unlimited strategies and advanced features
-            </p>
-          </div>
-          <button 
-            onClick={() => router.push("/dashboard/billing")}
-            className="rounded-lg bg-amber-500 px-4 py-2 text-xs font-bold text-white hover:bg-amber-600 transition-colors"
-          >
-            Upgrade
-          </button>
-        </motion.div>
-      )}
-
-      {/* Search & Select All */}
-      {strategies.length > 0 && (
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
-            <input
-              type="text"
-              placeholder="Search your strategies..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full rounded-lg border border-white/10 bg-white/[0.03] py-2 pl-10 pr-4 text-sm text-white outline-none transition-all focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/20 placeholder:text-slate-600"
-            />
-          </div>
-          
-          {/* Select All Button */}
-          <button
-            onClick={toggleSelectAll}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-          >
-            {selectedIds.size === filteredStrategies.length && filteredStrategies.length > 0 ? (
-              <CheckSquare className="h-4 w-4 text-[#8b5cf6]" />
-            ) : (
-              <Square className="h-4 w-4" />
-            )}
-            <span>{selectedIds.size === filteredStrategies.length ? "Deselect All" : "Select All"}</span>
-          </button>
-        </div>
-      )}
-
-      {/* Bulk Actions Bar */}
-      <AnimatePresence>
-        {selectedIds.size > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="sticky top-4 z-40 rounded-xl border border-[#6366f1]/30 bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10 backdrop-blur-xl p-4 flex items-center justify-between shadow-2xl"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-[#6366f1] text-white font-bold text-sm">
-                {selectedIds.size}
-              </div>
-              <p className="text-sm font-medium text-white">
-                strateg{selectedIds.size === 1 ? 'y' : 'ies'} selected
+    <PageTransition>
+      <div className="space-y-5 sm:space-y-6">
+        
+        {/* ═══════════════════════════════════════════════════════════
+            HEADER RESPONSIVE
+            ═══════════════════════════════════════════════════════════ */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
+              <Sparkles className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white no-hyphens">
+                Strategies
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-400 mt-0.5">
+                {isFree 
+                  ? `${quotaUsed}/${quotaLimit} used this month` 
+                  : `${strategies.length} ${strategies.length === 1 ? 'strategy' : 'strategies'}`}
               </p>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleBulkDuplicate}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-              >
-                <Copy className="h-3.5 w-3.5" />
-                <span>Duplicate</span>
-              </button>
-              
-              <button
-                onClick={handleBulkExport}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>Export CSV</span>
-              </button>
-              
-              <button
-                onClick={handleBulkDelete}
-                className="flex items-center gap-2 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/20 transition-all"
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-                <span>Delete</span>
-              </button>
-              
-              <button
-                onClick={() => setSelectedIds(new Set())}
-                className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-              >
-                <X className="h-3.5 w-3.5" />
-                <span>Clear</span>
-              </button>
+          </div>
+          
+          <button
+            onClick={handleNewStrategy}
+            disabled={isQuotaReached}
+            className="flex items-center justify-center gap-1.5 rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-2.5 text-xs sm:text-sm font-semibold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" strokeWidth={2.5} />
+            <span>New Strategy</span>
+          </button>
+        </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            QUOTA WARNING
+            ═══════════════════════════════════════════════════════════ */}
+        {isQuotaReached && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-3 sm:p-4 flex items-start gap-3"
+          >
+            <Lock className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-amber-200">Monthly quota reached</p>
+              <p className="text-xs text-amber-400/80 mt-0.5">
+                Upgrade to Pro for unlimited strategies
+              </p>
             </div>
+            <button 
+              onClick={() => router.push("/dashboard/billing")}
+              className="rounded-lg bg-amber-500 px-3 py-1.5 text-xs font-bold text-white hover:bg-amber-600 transition-colors flex-shrink-0"
+            >
+              Upgrade
+            </button>
           </motion.div>
         )}
-      </AnimatePresence>
 
-      {/* Empty State Premium */}
-      {strategies.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-16 text-center relative overflow-hidden"
-        >
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#6366f1]/5 rounded-full blur-3xl" />
-            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#8b5cf6]/5 rounded-full blur-3xl" />
-          </div>
-
-          <div className="relative z-10">
-            <div className="inline-flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 mb-6">
-              <Sparkles className="h-10 w-10 text-[#8b5cf6]" />
+        {/* ═══════════════════════════════════════════════════════════
+            SEARCH & SELECT ALL - Empilés sur mobile
+            ═══════════════════════════════════════════════════════════ */}
+        {strategies.length > 0 && (
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Search strategies..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-10 rounded-lg border border-white/10 bg-white/[0.03] pl-10 pr-4 text-sm text-white outline-none transition-all focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/20 placeholder:text-slate-600"
+              />
             </div>
-            <h3 className="text-2xl font-bold text-white mb-3">No strategy created yet</h3>
-            <p className="text-slate-400 mb-8 max-w-md mx-auto">
-              Generate your first AI-powered strategy and unlock actionable insights for your business.
-            </p>
+            
             <button
-              onClick={handleNewStrategy}
-              disabled={isQuotaReached}
-              className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-3 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={toggleSelectAll}
+              className="flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-xs sm:text-sm font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
             >
-              <Plus className="h-4 w-4" />
-              Create your first AI strategy
+              {selectedIds.size === filteredStrategies.length && filteredStrategies.length > 0 ? (
+                <CheckSquare className="h-4 w-4 text-[#8b5cf6]" />
+              ) : (
+                <Square className="h-4 w-4" />
+              )}
+              <span>{selectedIds.size === filteredStrategies.length ? "Deselect" : "Select All"}</span>
             </button>
           </div>
-        </motion.div>
-      ) : filteredStrategies.length === 0 ? (
-        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-12 text-center">
-          <Search className="h-10 w-10 text-slate-600 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-white mb-2">No results found</h3>
-          <p className="text-sm text-slate-400">
-            Try adjusting your search query
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredStrategies.map((strategy, index) => {
-            const platforms = strategy.data?.campaigns?.map(c => c.platform).filter((v, i, a) => a.indexOf(v) === i) || [];
-            const marketScore = strategy.data?.overview?.marketScore || 0;
-            const isSelected = selectedIds.has(strategy.id);
+        )}
 
-            return (
-              <motion.div
-                key={strategy.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                onClick={() => router.push(`/dashboard/strategies/${strategy.id}`)}
-                className={`group relative rounded-2xl border p-6 transition-all cursor-pointer ${
-                  isSelected
-                    ? "border-[#6366f1] bg-[#6366f1]/5 shadow-lg shadow-[#6366f1]/20"
-                    : "border-white/10 bg-[#0f0f1a] hover:border-[#6366f1]/30"
-                }`}
-              >
-                {/* Checkbox */}
-                <button
-                  onClick={(e) => toggleSelection(strategy.id, e)}
-                  className="absolute top-4 left-4 z-10"
-                >
-                  {isSelected ? (
-                    <CheckSquare className="h-5 w-5 text-[#8b5cf6]" />
-                  ) : (
-                    <Square className="h-5 w-5 text-slate-500 group-hover:text-slate-300" />
-                  )}
-                </button>
-
-                {/* Delete button */}
-                <button
-                  onClick={(e) => handleDelete(strategy.id, e)}
-                  disabled={deletingId === strategy.id}
-                  className="absolute top-4 right-4 p-2 rounded-lg bg-red-500/10 text-red-400 opacity-0 group-hover:opacity-100 hover:bg-red-500/20 transition-all z-10"
-                  title="Delete strategy"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </button>
-
-                {/* Generate Images button */}
-                <button
-                  onClick={(e) => handleGenerateImages(strategy, e)}
-                  className="absolute top-4 right-14 p-2 rounded-lg bg-[#6366f1]/10 text-[#8b5cf6] opacity-0 group-hover:opacity-100 hover:bg-[#6366f1]/20 transition-all z-10"
-                  title="Generate brand images"
-                >
-                  <ImageIcon className="h-4 w-4" />
-                </button>
-
-                <div className="flex items-start justify-between mb-4 pl-8 pr-16">
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base font-semibold text-white truncate group-hover:text-[#8b5cf6] transition-colors">
-                      {strategy.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 mt-1 capitalize">{strategy.industry}</p>
-                  </div>
-                </div>
-
-                {platforms.length > 0 && (
-                  <div className="flex items-center gap-2 mb-4">
-                    {platforms.slice(0, 3).map((platform) => (
-                      <span
-                        key={platform}
-                        className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-1 text-[10px] font-medium text-slate-300"
-                      >
-                        {platform}
-                      </span>
-                    ))}
-                    {platforms.length > 3 && (
-                      <span className="text-[10px] text-slate-500">+{platforms.length - 3}</span>
-                    )}
-                  </div>
-                )}
-
-                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-white/5">
-                  <div className="flex items-center gap-2">
-                    <BarChart3 className="h-3.5 w-3.5 text-[#8b5cf6]" />
-                    <span className="text-xs text-slate-400">
-                      Score: <span className="text-white font-bold">{marketScore}</span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-3.5 w-3.5 text-[#38bdf8]" />
-                    <span className="text-xs text-slate-400">
-                      {new Date(strategy.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </div>
-
-                {strategy.objective && (
-                  <div className="mt-4 pt-4 border-t border-white/5">
-                    <p className="text-xs text-slate-500 line-clamp-2">{strategy.objective}</p>
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      )}
-
-      {/* Image Generation Modal */}
-      <AnimatePresence>
-        {showImageModal && selectedStrategyForImages && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
-            onClick={() => setShowImageModal(false)}
-          >
+        {/* ═══════════════════════════════════════════════════════════
+            BULK ACTIONS BAR - Scrollable sur mobile
+            ═══════════════════════════════════════════════════════════ */}
+        <AnimatePresence>
+          {selectedIds.size > 0 && (
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative max-w-4xl w-full max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0f0f1a] p-8"
-              onClick={(e) => e.stopPropagation()}
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="sticky top-4 z-40 rounded-xl border border-[#6366f1]/30 bg-gradient-to-r from-[#6366f1]/10 to-[#8b5cf6]/10 backdrop-blur-xl p-3 sm:p-4 shadow-2xl"
             >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-6">
-                <div>
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
-                      <ImageIcon className="h-5 w-5 text-white" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-white">Brand Image Prompts</h2>
+              <div className="flex items-center justify-between gap-3 mb-3">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-[#6366f1] text-white font-bold text-xs sm:text-sm flex-shrink-0">
+                    {selectedIds.size}
                   </div>
-                  <p className="text-sm text-slate-400">
-                    AI-generated prompts for {selectedStrategyForImages.title}
+                  <p className="text-xs sm:text-sm font-medium text-white truncate">
+                    {selectedIds.size} selected
                   </p>
                 </div>
+                
                 <button
-                  onClick={() => setShowImageModal(false)}
-                  className="p-2 rounded-lg hover:bg-white/5 transition-colors"
+                  onClick={() => setSelectedIds(new Set())}
+                  className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 sm:px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all flex-shrink-0"
                 >
-                  <X className="h-5 w-5 text-slate-400" />
+                  <X className="h-3 w-3" />
+                  <span className="hidden sm:inline">Clear</span>
                 </button>
               </div>
-
-              {/* Loading State */}
-              {generatingPrompts ? (
-                <div className="flex flex-col items-center justify-center py-16">
-                  <Loader2 className="h-12 w-12 animate-spin text-[#6366f1] mb-4" />
-                  <p className="text-sm text-slate-400">Analyzing your brand and generating prompts...</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {imagePrompts.map((imagePrompt, index) => (
-                    <motion.div
-                      key={index}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      className="rounded-xl border border-white/10 bg-white/[0.02] p-5"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <h3 className="text-sm font-bold text-white">{imagePrompt.type}</h3>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
-                              {imagePrompt.platform}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500">{imagePrompt.style}</p>
-                        </div>
-                        <button
-                          onClick={() => copyPromptToClipboard(imagePrompt.prompt)}
-                          className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-1.5 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all"
-                        >
-                          <Copy className="h-3 w-3" />
-                          <span>Copy</span>
-                        </button>
-                      </div>
-                      <div className="rounded-lg bg-black/20 p-4 border border-white/5">
-                        <p className="text-sm text-slate-300 leading-relaxed font-mono">
-                          {imagePrompt.prompt}
-                        </p>
-                      </div>
-                      <div className="mt-3 flex items-center gap-2">
-                        <button
-                          onClick={() => {
-                            const searchQuery = encodeURIComponent(imagePrompt.prompt);
-                            window.open(`https://www.midjourney.com/app/`, '_blank');
-                          }}
-                          className="flex items-center gap-1.5 text-xs text-[#8b5cf6] hover:text-white transition-colors"
-                        >
-                          <Palette className="h-3 w-3" />
-                          <span>Open in Midjourney</span>
-                        </button>
-                        <span className="text-slate-600">•</span>
-                        <button
-                          onClick={() => {
-                            const searchQuery = encodeURIComponent(imagePrompt.prompt);
-                            window.open(`https://openai.com/dall-e-3/`, '_blank');
-                          }}
-                          className="flex items-center gap-1.5 text-xs text-[#8b5cf6] hover:text-white transition-colors"
-                        >
-                          <ImageIcon className="h-3 w-3" />
-                          <span>Open in DALL-E</span>
-                        </button>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-              )}
-
-              {/* Footer */}
-              <div className="mt-6 pt-6 border-t border-white/5">
-                <p className="text-xs text-slate-500 text-center">
-                  💡 Copy these prompts and use them in your preferred AI image generator (Midjourney, DALL-E, Stable Diffusion, etc.)
-                </p>
+              
+              {/* Actions scrollables horizontalement sur mobile */}
+              <div className="flex gap-2 overflow-x-auto scrollbar-hide pb-1 -mx-1 px-1">
+                <button
+                  onClick={handleBulkDuplicate}
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all whitespace-nowrap flex-shrink-0"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  <span>Duplicate</span>
+                </button>
+                
+                <button
+                  onClick={handleBulkExport}
+                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all whitespace-nowrap flex-shrink-0"
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  <span>Export CSV</span>
+                </button>
+                
+                <button
+                  onClick={handleBulkDelete}
+                  className="flex items-center gap-1.5 rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs font-medium text-red-400 hover:bg-red-500/20 transition-all whitespace-nowrap flex-shrink-0"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  <span>Delete</span>
+                </button>
               </div>
             </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ═══════════════════════════════════════════════════════════
+            EMPTY STATE
+            ═══════════════════════════════════════════════════════════ */}
+        {strategies.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-8 sm:p-16 text-center relative overflow-hidden"
+          >
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-[#6366f1]/5 rounded-full blur-3xl" />
+              <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-[#8b5cf6]/5 rounded-full blur-3xl" />
+            </div>
+
+            <div className="relative z-10">
+              <div className="inline-flex h-16 w-16 sm:h-20 sm:w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1]/20 to-[#8b5cf6]/20 mb-4 sm:mb-6">
+                <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-[#8b5cf6]" />
+              </div>
+              <h3 className="text-lg sm:text-2xl font-bold text-white mb-2 sm:mb-3 no-hyphens">
+                No strategy created yet
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-400 mb-6 sm:mb-8 max-w-md mx-auto">
+                Generate your first AI-powered strategy and unlock actionable insights.
+              </p>
+              <button
+                onClick={handleNewStrategy}
+                disabled={isQuotaReached}
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-6 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
+              >
+                <Plus className="h-4 w-4" />
+                Create first strategy
+              </button>
+            </div>
           </motion.div>
+        ) : filteredStrategies.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-8 sm:p-12 text-center">
+            <Search className="h-10 w-10 text-slate-600 mx-auto mb-4" />
+            <h3 className="text-base sm:text-lg font-semibold text-white mb-2">No results found</h3>
+            <p className="text-xs sm:text-sm text-slate-400">
+              Try adjusting your search query
+            </p>
+          </div>
+        ) : (
+          /* ═══════════════════════════════════════════════════════════
+              STRATEGIES GRID
+              ═══════════════════════════════════════════════════════════ */
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+            {filteredStrategies.map((strategy, index) => {
+              const platforms = strategy.data?.campaigns?.map(c => c.platform).filter((v, i, a) => a.indexOf(v) === i) || [];
+              const marketScore = strategy.data?.overview?.marketScore || 0;
+              const isSelected = selectedIds.has(strategy.id);
+
+              return (
+                <motion.div
+                  key={strategy.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  onClick={() => router.push(`/dashboard/strategies/${strategy.id}`)}
+                  className={`group relative rounded-2xl border p-4 sm:p-6 transition-all cursor-pointer active:scale-[0.99] ${
+                    isSelected
+                      ? "border-[#6366f1] bg-[#6366f1]/5 shadow-lg shadow-[#6366f1]/20"
+                      : "border-white/10 bg-[#0f0f1a] hover:border-[#6366f1]/30"
+                  }`}
+                >
+                  {/* Checkbox */}
+                  <button
+                    onClick={(e) => toggleSelection(strategy.id, e)}
+                    className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10"
+                  >
+                    {isSelected ? (
+                      <CheckSquare className="h-5 w-5 text-[#8b5cf6]" />
+                    ) : (
+                      <Square className="h-5 w-5 text-slate-500 group-hover:text-slate-300" />
+                    )}
+                  </button>
+
+                  {/* Action buttons - TOUJOURS visibles sur mobile */}
+                  <div className="absolute top-3 right-3 sm:top-4 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-10">
+                    <button
+                      onClick={(e) => handleGenerateImages(strategy, e)}
+                      className="p-2 rounded-lg bg-[#6366f1]/10 text-[#8b5cf6] sm:opacity-0 sm:group-hover:opacity-100 hover:bg-[#6366f1]/20 transition-all active:scale-95"
+                      title="Generate brand images"
+                    >
+                      <ImageIcon className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={(e) => handleDelete(strategy.id, e)}
+                      disabled={deletingId === strategy.id}
+                      className="p-2 rounded-lg bg-red-500/10 text-red-400 sm:opacity-0 sm:group-hover:opacity-100 hover:bg-red-500/20 transition-all active:scale-95"
+                      title="Delete strategy"
+                    >
+                      {deletingId === strategy.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash2 className="h-4 w-4" />
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-start justify-between mb-3 sm:mb-4 pl-8 pr-16">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-sm sm:text-base font-semibold text-white truncate group-hover:text-[#8b5cf6] transition-colors">
+                        {strategy.title}
+                      </h3>
+                      <p className="text-[10px] sm:text-xs text-slate-500 mt-1 capitalize truncate">
+                        {strategy.industry}
+                      </p>
+                    </div>
+                  </div>
+
+                  {platforms.length > 0 && (
+                    <div className="flex items-center gap-1.5 sm:gap-2 mb-3 sm:mb-4 flex-wrap">
+                      {platforms.slice(0, 3).map((platform) => (
+                        <span
+                          key={platform}
+                          className="rounded-md border border-white/10 bg-white/[0.03] px-2 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-medium text-slate-300"
+                        >
+                          {platform}
+                        </span>
+                      ))}
+                      {platforms.length > 3 && (
+                        <span className="text-[9px] sm:text-[10px] text-slate-500">+{platforms.length - 3}</span>
+                      )}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-3 sm:pt-4 border-t border-white/5">
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <BarChart3 className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#8b5cf6] flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs text-slate-400 truncate">
+                        Score: <span className="text-white font-bold">{marketScore}</span>
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1.5 sm:gap-2">
+                      <Calendar className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-[#38bdf8] flex-shrink-0" />
+                      <span className="text-[10px] sm:text-xs text-slate-400 truncate">
+                        {new Date(strategy.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+
+                  {strategy.objective && (
+                    <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-white/5">
+                      <p className="text-[10px] sm:text-xs text-slate-500 line-clamp-2">
+                        {strategy.objective}
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              );
+            })}
+          </div>
         )}
-      </AnimatePresence>
-    </div>
+
+        {/* ═══════════════════════════════════════════════════════════
+            IMAGE GENERATION MODAL
+            ═══════════════════════════════════════════════════════════ */}
+        <AnimatePresence>
+          {showImageModal && selectedStrategyForImages && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-3 sm:p-4"
+              onClick={() => setShowImageModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="relative w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-2xl border border-white/10 bg-[#0f0f1a] p-5 sm:p-8"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Header */}
+                <div className="flex items-start justify-between gap-3 mb-5 sm:mb-6">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
+                      <ImageIcon className="h-5 w-5 text-white" />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-lg sm:text-2xl font-bold text-white truncate">
+                        Brand Image Prompts
+                      </h2>
+                      <p className="text-xs sm:text-sm text-slate-400 truncate">
+                        {selectedStrategyForImages.title}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowImageModal(false)}
+                    className="p-2 rounded-lg hover:bg-white/5 transition-colors flex-shrink-0"
+                  >
+                    <X className="h-5 w-5 text-slate-400" />
+                  </button>
+                </div>
+
+                {/* Loading State */}
+                {generatingPrompts ? (
+                  <div className="flex flex-col items-center justify-center py-12 sm:py-16">
+                    <Loader2 className="h-10 w-10 sm:h-12 sm:w-12 animate-spin text-[#6366f1] mb-4" />
+                    <p className="text-xs sm:text-sm text-slate-400 text-center">
+                      Analyzing your brand and generating prompts...
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 sm:space-y-4">
+                    {imagePrompts.map((imagePrompt, index) => (
+                      <motion.div
+                        key={index}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.1 }}
+                        className="rounded-xl border border-white/10 bg-white/[0.02] p-4 sm:p-5"
+                      >
+                        <div className="flex items-start justify-between gap-3 mb-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h3 className="text-xs sm:text-sm font-bold text-white">
+                                {imagePrompt.type}
+                              </h3>
+                              <span className="text-[9px] sm:text-[10px] px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] font-bold">
+                                {imagePrompt.platform}
+                              </span>
+                            </div>
+                            <p className="text-[10px] sm:text-xs text-slate-500">
+                              {imagePrompt.style}
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => copyPromptToClipboard(imagePrompt.prompt)}
+                            className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/[0.03] px-2.5 sm:px-3 py-1.5 text-[10px] sm:text-xs font-medium text-slate-300 hover:bg-white/[0.05] transition-all flex-shrink-0"
+                          >
+                            <Copy className="h-3 w-3" />
+                            <span>Copy</span>
+                          </button>
+                        </div>
+                        <div className="rounded-lg bg-black/20 p-3 sm:p-4 border border-white/5">
+                          <p className="text-xs sm:text-sm text-slate-300 leading-relaxed font-mono break-words">
+                            {imagePrompt.prompt}
+                          </p>
+                        </div>
+                        <div className="mt-3 flex items-center gap-2 flex-wrap">
+                          <button
+                            onClick={() => {
+                              window.open(`https://www.midjourney.com/app/`, '_blank');
+                            }}
+                            className="flex items-center gap-1.5 text-[10px] sm:text-xs text-[#8b5cf6] hover:text-white transition-colors"
+                          >
+                            <Palette className="h-3 w-3" />
+                            <span>Midjourney</span>
+                          </button>
+                          <span className="text-slate-600">•</span>
+                          <button
+                            onClick={() => {
+                              window.open(`https://openai.com/dall-e-3/`, '_blank');
+                            }}
+                            className="flex items-center gap-1.5 text-[10px] sm:text-xs text-[#8b5cf6] hover:text-white transition-colors"
+                          >
+                            <ImageIcon className="h-3 w-3" />
+                            <span>DALL-E</span>
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Footer */}
+                <div className="mt-5 sm:mt-6 pt-5 sm:pt-6 border-t border-white/5">
+                  <p className="text-[10px] sm:text-xs text-slate-500 text-center">
+                    💡 Copy these prompts and use them in your preferred AI image generator
+                  </p>
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </PageTransition>
   );
 }

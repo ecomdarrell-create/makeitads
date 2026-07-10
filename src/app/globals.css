@@ -834,3 +834,176 @@ img {
     display: none !important;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ TYPOGRAPHY MOBILE OPTIMIZED (NOUVEAU)
+   Empêche les coupures de mots et réduit les tailles
+   ═══════════════════════════════════════════════════════════ */
+
+/* Empêcher hyphenation agressive */
+.no-hyphens {
+  hyphens: none;
+  -webkit-hyphens: none;
+  -ms-hyphens: none;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+/* Titres responsives - empêchent les coupures */
+.title-responsive {
+  font-size: clamp(1.25rem, 5vw, 2rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 640px) {
+  .title-responsive {
+    font-size: 1.5rem;
+  }
+}
+
+/* Sous-titres responsives */
+.subtitle-responsive {
+  font-size: clamp(0.875rem, 3.5vw, 1.125rem);
+  line-height: 1.5;
+}
+
+@media (max-width: 640px) {
+  .subtitle-responsive {
+    font-size: 0.9375rem;
+  }
+}
+
+/* Text compact pour mobile */
+.text-compact {
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .text-compact {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Labels courts - empêchent les retours à la ligne */
+.label-nowrap {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ BUTTONS MOBILE OPTIMIZED (NOUVEAU)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Boutons responsives */
+.btn-responsive {
+  height: 2.75rem;
+  padding: 0 1rem;
+  font-size: 0.875rem;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .btn-responsive {
+    height: 2.5rem;
+    padding: 0 0.875rem;
+    font-size: 0.8125rem;
+  }
+}
+
+/* Boutons avec texte court */
+.btn-compact {
+  height: 2.25rem;
+  padding: 0 0.75rem;
+  font-size: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .btn-compact {
+    height: 2rem;
+    padding: 0 0.625rem;
+    font-size: 0.6875rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ CARDS MOBILE OPTIMIZED (NOUVEAU)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Cards avec padding adaptatif */
+.card-responsive {
+  padding: 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .card-responsive {
+    padding: 1rem;
+  }
+}
+
+/* Grid adaptatif */
+.grid-responsive-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .grid-responsive-2 {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+.grid-responsive-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .grid-responsive-3 {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ HEADER MOBILE OPTIMIZED (NOUVEAU)
+   ═══════════════════════════════════════════════════════════ */
+
+.header-responsive {
+  padding: 1rem 1.5rem;
+}
+
+@media (max-width: 640px) {
+  .header-responsive {
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ✅ UTILITIES POUR ÉVITER OVERFLOW (NOUVEAU)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Empêcher le débordement horizontal */
+.prevent-overflow {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Tronquer texte long */
+.truncate-smart {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Break words proprement */
+.break-words-clean {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+}
