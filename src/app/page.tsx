@@ -7,6 +7,7 @@ import {
   ArrowRight,
   Eye,
   Check,
+  X,
   ChevronDown,
   ShieldCheck,
   Loader2,
@@ -166,7 +167,7 @@ function HowItWorksSection() {
 }
 
 // ======================================================
-// PAIN POINTS CAROUSEL - GLASSMORPHISM SUBTIL
+// PAIN POINTS CAROUSEL
 // ======================================================
 
 function PainPointsCarousel() {
@@ -207,7 +208,6 @@ function PainPointsCarousel() {
               sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 380px" 
             />
             
-            {/* Glassmorphism subtil - UNIQUE overlay léger */}
             {point.glassmorphism && (
               <>
                 <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-amber-500/5 pointer-events-none" />
@@ -228,6 +228,270 @@ function PainPointsCarousel() {
         </div>
       ))}
     </div>
+  );
+}
+
+// ======================================================
+// COMPARISON SECTION (REMPLACE LIVE STATISTICS)
+// ======================================================
+
+type CellValue = "yes" | "no" | "partial" | "basic" | "manual" | "general" | "limited";
+
+interface FeatureRow {
+  name: string;
+  makeitads: CellValue;
+  chatgpt: CellValue;
+  claude: CellValue;
+  google: CellValue;
+  meta: CellValue;
+}
+
+const comparisonData: FeatureRow[] = [
+  { name: "AI understands your business", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Competitor monitoring", makeitads: "yes", chatgpt: "no", claude: "no", google: "partial", meta: "partial" },
+  { name: "Marketing strategy generation", makeitads: "yes", chatgpt: "basic", claude: "basic", google: "no", meta: "no" },
+  { name: "Growth opportunities detection", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Competitor benchmark", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "SWOT analysis", makeitads: "yes", chatgpt: "manual", claude: "manual", google: "no", meta: "no" },
+  { name: "Campaign roadmap", makeitads: "yes", chatgpt: "partial", claude: "partial", google: "no", meta: "no" },
+  { name: "All-in-one workspace", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Designed for businesses", makeitads: "yes", chatgpt: "general", claude: "general", google: "general", meta: "general" },
+  { name: "Real market intelligence", makeitads: "yes", chatgpt: "limited", claude: "limited", google: "limited", meta: "limited" },
+];
+
+const tools = [
+  { key: "makeitads", name: "MakeItAds", isPrimary: true },
+  { key: "chatgpt", name: "ChatGPT", isPrimary: false },
+  { key: "claude", name: "Claude", isPrimary: false },
+  { key: "google", name: "Google Trends", isPrimary: false },
+  { key: "meta", name: "Meta Ads Library", isPrimary: false },
+];
+
+function CellValueRenderer({ value, isPrimary }: { value: CellValue; isPrimary: boolean }) {
+  if (value === "yes") {
+    return (
+      <div className={`flex items-center justify-center ${isPrimary ? "h-8 w-8 rounded-full bg-emerald-500/20" : ""}`}>
+        <Check className={`h-4 w-4 sm:h-5 sm:w-5 ${isPrimary ? "text-emerald-400" : "text-emerald-400"}`} strokeWidth={2.5} />
+      </div>
+    );
+  }
+  if (value === "no") {
+    return (
+      <div className="flex items-center justify-center">
+        <X className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" strokeWidth={2.5} />
+      </div>
+    );
+  }
+  if (value === "partial") {
+    return (
+      <span className="inline-flex items-center rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-amber-400">
+        Partial
+      </span>
+    );
+  }
+  if (value === "basic") {
+    return (
+      <span className="inline-flex items-center rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-400">
+        Basic
+      </span>
+    );
+  }
+  if (value === "manual") {
+    return (
+      <span className="inline-flex items-center rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-400">
+        Manual
+      </span>
+    );
+  }
+  if (value === "general") {
+    return (
+      <span className="text-[10px] sm:text-xs text-slate-500">General AI</span>
+    );
+  }
+  if (value === "limited") {
+    return (
+      <span className="text-[10px] sm:text-xs text-slate-500">Limited</span>
+    );
+  }
+  return null;
+}
+
+function ComparisonSection() {
+  return (
+    <section className="relative z-10 py-20 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden">
+      {/* Background premium sombre */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 bg-gradient-to-b from-[#080810] via-[#0a0a14] to-[#080810]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#6366f1]/5 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-12 sm:mb-16 md:mb-20 max-w-4xl mx-auto px-4"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#6366f1]/30 bg-[#6366f1]/10 px-4 py-1.5 mb-4 sm:mb-6">
+            <div className="h-2 w-2 rounded-full bg-[#6366f1] animate-pulse" />
+            <span className="text-xs font-semibold text-[#a5b4fc] uppercase tracking-wider">
+              Why MakeItAds
+            </span>
+          </div>
+
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 sm:mb-6 text-white leading-tight">
+            Why businesses choose MakeItAds over{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              traditional tools
+            </span>
+          </h2>
+
+          <p className="text-sm sm:text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
+            Everything your business needs in one intelligent platform instead of switching between disconnected tools.
+          </p>
+        </motion.div>
+
+        {/* DESKTOP TABLE */}
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.7 }}
+          className="hidden lg:block rounded-2xl border border-white/10 bg-[#0a0a14]/60 backdrop-blur-xl overflow-hidden"
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/10">
+                  <th className="text-left px-6 py-5 text-xs font-semibold text-slate-500 uppercase tracking-wider w-[280px]">
+                    Features
+                  </th>
+                  {tools.map((tool) => (
+                    <th
+                      key={tool.key}
+                      className={`px-6 py-5 text-center text-xs font-semibold uppercase tracking-wider ${
+                        tool.isPrimary
+                          ? "text-[#a5b4fc] bg-[#6366f1]/5 border-l border-r border-[#6366f1]/20"
+                          : "text-slate-400"
+                      }`}
+                    >
+                      {tool.name}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonData.map((row, index) => (
+                  <motion.tr
+                    key={row.name}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
+                    className="border-b border-white/5 last:border-0 hover:bg-white/[0.02] transition-colors"
+                  >
+                    <td className="px-6 py-4 text-sm text-slate-300 font-medium">
+                      {row.name}
+                    </td>
+                    <td className="px-6 py-4 text-center bg-[#6366f1]/5 border-l border-r border-[#6366f1]/20">
+                      <CellValueRenderer value={row.makeitads} isPrimary={true} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <CellValueRenderer value={row.chatgpt} isPrimary={false} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <CellValueRenderer value={row.claude} isPrimary={false} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <CellValueRenderer value={row.google} isPrimary={false} />
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <CellValueRenderer value={row.meta} isPrimary={false} />
+                    </td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
+        {/* MOBILE CARDS */}
+        <div className="lg:hidden space-y-3 sm:space-y-4">
+          {comparisonData.map((row, index) => (
+            <motion.div
+              key={row.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: index * 0.03 }}
+              className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0a0a14]/60 backdrop-blur-xl p-4 sm:p-5"
+            >
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4">
+                {row.name}
+              </h3>
+              <div className="space-y-2.5">
+                {tools.map((tool) => {
+                  const value = row[tool.key as keyof FeatureRow] as CellValue;
+                  return (
+                    <div
+                      key={tool.key}
+                      className={`flex items-center justify-between py-2 px-3 rounded-lg ${
+                        tool.isPrimary
+                          ? "bg-[#6366f1]/10 border border-[#6366f1]/30"
+                          : "bg-white/[0.02] border border-white/5"
+                      }`}
+                    >
+                      <span className={`text-xs sm:text-sm font-medium ${
+                        tool.isPrimary ? "text-[#a5b4fc]" : "text-slate-300"
+                      }`}>
+                        {tool.name}
+                      </span>
+                      <CellValueRenderer value={value} isPrimary={tool.isPrimary} />
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="mt-16 sm:mt-20 md:mt-24 text-center max-w-3xl mx-auto px-4"
+        >
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 leading-tight">
+            Stop using five tools to answer{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              one business question.
+            </span>
+          </h3>
+          <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 leading-relaxed">
+            Join thousands of businesses using one platform instead of juggling disconnected marketing tools.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
+            <Link
+              href="/dashboard"
+              className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105 w-full sm:w-auto"
+            >
+              Start Free
+              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 sm:px-8 py-3 text-sm font-bold text-white hover:bg-white/[0.06] transition-all w-full sm:w-auto"
+            >
+              See Dashboard
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   );
 }
 
@@ -296,7 +560,6 @@ const LogoCarousel = () => (
   </div>
 );
 
-// CAROUSEL TÉMOIGNAGES - DESIGN ÉDITORIAL PREMIUM
 function ReviewsCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -461,111 +724,8 @@ export default function LandingPage() {
 
       <CompetitorsSection />
 
-      <section className="relative z-10 py-20 md:py-32 px-4 sm:px-6 overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute inset-0 bg-gradient-to-br from-[#0a0a1a] via-[#0f0f2a] to-[#0a0a1a]" />
-          <div className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-[#6366f1]/10 rounded-full blur-[150px] animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-[#8b5cf6]/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: "1s" }} />
-        </div>
-
-        <div className="relative z-10 max-w-7xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16 md:mb-20 max-w-3xl mx-auto"
-          >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white leading-tight">
-              AI Live{" "}
-              <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-                Intelligence
-              </span>
-            </h2>
-
-            <p className="text-base sm:text-lg md:text-xl text-slate-400 leading-relaxed">
-              A command center that never sleeps. MakeItAds monitors your market, competitors and opportunities in real time.
-            </p>
-          </motion.div>
-
-          <div className="relative max-w-3xl mx-auto">
-            <div className="relative aspect-square max-w-lg mx-auto mb-16">
-              <motion.div
-                animate={{ scale: [1, 1.1, 1], opacity: [0.3, 0.5, 0.3] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-0 rounded-full bg-gradient-to-br from-[#6366f1]/30 via-[#8b5cf6]/20 to-[#38bdf8]/30 blur-2xl"
-              />
-              <motion.div
-                animate={{ rotate: [0, 360] }}
-                transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-8 rounded-full border border-[#6366f1]/30"
-              />
-              <motion.div
-                animate={{ rotate: [360, 0] }}
-                transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-                className="absolute inset-16 rounded-full border border-[#8b5cf6]/30"
-              />
-              <motion.div
-                animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute inset-24 rounded-full bg-gradient-to-br from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] shadow-[0_0_80px_rgba(99,102,241,0.5)]"
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-center">
-                  <p className="text-[10px] uppercase tracking-widest text-white/60 mb-1">Business</p>
-                  <p className="text-xs font-bold text-white">Intelligence</p>
-                  <p className="text-[10px] text-white/60">Engine</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { label: "Market", status: "Demand increasing" },
-                { label: "Competitors", status: "2 new campaigns detected" },
-                { label: "SEO", status: "12 opportunities found" },
-                { label: "Advertising", status: "Meta CPM decreasing" },
-                { label: "Audience", status: "High purchase intent" },
-                { label: "Social Media", status: "Viral signal detected" },
-                { label: "Search Trends", status: "Keyword volume rising" },
-                { label: "Growth", status: "New strategy generated" },
-                { label: "Content", status: "Publishing opportunity" },
-              ].map((module, index) => (
-                <motion.div
-                  key={module.label}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.05 }}
-                  className="relative rounded-2xl border border-white/10 bg-[#0a0a1a]/80 backdrop-blur-xl p-4 hover:border-[#6366f1]/30 transition-all duration-500"
-                >
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-bold text-white">{module.label}</p>
-                    <motion.div
-                      animate={{ scale: [1, 1.3, 1], opacity: [0.5, 1, 0.5] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.2 }}
-                      className="h-1.5 w-1.5 rounded-full bg-emerald-400"
-                    />
-                  </div>
-                  <p className="text-xs text-slate-400 mt-1">{module.status}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="text-center mt-16 md:mt-20"
-          >
-            <p className="text-sm text-slate-500 max-w-2xl mx-auto">
-              Every signal, every shift, every opportunity, monitored 24/7 by your AI intelligence engine.
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      {/* COMPARISON SECTION */}
+      <ComparisonSection />
 
       <FounderMessage />
 
