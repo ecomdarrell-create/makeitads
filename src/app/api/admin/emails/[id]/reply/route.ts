@@ -4,9 +4,12 @@ import { Resend } from 'resend';
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> } // ✅ Correction ici : Promise ajouté
 ) {
   try {
+    // ✅ On attend les params car c'est une Promise dans Next.js 15/16
+    const { id } = await params;
+
     const supabase = await createClient();
     
     // 1. Sécurité : Vérifier que c'est le CEO
@@ -26,7 +29,7 @@ export async function POST(
     const { data: originalEmail, error: fetchError } = await supabase
       .from('support_emails')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id) // ✅ Utilisation de la variable 'id' résolue
       .single();
 
     if (fetchError || !originalEmail) {
@@ -37,8 +40,6 @@ export async function POST(
     const resend = new Resend(process.env.RESEND_API_KEY);
     
     await resend.emails.send({
-      // Note: Si tu as vérifié support@makeitads.pro dans Resend, utilise-le. 
-      // Sinon, garde onboarding@resend.dev pour que ça marche tout de suite.
       from: 'MakeItAds Support <onboarding@resend.dev>', 
       to: originalEmail.from_email,
       subject: `Re: ${originalEmail.subject}`,
@@ -63,7 +64,7 @@ export async function POST(
         reply_content: replyContent,
         replied_at: new Date().toISOString()
       })
-      .eq('id', params.id);
+      .eq('id', id); // ✅ Utilisation de la variable 'id' résolue
 
     return NextResponse.json({ success: true, message: 'Réponse envoyée avec succès' });
 
