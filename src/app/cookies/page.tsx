@@ -184,8 +184,8 @@ We encourage you to review this policy periodically to stay informed about our u
     icon: MessageSquare,
     content: `If you have any questions about this Cookie Policy or wish to exercise your rights, please contact us:
 
-By email: privacy@makeitads.com
-By email (general): support@makeitads.com
+By email: privacy@makeitads.pro
+By email (general): support@makeitads.pro
 
 By mail:
 MakeItAds Inc.

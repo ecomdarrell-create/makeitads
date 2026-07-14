@@ -20,7 +20,7 @@ const sections = [
     id: "1",
     title: "Introduction",
     icon: FileText,
-    content: `At MakeItAds ("Company", "we", "our", "us"), we are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website makeitads.com and use our AI-powered market intelligence platform ("Service").
+    content: `At MakeItAds ("Company", "we", "our", "us"), we are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website makeitads.pro and use our AI-powered market intelligence platform ("Service").
 
 By using our Service, you consent to the collection and use of information in accordance with this Privacy Policy. If you do not agree with the terms of this Privacy Policy, please do not access the Service.`,
   },
@@ -143,7 +143,7 @@ For California residents (CCPA):
 • Right to request deletion of personal information
 • Right to non-discrimination for exercising rights
 
-To exercise any of these rights, contact us at support@makeitads.com. We will respond within 30 days.`,
+To exercise any of these rights, contact us at support@makeitads.pro. We will respond within 30 days.`,
   },
   {
     id: "8",
@@ -225,8 +225,8 @@ You are advised to review this Privacy Policy periodically for any changes. Chan
     content: `If you have any questions about this Privacy Policy or wish to exercise your rights, please contact us:
 
 Data Protection Officer (DPO):
-By email: privacy@makeitads.com
-By email (general): support@makeitads.com
+By email: privacy@makeitads.pro
+By email (general): support@makeitads.pro
 
 By mail:
 MakeItAds Inc.

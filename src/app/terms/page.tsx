@@ -20,7 +20,7 @@ const sections = [
     id: "1",
     title: "Introduction",
     icon: FileText,
-    content: `Welcome to MakeItAds ("Company", "we", "our", "us"). These Terms of Service ("Terms", "Terms of Service") govern your use of our website located at makeitads.com ("Service") operated by MakeItAds Inc.
+    content: `Welcome to MakeItAds ("Company", "we", "our", "us"). These Terms of Service ("Terms", "Terms of Service") govern your use of our website located at makeitads.pro ("Service") operated by MakeItAds Inc.
 
 These Terms apply to all visitors, users, and others who access or use the Service. By accessing or using the Service, you agree to be bound by these Terms. If you disagree with any part of the Terms, you may not access the Service.`,
   },
@@ -169,7 +169,7 @@ By continuing to access or use our Service after those revisions become effectiv
     icon: MessageSquare,
     content: `If you have any questions about these Terms, please contact us:
 
-By email: support@makeitads.com
+By email: support@makeitads.pro
 
 By mail:
 MakeItAds Inc.

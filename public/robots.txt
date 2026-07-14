@@ -2,7 +2,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://makeitads.com/sitemap.xml
+Sitemap: https://makeitads.pro/sitemap.xml
 
 # Bloquer les pages privées
 Disallow: /dashboard/

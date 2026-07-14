@@ -12,6 +12,18 @@ const nextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'makeitads.pro',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.makeitads.pro',
+      },
+      {
+        protocol: 'https',
+        hostname: 'makeitads.pro',
+      },
     ],
   },
 };

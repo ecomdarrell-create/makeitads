@@ -58,7 +58,7 @@ const howItWorksSteps = [
   },
 ];
 
-function HowItWorksSection() {
+function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <section id="how-it-works" className="relative z-10 bg-[#080810]">
       <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center">
@@ -153,7 +153,7 @@ function HowItWorksSection() {
             className="flex justify-center"
           >
             <Link
-              href="/dashboard"
+              href={isLoggedIn ? "/dashboard" : "/signup"}
               className="group inline-flex items-center gap-2 rounded-full bg-[#6366f1] px-8 sm:px-10 py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105"
             >
               Start Free
@@ -169,6 +169,12 @@ function HowItWorksSection() {
 // ======================================================
 // PAIN POINTS CAROUSEL
 // ======================================================
+
+const painPoints = [
+  { id: 1, title: "Guesswork", subtitle: "You don't know which channel deserves your budget.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Throwing money at Facebook, Google, TikTok – hoping something sticks.", stat: "63%", statLabel: "of marketers admit they're guessing" },
+  { id: 2, title: "Blind Competition", subtitle: "Your competitors move faster because they understand the market better.", image: "/images/pain-competition.webp", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "While you're guessing, they're scaling with data you don't have.", stat: "78%", statLabel: "lose to competitors with better data", glassmorphism: true },
+  { id: 3, title: "Wasted Spending", subtitle: "Money gets spent on campaigns without clear reasoning.", image: "/images/pain-wasted.png", borderColor: "border-rose-500/30", color: "from-rose-500 to-pink-500", description: "Up to 70% of ad budgets are wasted on channels that don't convert.", stat: "$200B", statLabel: "wasted annually on bad ads" },
+];
 
 function PainPointsCarousel() {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -232,7 +238,7 @@ function PainPointsCarousel() {
 }
 
 // ======================================================
-// COMPARISON SECTION (REMPLACE LIVE STATISTICS)
+// COMPARISON SECTION
 // ======================================================
 
 type CellValue = "yes" | "no" | "partial" | "basic" | "manual" | "general" | "limited";
@@ -289,44 +295,30 @@ function CellValueRenderer({ value, isPrimary }: { value: CellValue; isPrimary: 
       </span>
     );
   }
-  if (value === "basic") {
+  if (value === "basic" || value === "manual") {
     return (
       <span className="inline-flex items-center rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-400">
-        Basic
+        {value === "basic" ? "Basic" : "Manual"}
       </span>
     );
   }
-  if (value === "manual") {
+  if (value === "general" || value === "limited") {
     return (
-      <span className="inline-flex items-center rounded-md border border-slate-500/30 bg-slate-500/10 px-2 py-0.5 text-[10px] sm:text-xs font-semibold text-slate-400">
-        Manual
-      </span>
-    );
-  }
-  if (value === "general") {
-    return (
-      <span className="text-[10px] sm:text-xs text-slate-500">General AI</span>
-    );
-  }
-  if (value === "limited") {
-    return (
-      <span className="text-[10px] sm:text-xs text-slate-500">Limited</span>
+      <span className="text-[10px] sm:text-xs text-slate-500 capitalize">{value}</span>
     );
   }
   return null;
 }
 
-function ComparisonSection() {
+function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <section className="relative z-10 py-20 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden">
-      {/* Background premium sombre */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute inset-0 bg-gradient-to-b from-[#080810] via-[#0a0a14] to-[#080810]" />
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#6366f1]/5 rounded-full blur-[120px]" />
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -476,14 +468,14 @@ function ComparisonSection() {
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
-              href="/dashboard"
+              href={isLoggedIn ? "/dashboard" : "/signup"}
               className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105 w-full sm:w-auto"
             >
               Start Free
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
-              href="/dashboard"
+              href={isLoggedIn ? "/dashboard" : "/signup"}
               className="inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 sm:px-8 py-3 text-sm font-bold text-white hover:bg-white/[0.06] transition-all w-full sm:w-auto"
             >
               See Dashboard
@@ -496,7 +488,7 @@ function ComparisonSection() {
 }
 
 // ======================================================
-// DATA
+// DATA & UTILS
 // ======================================================
 
 const partnerLogos = [
@@ -517,12 +509,6 @@ const pricingPlans = [
 
 const successStories: SuccessStory[] = ALL_SUCCESS_STORIES;
 
-const painPoints = [
-  { id: 1, title: "Guesswork", subtitle: "You don't know which channel deserves your budget.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Throwing money at Facebook, Google, TikTok – hoping something sticks.", stat: "63%", statLabel: "of marketers admit they're guessing" },
-  { id: 2, title: "Blind Competition", subtitle: "Your competitors move faster because they understand the market better.", image: "/images/pain-competition.webp", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "While you're guessing, they're scaling with data you don't have.", stat: "78%", statLabel: "lose to competitors with better data", glassmorphism: true },
-  { id: 3, title: "Wasted Spending", subtitle: "Money gets spent on campaigns without clear reasoning.", image: "/images/pain-wasted.png", borderColor: "border-rose-500/30", color: "from-rose-500 to-pink-500", description: "Up to 70% of ad budgets are wasted on channels that don't convert.", stat: "$200B", statLabel: "wasted annually on bad ads" },
-];
-
 const faqData = [
   { question: "How accurate are the recommendations?", answer: "Our AI analyzes real-time market data with an average accuracy rate of 87%." },
   { question: "Do I need marketing experience?", answer: "Not at all! MakeItAds is designed for founders and business owners at any level." },
@@ -539,10 +525,6 @@ const faqData = [
   { question: "What makes MakeItAds different from ChatGPT?", answer: "Unlike generic AI, MakeItAds has persistent business memory, real-time market data, competitor tracking, and generates actionable execution-ready strategies — not just advice." },
   { question: "Is there a mobile app?", answer: "Our platform is fully responsive and works perfectly on mobile browsers. A native iOS/Android app is in development for Q2 2025." },
 ];
-
-// ======================================================
-// COMPOSANTS UTILITAIRES
-// ======================================================
 
 const LogoCarousel = () => (
   <div className="relative overflow-hidden">
@@ -598,13 +580,7 @@ function ReviewsCarousel() {
               sizes="(max-width: 768px) 320px, 380px"
               priority
             />
-            
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.60) 30%, rgba(0,0,0,0.20) 60%, rgba(0,0,0,0) 100%)'
-              }}
-            />
+            <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.60) 30%, rgba(0,0,0,0.20) 60%, rgba(0,0,0,0) 100%)' }} />
           </div>
 
           {story.isNew && (
@@ -660,7 +636,8 @@ export default function LandingPage() {
 
   const handleUpgrade = async (planName: string) => {
     if (!user) {
-      window.location.href = `/auth/login?redirect=/dashboard/billing&plan=${planName}`;
+      // 🔒 Redirection vers signup si l'utilisateur n'est pas connecté
+      window.location.href = `/signup?redirect=/dashboard/billing&plan=${planName}`;
       return;
     }
     setLoadingPlan(planName);
@@ -720,12 +697,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <HowItWorksSection />
+      {/* ✅ Passage de la prop isLoggedIn */}
+      <HowItWorksSection isLoggedIn={!!user} />
 
       <CompetitorsSection />
 
-      {/* COMPARISON SECTION */}
-      <ComparisonSection />
+      {/* ✅ Passage de la prop isLoggedIn */}
+      <ComparisonSection isLoggedIn={!!user} />
 
       <FounderMessage />
 

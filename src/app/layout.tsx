@@ -26,14 +26,14 @@ export const metadata: Metadata = {
   authors: [{ name: "MakeItAds" }],
   creator: "MakeItAds",
   publisher: "MakeItAds",
-  metadataBase: new URL("https://makeitads.com"),
+  metadataBase: new URL("https://makeitads.pro"),
   alternates: {
     canonical: "/",
   },
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://makeitads.com",
+    url: "https://makeitads.pro",
     siteName: "MakeItAds",
     title: "MakeItAds - AI Marketing Strategies That Convert",
     description: "Stop guessing. MakeItAds analyzes your market, benchmarks competitors, and builds data-backed ad strategies.",
@@ -101,7 +101,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  viewportFit: "cover", // Important pour iOS safe area
+  viewportFit: "cover",
   themeColor: "#080810",
 };
 
@@ -114,8 +114,8 @@ const jsonLd = {
     {
       "@type": "Organization",
       "name": "MakeItAds",
-      "url": "https://makeitads.com",
-      "logo": "https://makeitads.com/favicon.ico",
+      "url": "https://makeitads.pro",
+      "logo": "https://makeitads.pro/favicon.ico",
       "sameAs": [
         "https://twitter.com/makeitads",
         "https://t.me/makeitads"
@@ -127,7 +127,7 @@ const jsonLd = {
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
       "description": "AI-powered marketing strategies that convert. Analyze your market, benchmark competitors, and build data-backed ad strategies.",
-      "url": "https://makeitads.com",
+      "url": "https://makeitads.pro",
       "offers": {
         "@type": "AggregateOffer",
         "priceCurrency": "USD",
@@ -172,8 +172,8 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
         {/* DNS Prefetch pour performance */}
-        <link rel="dns-prefetch" href="//makeitads.com" />
-        <link rel="dns-prefetch" href="//api.makeitads.com" />
+        <link rel="dns-prefetch" href="//makeitads.pro" />
+        <link rel="dns-prefetch" href="//api.makeitads.pro" />
         
         {/* Script JSON-LD injecté ici */}
         <script

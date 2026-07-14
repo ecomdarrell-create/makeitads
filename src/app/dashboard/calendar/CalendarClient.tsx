@@ -223,7 +223,7 @@ export default function CalendarClient() {
         const dateStr = date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
         
         icsContent += "BEGIN:VEVENT\n";
-        icsContent += `UID:${campaign.id}@makeitads.com\n`;
+        icsContent += `UID:${campaign.id}@makeitads.pro\n`;
         icsContent += `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z\n`;
         icsContent += `DTSTART:${dateStr}\n`;
         icsContent += `SUMMARY:${campaign.headline} (${campaign.platform})\n`;

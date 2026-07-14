@@ -40,7 +40,7 @@ export async function sendWelcomeEmail(userEmail: string, userName: string) {
                         <table role="presentation" style="margin: 30px 0;">
                           <tr>
                             <td style="border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-                              <a href="https://makeitads.com/dashboard" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 12px;">
+                              <a href="https://makeitads.pro/dashboard" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 12px;">
                                 Go to Dashboard →
                               </a>
                             </td>
@@ -122,14 +122,14 @@ export async function sendPaymentConfirmationEmail(
                         <table role="presentation" style="margin: 30px 0;">
                           <tr>
                             <td style="border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-                              <a href="https://makeitads.com/dashboard/billing" style="display: inline-block; padding: 14px 28px; color: white; text-decoration: none; font-weight: bold; border-radius: 12px;">
+                              <a href="https://makeitads.pro/dashboard/billing" style="display: inline-block; padding: 14px 28px; color: white; text-decoration: none; font-weight: bold; border-radius: 12px;">
                                 View Billing Details
                               </a>
                             </td>
                           </tr>
                         </table>
                         <p style="color: #94a3b8; font-size: 14px; line-height: 1.6; margin: 30px 0 0 0;">
-                          Questions? Contact us at support@makeitads.com
+                          Questions? Contact us at support@makeitads.pro
                         </p>
                       </td>
                     </tr>
@@ -216,7 +216,7 @@ export async function sendStrategyReadyEmail({
                         <table role="presentation" style="margin: 30px 0; width: 100%;">
                           <tr>
                             <td style="border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); text-align: center;">
-                              <a href="https://makeitads.com/dashboard/strategy/${strategyId}" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 12px;">
+                              <a href="https://makeitads.pro/dashboard/strategy/${strategyId}" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; font-size: 16px; border-radius: 12px;">
                                 View Your Strategy →
                               </a>
                             </td>

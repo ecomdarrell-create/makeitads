@@ -581,7 +581,7 @@ export default function SettingsPage() {
                   Business Profile →
                 </button>
                 <a 
-                  href="mailto:contact@makeitads.com" 
+                  href="mailto:contact@makeitads.pro" 
                   className="w-full text-left rounded-lg px-2 sm:px-3 py-2 text-[10px] sm:text-xs text-slate-400 hover:bg-white/[0.03] hover:text-white transition-all block active:scale-95"
                 >
                   Contact Support →

@@ -117,7 +117,7 @@ export async function POST(req: Request) {
                         <table role="presentation" style="margin: 30px 0;">
                           <tr>
                             <td style="border-radius: 12px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
-                              <a href="https://makeitads.com" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; border-radius: 12px;">
+                              <a href="https://makeitads.pro" style="display: inline-block; padding: 16px 32px; color: white; text-decoration: none; font-weight: bold; border-radius: 12px;">
                                 Explore MakeItAds
                               </a>
                             </td>

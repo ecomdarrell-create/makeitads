@@ -186,7 +186,7 @@ export default function AcademyPage() {
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-white">Email us</p>
-                      <p className="text-sm text-slate-400">support@makeitads.com</p>
+                      <p className="text-sm text-slate-400">support@makeitads.pro</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4">

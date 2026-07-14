@@ -72,7 +72,7 @@ export default function GlobalFooter() {
               </svg>
             </a>
             {/* Email */}
-            <a href="mailto:support@makeitads.com" className="text-slate-400 hover:text-white transition-colors">
+            <a href="mailto:support@makeitads.pro" className="text-slate-400 hover:text-white transition-colors">
               <Mail className="h-4 w-4" />
             </a>
           </div>

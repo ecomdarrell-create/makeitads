@@ -17,6 +17,8 @@ import {
   HelpCircle,
   Lock,
   X,
+  Mail,
+  Megaphone,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { createClient } from "@/lib/supabase";
@@ -38,9 +40,8 @@ const navItems = [
   { label: "Billing", href: "/dashboard/billing", icon: CreditCard },
 ];
 
-const bottomItems = [
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-];
+// ⚠️ REMPLACE CETTE VALEUR PAR TON VRAI EMAIL CEO
+const CEO_EMAIL = "darrellkamga@gmail.com"; 
 
 interface MobileSidebarProps {
   onClose: () => void;
@@ -79,6 +80,17 @@ export default function MobileSidebar({ onClose }: MobileSidebarProps) {
     };
     getUser();
   }, []);
+
+  // ✅ Liens admin réservés au CEO (calculés dynamiquement)
+  const adminItems = userEmail === CEO_EMAIL ? [
+    { label: "Admin Emails", href: "/dashboard/admin/emails", icon: Mail },
+    { label: "Newsletters", href: "/dashboard/admin/newsletters", icon: Megaphone },
+  ] : [];
+
+  const bottomItems = [
+    ...adminItems,
+    { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -271,7 +283,7 @@ export default function MobileSidebar({ onClose }: MobileSidebarProps) {
         </div>
 
         <a 
-          href="mailto:contact@makeitads.com?subject=Help%20%26%20Support%20Request"
+          href="mailto:contact@makeitads.pro?subject=Help%20%26%20Support%20Request"
           onClick={handleNavClick}
           className="w-full flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-slate-400 hover:bg-white/[0.05] hover:text-white transition-all active:scale-[0.98]"
         >

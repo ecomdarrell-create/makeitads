@@ -16,6 +16,8 @@ import {
   ChevronRight,
   HelpCircle,
   Lock,
+  Mail,
+  Megaphone,
 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { createClient } from "@/lib/supabase";
@@ -37,9 +39,8 @@ const navItems = [
   { label: "Billing", href: "/dashboard/billing", icon: CreditCard },
 ];
 
-const bottomItems = [
-  { label: "Settings", href: "/dashboard/settings", icon: Settings },
-];
+// ⚠️ REMPLACE CETTE VALEUR PAR TON VRAI EMAIL CEO
+const CEO_EMAIL = "darrellkamga@gmail.com"; 
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -79,6 +80,17 @@ export default function Sidebar() {
     };
     getUser();
   }, []);
+
+  // ✅ Liens admin réservés au CEO (calculés dynamiquement)
+  const adminItems = userEmail === CEO_EMAIL ? [
+    { label: "Admin Emails", href: "/dashboard/admin/emails", icon: Mail },
+    { label: "Newsletters", href: "/dashboard/admin/newsletters", icon: Megaphone },
+  ] : [];
+
+  const bottomItems = [
+    ...adminItems,
+    { label: "Settings", href: "/dashboard/settings", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     try {
@@ -266,7 +278,7 @@ export default function Sidebar() {
         </div>
 
         <a 
-          href="mailto:contact@makeitads.com?subject=Help%20%26%20Support%20Request"
+          href="mailto:contact@makeitads.pro?subject=Help%20%26%20Support%20Request"
           className="w-full flex items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-slate-400 hover:bg-white/[0.05] hover:text-white transition-all"
         >
           <HelpCircle className="h-3.5 w-3.5" strokeWidth={2} />

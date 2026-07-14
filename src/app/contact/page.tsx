@@ -20,7 +20,7 @@ const FAQS = [
   },
   {
     question: "How do I contact support?",
-    answer: "You can reach our support team via email at support@makeitads.com, through the live chat available 24/7 on our platform, or by filling out the contact form on this page. We typically respond within 24 hours."
+    answer: "You can reach our support team via email at support@makeitads.pro, through the live chat available 24/7 on our platform, or by filling out the contact form on this page. We typically respond within 24 hours."
   },
   {
     question: "Can I cancel my subscription anytime?",
@@ -91,7 +91,7 @@ export default function ContactPage() {
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Email Us</h3>
             <p className="text-sm text-slate-400 mb-3">We'll respond within 24 hours</p>
-            <p className="text-sm font-semibold text-[#6366f1]">support@makeitads.com</p>
+            <p className="text-sm font-semibold text-[#6366f1]">support@makeitads.pro</p>
           </div>
           <div className="rounded-3xl border border-white/10 bg-white/[0.02] p-8">
             <div className="h-12 w-12 rounded-xl bg-[#6366f1]/10 flex items-center justify-center mb-4">

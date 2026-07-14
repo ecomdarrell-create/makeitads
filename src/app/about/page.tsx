@@ -27,7 +27,7 @@ const aboutJsonLd = {
     "worksFor": {
       "@type": "Organization",
       "name": "MakeItAds",
-      "url": "https://makeitads.com"
+      "url": "https://makeitads.pro"
     },
     "url": "https://www.linkedin.com/in/darrell-kamga-547b24275",
     "sameAs": [
