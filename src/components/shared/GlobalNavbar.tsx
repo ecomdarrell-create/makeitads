@@ -8,7 +8,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter, usePathname } from "next/navigation";
 
-const TELEGRAM_URL = "https://t.me/makeitads";
+const TELEGRAM_URL = "https://t.me/theboardroom_group";
 
 export default function GlobalNavbar() {
   const { user, loading } = useSession();
@@ -30,6 +30,16 @@ export default function GlobalNavbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // ✅ Empêche le scroll de la page arrière-plan quand le menu mobile est ouvert
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [mobileMenuOpen]);
+
   const handleLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -44,15 +54,11 @@ export default function GlobalNavbar() {
         router.push("/");
         setTimeout(() => {
           const element = document.querySelector(href);
-          if (element) {
-            element.scrollIntoView({ behavior: "smooth" });
-          }
+          if (element) element.scrollIntoView({ behavior: "smooth" });
         }, 300);
       } else {
         const element = document.querySelector(href);
-        if (element) {
-          element.scrollIntoView({ behavior: "smooth" });
-        }
+        if (element) element.scrollIntoView({ behavior: "smooth" });
       }
     } else {
       router.push(href);
@@ -69,48 +75,18 @@ export default function GlobalNavbar() {
           
           <Link href="/" className="relative flex items-center gap-1.5 flex-shrink-0 pl-3 sm:pl-4 z-10">
             <span className="text-sm sm:text-base font-bold tracking-tight text-white">
-              Make<span className="text-[#6366f1]">ItAds</span>
+              MakeIt<span className="text-[#6366f1]">Ads</span>
             </span>
           </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 z-10">
-            <button 
-              onClick={() => scrollToSection("#success-stories")}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
-            >
-              Results
-            </button>
-
-            <Link 
-              href="/community"
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
-            >
-              Community
-            </Link>
-
-            <button 
-              onClick={() => scrollToSection("#pricing")}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
-            >
-              Pricing
-            </button>
-
-            <button 
-              onClick={() => scrollToSection("#faq")}
-              className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5"
-            >
-              FAQ
-            </button>
-
-            <a
-              href={TELEGRAM_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#a78bfa] hover:text-[#c4b5fd] transition-colors rounded-full hover:bg-white/5"
-            >
-              Telegram
-              <ExternalLink className="h-3 w-3" />
+            <button onClick={() => scrollToSection("#success-stories")} className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Results</button>
+            <Link href="/community" className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Community</Link>
+            <button onClick={() => scrollToSection("#pricing")} className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">Pricing</button>
+            <button onClick={() => scrollToSection("#faq")} className="px-3 py-2 text-sm text-slate-400 hover:text-white transition-colors rounded-full hover:bg-white/5">FAQ</button>
+            <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 px-3 py-2 text-sm text-[#a78bfa] hover:text-[#c4b5fd] transition-colors rounded-full hover:bg-white/5">
+              Telegram <ExternalLink className="h-3 w-3" />
             </a>
           </div>
 
@@ -139,24 +115,13 @@ export default function GlobalNavbar() {
                       exit={{ opacity: 0, y: 8, scale: 0.95 }}
                       className="absolute right-0 mt-2 w-48 rounded-2xl border border-white/10 bg-[#0f0f1a] shadow-xl overflow-hidden py-2"
                     >
-                      <Link 
-                        href="/dashboard" 
-                        onClick={() => setUserMenuOpen(false)} 
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
-                      >
+                      <Link href="/dashboard" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
                         <User className="h-4 w-4" /> Dashboard
                       </Link>
-                      <Link
-                        href="/community"
-                        onClick={() => setUserMenuOpen(false)}
-                        className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors"
-                      >
+                      <Link href="/community" onClick={() => setUserMenuOpen(false)} className="flex items-center gap-2 px-4 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-white transition-colors">
                         <ExternalLink className="h-4 w-4" /> Community
                       </Link>
-                      <button 
-                        onClick={handleLogout} 
-                        className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 hover:text-red-300 transition-colors"
-                      >
+                      <button onClick={handleLogout} className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 hover:text-red-300 transition-colors">
                         <LogOut className="h-4 w-4" /> Logout
                       </button>
                     </motion.div>
@@ -165,18 +130,8 @@ export default function GlobalNavbar() {
               </div>
             ) : (
               <>
-                <Link 
-                  href="/login" 
-                  className="hidden sm:flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-                >
-                  Sign in
-                </Link>
-                <Link 
-                  href="/signup" 
-                  className="flex items-center rounded-full bg-[#6366f1] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#4f46e5] transition-colors shadow-lg shadow-[#6366f1]/25"
-                >
-                  Start Free
-                </Link>
+                <Link href="/login" className="hidden sm:flex items-center rounded-full border border-white/10 bg-white/5 px-4 py-1.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors">Sign in</Link>
+                <Link href="/signup" className="flex items-center rounded-full bg-[#6366f1] px-4 py-1.5 text-sm font-semibold text-white hover:bg-[#4f46e5] transition-colors shadow-lg shadow-[#6366f1]/25">Start Free</Link>
               </>
             )}
             
@@ -198,88 +153,37 @@ export default function GlobalNavbar() {
             animate={{ opacity: 1, y: 0, scale: 1 }} 
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="lg:hidden fixed top-20 left-4 right-4 z-40 mx-auto max-w-md"
+            // ✅ Ajout de max-h et overflow-y pour les petits écrans
+            className="lg:hidden fixed top-20 left-4 right-4 z-40 mx-auto max-w-md max-h-[calc(100vh-100px)] overflow-y-auto overscroll-contain"
           >
             <div className="rounded-3xl border border-white/10 bg-[#0a0a14]/95 backdrop-blur-xl shadow-2xl overflow-hidden relative">
               <div className="absolute inset-0 rounded-3xl bg-gradient-to-b from-white/5 to-transparent pointer-events-none" />
               
               <div className="relative z-10 p-3 space-y-1">
-                <button
-                  onClick={() => scrollToSection("#success-stories")}
-                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
-                >
-                  Results
-                </button>
-
-                <Link
-                  href="/community"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
-                >
-                  Community
-                </Link>
-
-                <a
-                  href={TELEGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="flex items-center justify-between px-4 py-3 text-sm text-[#a78bfa] hover:text-[#c4b5fd] hover:bg-white/5 rounded-2xl transition-colors"
-                >
+                <button onClick={() => scrollToSection("#success-stories")} className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors">Results</button>
+                <Link href="/community" onClick={() => setMobileMenuOpen(false)} className="block w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors">Community</Link>
+                <a href={TELEGRAM_URL} target="_blank" rel="noopener noreferrer" onClick={() => setMobileMenuOpen(false)} className="flex items-center justify-between px-4 py-3 text-sm text-[#a78bfa] hover:text-[#c4b5fd] hover:bg-white/5 rounded-2xl transition-colors">
                   <span>Join The Boardroom</span>
                   <ExternalLink className="h-3.5 w-3.5" />
                 </a>
-
-                <button
-                  onClick={() => scrollToSection("#pricing")}
-                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
-                >
-                  Pricing
-                </button>
-
-                <button
-                  onClick={() => scrollToSection("#faq")}
-                  className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors"
-                >
-                  FAQ
-                </button>
+                <button onClick={() => scrollToSection("#pricing")} className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors">Pricing</button>
+                <button onClick={() => scrollToSection("#faq")} className="w-full text-left px-4 py-3 text-sm text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl transition-colors">FAQ</button>
 
                 <div className="my-2 border-t border-white/10" />
 
                 {!user && (
                   <div className="space-y-2 p-2">
-                    <Link 
-                      href="/login" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-center rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors"
-                    >
-                      Sign in
-                    </Link>
-                    <Link 
-                      href="/signup" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-center rounded-full bg-[#8b5cf6] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"
-                    >
-                      Start Free
-                    </Link>
+                    <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center rounded-full border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/10 transition-colors">Sign in</Link>
+                    {/* ✅ Couleur uniformisée avec le bouton desktop */}
+                    <Link href="/signup" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center rounded-full bg-[#6366f1] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4f46e5] transition-colors">Start Free</Link>
                   </div>
                 )}
 
                 {user && (
                   <div className="space-y-2 p-2">
-                    <Link 
-                      href="/dashboard" 
-                      onClick={() => setMobileMenuOpen(false)}
-                      className="block w-full text-center rounded-full bg-[#8b5cf6] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#7c3aed] transition-colors"
-                    >
-                      Open Dashboard
-                    </Link>
-                    <button 
-                      onClick={handleLogout}
-                      className="block w-full text-center text-xs text-red-400 hover:text-red-300 transition-colors py-2"
-                    >
-                      Logout
-                    </button>
+                    {/* ✅ Couleur uniformisée avec le bouton desktop */}
+                    <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="block w-full text-center rounded-full bg-[#6366f1] px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#4f46e5] transition-colors">Open Dashboard</Link>
+                    <button onClick={handleLogout} className="block w-full text-center text-xs text-red-400 hover:text-red-300 transition-colors py-2">Logout</button>
                   </div>
                 )}
               </div>

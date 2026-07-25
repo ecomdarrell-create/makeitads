@@ -139,11 +139,10 @@ export default function Sidebar() {
     <aside className="fixed left-0 top-0 z-40 flex h-screen w-[260px] flex-col border-r border-white/10 bg-[#0a0a14] shadow-lg">
       {/* Header avec logo cliquable */}
       <div className="flex h-[64px] flex-col justify-center px-6 border-b border-white/10">
+        {/* ✅ LOGO CORRIGÉ : MakeIt en blanc, Ads en violet */}
         <Link href="/" className="flex items-center gap-0.5 transition-opacity hover:opacity-80 cursor-pointer">
-          <span className="text-[17px] font-bold text-white tracking-tight">Make</span>
-          <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-[17px] font-bold text-transparent tracking-tight">
-            ItAds
-          </span>
+          <span className="text-[17px] font-bold text-white tracking-tight">MakeIt</span>
+          <span className="text-[17px] font-bold text-[#6366f1] tracking-tight">Ads</span>
         </Link>
         <span className="text-[9px] font-medium text-slate-500 uppercase tracking-wider mt-0.5">
           Marketing Strategist

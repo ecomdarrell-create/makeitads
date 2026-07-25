@@ -7,8 +7,11 @@ export default function GlobalFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="lg:col-span-1">
+            {/* ✅ MODIFICATION 1 : Logo "MakeIt" en blanc, "Ads" en violet */}
             <Link href="/" className="flex items-center gap-1.5 mb-6">
-              <span className="text-xl font-bold tracking-tight text-white">Make<span className="text-[#6366f1]">ItAds</span></span>
+              <span className="text-xl font-bold tracking-tight text-white">
+                MakeIt<span className="text-[#6366f1]">Ads</span>
+              </span>
             </Link>
             <p className="text-sm text-slate-400 mb-6 leading-relaxed">AI-powered market intelligence for modern businesses. Stop guessing, start growing.</p>
             <div className="space-y-3">
@@ -34,7 +37,12 @@ export default function GlobalFooter() {
             <h4 className="text-sm font-bold text-white mb-6">Resources</h4>
             <ul className="space-y-4 text-sm text-slate-400">
               <li><Link href="/#faq" className="hover:text-white transition-colors">Documentation</Link></li>
-              <li><a href="https://t.me/makeitads" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">Community</a></li>
+              {/* ✅ MODIFICATION 2 : Nouveau lien Telegram */}
+              <li>
+                <a href="https://t.me/theboardroom_group" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">
+                  Community
+                </a>
+              </li>
               <li><Link href="/help" className="hover:text-white transition-colors">Help Center</Link></li>
               <li><Link href="/#success-stories" className="hover:text-white transition-colors">Success Stories</Link></li>
             </ul>

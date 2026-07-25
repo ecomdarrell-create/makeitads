@@ -143,11 +143,10 @@ export default function MobileSidebar({ onClose }: MobileSidebarProps) {
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex h-[64px] items-center justify-between px-6 border-b border-white/10">
+        {/* ✅ LOGO CORRIGÉ : MakeIt en blanc, Ads en violet */}
         <Link href="/" onClick={handleNavClick} className="flex items-center gap-0.5 cursor-pointer hover:opacity-80 transition-opacity">
-          <span className="text-[17px] font-bold text-white tracking-tight">Make</span>
-          <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-[17px] font-bold text-transparent tracking-tight">
-            ItAds
-          </span>
+          <span className="text-[17px] font-bold text-white tracking-tight">MakeIt</span>
+          <span className="text-[17px] font-bold text-[#6366f1] tracking-tight">Ads</span>
         </Link>
         <button
           onClick={onClose}

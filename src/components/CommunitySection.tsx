@@ -63,8 +63,9 @@ export default function CommunitySection() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
 
+              {/* ✅ MODIFICATION : Nouveau lien Telegram */}
               <a
-                href="https://t.me/makeitads"
+                href="https://t.me/theboardroom_group"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-8 py-4 text-sm font-semibold text-white hover:bg-white/20 transition-all w-full sm:w-auto"

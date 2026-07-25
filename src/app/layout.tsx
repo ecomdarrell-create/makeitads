@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 // ═══════════════════════════════════════════════════════════
-// ✅ METADATA SEO
+// ✅ METADATA SEO & OPEN GRAPH
 // ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
@@ -39,7 +39,8 @@ export const metadata: Metadata = {
     description: "Stop guessing. MakeItAds analyzes your market, benchmarks competitors, and builds data-backed ad strategies.",
     images: [
       {
-        url: "/images/dashboard-screenshot.png",
+        // ✅ Assure-toi que cette image existe bien dans ton dossier public/
+        url: "/images/og-image.png", 
         width: 1200,
         height: 630,
         alt: "MakeItAds Dashboard - AI Marketing Intelligence",
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MakeItAds - AI Marketing Strategies That Convert",
     description: "Stop guessing. Get data-backed ad strategies powered by AI.",
-    images: ["/images/dashboard-screenshot.png"],
+    images: ["/images/og-image.png"],
   },
   robots: {
     index: true,
@@ -118,7 +119,7 @@ const jsonLd = {
       "logo": "https://makeitads.pro/favicon.ico",
       "sameAs": [
         "https://twitter.com/makeitads",
-        "https://t.me/makeitads"
+        "https://t.me/theboardroom_group" // ✅ MODIFICATION : Nouveau lien Telegram
       ]
     },
     {
@@ -183,39 +184,23 @@ export default function RootLayout({
       </head>
       
       <body 
-        className={`${inter.className} bg-background text-foreground min-h-screen overflow-x-hidden`}
+        className={`${inter.className} bg-[#080810] text-white min-h-screen overflow-x-hidden`}
         suppressHydrationWarning
       >
-        {/* ═══════════════════════════════════════════════════════════
-            CONTAINER PRINCIPAL
-            ═══════════════════════════════════════════════════════════ */}
         <div id="app-root" className="relative min-h-screen">
           {children}
         </div>
 
-        {/* ═══════════════════════════════════════════════════════════
-            OVERLAYS GLOBAUX
-            Ces éléments seront utilisés par les providers pour :
-            - Drawer mobile (sidebar)
-            - Modals
-            - Toasts/Notifications
-            - Loading states
-            ═══════════════════════════════════════════════════════════ */}
         <div 
           id="portal-root" 
           className="fixed inset-0 z-[9999] pointer-events-none"
           aria-hidden="true"
         >
-          {/* Les overlays seront injectés ici via React Portal */}
         </div>
 
-        {/* ═══════════════════════════════════════════════════════════
-            SKIP LINK (Accessibilité)
-            Permet aux utilisateurs clavier de sauter au contenu
-            ═══════════════════════════════════════════════════════════ */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-brand focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-accent"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-[#6366f1] focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
         >
           Skip to main content
         </a>

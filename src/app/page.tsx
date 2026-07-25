@@ -583,11 +583,7 @@ function ReviewsCarousel() {
             <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.90) 0%, rgba(0,0,0,0.60) 30%, rgba(0,0,0,0.20) 60%, rgba(0,0,0,0) 100%)' }} />
           </div>
 
-          {story.isNew && (
-            <div className="absolute top-4 right-4 z-20">
-              <span className="px-3 py-1 rounded-full bg-[#6366f1]/90 backdrop-blur-md text-xs font-bold text-white border border-[#6366f1]/50">New</span>
-            </div>
-          )}
+          {/* ✅ Badge "New" supprimé ici */}
 
           <div className="absolute bottom-0 left-0 right-0 z-10 p-6 md:p-8">
             <div className="mb-4">
@@ -636,7 +632,6 @@ export default function LandingPage() {
 
   const handleUpgrade = async (planName: string) => {
     if (!user) {
-      // 🔒 Redirection vers signup si l'utilisateur n'est pas connecté
       window.location.href = `/signup?redirect=/dashboard/billing&plan=${planName}`;
       return;
     }
@@ -697,12 +692,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ Passage de la prop isLoggedIn */}
       <HowItWorksSection isLoggedIn={!!user} />
 
       <CompetitorsSection />
 
-      {/* ✅ Passage de la prop isLoggedIn */}
       <ComparisonSection isLoggedIn={!!user} />
 
       <FounderMessage />

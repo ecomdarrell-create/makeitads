@@ -248,28 +248,28 @@ export default function DashboardClient() {
   const firstName = user?.user_metadata?.first_name || user?.email?.split("@")[0] || "there";
 
   return (
-    <div id="dashboard-export-content" className="space-y-8">
+    <div id="dashboard-export-content" className="space-y-6 sm:space-y-8">
       {/* HEADER */}
-      <div className="flex items-start justify-between gap-6">
-        <div>
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 mb-2 flex-wrap">
-            <h1 className="text-3xl font-bold text-white">Welcome back, {firstName}</h1>
+      <div className="flex flex-col sm:flex-row items-start justify-between gap-4 sm:gap-6">
+        <div className="w-full sm:w-auto">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
+            <h1 className="text-2xl sm:text-3xl font-bold text-white">Welcome back, {firstName}</h1>
             {isEnterprise && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-xs font-bold text-white flex items-center gap-1"><Star className="h-3 w-3" /> ENTERPRISE</span>}
             {isPremium && <span className="px-2 py-0.5 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-xs font-bold text-white">PREMIUM</span>}
             {isPro && <span className="px-2 py-0.5 rounded-full bg-[#6366f1]/20 text-[#a5b4fc] text-xs font-bold">PRO</span>}
           </motion.div>
-          <p className="text-slate-400">Here's your marketing command center.</p>
+          <p className="text-sm sm:text-base text-slate-400">Here's your marketing command center.</p>
         </div>
         
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
           {!usageLoading && usageData.strategiesLimit !== -1 && (
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-2.5 w-full sm:w-auto">
               <div className="flex items-center gap-2 mb-1">
-                <Zap className="h-3.5 w-3.5 text-[#8b5cf6]" />
+                <Zap className="h-3.5 w-3.5 text-[#8b5cf6] flex-shrink-0" />
                 <span className="text-xs font-medium text-slate-400">Strategies this month</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="h-2 w-32 bg-white/5 rounded-full overflow-hidden">
+                <div className="flex-1 sm:w-32 h-2 bg-white/5 rounded-full overflow-hidden">
                   <div 
                     className={`h-full rounded-full transition-all ${
                       usageData.strategiesUsed >= usageData.strategiesLimit 
@@ -279,49 +279,52 @@ export default function DashboardClient() {
                     style={{ width: `${Math.min(100, (usageData.strategiesUsed / usageData.strategiesLimit) * 100)}%` }}
                   />
                 </div>
-                <span className="text-sm font-bold text-white">
+                <span className="text-sm font-bold text-white flex-shrink-0">
                   {usageData.strategiesUsed}/{usageData.strategiesLimit}
                 </span>
               </div>
             </div>
           )}
 
-          <button
-            onClick={handleExportPDF}
-            disabled={isExporting}
-            className="flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white transition-all disabled:opacity-50"
-          >
-            {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
-            {isExporting ? "Generating..." : "Export PDF"}
-          </button>
-
-          {!usageLoading && usageData.strategiesLimit !== -1 && usageData.strategiesUsed >= usageData.strategiesLimit && (
+          <div className="flex items-center gap-3 w-full sm:w-auto">
             <button
-              onClick={() => router.push("/dashboard/billing")}
-              className="flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-2.5 text-sm font-bold text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 transition-all"
+              onClick={handleExportPDF}
+              disabled={isExporting}
+              className="flex-1 sm:flex-none flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2.5 text-sm font-medium text-slate-300 hover:bg-white/[0.05] hover:text-white transition-all disabled:opacity-50"
             >
-              <Crown className="h-4 w-4" />
-              Upgrade
+              {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              <span className="hidden sm:inline">{isExporting ? "Generating..." : "Export PDF"}</span>
+              <span className="sm:hidden">{isExporting ? "..." : "PDF"}</span>
             </button>
-          )}
+
+            {!usageLoading && usageData.strategiesLimit !== -1 && usageData.strategiesUsed >= usageData.strategiesLimit && (
+              <button
+                onClick={() => router.push("/dashboard/billing")}
+                className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-2.5 text-sm font-bold text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 transition-all"
+              >
+                <Crown className="h-4 w-4" />
+                <span className="hidden sm:inline">Upgrade</span>
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
       {/* WELCOME FLOW */}
       <AnimatePresence>
         {!welcomeCompleted && (
-          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-6">
-            <div className="flex items-start justify-between mb-4">
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center"><Rocket className="h-5 w-5 text-white" /></div>
-                <div><h2 className="text-lg font-bold text-white">Get Started with MakeItAds</h2><p className="text-xs text-slate-400">Complete these steps to unlock the full power</p></div>
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0"><Rocket className="h-5 w-5 text-white" /></div>
+                <div><h2 className="text-base sm:text-lg font-bold text-white">Get Started with MakeItAds</h2><p className="text-xs text-slate-400">Complete these steps to unlock the full power</p></div>
               </div>
-              <div className="text-right"><p className="text-2xl font-bold text-white">{welcomeSteps.filter((s) => s.completed).length}/{welcomeSteps.length}</p><p className="text-[10px] text-slate-500 uppercase tracking-wider">Completed</p></div>
+              <div className="text-right flex-shrink-0"><p className="text-xl sm:text-2xl font-bold text-white">{welcomeSteps.filter((s) => s.completed).length}/{welcomeSteps.length}</p><p className="text-[10px] text-slate-500 uppercase tracking-wider">Completed</p></div>
             </div>
             <div className="h-2 rounded-full bg-white/5 overflow-hidden mb-6">
               <motion.div initial={{ width: 0 }} animate={{ width: `${(welcomeSteps.filter((s) => s.completed).length / welcomeSteps.length) * 100}%` }} transition={{ duration: 0.8 }} className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {welcomeSteps.map((step, i) => {
                 const Icon = step.icon;
                 return (
@@ -341,12 +344,12 @@ export default function DashboardClient() {
       </AnimatePresence>
 
       {/* BUSINESS HEALTH SCORE */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-8 relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="rounded-2xl border border-white/10 bg-gradient-to-br from-[#0f0f1a] to-[#1a1a2e] p-5 sm:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366f1]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-3"><div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center"><Heart className="h-6 w-6 text-white" /></div><div><h2 className="text-xl font-bold text-white">Business Health</h2><p className="text-xs text-slate-400">Your overall readiness score</p></div></div>
-            <div className="text-right"><div className="text-5xl font-bold text-white"><AnimatedNumber value={businessHealthScore} /><span className="text-2xl text-slate-400">/100</span></div><p className="text-xs text-slate-400 mt-1">{businessHealthScore >= 80 ? "Excellent" : businessHealthScore >= 60 ? "Good" : businessHealthScore >= 40 ? "Fair" : "Needs work"}</p></div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+            <div className="flex items-center gap-3"><div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center flex-shrink-0"><Heart className="h-6 w-6 text-white" /></div><div><h2 className="text-lg sm:text-xl font-bold text-white">Business Health</h2><p className="text-xs text-slate-400">Your overall readiness score</p></div></div>
+            <div className="text-right"><div className="text-4xl sm:text-5xl font-bold text-white"><AnimatedNumber value={businessHealthScore} /><span className="text-xl sm:text-2xl text-slate-400">/100</span></div><p className="text-xs text-slate-400 mt-1">{businessHealthScore >= 80 ? "Excellent" : businessHealthScore >= 60 ? "Good" : businessHealthScore >= 40 ? "Fair" : "Needs work"}</p></div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
             {[
@@ -372,14 +375,14 @@ export default function DashboardClient() {
       </motion.div>
 
       {/* PRIMARY KPIs */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <h2 className="text-lg font-bold text-white">Key Metrics</h2>
-        <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
-          <button onClick={() => setTrendPeriod("7d")} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${trendPeriod === "7d" ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}>Last 7 days</button>
-          <button onClick={() => setTrendPeriod("30d")} className={`px-3 py-1 rounded-md text-xs font-medium transition-all ${trendPeriod === "30d" ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}>Last 30 days</button>
+        <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 w-full sm:w-auto">
+          <button onClick={() => setTrendPeriod("7d")} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-medium transition-all ${trendPeriod === "7d" ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}>Last 7 days</button>
+          <button onClick={() => setTrendPeriod("30d")} className={`flex-1 sm:flex-none px-3 py-1.5 rounded-md text-xs font-medium transition-all ${trendPeriod === "30d" ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}>Last 30 days</button>
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           { icon: Target, color: "text-[#8b5cf6]", bg: "bg-[#6366f1]/10", label: "Strategies Generated", value: totalStrategies, current: trendData.strategies.current, previous: trendData.strategies.previous },
           { icon: BarChart3, color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Avg. Market Score", value: avgMarketScore || "—", current: 0, previous: 0, hideTrend: true },
@@ -398,10 +401,10 @@ export default function DashboardClient() {
       </div>
 
       {/* AI COMMAND CENTER */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-[#6366f1]/10 p-8 relative overflow-hidden">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="rounded-2xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-[#6366f1]/10 p-5 sm:p-8 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#8b5cf6]/10 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-6"><div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center"><Brain className="h-6 w-6 text-white" /></div><div><h2 className="text-xl font-bold text-white">Intelligent Command Center</h2><p className="text-xs text-slate-400">Your automated marketing assistant</p></div></div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 mb-6"><div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center flex-shrink-0"><Brain className="h-6 w-6 text-white" /></div><div><h2 className="text-lg sm:text-xl font-bold text-white">Intelligent Command Center</h2><p className="text-xs text-slate-400">Your automated marketing assistant</p></div></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5"><div className="flex items-center gap-2 mb-3"><Activity className="h-4 w-4 text-[#38bdf8]" /><h3 className="text-sm font-bold text-white">What happened?</h3></div><div className="space-y-2">{aiCommandCenter.whatHappened.map((item, i) => <p key={i} className="text-xs text-slate-300 leading-relaxed">• {item}</p>)}</div></div>
             <div className="rounded-xl border border-white/10 bg-white/[0.02] p-5"><div className="flex items-center gap-2 mb-3"><Rocket className="h-4 w-4 text-emerald-400" /><h3 className="text-sm font-bold text-white">What should you do next?</h3></div><div className="space-y-2">{aiCommandCenter.whatNext.map((item, i) => <p key={i} className="text-xs text-slate-300 leading-relaxed">• {item}</p>)}</div></div>
@@ -413,7 +416,7 @@ export default function DashboardClient() {
       {/* RECENT INSIGHTS */}
       {recentAIInsights.length > 0 && (
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}>
-          <div className="flex items-center justify-between mb-4"><h2 className="text-lg font-bold text-white flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-400" /> Recent Insights</h2><Link href="/dashboard/analytics" className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">View all <ChevronRight className="h-3 w-3" /></Link></div>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-4"><h2 className="text-lg font-bold text-white flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-400" /> Recent Insights</h2><Link href="/dashboard/analytics" className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">View all <ChevronRight className="h-3 w-3" /></Link></div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {recentAIInsights.map((insight, i) => (
               <motion.button key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} onClick={() => router.push(insight.link)} className={`rounded-xl border p-5 text-left transition-all hover:scale-[1.02] ${insight.type === "success" ? "border-emerald-500/20 bg-emerald-500/5 hover:border-emerald-500/40" : insight.type === "warning" ? "border-amber-500/20 bg-amber-500/5 hover:border-amber-500/40" : "border-blue-500/20 bg-blue-500/5 hover:border-blue-500/40"}`}>
@@ -426,9 +429,9 @@ export default function DashboardClient() {
       )}
 
       {/* SMART PROGRESS */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6">
-        <div className="flex items-center justify-between mb-6"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center"><Gauge className="h-5 w-5 text-white" /></div><div><h2 className="text-lg font-bold text-white">Smart Progress</h2><p className="text-xs text-slate-400">Track your journey</p></div></div><Link href="/dashboard/milestones" className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">View milestones <ChevronRight className="h-3 w-3" /></Link></div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6"><div className="flex items-center gap-3"><div className="h-10 w-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center flex-shrink-0"><Gauge className="h-5 w-5 text-white" /></div><div><h2 className="text-lg font-bold text-white">Smart Progress</h2><p className="text-xs text-slate-400">Track your journey</p></div></div><Link href="/dashboard/milestones" className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1">View milestones <ChevronRight className="h-3 w-3" /></Link></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {[
             { label: "Business Profile", value: profileCompletion, icon: Building2, color: "from-[#6366f1] to-[#8b5cf6]" },
             { label: "Competitor Intel", value: competitorCoverage, icon: Eye, color: "from-emerald-500 to-teal-500" },
@@ -462,13 +465,13 @@ export default function DashboardClient() {
       </motion.div>
 
       {/* ACTIVITY FEED */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5 sm:p-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
           <h2 className="text-lg font-bold text-white flex items-center gap-2"><Activity className="h-5 w-5 text-[#38bdf8]" /> Activity Feed</h2>
-          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 overflow-x-auto">
+          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1 overflow-x-auto w-full sm:w-auto flex-shrink-0">
             {[{ id: "all", label: "All", icon: Activity }, { id: "strategy", label: "Strategies", icon: Sparkles }, { id: "competitor", label: "Competitors", icon: Eye }, { id: "campaign", label: "Campaigns", icon: Calendar }, { id: "profile", label: "Profile", icon: Building2 }, { id: "export", label: "Exports", icon: Download }].map((filter) => {
               const Icon = filter.icon;
-              return (<button key={filter.id} onClick={() => setActivityFilter(filter.id as ActivityFilter)} className={`flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-medium transition-all whitespace-nowrap ${activityFilter === filter.id ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}><Icon className="h-3 w-3" />{filter.label}</button>);
+              return (<button key={filter.id} onClick={() => setActivityFilter(filter.id as ActivityFilter)} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all whitespace-nowrap flex-shrink-0 ${activityFilter === filter.id ? "bg-[#6366f1] text-white" : "text-slate-400 hover:text-white"}`}><Icon className="h-3 w-3" />{filter.label}</button>);
             })}
           </div>
         </div>
@@ -501,9 +504,9 @@ export default function DashboardClient() {
       </motion.div>
 
       {/* QUICK ACTIONS */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6">
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.7 }} className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-5 sm:p-6">
         <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4"><Zap className="h-5 w-5 text-[#8b5cf6]" /> Quick Actions</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickActions.map((action, i) => {
             const Icon = action.icon;
             return (

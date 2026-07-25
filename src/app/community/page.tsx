@@ -29,7 +29,8 @@ import {
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 
-const TELEGRAM_URL = "https://t.me/makeitads";
+// ✅ MODIFICATION : Nouveau lien Telegram
+const TELEGRAM_URL = "https://t.me/theboardroom_group";
 
 const benefits = [
   { icon: TrendingUp, title: "Weekly Marketing Intelligence", description: "Curated insights delivered every Monday morning." },

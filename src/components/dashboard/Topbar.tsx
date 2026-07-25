@@ -54,16 +54,16 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
           <Menu className="h-5 w-5" strokeWidth={2} />
         </button>
 
-        {/* Logo - cliquable vers landing page */}
+        {/* ✅ LOGO CORRIGÉ : MakeIt en blanc, Ads en violet */}
         <Link 
           href="/" 
           className="flex items-center gap-0.5 cursor-pointer group"
         >
           <span className="text-base md:text-[17px] font-bold text-white tracking-tight group-hover:opacity-80 transition-opacity">
-            Make
+            MakeIt
           </span>
-          <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-base md:text-[17px] font-bold text-transparent tracking-tight group-hover:opacity-80 transition-opacity">
-            ItAds
+          <span className="text-base md:text-[17px] font-bold text-[#6366f1] tracking-tight group-hover:opacity-80 transition-opacity">
+            Ads
           </span>
         </Link>
 

@@ -1,5 +1,5 @@
 // ======================================================
-// SUCCESS STORIES - CHEMINS CORRIGÉS SELON TES FICHIERS
+// SUCCESS STORIES - Badge "New" retiré
 // ======================================================
 
 export interface SuccessStory {
@@ -17,7 +17,7 @@ export interface SuccessStory {
   quote: string;
   modules: string[];
   image: string;
-  isNew?: boolean;
+  // isNew?: boolean; // ✅ Supprimé
 }
 
 export const NEW_SUCCESS_STORIES: SuccessStory[] = [
@@ -36,7 +36,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "MakeItAds identified niches we never considered. Our revenue tripled in 4 months with half the ad spend.",
     modules: ["Market Intel", "Competitor Watch"],
     image: "/images/testimonial-ecommerce.webp",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 8,
@@ -44,7 +44,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     role: "Marketing Director",
     company: "CloudSync",
     country: "Japan",
-    countryFlag: "🇯🇵",
+    countryFlag: "🇵",
     industry: "SaaS",
     metric: "-62% CAC",
     timeToResult: "in 6 months",
@@ -53,7 +53,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "We cut our customer acquisition cost by 62% while scaling. The competitor intelligence alone is worth 10x the price.",
     modules: ["Competitor Intel", "Strategy Engine"],
     image: "/images/testimonial-saas.webp",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 9,
@@ -70,7 +70,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "The market intelligence from MakeItAds was crucial for our pitch deck. Investors loved our data-backed approach.",
     modules: ["Market Intel", "Benchmarking"],
     image: "/images/testimonial-fintech.webp",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 10,
@@ -87,7 +87,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "We manage 40+ client accounts. MakeItAds gives us an unfair advantage on every single one. 12x ROI across the board.",
     modules: ["Full Suite"],
     image: "/images/testimonial-agency.webp",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 4,
@@ -104,7 +104,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "MakeItAds identified audience segments we never considered. Our CPA dropped by 41% in the first month alone.",
     modules: ["Audience Lab", "Campaign Builder", "Analytics"],
     image: "/images/story-priya-patel.jpg",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 5,
@@ -121,7 +121,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "The competitor intelligence alone was worth the subscription. We discovered a positioning gap that doubled our conversion rate.",
     modules: ["Competitor Intelligence", "Market Intelligence", "Growth Roadmap"],
     image: "/images/story-david-kim.jpg",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
   {
     id: 6,
@@ -129,7 +129,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     role: "Marketing Director",
     company: "Bella Vita Cosmetics",
     country: "Spain",
-    countryFlag: "🇪",
+    countryFlag: "🇸",
     industry: "Beauty & Cosmetics",
     metric: "-41% CAC",
     timeToResult: "in 45 days",
@@ -138,7 +138,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "We stopped guessing and started executing with confidence. The AI recommendations were spot-on from day one.",
     modules: ["Creative Studio", "Trend Intelligence", "Budget Optimizer"],
     image: "/images/story-elena-rodriguez.jpg",
-    isNew: true,
+    // isNew: true, ✅ Supprimé
   },
 ];
 

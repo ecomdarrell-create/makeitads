@@ -176,13 +176,7 @@ function ReviewsCarousel() {
             <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/60 to-black/90" />
           </div>
 
-          {story.isNew && (
-            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20">
-              <span className="px-2.5 py-1 sm:px-3 sm:py-1 rounded-full bg-[#6366f1]/80 backdrop-blur-md text-[10px] sm:text-xs font-bold text-white border border-[#6366f1]/50">
-                New
-              </span>
-            </div>
-          )}
+          {/* ✅ Badge "New" supprimé ici */}
 
           <div className="relative z-10 p-5 sm:p-8 flex flex-col h-full">
             <div className="mb-4 sm:mb-6">
