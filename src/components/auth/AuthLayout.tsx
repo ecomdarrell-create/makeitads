@@ -62,15 +62,16 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="flex justify-center mb-8"
+            className="flex justify-center mb-6 sm:mb-8"
           >
             <Link href="/" className="group">
-              <div className="flex items-center gap-1">
-                <span className="text-2xl sm:text-3xl font-bold text-white tracking-tight group-hover:opacity-80 transition-opacity">
-                  Make
+              <div className="flex items-center gap-0.5">
+                {/* ✅ LOGO CORRIGÉ : MakeIt en blanc, Ads en violet */}
+                <span className="text-xl sm:text-2xl font-bold text-white tracking-tight group-hover:opacity-80 transition-opacity">
+                  MakeIt
                 </span>
-                <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-2xl sm:text-3xl font-bold text-transparent tracking-tight group-hover:opacity-80 transition-opacity">
-                  ItAds
+                <span className="text-xl sm:text-2xl font-bold text-[#6366f1] tracking-tight group-hover:opacity-80 transition-opacity">
+                  Ads
                 </span>
               </div>
             </Link>
@@ -83,12 +84,12 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-center mb-8"
+            className="text-center mb-6 sm:mb-8"
           >
-            <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight mb-2">
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight mb-2">
               {title}
             </h1>
-            <p className="text-sm sm:text-base text-slate-400 leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
               {subtitle}
             </p>
           </motion.div>
@@ -112,9 +113,9 @@ export default function AuthLayout({ children, title, subtitle }: AuthLayoutProp
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
-            className="mt-8 text-center"
+            className="mt-6 sm:mt-8 text-center"
           >
-            <div className="flex items-center justify-center gap-3 text-xs text-slate-500">
+            <div className="flex items-center justify-center gap-3 text-[11px] sm:text-xs text-slate-500">
               <Link href="/privacy" className="hover:text-slate-300 transition-colors">
                 Privacy Policy
               </Link>
