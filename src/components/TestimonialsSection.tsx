@@ -161,12 +161,17 @@ export default function TestimonialsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
+            className="text-left"
           >
+            <div className="mb-4 flex items-center gap-2 text-left">
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-white">MakeIt</span>
+              <span className="text-2xl sm:text-3xl font-black tracking-tight text-[#6366f1]">Ads</span>
+            </div>
             <p className="text-sm font-bold uppercase tracking-[0.32em] text-[#6366f1]">Real entrepreneurs</p>
-            <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <h2 className="mt-4 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl text-left">
               Real entrepreneurs. Real results.
             </h2>
-            <p className="mt-6 text-lg text-slate-400 max-w-2xl">
+            <p className="mt-6 text-lg text-slate-400 max-w-2xl text-left">
               Join thousands of founders who transformed their ad strategy with MakeItAds.
             </p>
           </motion.div>

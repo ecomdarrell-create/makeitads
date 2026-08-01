@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useSession } from "@/hooks/useSession";
-import { getCTAText, getCTAHref } from "@/config/cta.config";
+import { getCTAHref } from "@/config/cta.config";
 
 export default function HeroSection() {
   const { user } = useSession();
@@ -19,100 +19,80 @@ export default function HeroSection() {
     window.location.href = getCTAHref("hero", !!user);
   };
 
-  // SCROLL SMOOTH AVEC OFFSET POUR LA NAVBAR FIXE
-  const handleScrollToHowItWorks = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const target = document.getElementById("how-it-works");
-    if (target) {
-      const offset = 80; // Offset pour la navbar fixe
-      const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - offset;
-      window.scrollTo({
-        top: targetPosition,
-        behavior: "smooth",
-      });
-    }
-  };
-
   if (!mounted) return null;
 
   return (
-    <section className="relative z-10 min-h-screen flex items-center justify-center overflow-hidden">
-      <div className="absolute inset-0 z-0">
-        <div className="hidden md:block absolute inset-0">
-          <Image
-            src="/images/hero-realistic-v2.webp"
-            alt="MakeItAds - AI Marketing Intelligence"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
-            quality={90}
-          />
-        </div>
+    <section className="relative z-10 min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.25),transparent_40%),linear-gradient(180deg,#080810_0%,#0a0a14_100%)]" />
 
-        <div className="md:hidden absolute inset-0">
-          <Image
-            src="/images/hero-realistic-v2.webp"
-            alt="MakeItAds - AI Marketing Intelligence"
-            fill
-            className="object-cover object-center"
-            priority
-            sizes="100vw"
-            quality={85}
-          />
-        </div>
-
-        <div className="absolute inset-0 bg-gradient-to-b from-[#080810]/80 via-[#080810]/50 to-[#080810]/90" />
-      </div>
-
-      <div className="relative z-10 w-full max-w-5xl mx-auto px-4 sm:px-6 text-center">
-        <div className="pt-24 pb-12 sm:pt-28 sm:pb-16 md:pt-32 md:pb-20">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
+        <div className="mx-auto max-w-4xl text-left">
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight mb-4 sm:mb-6 leading-[1.1] text-white"
+            transition={{ duration: 0.5 }}
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[0.95] text-white mb-4"
           >
-            Still guessing which ads will actually{" "}
-            <motion.span
-              animate={{ opacity: [1, 0.7, 1] }}
-              transition={{ duration: 3, repeat: Infinity }}
-              className="font-bold bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent inline-block"
-            >
-              convert?
-            </motion.span>
+            <span className="block">Know your <span className="text-[#8b5cf6]">market</span>.</span>
+            <span className="block">Outsmart <span className="text-[#8b5cf6]">competitors</span>.</span>
+            <span className="block">Scale with <span className="text-[#8b5cf6]">confidence</span>.</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.1 }}
-            className="text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 mb-8 sm:mb-10 leading-relaxed max-w-3xl mx-auto px-2"
+            transition={{ duration: 0.5, delay: 0.08 }}
+            className="max-w-2xl text-sm sm:text-base md:text-lg lg:text-xl text-slate-300 leading-relaxed mb-8"
           >
-            MakeItAds analyzes your market, benchmarks your competitors, and
-            builds data-backed strategies so every dollar you spend has a clear
-            reason behind it.
+            MakeItAds turns competitor tracking, market analysis and positioning into one complete growth strategy your team can act on.
           </motion.p>
 
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 w-full max-w-md mx-auto sm:max-w-none"
+            transition={{ duration: 0.6, delay: 0.16 }}
+            className="rounded-[28px] border border-white/10 bg-[#0a0a14]/80 p-2 sm:p-3 shadow-[0_30px_80px_-35px_rgba(99,102,241,0.45)]"
+          >
+            <div className="hidden sm:block overflow-hidden rounded-[20px] border border-white/10 bg-[#080810]">
+              <Image
+                src="/images/hero pics.jpg"
+                alt="MakeItAds strategy dashboard"
+                width={1600}
+                height={900}
+                className="w-full h-auto object-cover"
+                priority
+              />
+            </div>
+
+            <div className="sm:hidden overflow-hidden rounded-[20px] border border-white/10 bg-[#080810]">
+              <Image
+                src="/images/1.jpg"
+                alt="MakeItAds strategy dashboard mobile"
+                width={900}
+                height={1200}
+                className="w-full h-auto object-cover"
+                priority
+              />
+            </div>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.24 }}
+            className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
           >
             <button
               onClick={handleHeroCta}
-              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-105 w-full sm:w-auto"
+              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] w-full sm:w-auto"
             >
-              {getCTAText("hero", !!user)}
+              Open Your Workspace
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* LIEN CORRIGÉ AVEC SCROLL SMOOTH */}
             <a
               href="#how-it-works"
-              onClick={handleScrollToHowItWorks}
-              className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-semibold text-white hover:bg-white/10 transition-all w-full sm:w-auto cursor-pointer"
+              className="flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white hover:bg-white/[0.06] transition-all w-full sm:w-auto"
             >
               See How It Works
             </a>

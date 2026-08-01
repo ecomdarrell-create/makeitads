@@ -13,7 +13,7 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SiShopify, SiStripe, SiMeta, SiGoogle, SiTiktok, SiHubspot } from "react-icons/si";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
@@ -40,8 +40,8 @@ const howItWorksSteps = [
   },
   {
     number: "02",
-    title: "AI analyzes your market",
-    description: "MakeItAds studies your competitors, positioning, trends and opportunities to build a complete market overview.",
+    title: "Analyze the market and competitors",
+    description: "MakeItAds studies your competitors, positioning, trends and opportunities to build a complete market overview for your next growth move.",
     image: "/images/howitworks-step2.webp",
   },
   {
@@ -61,21 +61,18 @@ const howItWorksSteps = [
 function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <section id="how-it-works" className="relative z-10 bg-[#080810]">
-      <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 text-center">
+      <div className="max-w-7xl mx-auto px-6 pt-20 pb-16 text-left sm:text-center">
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            From Business Idea to{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-              Growth Strategy
-            </span>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight tracking-[-0.04em] text-left">
+            From <span className="text-[#8b5cf6]">business context</span> to a complete <span className="text-[#8b5cf6]">marketing strategy</span>.
           </h2>
-          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
-            Describe your business once. MakeItAds takes care of the research, strategy and execution.
+          <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl text-left leading-relaxed">
+            You describe the business. MakeItAds turns your market context into a structured plan for positioning, competitors, channels and growth priorities.
           </p>
         </motion.div>
       </div>
@@ -171,9 +168,9 @@ function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
 // ======================================================
 
 const painPoints = [
-  { id: 1, title: "Guesswork", subtitle: "You don't know which channel deserves your budget.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Throwing money at Facebook, Google, TikTok – hoping something sticks.", stat: "63%", statLabel: "of marketers admit they're guessing" },
-  { id: 2, title: "Blind Competition", subtitle: "Your competitors move faster because they understand the market better.", image: "/images/pain-competition.webp", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "While you're guessing, they're scaling with data you don't have.", stat: "78%", statLabel: "lose to competitors with better data", glassmorphism: true },
-  { id: 3, title: "Wasted Spending", subtitle: "Money gets spent on campaigns without clear reasoning.", image: "/images/pain-wasted.png", borderColor: "border-rose-500/30", color: "from-rose-500 to-pink-500", description: "Up to 70% of ad budgets are wasted on channels that don't convert.", stat: "$200B", statLabel: "wasted annually on bad ads" },
+  { id: 1, title: "Reactive budget allocation", subtitle: "You spend on channels because they look active, not because they’re effective.", image: "/images/pain-guesswork.png", borderColor: "border-red-500/30", color: "from-red-500 to-orange-500", description: "Marketing becomes a series of guesses instead of a repeatable operating system.", stat: "63%", statLabel: "of teams admit they’re still guessing" },
+  { id: 2, title: "Market intelligence gap", subtitle: "Every competitor move feels faster, sharper, and more informed than your own.", image: "/images/pain-competition.webp", borderColor: "border-amber-500/30", color: "from-amber-500 to-yellow-500", description: "You’re reacting after the signal has already shifted.", stat: "78%", statLabel: "of leaders lose speed to better-informed competitors", glassmorphism: true },
+  { id: 3, title: "Channel drift", subtitle: "Your spend gets diluted across campaigns with no shared strategic logic.", image: "/images/pain-wasted.png", borderColor: "border-rose-500/30", color: "from-rose-500 to-pink-500", description: "Performance weakens because no single system connects market intelligence to action.", stat: "$200B", statLabel: "lost annually to inefficient ad decisions" },
 ];
 
 function PainPointsCarousel() {
@@ -186,7 +183,7 @@ function PainPointsCarousel() {
       {painPoints.map((point) => (
         <div
           key={point.id}
-          className={`flex-shrink-0 w-[280px] sm:w-[320px] md:w-[380px] snap-start group relative rounded-2xl sm:rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}
+          className={`flex-shrink-0 w-[290px] sm:w-[320px] md:w-[380px] snap-start group relative rounded-2xl sm:rounded-3xl overflow-hidden border ${point.borderColor} bg-[#0f0f1a] shadow-lg hover:shadow-2xl hover:shadow-[#6366f1]/10 transition-all duration-500`}
         >
           <div className="aspect-[16/10] overflow-hidden relative">
             <Image 
@@ -194,7 +191,7 @@ function PainPointsCarousel() {
               alt={point.title} 
               fill 
               className="object-cover transition duration-700 group-hover:scale-110" 
-              sizes="(max-width: 640px) 280px, (max-width: 768px) 320px, 380px" 
+              sizes="(max-width: 640px) 290px, (max-width: 768px) 320px, 380px" 
             />
             
             {point.glassmorphism && (
@@ -204,7 +201,7 @@ function PainPointsCarousel() {
               </>
             )}
           </div>
-          <div className="p-5 sm:p-6 space-y-2 sm:space-y-3">
+          <div className="p-5 sm:p-6 space-y-2 sm:space-y-3 text-left">
             <h3 className="text-lg sm:text-xl font-bold text-white">{point.title}</h3>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{point.subtitle}</p>
             <p className="text-[10px] sm:text-xs text-slate-500 italic">{point.description}</p>
@@ -217,6 +214,140 @@ function PainPointsCarousel() {
         </div>
       ))}
     </div>
+  );
+}
+
+const signalCards = [
+  {
+    label: "Signal capture",
+    title: "Market signal, not noise",
+    description: "The platform ingests competitor movement, audience shifts and channel momentum as a unified decision layer.",
+    accent: "from-[#6366f1] to-[#8b5cf6]",
+  },
+  {
+    label: "Strategic synthesis",
+    title: "Actionable direction, not generic ideas",
+    description: "Each output is framed with rationale, priorities, budget logic and recommended campaign routes.",
+    accent: "from-[#8b5cf6] to-[#38bdf8]",
+  },
+  {
+    label: "Execution cadence",
+    title: "A repeatable growth operating rhythm",
+    description: "Your team sees what matters, why it matters and what to test next — in the same workspace.",
+    accent: "from-[#38bdf8] to-[#6366f1]",
+  },
+];
+
+const proofMetrics = [
+  { value: "31%", label: "average drop in wasted spend" },
+  { value: "2.4x", label: "faster strategic alignment" },
+  { value: "12+", label: "signal sources unified in one flow" },
+];
+
+const workflowPillars = [
+  {
+    title: "Positioning clarity",
+    description: "Pinpoint what your business is really competing on and where the market is willing to pay more.",
+  },
+  {
+    title: "Channel prioritization",
+    description: "Know which opportunities deserve budget, creative focus and execution velocity.",
+  },
+  {
+    title: "Creative confidence",
+    description: "Turn market intelligence into campaign ideas with a stronger strategic rationale behind them.",
+  },
+];
+
+const trustPoints = [
+  {
+    title: "Unified intelligence",
+    description: "One operating layer for market signals, competition and strategic direction.",
+  },
+  {
+    title: "Decision velocity",
+    description: "Your team moves from ambiguity to a campaign plan in fewer cycles.",
+  },
+  {
+    title: "Premium framing",
+    description: "Position your brand as a higher-signal, more disciplined growth operator.",
+  },
+];
+
+const executiveCards = [
+  {
+    title: "Market intelligence",
+    summary: "Competitor structure, audience shifts and opportunity ranking in one live signal feed.",
+  },
+  {
+    title: "Strategic ideation",
+    summary: "High-confidence positioning, campaign logic and next-step recommendation paths.",
+  },
+  {
+    title: "Execution confidence",
+    summary: "A repeatable operating rhythm that helps your team move with more clarity and less noise.",
+  },
+];
+
+const enterpriseSignals = [
+  { value: "$0", label: "setup friction" },
+  { value: "1", label: "workspace for the full growth stack" },
+  { value: "24/7", label: "decision signal coverage" },
+];
+
+const decisionFlow = [
+  "Manual trend checking",
+  "Fragmented idea generation",
+  "Disconnected channel decisions",
+  "Slow campaign planning",
+];
+
+const decisionFlowAfter = [
+  "Live market intelligence",
+  "Strategic synthesis in one workspace",
+  "Clear channel prioritization",
+  "Execution-ready campaign planning",
+];
+
+function SignalSystemSection() {
+  return (
+    <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 22 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mb-10 md:mb-14 max-w-4xl"
+        >
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.02] text-left">
+            Know the <span className="text-[#8b5cf6]">market</span>. Understand the <span className="text-[#8b5cf6]">gap</span>. Build the <span className="text-[#8b5cf6]">growth move</span>.
+          </h2>
+        </motion.div>
+
+        <div className="grid gap-4 md:grid-cols-3">
+          {signalCards.map((card, index) => (
+            <motion.div
+              key={card.title}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.55, delay: index * 0.08 }}
+              whileHover={{ y: -6 }}
+              className="group relative rounded-[24px] border border-white/10 bg-[#0a0a14]/80 p-5 sm:p-6 text-left overflow-hidden"
+            >
+              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${card.accent}`} />
+              <div className="mb-5 flex items-center justify-between gap-3">
+                <span className="text-[11px] uppercase tracking-[0.22em] text-slate-400">{card.label}</span>
+                <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/80">0{index + 1}</span>
+              </div>
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 leading-tight">{card.title}</h3>
+              <p className="text-sm sm:text-base leading-relaxed text-slate-300">{card.description}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 
@@ -236,24 +367,24 @@ interface FeatureRow {
 }
 
 const comparisonData: FeatureRow[] = [
-  { name: "AI understands your business", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
-  { name: "Competitor monitoring", makeitads: "yes", chatgpt: "no", claude: "no", google: "partial", meta: "partial" },
-  { name: "Marketing strategy generation", makeitads: "yes", chatgpt: "basic", claude: "basic", google: "no", meta: "no" },
-  { name: "Growth opportunities detection", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
-  { name: "Competitor benchmark", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
-  { name: "SWOT analysis", makeitads: "yes", chatgpt: "manual", claude: "manual", google: "no", meta: "no" },
-  { name: "Campaign roadmap", makeitads: "yes", chatgpt: "partial", claude: "partial", google: "no", meta: "no" },
-  { name: "All-in-one workspace", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
-  { name: "Designed for businesses", makeitads: "yes", chatgpt: "general", claude: "general", google: "general", meta: "general" },
-  { name: "Real market intelligence", makeitads: "yes", chatgpt: "limited", claude: "limited", google: "limited", meta: "limited" },
+  { name: "Persistent business memory", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Live competitor signal tracking", makeitads: "yes", chatgpt: "no", claude: "no", google: "partial", meta: "partial" },
+  { name: "Execution-ready growth strategy", makeitads: "yes", chatgpt: "basic", claude: "basic", google: "no", meta: "no" },
+  { name: "Opportunity detection across channels", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Positioning benchmark against competitors", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Structured SWOT and market framing", makeitads: "yes", chatgpt: "manual", claude: "manual", google: "no", meta: "no" },
+  { name: "Campaign roadmap with rationale", makeitads: "yes", chatgpt: "partial", claude: "partial", google: "no", meta: "no" },
+  { name: "Single platform for strategy + execution", makeitads: "yes", chatgpt: "no", claude: "no", google: "no", meta: "no" },
+  { name: "Built for business decision-makers", makeitads: "yes", chatgpt: "general", claude: "general", google: "general", meta: "general" },
+  { name: "Real market intelligence layer", makeitads: "yes", chatgpt: "limited", claude: "limited", google: "limited", meta: "limited" },
 ];
 
 const tools = [
   { key: "makeitads", name: "MakeItAds", isPrimary: true },
-  { key: "chatgpt", name: "ChatGPT", isPrimary: false },
-  { key: "claude", name: "Claude", isPrimary: false },
-  { key: "google", name: "Google Trends", isPrimary: false },
-  { key: "meta", name: "Meta Ads Library", isPrimary: false },
+  { key: "chatgpt", name: "Generic AI", isPrimary: false },
+  { key: "claude", name: "Generic AI", isPrimary: false },
+  { key: "google", name: "Search Trends", isPrimary: false },
+  { key: "meta", name: "Platform Signals", isPrimary: false },
 ];
 
 function CellValueRenderer({ value, isPrimary }: { value: CellValue; isPrimary: boolean }) {
@@ -293,6 +424,55 @@ function CellValueRenderer({ value, isPrimary }: { value: CellValue; isPrimary: 
   return null;
 }
 
+function InteractiveGenerationSection() {
+  const [visibleLines, setVisibleLines] = useState(0);
+  const generationLines = [
+    "Analyzing the market signal",
+    "Mapping positioning gaps",
+    "Ranking revenue opportunities",
+    "Generating the campaign strategy",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVisibleLines((current) => (current + 1) % (generationLines.length + 1));
+    }, 1100);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6">
+      <div className="max-w-7xl mx-auto rounded-[30px] border border-white/10 bg-[#0a0a14]/85 p-5 sm:p-6 md:p-8">
+        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] items-center">
+          <div className="text-left">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-white mb-4">
+              A structure that <span className="text-[#8b5cf6]">generates</span> a full marketing strategy while the market keeps moving.
+            </h2>
+            <p className="text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed max-w-2xl">
+              The system turns live competitor tracking, market analysis and channel opportunity into a decision sequence your team can execute with clarity.
+            </p>
+          </div>
+
+          <div className="rounded-[24px] border border-[#6366f1]/20 bg-[linear-gradient(135deg,rgba(99,102,241,0.16),rgba(10,10,20,0.94))] p-5 sm:p-6">
+            <div className="mb-4 text-[11px] uppercase tracking-[0.24em] text-[#c7d2fe]">Live generation</div>
+            <div className="space-y-3 font-medium text-white">
+              {generationLines.map((line, index) => (
+                <div
+                  key={line}
+                  className={`transition-all duration-500 ${index < visibleLines ? "opacity-100 translate-x-0" : "opacity-35 translate-x-2"}`}
+                >
+                  {line}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <section className="relative z-10 py-20 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden">
@@ -309,22 +489,12 @@ function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16 md:mb-20 max-w-4xl mx-auto px-4"
         >
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#6366f1]/30 bg-[#6366f1]/10 px-4 py-1.5 mb-4 sm:mb-6">
-            <div className="h-2 w-2 rounded-full bg-[#6366f1] animate-pulse" />
-            <span className="text-xs font-semibold text-[#a5b4fc] uppercase tracking-wider">
-              Why MakeItAds
-            </span>
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight mb-4 sm:mb-6 text-white leading-tight">
-            Why businesses choose MakeItAds over{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-              traditional tools
-            </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.04em] mb-4 sm:mb-6 text-white leading-tight text-left sm:text-center">
+            A <span className="text-[#8b5cf6]">marketing strategy engine</span> for teams that need to move faster than the market.
           </h2>
 
-          <p className="text-sm sm:text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto">
-            Everything your business needs in one intelligent platform instead of switching between disconnected tools.
+          <p className="text-sm sm:text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl text-left sm:text-center">
+            Instead of stitching together scattered tools, teams get one operating layer for market analysis, competitor tracking and campaign direction.
           </p>
         </motion.div>
 
@@ -440,14 +610,11 @@ function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-16 sm:mt-20 md:mt-24 text-center max-w-3xl mx-auto px-4"
         >
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 leading-tight">
-            Stop using five tools to answer{" "}
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-              one business question.
-            </span>
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 leading-tight text-left sm:text-center">
+            One workspace for building the next <span className="text-[#8b5cf6]">marketing strategy</span> with clarity.
           </h3>
-          <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 leading-relaxed">
-            Join thousands of businesses using one platform instead of juggling disconnected marketing tools.
+          <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 leading-relaxed text-left sm:text-center">
+            Replace fragmented workflows with one layer for market intelligence, competitor understanding and execution-ready campaign direction.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4">
             <Link
@@ -644,23 +811,34 @@ export default function LandingPage() {
 
       <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-10 md:mb-16 max-w-4xl mx-auto px-4">
-            <h2 className="text-2xl md:text-4xl lg:text-5xl font-bold tracking-tight leading-tight">
-              Most businesses don't fail because they lack effort.{" "}
-              <span className="font-bold bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
-                They fail because they're making decisions without market intelligence.
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="mb-10 md:mb-16 max-w-5xl"
+          >
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.02] text-left">
+              Most teams are not missing ambition.
+              <span className="block mt-2 text-[#8b5cf6]">
+                They’re missing the right <span className="text-[#8b5cf6]">market angle</span>, the right <span className="text-[#8b5cf6]">competitor signal</span>, and the right <span className="text-[#8b5cf6]">growth strategy</span>.
               </span>
             </h2>
+            <p className="mt-4 max-w-2xl text-left text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed">
+              When the signal is fragmented, your team reacts late, spends inefficiently, and loses the speed advantage that premium growth brands need.
+            </p>
           </motion.div>
           <PainPointsCarousel />
         </div>
       </section>
 
+      <SignalSystemSection />
+
+      <InteractiveGenerationSection />
+
       <HowItWorksSection isLoggedIn={!!user} />
 
       <CompetitorsSection />
-
-      <ComparisonSection isLoggedIn={!!user} />
 
       <FounderMessage />
 
@@ -796,7 +974,7 @@ export default function LandingPage() {
               Stop making decisions{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">in the dark.</span>
             </h2>
-            <p className="text-base md:text-xl text-slate-300 mb-12 max-w-2xl mx-auto">Get market intelligence, competitor insights and growth strategies in one platform.</p>
+            <p className="text-base md:text-xl text-slate-300 mb-12 max-w-2xl mx-auto">Get competitive intelligence, market analysis and full marketing strategy support in one workspace.</p>
             <button onClick={handleFinalCta} className="group inline-flex items-center gap-2 rounded-full bg-[#6366f1] px-8 md:px-12 py-4 md:py-5 text-base md:text-lg font-bold text-white shadow-[0_0_60px_-10px_rgba(99,102,241,0.6)] hover:bg-[#5558e6] transition-all hover:scale-105">
               {getCTAText("finalCta", !!user)} <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
             </button>

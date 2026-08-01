@@ -12,7 +12,7 @@ export interface SmartCTA {
 
 export const SECTION_CTAS: Record<string, SmartCTA> = {
   hero: {
-    text: "Build Your Strategy",
+    text: "Book a Strategy Call",
     href: "/signup",
     variant: "primary",
   },
@@ -62,7 +62,7 @@ export const SECTION_CTAS: Record<string, SmartCTA> = {
     variant: "primary",
   },
   finalCta: {
-    text: "Start For Free",
+    text: "See the Platform",
     href: "/signup",
     variant: "primary",
   },
