@@ -1,29 +1,139 @@
 "use client";
 
 import { motion } from "framer-motion";
-import Image from "next/image";
+import { Quote, Award } from "lucide-react";
 
 export default function FounderMessage() {
   return (
-    <section id="founder" className="relative z-10 overflow-hidden">
-      {/* IMAGE PLEIN ÉCRAN SANS TITRE */}
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.8 }}
-        className="relative w-full min-h-[500px] md:min-h-[600px] lg:min-h-[700px]"
-      >
-        <Image
-          src="/images/founder-message.webp"
-          alt="Dr. Darrell Kamga - Founder of MakeItAds"
-          fill
-          className="object-cover object-center"
-          priority
-          sizes="100vw"
-          quality={95}
-        />
-      </motion.div>
+    <section id="founder" className="relative z-10 overflow-hidden bg-[#080810] py-20 md:py-32">
+      {/* Halos lumineux premium */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-[#6366f1]/10 rounded-full blur-[150px] pointer-events-none" />
+      <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-[#8b5cf6]/10 rounded-full blur-[120px] pointer-events-none" />
+
+      <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
+        {/* Header avec badge premium */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16 md:mb-20"
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#6366f1]/30 bg-[#6366f1]/10 px-4 py-1.5 mb-6">
+            <Award className="h-3.5 w-3.5 text-[#6366f1]" />
+            <span className="text-xs font-semibold text-[#a5b4fc] uppercase tracking-wider">
+              Founder's Vision
+            </span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white leading-tight">
+            Why I built{" "}
+            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
+              MakeItAds
+            </span>
+          </h2>
+          <p className="text-base sm:text-lg md:text-xl text-slate-400 max-w-3xl mx-auto leading-relaxed">
+            A mission to democratize market intelligence for every business
+          </p>
+        </motion.div>
+
+        {/* Contenu texte uniquement (Image et Stats supprimées) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="space-y-6 text-center mb-16 md:mb-20"
+        >
+          {/* Citation principale */}
+          <div className="relative flex justify-center">
+            <Quote className="absolute -top-2 -left-2 h-8 w-8 text-[#6366f1]/30" />
+            <blockquote className="pl-8 text-xl sm:text-2xl md:text-3xl font-bold text-white leading-tight max-w-3xl">
+              "I was tired of watching businesses burn millions on guesswork while their competitors scaled with data they didn't have."
+            </blockquote>
+          </div>
+
+          <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto">
+            After years of consulting for Fortune 500 companies, I realized that <span className="font-semibold text-white">market intelligence shouldn't be a luxury reserved for enterprise budgets</span>. Every founder, every marketer, every small business deserves access to the same strategic insights that drive billion dollar decisions.
+          </p>
+
+          <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-3xl mx-auto">
+            That's why I built MakeItAds — to <span className="font-semibold text-[#8b5cf6]">democratize competitive intelligence</span> and give every business the power to make data driven decisions in minutes, not months.
+          </p>
+
+          {/* Signature */}
+          <div className="pt-4 border-t border-white/10 flex flex-col items-center">
+            <p className="text-lg font-bold text-white">Dr. Darrell Kamga</p>
+            <p className="text-sm text-slate-400">Founder & CEO, MakeItAds</p>
+          </div>
+        </motion.div>
+
+        {/* Section vision avec timeline */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="relative rounded-3xl border border-[#6366f1]/20 bg-gradient-to-br from-[#6366f1]/10 via-[#0f0f1a] to-[#8b5cf6]/10 p-8 md:p-12 overflow-hidden"
+        >
+          {/* Halos internes */}
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#6366f1]/10 rounded-full blur-[100px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#8b5cf6]/10 rounded-full blur-[80px] pointer-events-none" />
+
+          <div className="relative z-10">
+            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-6 text-center">
+              The vision behind MakeItAds
+            </h3>
+
+            <div className="grid md:grid-cols-3 gap-6 md:gap-8">
+              {[
+                {
+                  step: "01",
+                  title: "Identify the gap",
+                  description: "Most marketing tools give you data. None give you context. We bridge that gap with AI powered market intelligence.",
+                },
+                {
+                  step: "02",
+                  title: "Analyze competitors",
+                  description: "Real time competitive analysis that reveals what is working, what is not, and where the opportunities are hiding.",
+                },
+                {
+                  step: "03",
+                  title: "Execute with confidence",
+                  description: "Turn insights into actionable strategies. No more guesswork. Just data driven decisions that drive growth.",
+                },
+              ].map((item, i) => (
+                <motion.div
+                  key={item.step}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.15 }}
+                  className="relative text-center md:text-left"
+                >
+                  {/* Icônes supprimées ici */}
+                  <p className="text-xs font-bold text-[#6366f1] uppercase tracking-wider mb-2">Step {item.step}</p>
+                  <h4 className="text-lg sm:text-xl font-bold text-white mb-3">{item.title}</h4>
+                  <p className="text-sm sm:text-base text-slate-300 leading-relaxed">{item.description}</p>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* CTA final */}
+            <div className="mt-12 text-center">
+              <p className="text-lg sm:text-xl text-slate-300 mb-6">
+                Ready to join thousands of businesses making smarter decisions?
+              </p>
+              <a
+                href="/signup"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-4 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/30 hover:shadow-xl hover:shadow-[#6366f1]/40 transition-all hover:scale-105"
+              >
+                Start Your Free Trial
+                <span className="text-lg">→</span>
+              </a>
+            </div>
+          </div>
+        </motion.div>
+      </div>
     </section>
   );
 }

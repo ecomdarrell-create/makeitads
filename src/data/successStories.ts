@@ -1,5 +1,5 @@
 // ======================================================
-// SUCCESS STORIES - Badge "New" retiré
+// SUCCESS STORIES - Données corrigées (Drapeaux, Noms, Nationalités, Images)
 // ======================================================
 
 export interface SuccessStory {
@@ -17,7 +17,6 @@ export interface SuccessStory {
   quote: string;
   modules: string[];
   image: string;
-  // isNew?: boolean; // ✅ Supprimé
 }
 
 export const NEW_SUCCESS_STORIES: SuccessStory[] = [
@@ -36,7 +35,6 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "MakeItAds identified niches we never considered. Our revenue tripled in 4 months with half the ad spend.",
     modules: ["Market Intel", "Competitor Watch"],
     image: "/images/testimonial-ecommerce.webp",
-    // isNew: true, ✅ Supprimé
   },
   {
     id: 8,
@@ -44,7 +42,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     role: "Marketing Director",
     company: "CloudSync",
     country: "Japan",
-    countryFlag: "🇵",
+    countryFlag: "🇯🇵",
     industry: "SaaS",
     metric: "-62% CAC",
     timeToResult: "in 6 months",
@@ -53,7 +51,6 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "We cut our customer acquisition cost by 62% while scaling. The competitor intelligence alone is worth 10x the price.",
     modules: ["Competitor Intel", "Strategy Engine"],
     image: "/images/testimonial-saas.webp",
-    // isNew: true, ✅ Supprimé
   },
   {
     id: 9,
@@ -70,7 +67,6 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "The market intelligence from MakeItAds was crucial for our pitch deck. Investors loved our data-backed approach.",
     modules: ["Market Intel", "Benchmarking"],
     image: "/images/testimonial-fintech.webp",
-    // isNew: true, ✅ Supprimé
   },
   {
     id: 10,
@@ -87,7 +83,6 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     quote: "We manage 40+ client accounts. MakeItAds gives us an unfair advantage on every single one. 12x ROI across the board.",
     modules: ["Full Suite"],
     image: "/images/testimonial-agency.webp",
-    // isNew: true, ✅ Supprimé
   },
   {
     id: 4,
@@ -103,16 +98,15 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Precision audience segments", "4.3x ROAS on Meta campaigns", "Predictable lead generation"],
     quote: "MakeItAds identified audience segments we never considered. Our CPA dropped by 41% in the first month alone.",
     modules: ["Audience Lab", "Campaign Builder", "Analytics"],
-    image: "/images/story-priya-patel.jpg",
-    // isNew: true, ✅ Supprimé
+    image: "/images/story-priya-patel.jpg", 
   },
   {
     id: 5,
     name: "David Kim",
     role: "VP of Marketing",
     company: "CloudSync Pro",
-    country: "United States",
-    countryFlag: "🇺🇸",
+    country: "South Korea",
+    countryFlag: "🇰🇷",
     industry: "B2B SaaS",
     metric: "+4.3x ROI",
     timeToResult: "in 90 days",
@@ -120,8 +114,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Clear market differentiation", "Optimized channel allocation", "3 new enterprise clients"],
     quote: "The competitor intelligence alone was worth the subscription. We discovered a positioning gap that doubled our conversion rate.",
     modules: ["Competitor Intelligence", "Market Intelligence", "Growth Roadmap"],
-    image: "/images/story-david-kim.jpg",
-    // isNew: true, ✅ Supprimé
+    image: "/images/story-david-kim.jpg", 
   },
   {
     id: 6,
@@ -129,7 +122,7 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     role: "Marketing Director",
     company: "Bella Vita Cosmetics",
     country: "Spain",
-    countryFlag: "🇸",
+    countryFlag: "🇪🇸",
     industry: "Beauty & Cosmetics",
     metric: "-41% CAC",
     timeToResult: "in 45 days",
@@ -137,15 +130,14 @@ export const NEW_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Data-driven creative strategy", "Focused budget on top 2 channels", "Clear brand positioning"],
     quote: "We stopped guessing and started executing with confidence. The AI recommendations were spot-on from day one.",
     modules: ["Creative Studio", "Trend Intelligence", "Budget Optimizer"],
-    image: "/images/story-elena-rodriguez.jpg",
-    // isNew: true, ✅ Supprimé
+    image: "/images/story-elena-rodriguez.jpg", 
   },
 ];
 
 export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
   {
     id: 1,
-    name: "James Walker",
+    name: "Mark Jensen",
     role: "Founder",
     company: "Bright Dental",
     country: "United Kingdom",
@@ -157,7 +149,9 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Clear growth roadmap", "Better positioning"],
     quote: "Instead of guessing where to invest our budget, we finally had a clear plan backed by market insights.",
     modules: ["Market Intelligence", "Growth Roadmap"],
-    image: "/images/story-james-walker.jpg",
+    // ✅ Image remplacée par une URL Unsplash fiable pour garantir l'affichage immédiat.
+    // (Tu pourras la remplacer par "/images/story-mark-jensen.jpg" quand tu auras ajouté le vrai fichier dans ton dossier public/images/)
+    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=400&h=400&q=80",
   },
   {
     id: 2,
@@ -165,7 +159,7 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
     role: "CMO",
     company: "Luxe Skincare",
     country: "United States",
-    countryFlag: "🇸",
+    countryFlag: "🇺🇸",
     industry: "Beauty",
     metric: "-31% CPA",
     timeToResult: "in 60 days",
@@ -173,7 +167,7 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Optimized budget split", "Consistent execution"],
     quote: "We were burning cash on channels that didn't convert. MakeItAds showed us exactly where our audience was.",
     modules: ["Competitor Intelligence", "Analytics"],
-    image: "/images/story-sarah-chen.jpg",
+    image: "/images/story-sarah-chen.jpg", 
   },
   {
     id: 3,
@@ -189,7 +183,7 @@ export const EXISTING_SUCCESS_STORIES: SuccessStory[] = [
     after: ["Data-driven expansion", "Confident positioning"],
     quote: "The market opportunity score gave us the confidence to expand into two new verticals we hadn't considered.",
     modules: ["Opportunity Detection", "Benchmarks"],
-    image: "/images/story-marcus-johnson.jpg",
+    image: "/images/story-marcus-johnson.jpg", 
   },
 ];
 

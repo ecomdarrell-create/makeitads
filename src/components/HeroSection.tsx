@@ -13,6 +13,9 @@ export default function HeroSection() {
 
   useEffect(() => {
     setMounted(true);
+    // ✅ FORCE LE RETOUR EN HAUT DE PAGE AU CHARGEMENT
+    // Cela empêche le navigateur de sauter automatiquement vers une section du milieu
+    window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
   const handleHeroCta = () => {
@@ -22,16 +25,17 @@ export default function HeroSection() {
   if (!mounted) return null;
 
   return (
-    <section className="relative z-10 min-h-[calc(100vh-5rem)] flex items-center justify-center overflow-hidden">
+    <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 pb-12 sm:pb-16">
+      {/* Fond premium avec halos */}
       <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.25),transparent_40%),linear-gradient(180deg,#080810_0%,#0a0a14_100%)]" />
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6 py-20 sm:py-24">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[0.95] text-white mb-4"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.1] text-white mb-6"
           >
             <span className="block">Know your <span className="text-[#8b5cf6]">market</span>.</span>
             <span className="block">Outsmart <span className="text-[#8b5cf6]">competitors</span>.</span>
@@ -51,7 +55,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.16 }}
-            className="rounded-[28px] border border-white/10 bg-[#0a0a14]/80 p-2 sm:p-3 shadow-[0_30px_80px_-35px_rgba(99,102,241,0.45)]"
+            className="rounded-[28px] border border-white/10 bg-[#0a0a14]/80 p-2 sm:p-3 shadow-[0_30px_80px_-35px_rgba(99,102,241,0.45)] mb-8"
           >
             <div className="hidden sm:block overflow-hidden rounded-[20px] border border-white/10 bg-[#080810]">
               <Image
@@ -80,7 +84,7 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.24 }}
-            className="mt-8 flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
           >
             <button
               onClick={handleHeroCta}

@@ -13,7 +13,7 @@ import {
   Loader2,
   Clock,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { SiShopify, SiStripe, SiMeta, SiGoogle, SiTiktok, SiHubspot } from "react-icons/si";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
@@ -68,7 +68,7 @@ function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight tracking-[-0.04em] text-left">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 leading-[1.1] tracking-[-0.04em] text-left">
             From <span className="text-[#8b5cf6]">business context</span> to a complete <span className="text-[#8b5cf6]">marketing strategy</span>.
           </h2>
           <p className="text-base sm:text-lg md:text-xl text-slate-300 max-w-3xl text-left leading-relaxed">
@@ -113,7 +113,7 @@ function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.5, delay: 0.3 }}
-                        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 leading-tight relative z-10 pt-8 sm:pt-12"
+                        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6 leading-[1.1] tracking-[-0.04em] relative z-10 pt-8 sm:pt-12"
                       >
                         {step.title}
                       </motion.h3>
@@ -164,7 +164,7 @@ function HowItWorksSection({ isLoggedIn }: { isLoggedIn: boolean }) {
 }
 
 // ======================================================
-// PAIN POINTS CAROUSEL (✅ DÉFILEMENT MANUEL UNIQUEMENT)
+// PAIN POINTS CAROUSEL
 // ======================================================
 
 const painPoints = [
@@ -202,12 +202,14 @@ function PainPointsCarousel() {
             )}
           </div>
           <div className="p-5 sm:p-6 space-y-2 sm:space-y-3 text-left">
-            <h3 className="text-lg sm:text-xl font-bold text-white">{point.title}</h3>
+            <h3 className="text-lg sm:text-xl font-bold text-white leading-[1.2] tracking-[-0.02em]">{point.title}</h3>
             <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">{point.subtitle}</p>
             <p className="text-[10px] sm:text-xs text-slate-500 italic">{point.description}</p>
             <div className="pt-1 sm:pt-2">
-              <span className={`text-[10px] sm:text-xs font-bold px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full bg-gradient-to-r ${point.color} text-white shadow-lg`}>
-                {point.stat} {point.statLabel}
+              {/* ✅ Badge aligné proprement sur mobile */}
+              <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-xs font-bold px-2.5 py-1.5 sm:px-3 sm:py-2 rounded-full bg-gradient-to-r ${point.color} text-white shadow-lg w-full sm:w-auto justify-center sm:justify-start`}>
+                <span>{point.stat}</span>
+                <span className="text-white/90 font-medium">{point.statLabel}</span>
               </span>
             </div>
           </div>
@@ -216,6 +218,10 @@ function PainPointsCarousel() {
     </div>
   );
 }
+
+// ======================================================
+// SIGNAL SYSTEM SECTION (Animations au défilement)
+// ======================================================
 
 const signalCards = [
   {
@@ -238,77 +244,6 @@ const signalCards = [
   },
 ];
 
-const proofMetrics = [
-  { value: "31%", label: "average drop in wasted spend" },
-  { value: "2.4x", label: "faster strategic alignment" },
-  { value: "12+", label: "signal sources unified in one flow" },
-];
-
-const workflowPillars = [
-  {
-    title: "Positioning clarity",
-    description: "Pinpoint what your business is really competing on and where the market is willing to pay more.",
-  },
-  {
-    title: "Channel prioritization",
-    description: "Know which opportunities deserve budget, creative focus and execution velocity.",
-  },
-  {
-    title: "Creative confidence",
-    description: "Turn market intelligence into campaign ideas with a stronger strategic rationale behind them.",
-  },
-];
-
-const trustPoints = [
-  {
-    title: "Unified intelligence",
-    description: "One operating layer for market signals, competition and strategic direction.",
-  },
-  {
-    title: "Decision velocity",
-    description: "Your team moves from ambiguity to a campaign plan in fewer cycles.",
-  },
-  {
-    title: "Premium framing",
-    description: "Position your brand as a higher-signal, more disciplined growth operator.",
-  },
-];
-
-const executiveCards = [
-  {
-    title: "Market intelligence",
-    summary: "Competitor structure, audience shifts and opportunity ranking in one live signal feed.",
-  },
-  {
-    title: "Strategic ideation",
-    summary: "High-confidence positioning, campaign logic and next-step recommendation paths.",
-  },
-  {
-    title: "Execution confidence",
-    summary: "A repeatable operating rhythm that helps your team move with more clarity and less noise.",
-  },
-];
-
-const enterpriseSignals = [
-  { value: "$0", label: "setup friction" },
-  { value: "1", label: "workspace for the full growth stack" },
-  { value: "24/7", label: "decision signal coverage" },
-];
-
-const decisionFlow = [
-  "Manual trend checking",
-  "Fragmented idea generation",
-  "Disconnected channel decisions",
-  "Slow campaign planning",
-];
-
-const decisionFlowAfter = [
-  "Live market intelligence",
-  "Strategic synthesis in one workspace",
-  "Clear channel prioritization",
-  "Execution-ready campaign planning",
-];
-
 function SignalSystemSection() {
   return (
     <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6">
@@ -320,7 +255,7 @@ function SignalSystemSection() {
           transition={{ duration: 0.6 }}
           className="mb-10 md:mb-14 max-w-4xl"
         >
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.02] text-left">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.1] text-left">
             Know the <span className="text-[#8b5cf6]">market</span>. Understand the <span className="text-[#8b5cf6]">gap</span>. Build the <span className="text-[#8b5cf6]">growth move</span>.
           </h2>
         </motion.div>
@@ -329,10 +264,10 @@ function SignalSystemSection() {
           {signalCards.map((card, index) => (
             <motion.div
               key={card.title}
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.55, delay: index * 0.08 }}
+              transition={{ duration: 0.6, delay: index * 0.15 }} // ✅ Animation en cascade
               whileHover={{ y: -6 }}
               className="group relative rounded-[24px] border border-white/10 bg-[#0a0a14]/80 p-5 sm:p-6 text-left overflow-hidden"
             >
@@ -341,7 +276,7 @@ function SignalSystemSection() {
                 <span className="text-[11px] uppercase tracking-[0.22em] text-slate-400">{card.label}</span>
                 <span className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] text-white/80">0{index + 1}</span>
               </div>
-              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 leading-tight">{card.title}</h3>
+              <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 leading-[1.2] tracking-[-0.02em]">{card.title}</h3>
               <p className="text-sm sm:text-base leading-relaxed text-slate-300">{card.description}</p>
             </motion.div>
           ))}
@@ -424,55 +359,6 @@ function CellValueRenderer({ value, isPrimary }: { value: CellValue; isPrimary: 
   return null;
 }
 
-function InteractiveGenerationSection() {
-  const [visibleLines, setVisibleLines] = useState(0);
-  const generationLines = [
-    "Analyzing the market signal",
-    "Mapping positioning gaps",
-    "Ranking revenue opportunities",
-    "Generating the campaign strategy",
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisibleLines((current) => (current + 1) % (generationLines.length + 1));
-    }, 1100);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  return (
-    <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6">
-      <div className="max-w-7xl mx-auto rounded-[30px] border border-white/10 bg-[#0a0a14]/85 p-5 sm:p-6 md:p-8">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr] items-center">
-          <div className="text-left">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.02] text-white mb-4">
-              A structure that <span className="text-[#8b5cf6]">generates</span> a full marketing strategy while the market keeps moving.
-            </h2>
-            <p className="text-sm sm:text-base md:text-lg text-slate-300 leading-relaxed max-w-2xl">
-              The system turns live competitor tracking, market analysis and channel opportunity into a decision sequence your team can execute with clarity.
-            </p>
-          </div>
-
-          <div className="rounded-[24px] border border-[#6366f1]/20 bg-[linear-gradient(135deg,rgba(99,102,241,0.16),rgba(10,10,20,0.94))] p-5 sm:p-6">
-            <div className="mb-4 text-[11px] uppercase tracking-[0.24em] text-[#c7d2fe]">Live generation</div>
-            <div className="space-y-3 font-medium text-white">
-              {generationLines.map((line, index) => (
-                <div
-                  key={line}
-                  className={`transition-all duration-500 ${index < visibleLines ? "opacity-100 translate-x-0" : "opacity-35 translate-x-2"}`}
-                >
-                  {line}
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
   return (
     <section className="relative z-10 py-20 sm:py-24 md:py-32 px-4 sm:px-6 overflow-hidden">
@@ -489,7 +375,7 @@ function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
           transition={{ duration: 0.6 }}
           className="text-center mb-12 sm:mb-16 md:mb-20 max-w-4xl mx-auto px-4"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.04em] mb-4 sm:mb-6 text-white leading-tight text-left sm:text-center">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-[-0.04em] leading-[1.1] mb-4 sm:mb-6 text-white text-left sm:text-center">
             A <span className="text-[#8b5cf6]">marketing strategy engine</span> for teams that need to move faster than the market.
           </h2>
 
@@ -573,7 +459,7 @@ function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
               transition={{ duration: 0.4, delay: index * 0.03 }}
               className="rounded-xl sm:rounded-2xl border border-white/10 bg-[#0a0a14]/60 backdrop-blur-xl p-4 sm:p-5"
             >
-              <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4">
+              <h3 className="text-sm sm:text-base font-semibold text-white mb-3 sm:mb-4 leading-[1.2]">
                 {row.name}
               </h3>
               <div className="space-y-2.5">
@@ -610,7 +496,7 @@ function ComparisonSection({ isLoggedIn }: { isLoggedIn: boolean }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="mt-16 sm:mt-20 md:mt-24 text-center max-w-3xl mx-auto px-4"
         >
-          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 leading-tight text-left sm:text-center">
+          <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-3 sm:mb-4 leading-[1.2] text-left sm:text-center">
             One workspace for building the next <span className="text-[#8b5cf6]">marketing strategy</span> with clarity.
           </h3>
           <p className="text-sm sm:text-base text-slate-400 mb-6 sm:mb-8 leading-relaxed text-left sm:text-center">
@@ -676,9 +562,10 @@ const faqData = [
   { question: "Is there a mobile app?", answer: "Our platform is fully responsive and works perfectly on mobile browsers. A native iOS/Android app is in development for Q2 2025." },
 ];
 
+// ✅ VITESSE DE DÉFILEMENT AUGMENTÉE (15s au lieu de 30s)
 const LogoCarousel = () => (
   <div className="relative overflow-hidden">
-    <div className="flex animate-[scroll_30s_linear_infinite] hover:[animation-play-state:paused]">
+    <div className="flex animate-[scroll_15s_linear_infinite] hover:[animation-play-state:paused]">
       {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => {
         const Icon = logo.icon;
         return (
@@ -692,9 +579,27 @@ const LogoCarousel = () => (
   </div>
 );
 
+// ✅ CARROUSEL TÉMOIGNAGES AVEC DÉFILEMENT AUTOMATIQUE
 function ReviewsCarousel() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const interval = setInterval(() => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      if (scrollLeft >= scrollWidth - clientWidth - 10) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 340, behavior: "smooth" });
+      }
+    }, 4000); // Défile automatiquement toutes les 4 secondes
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div
+      ref={scrollRef}
       className="flex gap-6 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-4 px-2 scrollbar-hide"
       style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
     >
@@ -723,7 +628,7 @@ function ReviewsCarousel() {
                 <span className="w-1 h-1 rounded-full bg-white/40" />
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/10 border border-white/20 text-white/80">{story.industry}</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-1">{story.name}</h3>
+              <h3 className="text-xl font-bold text-white mb-1 leading-[1.2]">{story.name}</h3>
               <p className="text-sm text-white/70">{story.role} • {story.company}</p>
             </div>
 
@@ -818,7 +723,7 @@ export default function LandingPage() {
             transition={{ duration: 0.6 }}
             className="mb-10 md:mb-16 max-w-5xl"
           >
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.02] text-left">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.04em] leading-[1.1] text-left">
               Most teams are not missing ambition.
               <span className="block mt-2 text-[#8b5cf6]">
                 They’re missing the right <span className="text-[#8b5cf6]">market angle</span>, the right <span className="text-[#8b5cf6]">competitor signal</span>, and the right <span className="text-[#8b5cf6]">growth strategy</span>.
@@ -834,8 +739,6 @@ export default function LandingPage() {
 
       <SignalSystemSection />
 
-      <InteractiveGenerationSection />
-
       <HowItWorksSection isLoggedIn={!!user} />
 
       <CompetitorsSection />
@@ -847,7 +750,7 @@ export default function LandingPage() {
       <section id="pricing" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.1] mb-4">
               Simple, transparent{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">pricing</span>
             </h2>
@@ -877,7 +780,7 @@ export default function LandingPage() {
                     </div>
                   )}
                   <div className="mb-6">
-                    <h3 className="text-xl font-bold text-white mb-2">{planItem.name}</h3>
+                    <h3 className="text-xl font-bold text-white mb-2 leading-[1.2]">{planItem.name}</h3>
                     <p className="text-sm text-slate-400">{planItem.description}</p>
                   </div>
                   <div className="mb-6">
@@ -924,7 +827,7 @@ export default function LandingPage() {
       <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-7xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-16 max-w-3xl mx-auto">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.1] mb-4">
               How businesses are growing with{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">MakeItAds</span>
             </h2>
@@ -937,7 +840,7 @@ export default function LandingPage() {
       <section id="faq" className="relative z-10 py-16 md:py-24 px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }} className="text-center mb-12">
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-4">
+            <h2 className="text-3xl md:text-5xl font-bold tracking-[-0.04em] leading-[1.1] mb-4">
               Frequently asked{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">questions</span>
             </h2>
@@ -947,7 +850,7 @@ export default function LandingPage() {
             {faqData.map((faq, index) => (
               <motion.div key={index} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: index * 0.05 }} className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
                 <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors">
-                  <span className="text-base font-semibold text-white pr-4">{faq.question}</span>
+                  <span className="text-base font-semibold text-white pr-4 leading-[1.2]">{faq.question}</span>
                   <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
                 </button>
                 <AnimatePresence>
@@ -970,7 +873,7 @@ export default function LandingPage() {
         <div className="absolute inset-0 z-0 bg-gradient-to-b from-[#080810]/90 via-[#080810]/70 to-[#000000]" />
         <div className="relative z-10 max-w-4xl mx-auto text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="text-3xl md:text-6xl font-bold tracking-tight mb-6">
+            <h2 className="text-3xl md:text-6xl font-bold tracking-[-0.04em] leading-[1.1] mb-6">
               Stop making decisions{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">in the dark.</span>
             </h2>
