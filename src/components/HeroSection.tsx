@@ -13,8 +13,6 @@ export default function HeroSection() {
 
   useEffect(() => {
     setMounted(true);
-    // ✅ FORCE LE RETOUR EN HAUT DE PAGE AU CHARGEMENT
-    // Cela empêche le navigateur de sauter automatiquement vers une section du milieu
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
@@ -31,6 +29,8 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
+          
+          {/* TITRE */}
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -42,6 +42,7 @@ export default function HeroSection() {
             <span className="block">Scale with <span className="text-[#8b5cf6]">confidence</span>.</span>
           </motion.h1>
 
+          {/* SOUS-TITRE */}
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -51,40 +52,39 @@ export default function HeroSection() {
             MakeItAds turns competitor tracking, market analysis and positioning into one complete growth strategy your team can act on.
           </motion.p>
 
+          {/* IMAGE HERO - Mockup multi-devices avec fond transparent */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.16 }}
-            className="rounded-[28px] border border-white/10 bg-[#0a0a14]/80 p-2 sm:p-3 shadow-[0_30px_80px_-35px_rgba(99,102,241,0.45)] mb-8"
+            initial={{ opacity: 0, y: 40, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
+            className="relative w-full mb-10"
           >
-            <div className="hidden sm:block overflow-hidden rounded-[20px] border border-white/10 bg-[#080810]">
+            {/* Halo lumineux derrière */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[60%] bg-[#6366f1]/15 blur-[120px] rounded-full -z-10" />
+            
+            {/* Container avec fond sombre pour absorber le blanc de l'image */}
+            <div className="relative rounded-2xl overflow-hidden bg-[#0a0a14]">
               <Image
-                src="/images/hero pics.jpg"
-                alt="MakeItAds strategy dashboard"
-                width={1600}
+                src="/images/couv-X.png"
+                alt="MakeItAds Dashboard - Multi-device preview"
+                width={1400}
                 height={900}
-                className="w-full h-auto object-cover"
                 priority
-              />
-            </div>
-
-            <div className="sm:hidden overflow-hidden rounded-[20px] border border-white/10 bg-[#080810]">
-              <Image
-                src="/images/1.jpg"
-                alt="MakeItAds strategy dashboard mobile"
-                width={900}
-                height={1200}
-                className="w-full h-auto object-cover"
-                priority
+                className="w-full h-auto object-contain"
+                style={{
+                  mixBlendMode: 'screen',
+                  filter: 'drop-shadow(0 20px 60px rgba(99, 102, 241, 0.3))'
+                }}
               />
             </div>
           </motion.div>
 
+          {/* BOUTONS D'ACTION */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.24 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl mx-auto sm:mx-0"
           >
             <button
               onClick={handleHeroCta}
@@ -101,6 +101,7 @@ export default function HeroSection() {
               See How It Works
             </a>
           </motion.div>
+
         </div>
       </div>
     </section>
