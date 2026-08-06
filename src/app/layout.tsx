@@ -39,7 +39,6 @@ export const metadata: Metadata = {
     description: "Stop guessing. MakeItAds analyzes your market, benchmarks competitors, and builds data-backed ad strategies.",
     images: [
       {
-        // ✅ Assure-toi que cette image existe bien dans ton dossier public/
         url: "/images/og-image.png", 
         width: 1200,
         height: 630,
@@ -95,7 +94,7 @@ export const metadata: Metadata = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ VIEWPORT - Optimisations Mobile-First
+// ✅ VIEWPORT - Optimisations Mobile-First (MIS À JOUR LIGHT THEME)
 // ═══════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: "device-width",
@@ -103,7 +102,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#080810",
+  themeColor: "#FAFAFC", // ✅ Changé de #080810 à #FAFAFC pour le thème clair
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -119,7 +118,7 @@ const jsonLd = {
       "logo": "https://makeitads.pro/favicon.ico",
       "sameAs": [
         "https://twitter.com/makeitads",
-        "https://t.me/theboardroom_group" // ✅ MODIFICATION : Nouveau lien Telegram
+        "https://t.me/theboardroom_group"
       ]
     },
     {
@@ -154,7 +153,7 @@ const jsonLd = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ ROOT LAYOUT
+// ✅ ROOT LAYOUT (MIS À JOUR LIGHT THEME)
 // ═══════════════════════════════════════════════════════════
 export default function RootLayout({
   children,
@@ -184,7 +183,8 @@ export default function RootLayout({
       </head>
       
       <body 
-        className={`${inter.className} bg-[#080810] text-white min-h-screen overflow-x-hidden`}
+        // ✅ Changé de bg-[#080810] text-white à bg-[#FAFAFC] text-[#111827]
+        className={`${inter.className} bg-[#FAFAFC] text-[#111827] min-h-screen overflow-x-hidden`}
         suppressHydrationWarning
       >
         <div id="app-root" className="relative min-h-screen">

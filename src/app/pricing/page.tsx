@@ -3,29 +3,15 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { 
-  Check, 
-  Zap, 
-  Crown, 
-  Building2, 
-  Sparkles, 
-  ArrowRight, 
-  ArrowLeft,
-  Loader2, 
-  ChevronDown, 
-  X,
-  ChevronLeft,
-  ChevronRight
+  Check, Zap, Crown, Building2, Sparkles, ArrowRight, ArrowLeft,
+  Loader2, ChevronDown, X
 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { useSession } from "@/hooks/useSession";
 import { usePlan } from "@/hooks/usePlan";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
-
-// ======================================================
-// DATA - PLANS DÉTAILLÉS
-// ======================================================
 
 const pricingPlans = [
   {
@@ -33,11 +19,11 @@ const pricingPlans = [
     key: "free",
     icon: Sparkles,
     price: { monthly: 0, yearly: 0 },
-    color: "from-slate-500 to-slate-600",
-    borderColor: "border-white/10",
-    bg: "bg-[#0a0a14]",
-    accentColor: "text-slate-300",
-    badgeColor: "bg-slate-500/20 text-slate-300 border-slate-500/30",
+    color: "from-slate-400 to-slate-500",
+    borderColor: "border-[#E5E7EB]",
+    bg: "bg-white",
+    accentColor: "text-[#64748B]",
+    badgeColor: "bg-slate-100 text-slate-600 border-slate-200",
     description: "Perfect for testing the waters and exploring basic features.",
     features: [
       "1 AI-generated strategy per month",
@@ -58,10 +44,10 @@ const pricingPlans = [
     icon: Zap,
     price: { monthly: 29, yearly: 23 },
     color: "from-[#6366f1] to-[#8b5cf6]",
-    borderColor: "border-[#6366f1]/40",
-    bg: "bg-gradient-to-br from-[#6366f1]/8 to-[#8b5cf6]/4",
+    borderColor: "border-[#6366f1]",
+    bg: "bg-[#EEF2FF]",
     accentColor: "text-[#6366f1]",
-    badgeColor: "bg-[#6366f1]/20 text-[#a5b4fc] border-[#6366f1]/30",
+    badgeColor: "bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]/20",
     description: "For growing businesses ready to scale their marketing efforts.",
     features: [
       "Everything in Free plan",
@@ -88,10 +74,10 @@ const pricingPlans = [
     icon: Crown,
     price: { monthly: 59, yearly: 47 },
     color: "from-violet-500 to-fuchsia-500",
-    borderColor: "border-violet-500/30",
-    bg: "bg-[#0a0a14]",
-    accentColor: "text-violet-400",
-    badgeColor: "bg-violet-500/20 text-violet-300 border-violet-500/30",
+    borderColor: "border-violet-300",
+    bg: "bg-white",
+    accentColor: "text-violet-600",
+    badgeColor: "bg-violet-50 text-violet-700 border-violet-200",
     description: "For serious marketers who need unlimited power and insights.",
     features: [
       "Everything in Pro plan",
@@ -122,10 +108,10 @@ const pricingPlans = [
     icon: Building2,
     price: { monthly: 149, yearly: 119 },
     color: "from-amber-500 to-orange-500",
-    borderColor: "border-amber-500/30",
-    bg: "bg-[#0a0a14]",
-    accentColor: "text-amber-400",
-    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    borderColor: "border-amber-300",
+    bg: "bg-white",
+    accentColor: "text-amber-600",
+    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
     description: "For agencies and large teams requiring full customization.",
     features: [
       "Everything in Premium plan",
@@ -151,10 +137,6 @@ const pricingPlans = [
     popular: false,
   },
 ];
-
-// ======================================================
-// DATA - TABLEAU COMPARATIF
-// ======================================================
 
 const comparisonCategories = [
   {
@@ -228,10 +210,6 @@ const comparisonCategories = [
   },
 ];
 
-// ======================================================
-// DATA - FAQ
-// ======================================================
-
 const faqData = [
   { question: "How accurate are the AI recommendations?", answer: "Our AI analyzes real-time market data with an average accuracy rate of 87%. We continuously train our models on the latest market trends and competitor data to ensure you get the most relevant insights." },
   { question: "Can I change my plan at any time?", answer: "Absolutely! You can upgrade or downgrade your plan at any time from your billing dashboard. Changes take effect immediately, and we'll prorate any charges." },
@@ -243,18 +221,12 @@ const faqData = [
   { question: "Can I cancel my subscription anytime?", answer: "Yes, you can cancel your subscription at any time from your billing dashboard. Your access will continue until the end of your current billing period." },
 ];
 
-// ======================================================
-// PAGE PRICING
-// ======================================================
-
 export default function PricingPage() {
   const { user } = useSession();
   const { isFree, isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
   const [isYearly, setIsYearly] = useState(false);
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  
-  // État pour le sélecteur mobile de plan
   const [selectedMobilePlan, setSelectedMobilePlan] = useState<string>("pro");
 
   const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
@@ -271,12 +243,7 @@ export default function PricingPage() {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          planName, 
-          billingCycle, 
-          userId: user.id, 
-          userEmail: user.email 
-        }),
+        body: JSON.stringify({ planName, billingCycle, userId: user.id, userEmail: user.email }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Server error");
@@ -293,25 +260,23 @@ export default function PricingPage() {
   const renderValue = (value: boolean | string) => {
     if (typeof value === 'boolean') {
       return value ? (
-        <Check className="h-5 w-5 text-emerald-400 mx-auto" />
+        <Check className="h-5 w-5 text-emerald-600 mx-auto" />
       ) : (
-        <X className="h-5 w-5 text-slate-600 mx-auto" />
+        <X className="h-5 w-5 text-[#CBD5E1] mx-auto" />
       );
     }
-    return <span className="text-sm text-slate-300">{value}</span>;
+    return <span className="text-sm text-[#475569] font-medium">{value}</span>;
   };
 
-  // Trouver le plan sélectionné pour mobile
   const currentMobilePlan = pricingPlans.find(p => p.key === selectedMobilePlan) || pricingPlans[1];
 
   return (
-    <main className="min-h-screen bg-[#05050a] text-white">
+    <main className="min-h-screen bg-[#FAFAFC] text-[#111827]">
       <GlobalNavbar />
 
-      <div className="pt-28 pb-20 px-4">
+      <div className="pt-32 pb-20 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           
-          {/* BOUTON BACK TO HOME */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -320,42 +285,49 @@ export default function PricingPage() {
           >
             <Link
               href="/"
-              className="group inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.03] backdrop-blur-sm px-5 py-2.5 text-sm font-semibold text-slate-300 hover:text-white hover:bg-white/[0.06] hover:border-white/20 transition-all"
+              className="group inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-5 py-2.5 text-sm font-semibold text-[#475569] hover:text-[#111827] hover:bg-[#F9FAFB] hover:border-[#CBD5E1] transition-all"
             >
               <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
               Back to Home
             </Link>
           </motion.div>
 
-          {/* HEADER */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="text-center mb-16"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-white to-slate-400 bg-clip-text text-transparent leading-tight">
-              Simple, transparent pricing
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-[#111827] leading-tight tracking-tight">
+              Simple, transparent <span className="text-[#6366f1]">pricing</span>
             </h1>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto mb-8">
+            <p className="text-lg text-[#64748B] max-w-2xl mx-auto mb-8">
               Choose the plan that fits your needs. Upgrade or downgrade at any time.
             </p>
 
-            {/* Toggle Monthly/Yearly */}
-            <div className="flex items-center justify-center gap-4">
-              <span className={`text-sm ${!isYearly ? "text-white font-semibold" : "text-slate-400"}`}>Monthly</span>
-              <button 
-                onClick={() => setIsYearly(!isYearly)} 
-                className="relative h-6 w-11 rounded-full bg-white/10 transition-colors focus:outline-none"
+            <div className="inline-flex items-center gap-3 sm:gap-4 rounded-full border border-[#E5E7EB] bg-white p-1 sm:p-1.5 shadow-sm">
+              <button
+                onClick={() => setIsYearly(false)}
+                className={`px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all ${
+                  !isYearly ? "bg-[#6366f1] text-white shadow-sm" : "text-[#64748B] hover:text-[#111827]"
+                }`}
               >
-                <span className={`absolute top-1 left-1 h-4 w-4 rounded-full bg-[#8b5cf6] transition-transform ${isYearly ? "translate-x-5" : ""}`} />
+                Monthly
               </button>
-              <span className={`text-sm ${isYearly ? "text-white font-semibold" : "text-slate-400"}`}>
-                Yearly <span className="ml-2 rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-semibold text-emerald-400">Save 20%</span>
-              </span>
+              <button
+                onClick={() => setIsYearly(true)}
+                className={`px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
+                  isYearly ? "bg-[#6366f1] text-white shadow-sm" : "text-[#64748B] hover:text-[#111827]"
+                }`}
+              >
+                Yearly
+                <span className="text-[10px] sm:text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">
+                  Save 20%
+                </span>
+              </button>
             </div>
           </motion.div>
 
-          {/* PLANS GRID - DESKTOP */}
+          {/* DESKTOP GRID */}
           <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             {pricingPlans.map((planItem, index) => {
               const Icon = planItem.icon;
@@ -367,11 +339,15 @@ export default function PricingPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
-                  className={`relative rounded-2xl border ${planItem.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5 shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]" : `${planItem.borderColor} ${planItem.bg}`} p-6 flex flex-col`}
+                  className={`relative rounded-2xl border p-6 sm:p-8 flex flex-col transition-all hover:shadow-md ${
+                    planItem.popular 
+                      ? "border-[#6366f1] bg-[#EEF2FF] shadow-lg shadow-[#6366f1]/10" 
+                      : `${planItem.borderColor} ${planItem.bg}`
+                  }`}
                 >
                   {planItem.popular && (
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-lg shadow-[#6366f1]/25">
+                      <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
                         Most Popular
                       </span>
                     </div>
@@ -385,20 +361,20 @@ export default function PricingPage() {
                   )}
 
                   <div className="mb-6">
-                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${planItem.color} mb-4 shadow-lg`}>
+                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${planItem.color} mb-4 shadow-sm`}>
                       <Icon className="h-5 w-5 text-white" />
                     </div>
-                    <h3 className="text-xl font-bold text-white">{planItem.name}</h3>
-                    <p className="text-sm text-slate-400 mt-1">{planItem.description}</p>
+                    <h3 className="text-xl font-bold text-[#111827]">{planItem.name}</h3>
+                    <p className="text-sm text-[#64748B] mt-1">{planItem.description}</p>
                   </div>
 
                   <div className="mb-6">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-white">${isYearly ? planItem.price.yearly : planItem.price.monthly}</span>
-                      <span className="text-slate-400">/month</span>
+                      <span className="text-4xl font-bold text-[#111827]">${isYearly ? planItem.price.yearly : planItem.price.monthly}</span>
+                      <span className="text-sm text-[#64748B]">/month</span>
                     </div>
                     {isYearly && planItem.price.monthly > 0 && (
-                      <p className="text-xs text-slate-500 mt-1">Billed annually (${planItem.price.yearly * 12}/year)</p>
+                      <p className="text-xs text-[#64748B] mt-1">Billed annually (${planItem.price.yearly * 12}/year)</p>
                     )}
                   </div>
 
@@ -407,8 +383,8 @@ export default function PricingPage() {
                       disabled
                       className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all mb-6 ${
                         isCurrentPlan 
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                          : "border border-white/10 bg-white/[0.03] text-slate-500 cursor-not-allowed"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
+                          : "border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
                       }`}
                     >
                       {isCurrentPlan ? "Current Plan" : "Free"}
@@ -416,7 +392,7 @@ export default function PricingPage() {
                   ) : planItem.name === "Enterprise" ? (
                     <Link 
                       href="/contact" 
-                      className="w-full rounded-xl py-3 text-sm font-semibold text-center transition-all border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] mb-6 block"
+                      className="w-full rounded-xl py-3 text-sm font-semibold text-center transition-all border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] mb-6 block"
                     >
                       {planItem.cta}
                     </Link>
@@ -426,10 +402,10 @@ export default function PricingPage() {
                       disabled={loadingPlan === planItem.name || isCurrentPlan}
                       className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
                         isCurrentPlan
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
                           : planItem.popular
                           ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                          : "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] disabled:opacity-60 disabled:cursor-not-allowed"
+                          : "border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60 disabled:cursor-not-allowed"
                       }`}
                     >
                       {loadingPlan === planItem.name ? (
@@ -448,7 +424,7 @@ export default function PricingPage() {
                         <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${planItem.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                           <Check className="h-3 w-3 text-white" />
                         </div>
-                        <span className="text-sm text-slate-300">{feature}</span>
+                        <span className="text-sm text-[#475569]">{feature}</span>
                       </div>
                     ))}
                   </div>
@@ -457,9 +433,8 @@ export default function PricingPage() {
             })}
           </div>
 
-          {/* PLANS - MOBILE (CAROUSEL PREMIUM) */}
+          {/* MOBILE CAROUSEL */}
           <div className="md:hidden mb-12">
-            {/* Sélecteur de plan (tabs) */}
             <div className="mb-6">
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                 <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
@@ -472,8 +447,8 @@ export default function PricingPage() {
                       onClick={() => setSelectedMobilePlan(plan.key)}
                       className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all border ${
                         isSelected 
-                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-lg`
-                          : "bg-white/[0.03] text-slate-400 border-white/10 hover:border-white/20"
+                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-md`
+                          : "bg-[#F9FAFB] text-[#64748B] border-[#E5E7EB]"
                       }`}
                     >
                       <Icon className="h-4 w-4" />
@@ -484,7 +459,6 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Carte du plan sélectionné */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={currentMobilePlan.key}
@@ -492,11 +466,13 @@ export default function PricingPage() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
                 transition={{ duration: 0.3 }}
-                className={`relative rounded-2xl border ${currentMobilePlan.popular ? "border-[#8b5cf6] bg-[#8b5cf6]/5 shadow-[0_0_40px_-10px_rgba(139,92,246,0.3)]" : `${currentMobilePlan.borderColor} ${currentMobilePlan.bg}`} p-6`}
+                className={`relative rounded-2xl border p-6 ${
+                  currentMobilePlan.popular ? "border-[#6366f1] bg-[#EEF2FF] shadow-lg shadow-[#6366f1]/10" : `${currentMobilePlan.borderColor} ${currentMobilePlan.bg}`
+                }`}
               >
                 {currentMobilePlan.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-lg">
+                    <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
                       Most Popular
                     </span>
                   </div>
@@ -510,33 +486,32 @@ export default function PricingPage() {
                 )}
 
                 <div className="mb-6">
-                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${currentMobilePlan.color} mb-4 shadow-lg`}>
+                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${currentMobilePlan.color} mb-4 shadow-sm`}>
                     <currentMobilePlan.icon className="h-6 w-6 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-white">{currentMobilePlan.name}</h3>
-                  <p className="text-sm text-slate-400 mt-1">{currentMobilePlan.description}</p>
+                  <h3 className="text-2xl font-bold text-[#111827]">{currentMobilePlan.name}</h3>
+                  <p className="text-sm text-[#64748B] mt-1">{currentMobilePlan.description}</p>
                 </div>
 
                 <div className="mb-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-white">
+                    <span className="text-5xl font-bold text-[#111827]">
                       ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}
                     </span>
-                    <span className="text-slate-400">/month</span>
+                    <span className="text-[#64748B]">/month</span>
                   </div>
                   {isYearly && currentMobilePlan.price.monthly > 0 && (
-                    <p className="text-xs text-slate-500 mt-1">Billed annually (${currentMobilePlan.price.yearly * 12}/year)</p>
+                    <p className="text-xs text-[#64748B] mt-1">Billed annually (${currentMobilePlan.price.yearly * 12}/year)</p>
                   )}
                 </div>
 
-                {/* Bouton CTA */}
                 {currentMobilePlan.name === "Free" ? (
                   <button 
                     disabled
                     className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all mb-6 ${
                       currentPlan === currentMobilePlan.key
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                        : "border border-white/10 bg-white/[0.03] text-slate-500 cursor-not-allowed"
+                        ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
+                        : "border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
                     }`}
                   >
                     {currentPlan === currentMobilePlan.key ? "Current Plan" : "Free"}
@@ -544,7 +519,7 @@ export default function PricingPage() {
                 ) : currentMobilePlan.name === "Enterprise" ? (
                   <Link 
                     href="/contact" 
-                    className="w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] mb-6 block"
+                    className="w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] mb-6 block"
                   >
                     {currentMobilePlan.cta}
                   </Link>
@@ -554,10 +529,10 @@ export default function PricingPage() {
                     disabled={loadingPlan === currentMobilePlan.name || currentPlan === currentMobilePlan.key}
                     className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
                       currentPlan === currentMobilePlan.key
-                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                        ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
                         : currentMobilePlan.popular
                         ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                        : "border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] disabled:opacity-60 disabled:cursor-not-allowed"
+                        : "border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60 disabled:cursor-not-allowed"
                     }`}
                   >
                     {loadingPlan === currentMobilePlan.name ? (
@@ -570,15 +545,14 @@ export default function PricingPage() {
                   </button>
                 )}
 
-                {/* Liste des features */}
                 <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">What's included</h4>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#64748B] mb-3">What's included</h4>
                   {currentMobilePlan.features.map((feature, i) => (
                     <div key={i} className="flex items-start gap-2.5">
                       <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
                         <Check className="h-3 w-3 text-white" />
                       </div>
-                      <span className="text-sm text-slate-300">{feature}</span>
+                      <span className="text-sm text-[#475569]">{feature}</span>
                     </div>
                   ))}
                 </div>
@@ -586,7 +560,7 @@ export default function PricingPage() {
             </AnimatePresence>
           </div>
 
-          {/* TABLEAU COMPARATIF - DESKTOP */}
+          {/* COMPARISON TABLE DESKTOP */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -594,37 +568,37 @@ export default function PricingPage() {
             className="hidden md:block mb-20"
           >
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Compare all <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">features</span>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[#111827]">
+                Compare all <span className="text-[#6366f1]">features</span>
               </h2>
-              <p className="text-base md:text-lg text-slate-400">See exactly what you get with each plan</p>
+              <p className="text-base md:text-lg text-[#64748B]">See exactly what you get with each plan</p>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-[#0a0a14]/80 backdrop-blur-sm overflow-hidden">
-              <div className="grid grid-cols-5 gap-4 p-6 border-b border-white/10 bg-white/[0.02]">
-                <div className="text-sm font-semibold text-slate-400">Feature</div>
+            <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm">
+              <div className="grid grid-cols-5 gap-4 p-6 border-b border-[#E5E7EB] bg-[#F9FAFB]">
+                <div className="text-sm font-semibold text-[#64748B]">Feature</div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-white">Free</div>
-                  <div className="text-xs text-slate-500">$0/mo</div>
+                  <div className="text-lg font-bold text-[#111827]">Free</div>
+                  <div className="text-xs text-[#64748B]">$0/mo</div>
                 </div>
                 <div className="text-center">
                   <div className="text-lg font-bold text-[#6366f1]">Pro</div>
-                  <div className="text-xs text-slate-500">${isYearly ? '23' : '29'}/mo</div>
+                  <div className="text-xs text-[#64748B]">${isYearly ? '23' : '29'}/mo</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-violet-400">Premium</div>
-                  <div className="text-xs text-slate-500">${isYearly ? '47' : '59'}/mo</div>
+                  <div className="text-lg font-bold text-violet-600">Premium</div>
+                  <div className="text-xs text-[#64748B]">${isYearly ? '47' : '59'}/mo</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-bold text-amber-400">Enterprise</div>
-                  <div className="text-xs text-slate-500">${isYearly ? '119' : '149'}/mo</div>
+                  <div className="text-lg font-bold text-amber-600">Enterprise</div>
+                  <div className="text-xs text-[#64748B]">${isYearly ? '119' : '149'}/mo</div>
                 </div>
               </div>
 
               {comparisonCategories.map((category, catIndex) => (
-                <div key={catIndex} className="border-b border-white/5 last:border-b-0">
-                  <div className="px-6 py-4 bg-white/[0.01] border-b border-white/5">
-                    <h3 className="text-sm font-bold text-white uppercase tracking-wider">{category.category}</h3>
+                <div key={catIndex} className="border-b border-[#E5E7EB] last:border-b-0">
+                  <div className="px-6 py-4 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                    <h3 className="text-sm font-bold text-[#111827] uppercase tracking-wider">{category.category}</h3>
                   </div>
                   
                   {category.features.map((feature, featIndex) => (
@@ -634,9 +608,9 @@ export default function PricingPage() {
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.3, delay: featIndex * 0.05 }}
-                      className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-white/5 hover:bg-white/[0.02] transition-colors items-center"
+                      className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors items-center last:border-b-0"
                     >
-                      <div className="text-sm text-slate-300 font-medium">{feature.name}</div>
+                      <div className="text-sm text-[#475569] font-medium">{feature.name}</div>
                       <div className="text-center">{renderValue(feature.free)}</div>
                       <div className="text-center">{renderValue(feature.pro)}</div>
                       <div className="text-center">{renderValue(feature.premium)}</div>
@@ -648,7 +622,7 @@ export default function PricingPage() {
             </div>
           </motion.div>
 
-          {/* TABLEAU COMPARATIF - MOBILE (SÉLECTEUR DYNAMIQUE) */}
+          {/* COMPARISON TABLE MOBILE */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -656,14 +630,13 @@ export default function PricingPage() {
             className="md:hidden mb-20"
           >
             <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3">
-                Compare <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">features</span>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-[#111827]">
+                Compare <span className="text-[#6366f1]">features</span>
               </h2>
-              <p className="text-sm text-slate-400">Select a plan to see its features</p>
+              <p className="text-sm text-[#64748B]">Select a plan to see its features</p>
             </div>
 
-            {/* Sélecteur de plan pour comparaison */}
-            <div className="mb-6 sticky top-20 z-10 bg-[#05050a]/95 backdrop-blur-md py-3 -mx-4 px-4">
+            <div className="mb-6 sticky top-20 z-10 bg-[#FAFAFC]/95 backdrop-blur-md py-3 -mx-4 px-4">
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
                 <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
                 {pricingPlans.map((plan) => {
@@ -675,8 +648,8 @@ export default function PricingPage() {
                       onClick={() => setSelectedMobilePlan(plan.key)}
                       className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all border ${
                         isSelected 
-                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-lg`
-                          : "bg-white/[0.03] text-slate-400 border-white/10"
+                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-md`
+                          : "bg-[#F9FAFB] text-[#64748B] border-[#E5E7EB]"
                       }`}
                     >
                       <Icon className="h-3.5 w-3.5" />
@@ -687,7 +660,6 @@ export default function PricingPage() {
               </div>
             </div>
 
-            {/* Features du plan sélectionné */}
             <AnimatePresence mode="wait">
               <motion.div
                 key={selectedMobilePlan}
@@ -695,28 +667,26 @@ export default function PricingPage() {
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
-                className="rounded-2xl border border-white/10 bg-[#0a0a14]/80 backdrop-blur-sm overflow-hidden"
+                className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm"
               >
-                {/* Header */}
-                <div className={`px-5 py-4 border-b border-white/10 bg-gradient-to-r ${currentMobilePlan.color} bg-opacity-10`}>
+                <div className={`px-5 py-4 border-b border-[#E5E7EB] bg-gradient-to-r ${currentMobilePlan.color} bg-opacity-10`}>
                   <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center shadow-lg`}>
+                    <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center shadow-sm`}>
                       <currentMobilePlan.icon className="h-5 w-5 text-white" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{currentMobilePlan.name} Plan</h3>
-                      <p className="text-xs text-white/70">
+                      <h3 className="text-lg font-bold text-[#111827]">{currentMobilePlan.name} Plan</h3>
+                      <p className="text-xs text-[#64748B]">
                         ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}/month
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Features par catégorie */}
                 {comparisonCategories.map((category, catIndex) => (
-                  <div key={catIndex} className="border-b border-white/5 last:border-b-0">
-                    <div className="px-5 py-3 bg-white/[0.01] border-b border-white/5">
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider">{category.category}</h4>
+                  <div key={catIndex} className="border-b border-[#E5E7EB] last:border-b-0">
+                    <div className="px-5 py-3 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+                      <h4 className="text-xs font-bold text-[#111827] uppercase tracking-wider">{category.category}</h4>
                     </div>
                     
                     {category.features.map((feature, featIndex) => {
@@ -724,15 +694,15 @@ export default function PricingPage() {
                       return (
                         <div 
                           key={featIndex}
-                          className="flex items-center justify-between px-5 py-3.5 border-b border-white/5 last:border-b-0"
+                          className="flex items-center justify-between px-5 py-3.5 border-b border-[#E5E7EB] last:border-b-0"
                         >
-                          <span className="text-sm text-slate-300 flex-1 pr-3">{feature.name}</span>
+                          <span className="text-sm text-[#475569] flex-1 pr-3">{feature.name}</span>
                           <div className="flex-shrink-0">
                             {typeof value === 'boolean' ? (
                               value ? (
-                                <Check className="h-5 w-5 text-emerald-400" />
+                                <Check className="h-5 w-5 text-emerald-600" />
                               ) : (
-                                <X className="h-5 w-5 text-slate-600" />
+                                <X className="h-5 w-5 text-[#CBD5E1]" />
                               )
                             ) : (
                               <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${currentMobilePlan.badgeColor}`}>
@@ -757,10 +727,10 @@ export default function PricingPage() {
             className="max-w-3xl mx-auto mb-20"
           >
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4">
-                Frequently asked <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">questions</span>
+              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[#111827]">
+                Frequently asked <span className="text-[#6366f1]">questions</span>
               </h2>
-              <p className="text-base md:text-lg text-slate-400">Everything you need to know about MakeItAds</p>
+              <p className="text-base md:text-lg text-[#64748B]">Everything you need to know about MakeItAds</p>
             </div>
             <div className="space-y-4">
               {faqData.map((faq, index) => (
@@ -770,14 +740,14 @@ export default function PricingPage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden"
+                  className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm"
                 >
                   <button 
                     onClick={() => setOpenFaq(openFaq === index ? null : index)} 
-                    className="w-full flex items-center justify-between p-6 text-left hover:bg-white/[0.02] transition-colors"
+                    className="w-full flex items-center justify-between p-6 text-left hover:bg-[#F9FAFB] transition-colors"
                   >
-                    <span className="text-base font-semibold text-white pr-4">{faq.question}</span>
-                    <ChevronDown className={`h-5 w-5 text-slate-400 transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
+                    <span className="text-base font-semibold text-[#111827] pr-4">{faq.question}</span>
+                    <ChevronDown className={`h-5 w-5 text-[#64748B] transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
                   </button>
                   <AnimatePresence>
                     {openFaq === index && (
@@ -789,7 +759,7 @@ export default function PricingPage() {
                         className="overflow-hidden"
                       >
                         <div className="px-6 pb-6">
-                          <p className="text-sm text-slate-400 leading-relaxed">{faq.answer}</p>
+                          <p className="text-sm text-[#64748B] leading-relaxed">{faq.answer}</p>
                         </div>
                       </motion.div>
                     )}
@@ -799,21 +769,21 @@ export default function PricingPage() {
             </div>
           </motion.div>
 
-          {/* CTA FINAL */}
+          {/* FINAL CTA */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="text-center"
           >
-            <div className="rounded-3xl border border-[#6366f1]/30 bg-gradient-to-br from-[#6366f1]/10 to-[#8b5cf6]/5 p-8 md:p-12 max-w-4xl mx-auto">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4">Ready to scale your business?</h2>
-              <p className="text-slate-400 mb-8 max-w-2xl mx-auto">
+            <div className="rounded-3xl border border-[#6366f1]/20 bg-[#EEF2FF] p-8 md:p-12 max-w-4xl mx-auto">
+              <h2 className="text-2xl md:text-4xl font-bold mb-4 text-[#111827]">Ready to scale your business?</h2>
+              <p className="text-[#64748B] mb-8 max-w-2xl mx-auto">
                 Join thousands of marketers using MakeItAds to dominate their niche.
               </p>
               <button 
                 onClick={() => handleUpgrade("Pro")}
-                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-4 text-base font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_-10px_rgba(139,92,246,0.6)] transition-all hover:scale-105"
+                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:shadow-xl hover:shadow-[#8b5cf6]/30 transition-all hover:scale-105"
               >
                 Get Started with Pro <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </button>

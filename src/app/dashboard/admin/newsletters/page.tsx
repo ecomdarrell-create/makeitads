@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Send, Loader2, CheckCircle2, Users, FileText, Megaphone } from "lucide-react";
+import { Send, Loader2, CheckCircle2, FileText, Megaphone } from "lucide-react";
 import PageTransition from "@/components/ui/PageTransition";
 
 export default function AdminNewslettersPage() {
@@ -27,7 +27,7 @@ export default function AdminNewslettersPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           title, 
-          content_html: content, // On envoie le texte brut, tu pourras ajouter un éditeur HTML plus tard
+          content_html: content,
           target_plan: targetPlan 
         }),
       });
@@ -54,21 +54,21 @@ export default function AdminNewslettersPage() {
         
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center">
+          <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-pink-500 to-rose-500 flex items-center justify-center shadow-md">
             <Megaphone className="h-5 w-5 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">Créer une Newsletter</h1>
-            <p className="text-sm text-slate-400">Envoyez des mises à jour à vos utilisateurs</p>
+            <h1 className="text-2xl font-bold text-[#111827]">Créer une Newsletter</h1>
+            <p className="text-sm text-[#64748B]">Envoyez des mises à jour à vos utilisateurs</p>
           </div>
         </div>
 
         {/* Formulaire */}
-        <div className="rounded-2xl border border-white/10 bg-[#0f0f1a] p-6 space-y-6">
+        <div className="rounded-2xl border border-[#E5E7EB] bg-white p-6 space-y-6 shadow-sm">
           
           {/* Titre */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#64748B] mb-2">
               Sujet de l'email
             </label>
             <input
@@ -76,13 +76,13 @@ export default function AdminNewslettersPage() {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Nouvelle fonctionnalité disponible !"
-              className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-white outline-none focus:border-[#6366f1] transition-all"
+              className="w-full rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-all placeholder:text-[#94A3B8]"
             />
           </div>
 
           {/* Destinataires */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#64748B] mb-2">
               Destinataires
             </label>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
@@ -98,8 +98,8 @@ export default function AdminNewslettersPage() {
                   onClick={() => setTargetPlan(plan.id)}
                   className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                     targetPlan === plan.id
-                      ? "bg-[#6366f1] text-white"
-                      : "bg-white/[0.02] text-slate-400 hover:bg-white/[0.05] border border-white/10"
+                      ? "bg-[#6366f1] text-white shadow-sm"
+                      : "bg-[#F9FAFB] text-[#64748B] hover:bg-[#F3F4F6] border border-[#E5E7EB]"
                   }`}
                 >
                   {plan.label}
@@ -110,7 +110,7 @@ export default function AdminNewslettersPage() {
 
           {/* Contenu */}
           <div>
-            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+            <label className="block text-xs font-bold uppercase tracking-wider text-[#64748B] mb-2">
               Contenu (HTML supporté)
             </label>
             <textarea
@@ -118,24 +118,26 @@ export default function AdminNewslettersPage() {
               onChange={(e) => setContent(e.target.value)}
               placeholder="Écrivez votre message ici... Vous pouvez utiliser des balises HTML comme <b>, <a>, <h1>."
               rows={12}
-              className="w-full rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-white outline-none focus:border-[#6366f1] transition-all resize-none font-mono text-sm"
+              className="w-full rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3 text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-all resize-none font-mono text-sm placeholder:text-[#94A3B8]"
             />
-            <p className="text-xs text-slate-500 mt-2">
-               Astuce : Pour un rendu pro, utilisez du HTML simple. Ex: <code className="bg-white/5 px-1 rounded">&lt;h1&gt;Titre&lt;/h1&gt;&lt;p&gt;Texte...&lt;/p&gt;</code>
+            <p className="text-xs text-[#64748B] mt-2">
+               Astuce : Pour un rendu pro, utilisez du HTML simple. Ex: <code className="bg-[#F3F4F6] px-1 rounded text-[#475569]">&lt;h1&gt;Titre&lt;/h1&gt;&lt;p&gt;Texte...&lt;/p&gt;</code>
             </p>
           </div>
 
           {/* Status & Bouton */}
           {status && (
             <div className={`p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${
-              status.type === 'success' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'
+              status.type === 'success' 
+                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                : 'bg-red-50 text-red-700 border border-red-200'
             }`}>
               {status.type === 'success' ? <CheckCircle2 className="h-5 w-5" /> : <FileText className="h-5 w-5" />}
               {status.msg}
             </div>
           )}
 
-          <div className="flex justify-end pt-4 border-t border-white/5">
+          <div className="flex justify-end pt-4 border-t border-[#E5E7EB]">
             <button
               onClick={handleSend}
               disabled={isSending || !title || !content}

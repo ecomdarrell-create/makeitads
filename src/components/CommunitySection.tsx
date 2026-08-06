@@ -7,7 +7,7 @@ import { ArrowRight, Users } from "lucide-react";
 
 export default function CommunitySection() {
   return (
-    <section id="community" className="relative z-10 overflow-hidden">
+    <section id="community" className="relative z-10 overflow-hidden bg-[#FFFFFF]">
       {/* CONTAINER PLEIN ÉCRAN */}
       <div className="relative min-h-[600px] md:min-h-[700px] flex items-center justify-center px-4 sm:px-6 py-20 md:py-32">
         
@@ -22,10 +22,10 @@ export default function CommunitySection() {
             sizes="100vw"
             quality={90}
           />
-          {/* Overlay sombre pour lisibilité */}
-          <div className="absolute inset-0 bg-[#080810]/60" />
-          {/* Gradient pour profondeur */}
-          <div className="absolute inset-0 bg-gradient-to-t from-[#080810] via-[#080810]/30 to-[#080810]/50" />
+          {/* Overlay clair premium (Glassmorphism) pour lisibilité et thème blanc */}
+          <div className="absolute inset-0 bg-[#F8FAFC]/85 backdrop-blur-xl" />
+          {/* Gradient subtil pour profondeur et transition douce */}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#FFFFFF] via-transparent to-[#FFFFFF]/50" />
         </div>
 
         {/* CONTENU CENTRÉ */}
@@ -36,21 +36,21 @@ export default function CommunitySection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-md px-4 py-1.5 mb-6">
-              <Users className="h-3.5 w-3.5 text-white" />
-              <span className="text-xs font-semibold text-white uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#E2E8F0] bg-white/60 backdrop-blur-md px-4 py-1.5 mb-6 shadow-sm">
+              <Users className="h-3.5 w-3.5 text-[#6366f1]" />
+              <span className="text-xs font-semibold text-[#0F172A] uppercase tracking-wider">
                 Private Community
               </span>
             </div>
 
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-white leading-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 text-[#0F172A] leading-tight">
               Join{" "}
               <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-transparent">
                 The Boardroom
               </span>
             </h2>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-200 leading-relaxed mb-10 max-w-2xl mx-auto">
+            <p className="text-base sm:text-lg md:text-xl text-[#475569] leading-relaxed mb-10 max-w-2xl mx-auto">
               An exclusive circle of founders, marketers and decision-makers. Get the intelligence, strategies and connections that drive real growth.
             </p>
 
@@ -63,12 +63,11 @@ export default function CommunitySection() {
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
               </Link>
 
-              {/* ✅ MODIFICATION : Nouveau lien Telegram */}
               <a
                 href="https://t.me/theboardroom_group"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/10 backdrop-blur-sm px-8 py-4 text-sm font-semibold text-white hover:bg-white/20 transition-all w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white/80 backdrop-blur-sm px-8 py-4 text-sm font-semibold text-[#0F172A] hover:bg-white hover:border-[#CBD5E1] transition-all shadow-sm w-full sm:w-auto"
               >
                 Join Telegram
               </a>

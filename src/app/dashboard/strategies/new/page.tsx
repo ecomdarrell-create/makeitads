@@ -281,10 +281,10 @@ export default function NewStrategyPage() {
 
   if (loading || !profileLoaded || usageLoading) {
     return (
-      <div className="min-h-screen bg-[#080810] flex items-center justify-center">
+      <div className="min-h-screen bg-[#FAFAFC] flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[#6366f1] mx-auto mb-3 sm:mb-4" />
-          <p className="text-xs sm:text-sm text-slate-400">Loading your profile...</p>
+          <p className="text-xs sm:text-sm text-[#64748B]">Loading your profile...</p>
         </div>
       </div>
     );
@@ -572,10 +572,8 @@ export default function NewStrategyPage() {
   const currentStepIndex = steps.indexOf(step);
 
   return (
-    <div className="min-h-screen bg-[#080810] text-white">
-      {/* ═══════════════════════════════════════════════════════════
-          MODAL D'UPGRADE - RESPONSIVE
-          ═══════════════════════════════════════════════════════════ */}
+    <div className="min-h-screen bg-[#FAFAFC] text-[#111827]">
+      {/* MODAL D'UPGRADE */}
       <AnimatePresence>
         {showUpgradeModal && (
           <>
@@ -584,7 +582,7 @@ export default function NewStrategyPage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setShowUpgradeModal(false)}
-              className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm"
+              className="fixed inset-0 z-50 bg-[#0F172A]/60 backdrop-blur-sm"
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -592,10 +590,10 @@ export default function NewStrategyPage() {
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
             >
-              <div className="relative w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl border border-white/10 bg-[#0a0a14] p-5 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
+              <div className="relative w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl border border-[#E5E7EB] bg-white p-5 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
                 <button
                   onClick={() => setShowUpgradeModal(false)}
-                  className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-xl p-2 text-slate-400 hover:bg-white/5 hover:text-white transition-all"
+                  className="absolute right-3 top-3 sm:right-4 sm:top-4 rounded-xl p-2 text-[#64748B] hover:bg-[#F3F4F6] hover:text-[#111827] transition-all"
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -604,10 +602,10 @@ export default function NewStrategyPage() {
                   <div className="inline-flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] mb-3 sm:mb-4 shadow-lg shadow-[#6366f1]/25">
                     <Zap className="h-7 w-7 sm:h-8 sm:w-8 text-white" />
                   </div>
-                  <h2 className="text-xl sm:text-2xl font-bold text-white mb-2 no-hyphens">
+                  <h2 className="text-xl sm:text-2xl font-bold text-[#111827] mb-2 no-hyphens">
                     Monthly Limit Reached
                   </h2>
-                  <p className="text-xs sm:text-sm text-slate-400">
+                  <p className="text-xs sm:text-sm text-[#64748B]">
                     You've used {strategiesUsed} of {strategiesLimit} strategies.
                     <br className="hidden sm:block" />
                     Upgrade to generate unlimited strategies.
@@ -615,9 +613,9 @@ export default function NewStrategyPage() {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-6 sm:mb-8">
-                  <div className="relative rounded-2xl border border-[#8b5cf6] bg-[#8b5cf6]/5 p-4 sm:p-6">
+                  <div className="relative rounded-2xl border border-[#6366f1]/30 bg-[#EEF2FF] p-4 sm:p-6">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 py-1 text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider">
+                      <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 py-1 text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
                         Most Popular
                       </span>
                     </div>
@@ -626,21 +624,21 @@ export default function NewStrategyPage() {
                         <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-white">Pro</h3>
-                        <p className="text-xs sm:text-sm text-slate-400">$29/month</p>
+                        <h3 className="text-base sm:text-lg font-bold text-[#111827]">Pro</h3>
+                        <p className="text-xs sm:text-sm text-[#64748B]">$29/month</p>
                       </div>
                     </div>
                     <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>10 strategies per month</span>
                       </li>
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>Competitor intelligence</span>
                       </li>
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>PDF exports</span>
                       </li>
                     </ul>
@@ -652,33 +650,33 @@ export default function NewStrategyPage() {
                     </Link>
                   </div>
 
-                  <div className="relative rounded-2xl border border-white/10 bg-white/[0.02] p-4 sm:p-6">
+                  <div className="relative rounded-2xl border border-[#E5E7EB] bg-white p-4 sm:p-6">
                     <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
                       <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-500 flex items-center justify-center">
                         <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-white">Premium</h3>
-                        <p className="text-xs sm:text-sm text-slate-400">$59/month</p>
+                        <h3 className="text-base sm:text-lg font-bold text-[#111827]">Premium</h3>
+                        <p className="text-xs sm:text-sm text-[#64748B]">$59/month</p>
                       </div>
                     </div>
                     <ul className="space-y-1.5 sm:space-y-2 mb-4 sm:mb-6">
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>Unlimited strategies</span>
                       </li>
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>Predictive trends</span>
                       </li>
-                      <li className="flex items-center gap-2 text-xs sm:text-sm text-slate-300">
-                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400 flex-shrink-0" />
+                      <li className="flex items-center gap-2 text-xs sm:text-sm text-[#475569]">
+                        <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600 flex-shrink-0" />
                         <span>Dedicated support</span>
                       </li>
                     </ul>
                     <Link
                       href="/dashboard/billing?upgrade=premium"
-                      className="block w-full rounded-xl py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold border border-white/10 bg-white/[0.03] text-white hover:bg-white/[0.06] transition-all active:scale-95"
+                      className="block w-full rounded-xl py-2.5 sm:py-3 text-center text-xs sm:text-sm font-semibold border border-[#E5E7EB] bg-[#F9FAFB] text-[#111827] hover:bg-[#F3F4F6] transition-all active:scale-95"
                     >
                       Upgrade to Premium
                     </Link>
@@ -688,7 +686,7 @@ export default function NewStrategyPage() {
                 <div className="text-center">
                   <button
                     onClick={() => setShowUpgradeModal(false)}
-                    className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors"
+                    className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors"
                   >
                     Maybe later
                   </button>
@@ -699,28 +697,26 @@ export default function NewStrategyPage() {
         )}
       </AnimatePresence>
 
-      {/* ═══════════════════════════════════════════════════════════
-          HEADER - COMPACT SUR MOBILE
-          ═══════════════════════════════════════════════════════════ */}
-      <div className="border-b border-white/5 px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 bg-[#080810]/95 backdrop-blur-sm z-40 gap-2">
+      {/* HEADER */}
+      <div className="border-b border-[#E5E7EB] px-3 sm:px-6 py-3 sm:py-4 flex items-center justify-between sticky top-0 bg-white/95 backdrop-blur-sm z-40 gap-2">
         <div className="flex items-center gap-2 sm:gap-4 min-w-0">
-          <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0 active:scale-95">
-            <X className="h-4 w-4 text-slate-400" />
+          <button onClick={() => router.back()} className="p-2 rounded-lg hover:bg-[#F3F4F6] transition-colors flex-shrink-0 active:scale-95">
+            <X className="h-4 w-4 text-[#64748B]" />
           </button>
-          <span className="text-xs sm:text-sm font-bold text-white truncate">
+          <span className="text-xs sm:text-sm font-bold text-[#111827] truncate">
             <span className="hidden sm:inline">Make</span>
             <span className="sm:hidden">M</span>
-            <span className="text-[#8b5cf6]">ItAds</span>
+            <span className="text-[#6366f1]">ItAds</span>
             <span className="hidden sm:inline"> — Strategy Builder</span>
           </span>
         </div>
 
-        {/* Compteur - caché sur mobile */}
+        {/* Compteur */}
         {!isUnlimited && (
           <div className="hidden md:flex items-center gap-3 flex-shrink-0">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
-              <Sparkles className="h-3.5 w-3.5 text-[#8b5cf6]" />
-              <span className="text-xs font-bold text-white">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#F9FAFB] border border-[#E5E7EB]">
+              <Sparkles className="h-3.5 w-3.5 text-[#6366f1]" />
+              <span className="text-xs font-bold text-[#111827]">
                 {strategiesUsed} / {strategiesLimit}
               </span>
             </div>
@@ -736,7 +732,7 @@ export default function NewStrategyPage() {
           </div>
         )}
 
-        {/* Progress dots - plus petits sur mobile */}
+        {/* Progress dots */}
         <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
           {steps.slice(0, -1).map((s, i) => (
             <div
@@ -746,27 +742,25 @@ export default function NewStrategyPage() {
                   ? "w-5 sm:w-8 bg-[#6366f1]" 
                   : i < currentStepIndex 
                   ? "w-4 sm:w-6 bg-[#6366f1]/50" 
-                  : "w-4 sm:w-6 bg-white/10"
+                  : "w-4 sm:w-6 bg-[#E5E7EB]"
               }`}
             />
           ))}
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════════════════════════
-          BANNIÈRE PROFIL SAUVEGARDÉ - COMPACTE
-          ═══════════════════════════════════════════════════════════ */}
+      {/* BANNIÈRE PROFIL SAUVEGARDÉ */}
       {hasSavedProfile && step !== "generating" && (
-        <div className="bg-gradient-to-r from-emerald-500/10 to-emerald-500/5 border-b border-emerald-500/20 px-3 sm:px-6 py-2 sm:py-3">
+        <div className="bg-gradient-to-r from-emerald-50 to-emerald-50/50 border-b border-emerald-200 px-3 sm:px-6 py-2 sm:py-3">
           <div className="max-w-3xl mx-auto flex items-center gap-2 sm:gap-3">
-            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-emerald-500/20 flex-shrink-0">
-              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-400" />
+            <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-emerald-100 flex-shrink-0">
+              <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs sm:text-sm font-semibold text-emerald-200 truncate">
+              <p className="text-xs sm:text-sm font-semibold text-emerald-800 truncate">
                 Profile pre-filled
               </p>
-              <p className="text-[10px] sm:text-xs text-emerald-400/80 truncate">
+              <p className="text-[10px] sm:text-xs text-emerald-700 truncate">
                 Modify anything before generating.
               </p>
             </div>
@@ -797,7 +791,7 @@ export default function NewStrategyPage() {
                 setAdditionalNotes("");
                 setHasSavedProfile(false);
               }}
-              className="text-[10px] sm:text-xs text-emerald-400 hover:text-emerald-300 underline flex-shrink-0"
+              className="text-[10px] sm:text-xs text-emerald-700 hover:text-emerald-800 underline flex-shrink-0"
             >
               Reset
             </button>
@@ -805,21 +799,17 @@ export default function NewStrategyPage() {
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════════════════════
-          CONTENU DES ÉTAPES
-          ═══════════════════════════════════════════════════════════ */}
+      {/* CONTENU DES ÉTAPES */}
       <div className="flex-1 overflow-auto">
         <AnimatePresence mode="wait">
           
-          {/* ═══════════════════════════════════════════════════════
-              STEP 1: INDUSTRY
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 1: INDUSTRY */}
           {step === "industry" && (
             <motion.div key="industry" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-7xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Choose Your Industry</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Select the category that describes your business.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Choose Your Industry</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Select the category that describes your business.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -839,11 +829,11 @@ export default function NewStrategyPage() {
                     className={`relative rounded-lg sm:rounded-xl overflow-hidden border-2 aspect-[4/3] group ${
                       selectedIndustry === biz.id 
                         ? "border-[#6366f1] shadow-[0_0_20px_-5px_rgba(99,102,241,0.5)]" 
-                        : "border-white/10 hover:border-white/30"
+                        : "border-[#E5E7EB] hover:border-[#6366f1]/50"
                     }`}
                   >
                     <Image src={biz.image} alt={biz.name} fill className="object-cover group-hover:scale-110 transition-transform duration-500" style={{ objectPosition: "center 30%" }} sizes="20vw" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0F172A]/90 via-[#0F172A]/50 to-transparent" />
                     <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
                       <p className="text-[10px] sm:text-sm font-bold text-white truncate">{biz.name}</p>
                     </div>
@@ -858,15 +848,13 @@ export default function NewStrategyPage() {
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 2: BUSINESS NAME
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 2: BUSINESS NAME */}
           {step === "business-name" && (
             <motion.div key="business-name" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-2xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Business Name</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Helps us personalize your strategy.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Business Name</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Helps us personalize your strategy.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -881,25 +869,23 @@ export default function NewStrategyPage() {
                 value={businessName} 
                 onChange={(e) => setBusinessName(e.target.value)} 
                 placeholder="e.g., Bright Dental Clinic" 
-                className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-lg text-white outline-none focus:border-[#6366f1] transition-colors" 
+                className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-3 sm:py-4 text-sm sm:text-lg text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
               />
               <div className="mt-6 sm:mt-8 flex justify-start">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 3: LOCATION
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 3: LOCATION */}
           {step === "location" && (
             <motion.div key="location" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Business Location</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Country and city for precise targeting.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Business Location</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Country and city for precise targeting.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -911,27 +897,27 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-4 sm:mb-6">
-                <label className="text-xs sm:text-sm font-bold text-white mb-1.5 sm:mb-2 block">City (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-1.5 sm:mb-2 block">City (Optional)</label>
                 <input 
                   type="text" 
                   value={city} 
                   onChange={(e) => setCity(e.target.value)} 
                   placeholder="e.g., Paris, New York" 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-2.5 sm:py-3 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-2.5 sm:py-3 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                 />
               </div>
 
               {!showCustomCountry ? (
                 <>
-                  <label className="text-xs sm:text-sm font-bold text-white mb-1.5 sm:mb-2 block">Country *</label>
+                  <label className="text-xs sm:text-sm font-bold text-[#111827] mb-1.5 sm:mb-2 block">Country *</label>
                   <div className="relative mb-4 sm:mb-6">
-                    <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-500" />
+                    <Search className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#94A3B8]" />
                     <input 
                       type="text" 
                       value={countrySearch} 
                       onChange={(e) => setCountrySearch(e.target.value)} 
                       placeholder="Search countries..." 
-                      className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                      className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     />
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5 sm:gap-2 mb-3 sm:mb-4 max-h-[250px] sm:max-h-[300px] overflow-y-auto pr-1 sm:pr-2">
@@ -941,8 +927,8 @@ export default function NewStrategyPage() {
                         onClick={() => handleCountrySelect(c)} 
                         className={`rounded-lg border px-2 sm:px-3 py-2 text-[10px] sm:text-xs font-medium transition-all text-left truncate active:scale-95 ${
                           selectedCountry === c 
-                            ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
-                            : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                            ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" 
+                            : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                         }`}
                       >
                         {selectedCountry === c && <Check className="inline h-2.5 w-2.5 sm:h-3 sm:w-3 mr-0.5 sm:mr-1" />}
@@ -952,7 +938,7 @@ export default function NewStrategyPage() {
                   </div>
                   <button 
                     onClick={() => handleCountrySelect("__custom__")} 
-                    className="w-full rounded-lg sm:rounded-xl border border-dashed border-[#6366f1]/50 bg-[#6366f1]/5 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-[#8b5cf6] hover:bg-[#6366f1]/10 transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95"
+                    className="w-full rounded-lg sm:rounded-xl border border-dashed border-[#6366f1]/50 bg-[#EEF2FF] px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium text-[#6366f1] hover:bg-[#E0E7FF] transition-all flex items-center justify-center gap-1.5 sm:gap-2 active:scale-95"
                   >
                     <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     <span className="hidden sm:inline">My country is not listed — Type it manually</span>
@@ -961,8 +947,8 @@ export default function NewStrategyPage() {
                 </>
               ) : (
                 <div className="space-y-3 sm:space-y-4">
-                  <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#6366f1]/30 bg-[#6366f1]/5">
-                    <p className="text-xs sm:text-sm text-[#8b5cf6] mb-2 sm:mb-3 flex items-center gap-2">
+                  <div className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#6366f1]/30 bg-[#EEF2FF]">
+                    <p className="text-xs sm:text-sm text-[#6366f1] mb-2 sm:mb-3 flex items-center gap-2">
                       <Globe className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Enter your country name
                     </p>
@@ -971,14 +957,14 @@ export default function NewStrategyPage() {
                       value={customCountry} 
                       onChange={(e) => setCustomCountry(e.target.value)} 
                       placeholder="e.g., Luxembourg, Monaco" 
-                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                      className="w-full rounded-lg border border-[#E5E7EB] bg-white px-3 sm:px-4 py-2.5 sm:py-3 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                       onKeyDown={(e) => { if (e.key === "Enter") handleCustomCountryConfirm(); }} 
                     />
                   </div>
                   <div className="flex gap-2 sm:gap-3">
                     <button 
                       onClick={() => { setShowCustomCountry(false); setCustomCountry(""); }} 
-                      className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-slate-400 hover:text-white transition-colors active:scale-95"
+                      className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm text-[#64748B] hover:text-[#111827] hover:bg-[#F3F4F6] transition-colors active:scale-95"
                     >
                       Cancel
                     </button>
@@ -994,8 +980,8 @@ export default function NewStrategyPage() {
               )}
 
               {selectedCountry && !showCustomCountry && (
-                <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-                  <p className="text-xs sm:text-sm text-emerald-400 flex items-center gap-2">
+                <div className="mt-3 sm:mt-4 p-2.5 sm:p-3 rounded-lg bg-emerald-50 border border-emerald-200">
+                  <p className="text-xs sm:text-sm text-emerald-700 flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                     Selected: <span className="font-bold truncate">{selectedCountry}</span>
                   </p>
@@ -1003,22 +989,20 @@ export default function NewStrategyPage() {
               )}
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 4: BUSINESS MODEL
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 4: BUSINESS MODEL */}
           {step === "business-model" && (
             <motion.div key="business-model" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-4xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Business Model</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Helps us understand your structure.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Business Model</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Helps us understand your structure.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1030,7 +1014,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Business Model *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Business Model *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                   {BUSINESS_MODELS.map((model) => (
                     <button 
@@ -1038,19 +1022,19 @@ export default function NewStrategyPage() {
                       onClick={() => setSelectedBusinessModel(model.id)} 
                       className={`rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-left transition-all active:scale-95 ${
                         selectedBusinessModel === model.id 
-                          ? "border-[#6366f1] bg-[#6366f1]/10" 
-                          : "border-white/10 bg-white/5 hover:border-white/30"
+                          ? "border-[#6366f1] bg-[#EEF2FF]" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#6366f1]/30"
                       }`}
                     >
-                      <p className="text-xs sm:text-sm font-bold text-white">{model.name}</p>
-                      <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">{model.description}</p>
+                      <p className="text-xs sm:text-sm font-bold text-[#111827]">{model.name}</p>
+                      <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5 sm:mt-1">{model.description}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Maturity Stage *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Maturity Stage *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
                   {MATURITY_STAGES.map((stage) => (
                     <button 
@@ -1058,34 +1042,32 @@ export default function NewStrategyPage() {
                       onClick={() => setSelectedMaturity(stage.id)} 
                       className={`rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-left transition-all active:scale-95 ${
                         selectedMaturity === stage.id 
-                          ? "border-[#6366f1] bg-[#6366f1]/10" 
-                          : "border-white/10 bg-white/5 hover:border-white/30"
+                          ? "border-[#6366f1] bg-[#EEF2FF]" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#6366f1]/30"
                       }`}
                     >
-                      <p className="text-xs sm:text-sm font-bold text-white">{stage.name}</p>
-                      <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">{stage.description}</p>
+                      <p className="text-xs sm:text-sm font-bold text-[#111827]">{stage.name}</p>
+                      <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5 sm:mt-1">{stage.description}</p>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 5: PRODUCTS & SERVICES
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 5: PRODUCTS & SERVICES */}
           {step === "products-services" && (
             <motion.div key="products-services" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Products & Services</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Add at least one product or service.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Products & Services</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Add at least one product or service.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1097,14 +1079,14 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Products</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Products</label>
                 <div className="flex gap-2 mb-2 sm:mb-3">
                   <input 
                     type="text" 
                     value={newProduct} 
                     onChange={(e) => setNewProduct(e.target.value)} 
                     placeholder="e.g., Premium Whitening Kit" 
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                    className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     onKeyDown={(e) => { if (e.key === "Enter") addProduct(); }} 
                   />
                   <button onClick={addProduct} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1114,9 +1096,9 @@ export default function NewStrategyPage() {
                 {products.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {products.map((product, i) => (
-                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 sm:px-3 py-1.5 sm:py-2">
-                        <span className="text-xs sm:text-sm text-white">{product}</span>
-                        <button onClick={() => removeProduct(i)} className="text-slate-400 hover:text-red-400 transition-colors">
+                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 sm:px-3 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-[#111827]">{product}</span>
+                        <button onClick={() => removeProduct(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors">
                           <Minus className="h-3 w-3" />
                         </button>
                       </div>
@@ -1126,14 +1108,14 @@ export default function NewStrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Services</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Services</label>
                 <div className="flex gap-2 mb-2 sm:mb-3">
                   <input 
                     type="text" 
                     value={newService} 
                     onChange={(e) => setNewService(e.target.value)} 
                     placeholder="e.g., Free Consultation" 
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                    className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     onKeyDown={(e) => { if (e.key === "Enter") addService(); }} 
                   />
                   <button onClick={addService} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1143,9 +1125,9 @@ export default function NewStrategyPage() {
                 {services.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {services.map((service, i) => (
-                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 sm:px-3 py-1.5 sm:py-2">
-                        <span className="text-xs sm:text-sm text-white">{service}</span>
-                        <button onClick={() => removeService(i)} className="text-slate-400 hover:text-red-400 transition-colors">
+                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 sm:px-3 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-[#111827]">{service}</span>
+                        <button onClick={() => removeService(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors">
                           <Minus className="h-3 w-3" />
                         </button>
                       </div>
@@ -1155,22 +1137,20 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 6: GOALS
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 6: GOALS */}
           {step === "goals" && (
             <motion.div key="goals" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Your Goals</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Select all that apply.</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Your Goals</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Select all that apply.</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1187,8 +1167,8 @@ export default function NewStrategyPage() {
                     onClick={() => setSelectedGoals((prev) => prev.includes(goal) ? prev.filter((g) => g !== goal) : [...prev, goal])} 
                     className={`rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all text-left active:scale-95 ${
                       selectedGoals.includes(goal) 
-                        ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
-                        : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                        ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" 
+                        : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                     }`}
                   >
                     {selectedGoals.includes(goal) && <Check className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />}
@@ -1197,22 +1177,20 @@ export default function NewStrategyPage() {
                 ))}
               </div>
               <div className="flex justify-start">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 7: TARGET AUDIENCE
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 7: TARGET AUDIENCE */}
           {step === "target-audience" && (
             <motion.div key="target-audience" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Target Audience</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Who are you trying to reach?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Target Audience</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Who are you trying to reach?</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1224,7 +1202,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Primary Audience *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Primary Audience *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   {TARGET_AUDIENCES.map((audience) => (
                     <button 
@@ -1232,8 +1210,8 @@ export default function NewStrategyPage() {
                       onClick={() => setSelectedAudience(audience)} 
                       className={`rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all text-left active:scale-95 ${
                         selectedAudience === audience 
-                          ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                          ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                       }`}
                     >
                       {selectedAudience === audience && <Check className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />}
@@ -1244,33 +1222,31 @@ export default function NewStrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Ideal Customer Profile *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Ideal Customer Profile *</label>
                 <textarea 
                   value={idealCustomer} 
                   onChange={(e) => setIdealCustomer(e.target.value)} 
                   rows={4} 
                   placeholder="e.g., Working professionals aged 28-45..." 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-3 sm:py-4 text-sm text-white outline-none focus:border-[#6366f1] transition-colors resize-none" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-3 sm:py-4 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors resize-none placeholder:text-[#94A3B8]" 
                 />
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 8: PAIN POINTS
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 8: PAIN POINTS */}
           {step === "customer-pain-points" && (
             <motion.div key="customer-pain-points" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Pain Points</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">What problems do your customers face?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Pain Points</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">What problems do your customers face?</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1287,7 +1263,7 @@ export default function NewStrategyPage() {
                   value={newPainPoint} 
                   onChange={(e) => setNewPainPoint(e.target.value)} 
                   placeholder="e.g., High cost of services" 
-                  className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                  className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                   onKeyDown={(e) => { if (e.key === "Enter") addPainPoint(); }} 
                 />
                 <button onClick={addPainPoint} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1298,9 +1274,9 @@ export default function NewStrategyPage() {
               {customerPainPoints.length > 0 && (
                 <div className="space-y-1.5 sm:space-y-2">
                   {customerPainPoints.map((painPoint, i) => (
-                    <div key={i} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3">
-                      <span className="text-xs sm:text-sm text-white truncate pr-2">{painPoint}</span>
-                      <button onClick={() => removePainPoint(i)} className="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
+                    <div key={i} className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 sm:py-3">
+                      <span className="text-xs sm:text-sm text-[#111827] truncate pr-2">{painPoint}</span>
+                      <button onClick={() => removePainPoint(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors flex-shrink-0">
                         <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       </button>
                     </div>
@@ -1309,22 +1285,20 @@ export default function NewStrategyPage() {
               )}
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 9: BUDGET
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 9: BUDGET */}
           {step === "budget" && (
             <motion.div key="budget" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-2xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Marketing Budget</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">What's your monthly ad spend?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Marketing Budget</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">What's your monthly ad spend?</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1341,14 +1315,14 @@ export default function NewStrategyPage() {
                     onClick={() => setSelectedBudget(b.value)} 
                     className={`w-full rounded-lg sm:rounded-xl border px-4 sm:px-6 py-3 sm:py-4 text-left transition-all active:scale-[0.99] ${
                       selectedBudget === b.value 
-                        ? "border-[#6366f1] bg-[#6366f1]/10" 
-                        : "border-white/10 bg-white/5 hover:border-white/30"
+                        ? "border-[#6366f1] bg-[#EEF2FF]" 
+                        : "border-[#E5E7EB] bg-[#F9FAFB] hover:border-[#6366f1]/30"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-base sm:text-lg font-bold text-white">{b.label}</p>
-                        <p className="text-xs sm:text-sm text-slate-400">{b.description}</p>
+                        <p className="text-base sm:text-lg font-bold text-[#111827]">{b.label}</p>
+                        <p className="text-xs sm:text-sm text-[#64748B]">{b.description}</p>
                       </div>
                       {selectedBudget === b.value && <Check className="h-4 w-4 sm:h-5 sm:w-5 text-[#6366f1] flex-shrink-0" />}
                     </div>
@@ -1356,22 +1330,20 @@ export default function NewStrategyPage() {
                 ))}
               </div>
               <div className="flex justify-start">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 10: COMPETITORS
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 10: COMPETITORS */}
           {step === "competitors" && (
             <motion.div key="competitors" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Competitive Landscape</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Who are your competitors?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Competitive Landscape</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Who are your competitors?</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1383,14 +1355,14 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Known Competitors (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Known Competitors (Optional)</label>
                 <div className="flex gap-2 mb-2 sm:mb-3">
                   <input 
                     type="text" 
                     value={newCompetitor} 
                     onChange={(e) => setNewCompetitor(e.target.value)} 
                     placeholder="e.g., Competitor X" 
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                    className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     onKeyDown={(e) => { if (e.key === "Enter") addCompetitor(); }} 
                   />
                   <button onClick={addCompetitor} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1400,9 +1372,9 @@ export default function NewStrategyPage() {
                 {competitors.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 sm:gap-2">
                     {competitors.map((comp, i) => (
-                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-white/10 bg-white/5 px-2.5 sm:px-3 py-1.5 sm:py-2">
-                        <span className="text-xs sm:text-sm text-white">{comp}</span>
-                        <button onClick={() => removeCompetitor(i)} className="text-slate-400 hover:text-red-400 transition-colors">
+                      <div key={i} className="flex items-center gap-1.5 sm:gap-2 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-2.5 sm:px-3 py-1.5 sm:py-2">
+                        <span className="text-xs sm:text-sm text-[#111827]">{comp}</span>
+                        <button onClick={() => removeCompetitor(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors">
                           <Minus className="h-3 w-3" />
                         </button>
                       </div>
@@ -1412,14 +1384,14 @@ export default function NewStrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Competitive Advantages *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Competitive Advantages *</label>
                 <div className="flex gap-2 mb-2 sm:mb-3">
                   <input 
                     type="text" 
                     value={newAdvantage} 
                     onChange={(e) => setNewAdvantage(e.target.value)} 
                     placeholder="e.g., 24/7 customer support" 
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                    className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     onKeyDown={(e) => { if (e.key === "Enter") addAdvantage(); }} 
                   />
                   <button onClick={addAdvantage} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1429,9 +1401,9 @@ export default function NewStrategyPage() {
                 {competitiveAdvantages.length > 0 && (
                   <div className="space-y-1.5 sm:space-y-2">
                     {competitiveAdvantages.map((adv, i) => (
-                      <div key={i} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3">
-                        <span className="text-xs sm:text-sm text-white truncate pr-2">{adv}</span>
-                        <button onClick={() => removeAdvantage(i)} className="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
+                      <div key={i} className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 sm:py-3">
+                        <span className="text-xs sm:text-sm text-[#111827] truncate pr-2">{adv}</span>
+                        <button onClick={() => removeAdvantage(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors flex-shrink-0">
                           <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </button>
                       </div>
@@ -1441,22 +1413,20 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 11: BRAND POSITIONING
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 11: BRAND POSITIONING */}
           {step === "brand-positioning" && (
             <motion.div key="brand-positioning" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Brand Positioning</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">How do you want to be perceived?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Brand Positioning</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">How do you want to be perceived?</p>
                 </div>
                 <button 
                   disabled={!canProceed()} 
@@ -1468,7 +1438,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Brand Tone *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Brand Tone *</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   {TONES.map((tone) => (
                     <button 
@@ -1476,8 +1446,8 @@ export default function NewStrategyPage() {
                       onClick={() => setSelectedTone(tone)} 
                       className={`rounded-lg sm:rounded-xl border px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-all text-left active:scale-95 ${
                         selectedTone === tone 
-                          ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                          ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                       }`}
                     >
                       {selectedTone === tone && <Check className="inline h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2" />}
@@ -1488,55 +1458,53 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-4 sm:mb-6">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Brand Positioning *</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Brand Positioning *</label>
                 <input 
                   type="text" 
                   value={brandPositioning} 
                   onChange={(e) => setBrandPositioning(e.target.value)} 
                   placeholder="e.g., Premium quality at affordable prices" 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-2.5 sm:py-3 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-2.5 sm:py-3 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                 />
               </div>
 
               <div className="mb-4 sm:mb-6">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Positioning Statement (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Positioning Statement (Optional)</label>
                 <textarea 
                   value={positioningStatement} 
                   onChange={(e) => setPositioningStatement(e.target.value)} 
                   rows={3} 
                   placeholder="e.g., For [target audience] who [need]..." 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-3 sm:py-4 text-sm text-white outline-none focus:border-[#6366f1] transition-colors resize-none" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-3 sm:py-4 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors resize-none placeholder:text-[#94A3B8]" 
                 />
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Unique Value Proposition (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Unique Value Proposition (Optional)</label>
                 <textarea 
                   value={uniqueValueProposition} 
                   onChange={(e) => setUniqueValueProposition(e.target.value)} 
                   rows={2} 
                   placeholder="e.g., We deliver results 3x faster..." 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-3 sm:py-4 text-sm text-white outline-none focus:border-[#6366f1] transition-colors resize-none" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-3 sm:py-4 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors resize-none placeholder:text-[#94A3B8]" 
                 />
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 12: CHANNELS
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 12: CHANNELS */}
           {step === "channels" && (
             <motion.div key="channels" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Marketing Channels</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Which channels are you using?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Marketing Channels</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Which channels are you using?</p>
                 </div>
                 <button 
                   onClick={handleNext} 
@@ -1547,7 +1515,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Currently Using (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Currently Using (Optional)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                   {MARKETING_CHANNELS.map((channel) => (
                     <button 
@@ -1555,8 +1523,8 @@ export default function NewStrategyPage() {
                       onClick={() => toggleChannel(channel, "existing")} 
                       className={`rounded-lg border px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all text-left active:scale-95 ${
                         existingChannels.includes(channel) 
-                          ? "border-[#6366f1] bg-[#6366f1]/10 text-white" 
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                          ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                       }`}
                     >
                       {existingChannels.includes(channel) && <Check className="inline h-3 w-3 mr-1.5 sm:mr-2" />}
@@ -1567,7 +1535,7 @@ export default function NewStrategyPage() {
               </div>
 
               <div>
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Want to Explore (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Want to Explore (Optional)</label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 sm:gap-2">
                   {MARKETING_CHANNELS.map((channel) => (
                     <button 
@@ -1575,8 +1543,8 @@ export default function NewStrategyPage() {
                       onClick={() => toggleChannel(channel, "preferred")} 
                       className={`rounded-lg border px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all text-left active:scale-95 ${
                         preferredChannels.includes(channel) 
-                          ? "border-emerald-500 bg-emerald-500/10 text-white" 
-                          : "border-white/10 bg-white/5 text-slate-400 hover:border-white/30"
+                          ? "border-emerald-500 bg-emerald-50 text-emerald-700" 
+                          : "border-[#E5E7EB] bg-[#F9FAFB] text-[#475569] hover:border-[#6366f1]/30"
                       }`}
                     >
                       {preferredChannels.includes(channel) && <Check className="inline h-3 w-3 mr-1.5 sm:mr-2" />}
@@ -1587,22 +1555,20 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 13: CHALLENGES
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 13: CHALLENGES */}
           {step === "challenges" && (
             <motion.div key="challenges" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="p-4 sm:p-6 md:p-10 max-w-3xl mx-auto">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-1 sm:mb-2 no-hyphens">Final Details</h2>
-                  <p className="text-xs sm:text-sm text-slate-400">Any other context?</p>
+                  <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#111827] mb-1 sm:mb-2 no-hyphens">Final Details</h2>
+                  <p className="text-xs sm:text-sm text-[#64748B]">Any other context?</p>
                 </div>
                 <button 
                   onClick={startGeneration} 
@@ -1610,7 +1576,7 @@ export default function NewStrategyPage() {
                   className={`rounded-full px-5 sm:px-8 py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white transition-all flex items-center gap-1.5 sm:gap-2 shadow-lg active:scale-95 self-start sm:self-auto ${
                     canGenerate 
                       ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] hover:scale-105 shadow-[#6366f1]/25" 
-                      : "bg-slate-600 cursor-not-allowed"
+                      : "bg-[#94A3B8] cursor-not-allowed"
                   }`}
                 >
                   {canGenerate ? (
@@ -1627,16 +1593,16 @@ export default function NewStrategyPage() {
               </div>
 
               {!canGenerate && (
-                <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-amber-500/30 bg-amber-500/10">
+                <div className="mb-4 sm:mb-6 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-amber-200 bg-amber-50">
                   <div className="flex items-start gap-2 sm:gap-3">
-                    <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-amber-500/20 flex-shrink-0">
-                      <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-400" />
+                    <div className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-full bg-amber-100 flex-shrink-0">
+                      <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-700" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-xs sm:text-sm font-semibold text-amber-200 mb-1">
+                      <p className="text-xs sm:text-sm font-semibold text-amber-800 mb-1">
                         Monthly limit reached
                       </p>
-                      <p className="text-[10px] sm:text-xs text-amber-400/80 mb-2 sm:mb-3">
+                      <p className="text-[10px] sm:text-xs text-amber-700 mb-2 sm:mb-3">
                         You've used {strategiesUsed} of {strategiesLimit} strategies.
                       </p>
                       <button
@@ -1652,14 +1618,14 @@ export default function NewStrategyPage() {
               )}
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Key Challenges (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Key Challenges (Optional)</label>
                 <div className="flex gap-2 mb-2 sm:mb-3">
                   <input 
                     type="text" 
                     value={newChallenge} 
                     onChange={(e) => setNewChallenge(e.target.value)} 
                     placeholder="e.g., Limited brand awareness" 
-                    className="flex-1 rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 text-sm text-white outline-none focus:border-[#6366f1] transition-colors" 
+                    className="flex-1 rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors placeholder:text-[#94A3B8]" 
                     onKeyDown={(e) => { if (e.key === "Enter") addChallenge(); }} 
                   />
                   <button onClick={addChallenge} className="rounded-lg bg-[#6366f1] px-3 sm:px-4 py-2 text-white hover:bg-[#5558e6] transition-colors active:scale-95">
@@ -1669,9 +1635,9 @@ export default function NewStrategyPage() {
                 {keyChallenges.length > 0 && (
                   <div className="space-y-1.5 sm:space-y-2">
                     {keyChallenges.map((challenge, i) => (
-                      <div key={i} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-3 sm:px-4 py-2 sm:py-3">
-                        <span className="text-xs sm:text-sm text-white truncate pr-2">{challenge}</span>
-                        <button onClick={() => removeChallenge(i)} className="text-slate-400 hover:text-red-400 transition-colors flex-shrink-0">
+                      <div key={i} className="flex items-center justify-between rounded-lg border border-[#E5E7EB] bg-[#F9FAFB] px-3 sm:px-4 py-2 sm:py-3">
+                        <span className="text-xs sm:text-sm text-[#111827] truncate pr-2">{challenge}</span>
+                        <button onClick={() => removeChallenge(i)} className="text-[#94A3B8] hover:text-red-500 transition-colors flex-shrink-0">
                           <Minus className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                         </button>
                       </div>
@@ -1681,30 +1647,30 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="mb-6 sm:mb-8">
-                <label className="text-xs sm:text-sm font-bold text-white mb-2 sm:mb-3 block">Additional Notes (Optional)</label>
+                <label className="text-xs sm:text-sm font-bold text-[#111827] mb-2 sm:mb-3 block">Additional Notes (Optional)</label>
                 <textarea 
                   value={additionalNotes} 
                   onChange={(e) => setAdditionalNotes(e.target.value)} 
                   rows={4} 
                   placeholder="Any other information..." 
-                  className="w-full rounded-lg sm:rounded-xl border border-white/10 bg-white/5 px-4 sm:px-6 py-3 sm:py-4 text-sm text-white outline-none focus:border-[#6366f1] transition-colors resize-none" 
+                  className="w-full rounded-lg sm:rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] px-4 sm:px-6 py-3 sm:py-4 text-sm text-[#111827] outline-none focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 transition-colors resize-none placeholder:text-[#94A3B8]" 
                 />
               </div>
 
-              <div className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#6366f1]/30 bg-[#6366f1]/5">
+              <div className="mb-6 sm:mb-8 p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#6366f1]/30 bg-[#EEF2FF]">
                 <label className="flex items-start gap-2 sm:gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={saveAsDefault}
                     onChange={(e) => setSaveAsDefault(e.target.checked)}
-                    className="mt-0.5 h-4 w-4 rounded border-white/10 bg-white/5 text-[#6366f1] focus:ring-[#6366f1]"
+                    className="mt-0.5 h-4 w-4 rounded border-[#E5E7EB] bg-white text-[#6366f1] focus:ring-[#6366f1]"
                   />
                   <div className="flex-1">
-                    <p className="text-xs sm:text-sm font-semibold text-white flex items-center gap-1.5 sm:gap-2">
+                    <p className="text-xs sm:text-sm font-semibold text-[#111827] flex items-center gap-1.5 sm:gap-2">
                       <Save className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                       Save as default profile
                     </p>
-                    <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 sm:mt-1">
+                    <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5 sm:mt-1">
                       Pre-filled next time you create a strategy.
                     </p>
                   </div>
@@ -1712,16 +1678,14 @@ export default function NewStrategyPage() {
               </div>
 
               <div className="flex justify-start mt-6 sm:mt-8">
-                <button onClick={handleBack} className="text-xs sm:text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2 active:scale-95">
+                <button onClick={handleBack} className="text-xs sm:text-sm text-[#64748B] hover:text-[#111827] transition-colors flex items-center gap-2 active:scale-95">
                   <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Back
                 </button>
               </div>
             </motion.div>
           )}
 
-          {/* ═══════════════════════════════════════════════════════
-              STEP 14: GENERATING
-              ═══════════════════════════════════════════════════════ */}
+          {/* STEP 14: GENERATING */}
           {step === "generating" && (
             <motion.div key="generating" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex items-center justify-center p-4 sm:p-6 relative overflow-hidden min-h-[60vh]">
               <div className="absolute inset-0 pointer-events-none">
@@ -1740,7 +1704,7 @@ export default function NewStrategyPage() {
                     animate={{ opacity: 1, y: 0 }} 
                     exit={{ opacity: 0, y: -10 }} 
                     transition={{ duration: 0.3 }} 
-                    className="text-base sm:text-xl font-bold text-white mb-3 sm:mb-4 no-hyphens"
+                    className="text-base sm:text-xl font-bold text-[#111827] mb-3 sm:mb-4 no-hyphens"
                   >
                     {GENERATION_MESSAGES[genMessage]}
                   </motion.p>
@@ -1749,16 +1713,16 @@ export default function NewStrategyPage() {
                   {GENERATION_MESSAGES.map((_, i) => (
                     <motion.div 
                       key={i} 
-                      className={`h-1 sm:h-1.5 rounded-full ${i <= genMessage ? "bg-[#6366f1]" : "bg-white/10"}`} 
+                      className={`h-1 sm:h-1.5 rounded-full ${i <= genMessage ? "bg-[#6366f1]" : "bg-[#E5E7EB]"}`} 
                       animate={{ width: i === genMessage ? 20 : 6 }} 
                       transition={{ duration: 0.3 }} 
                     />
                   ))}
                 </div>
                 {error && (
-                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg border border-red-500/30 bg-red-500/10">
-                    <p className="text-xs sm:text-sm text-red-300">Error: {error}</p>
-                    <p className="text-[10px] sm:text-xs text-slate-400 mt-1 sm:mt-2">Redirecting...</p>
+                  <div className="mt-4 sm:mt-6 p-3 sm:p-4 rounded-lg border border-red-200 bg-red-50">
+                    <p className="text-xs sm:text-sm text-red-700">Error: {error}</p>
+                    <p className="text-[10px] sm:text-xs text-[#64748B] mt-1 sm:mt-2">Redirecting...</p>
                   </div>
                 )}
               </div>
