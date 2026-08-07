@@ -14,7 +14,7 @@ const inter = Inter({
 });
 
 // ═══════════════════════════════════════════════════════════
-// ✅ METADATA SEO & OPEN GRAPH
+// ✅ METADATA SEO & OPEN GRAPH (Favicon configuré pour /public)
 // ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
@@ -63,6 +63,7 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  // ✅ Configuration Favicon optimisée pour pointer vers tes fichiers dans /public
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -94,7 +95,7 @@ export const metadata: Metadata = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ VIEWPORT - Optimisations Mobile-First (MIS À JOUR LIGHT THEME)
+// ✅ VIEWPORT - Optimisations Mobile-First (Thème Clair)
 // ═══════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: "device-width",
@@ -102,7 +103,7 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#FAFAFC", // ✅ Changé de #080810 à #FAFAFC pour le thème clair
+  themeColor: "#FAFAFC", // ✅ Couleur de la barre d'adresse mobile assortie au thème clair
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -153,7 +154,7 @@ const jsonLd = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ ROOT LAYOUT (MIS À JOUR LIGHT THEME)
+// ✅ ROOT LAYOUT
 // ═══════════════════════════════════════════════════════════
 export default function RootLayout({
   children,
@@ -167,15 +168,10 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <head>
-        {/* Preconnect pour ressources externes */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
-        {/* DNS Prefetch pour performance */}
         <link rel="dns-prefetch" href="//makeitads.pro" />
         <link rel="dns-prefetch" href="//api.makeitads.pro" />
-        
-        {/* Script JSON-LD injecté ici */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -183,7 +179,6 @@ export default function RootLayout({
       </head>
       
       <body 
-        // ✅ Changé de bg-[#080810] text-white à bg-[#FAFAFC] text-[#111827]
         className={`${inter.className} bg-[#FAFAFC] text-[#111827] min-h-screen overflow-x-hidden`}
         suppressHydrationWarning
       >
@@ -195,8 +190,7 @@ export default function RootLayout({
           id="portal-root" 
           className="fixed inset-0 z-[9999] pointer-events-none"
           aria-hidden="true"
-        >
-        </div>
+        />
 
         <a
           href="#main-content"

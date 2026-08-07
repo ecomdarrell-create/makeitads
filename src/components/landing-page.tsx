@@ -20,9 +20,8 @@ import { useSession } from "@/hooks/useSession";
 import { usePlan } from "@/hooks/usePlan";
 import HeroSection from "@/components/HeroSection";
 import CompetitorsSection from "@/components/CompetitorsSection";
-import FounderMessage from "@/components/FounderMessage";
 import CommunitySection from "@/components/CommunitySection";
-import PremiumStories from "@/components/PremiumStories"; // ✅ NOUVEAU COMPOSANT
+import PremiumStories from "@/components/PremiumStories";
 import { getCTAText, getCTAHref } from "@/config/cta.config";
 
 // ======================================================
@@ -558,7 +557,6 @@ export default function LandingPage() {
       <GlobalNavbar />
       <HeroSection />
 
-      {/* ✅ SÉRIE 1 : SOCIAL PROOF STORIES (Juste après le Hero) */}
       <PremiumStories variant="top" />
 
       <section className="relative z-10 py-10 border-y border-[#E2E8F0] bg-[#F8FAFC]">
@@ -588,7 +586,9 @@ export default function LandingPage() {
       <SignalSystemSection />
       <HowItWorksSection isLoggedIn={!!user} />
       <CompetitorsSection />
-      <FounderMessage />
+      
+      {/* ✅ FounderMessage supprimé d'ici */}
+      
       <CommunitySection />
 
       <section id="pricing" className="relative z-10 py-16 md:py-24 px-6 bg-[#F8FAFC]">
@@ -668,7 +668,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SÉRIE 2 : SOCIAL PROOF STORIES (Remplace l'ancien carrousel en bas de page) */}
       <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6 bg-[#FFFFFF]">
         <PremiumStories variant="bottom" />
       </section>

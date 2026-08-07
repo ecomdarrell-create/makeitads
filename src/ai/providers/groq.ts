@@ -10,7 +10,6 @@ export async function callGroqProvider(
   const prompt = buildStrategyPrompt(profile);
 
   const controller = new AbortController();
-  // ✅ Timeout augmenté à 60s pour permettre des réponses plus longues
   const timeoutId = setTimeout(() => controller.abort(), 60000);
 
   console.log("\n🤖 [Groq] Appel API avec paramètres optimisés:");
@@ -47,9 +46,7 @@ CRITICAL RULES:
           },
           { role: "user", content: prompt },
         ],
-        // ✅ Température augmentée pour plus de variabilité
         temperature: 0.85,
-        // ✅ Max tokens augmenté pour des réponses plus détaillées
         max_tokens: 12000,
         top_p: 0.95,
         frequency_penalty: 0.3,
@@ -75,7 +72,6 @@ CRITICAL RULES:
 
     console.log(`✅ [Groq] Réponse reçue (${content.length} caractères)`);
 
-    // Nettoyage robuste du JSON
     const cleaned = content
       .replace(/```json\s*/g, "")
       .replace(/```\s*/g, "")
@@ -101,22 +97,20 @@ CRITICAL RULES:
   }
 }
 
-function normalizeToStrategyResult(data: any, profile: BusinessProfile): StrategyResult {
-  // ✅ Génération d'un score aléatoire réaliste si pas fourni
+// ✅ AJOUT DU MOT-CLÉ 'export' ICI
+export function normalizeToStrategyResult(data: any, profile: BusinessProfile): StrategyResult {
   const generateRealisticScore = (base?: number): number => {
     if (base && base >= 60 && base <= 95) return base;
-    // Score aléatoire entre 62 et 92 pour éviter les valeurs identiques
     return Math.floor(Math.random() * 30) + 62;
   };
 
-  // ✅ Génération d'un ROI réaliste basé sur l'industrie et le budget
   const generateRealisticROI = (industry: string, budget: number): string => {
     const baseROI = industry.toLowerCase().includes("saas") ? 350 :
                    industry.toLowerCase().includes("ecommerce") ? 280 :
                    industry.toLowerCase().includes("dental") ? 320 :
                    industry.toLowerCase().includes("restaurant") ? 220 :
                    250;
-    const variance = Math.floor(Math.random() * 100) - 50; // -50 à +50
+    const variance = Math.floor(Math.random() * 100) - 50;
     return `${baseROI + variance}%`;
   };
 
@@ -127,11 +121,9 @@ function normalizeToStrategyResult(data: any, profile: BusinessProfile): Strateg
       country: data.country || profile.country,
       city: data.city || profile.city,
       budget: data.budget || profile.budget,
-      // ✅ Score réaliste et varié
       marketScore: generateRealisticScore(data.overview?.marketScore || data.marketScore),
       growthPotential: data.overview?.growthPotential || data.growthPotential || "High",
       competition: data.overview?.competition || data.competition || "Medium",
-      // ✅ ROI réaliste
       estimatedROI: data.overview?.estimatedROI || data.estimatedROI || generateRealisticROI(profile.industry, profile.budget),
       budgetSplit: data.overview?.budgetSplit || data.budgetSplit || { 
         meta: 35 + Math.floor(Math.random() * 10), 
@@ -143,7 +135,7 @@ function normalizeToStrategyResult(data: any, profile: BusinessProfile): Strateg
     },
     market: data.marketAnalysis || data.market || {
       marketSize: "$2.4B",
-      growthRate: 8 + Math.random() * 12, // Entre 8% et 20%
+      growthRate: 8 + Math.random() * 12,
       trends: ["AI integration", "Mobile-first approach", "Personalization at scale", "Sustainability focus"],
       opportunities: ["Underserved market segments", "Digital transformation", "Emerging demographics"],
       threats: ["Increased competition", "Economic uncertainty", "Regulatory changes"],

@@ -1,6 +1,6 @@
 // ===== TYPES UNIFIÉS POUR TOUTE L'ARCHITECTURE =====
 
-export type AIProvider = "openai" | "gemini" | "groq" | "mock";
+export type AIProvider = "openai" | "gemini" | "groq" | "claude" | "mock";
 
 // ===== BUSINESS PROFILE ENRICHI =====
 export interface BusinessProfile {
@@ -8,47 +8,47 @@ export interface BusinessProfile {
   name: string;
   industry: string;
   country: string;
-  city?: string; // ✅ NOUVEAU : Ville pour ciblage géographique
+  city?: string;
   budget: number;
   
   // Stratégie
   goals: string[];
   targetAudience: string;
-  idealCustomer?: string; // ✅ NOUVEAU : Description détaillée du client idéal
-  customerPainPoints?: string[]; // ✅ NOUVEAU : Douleurs spécifiques des clients
+  idealCustomer?: string;
+  customerPainPoints?: string[];
   
   // Offre
   products?: string[];
   services?: string[];
-  businessModel?: string; // ✅ NOUVEAU : B2B, B2C, B2B2C, Marketplace, SaaS, etc.
+  businessModel?: string;
   
   // Marché
   competitors?: string[];
-  competitiveAdvantages?: string[]; // ✅ NOUVEAU : USP, différenciateurs
+  competitiveAdvantages?: string[];
   marketingChannels?: string[];
-  existingChannels?: string[]; // ✅ NOUVEAU : Canaux déjà utilisés
+  existingChannels?: string[];
   
   // Marque
   tone?: string;
   brandPositioning?: string;
-  positioningStatement?: string; // ✅ NOUVEAU : Positionnement détaillé
+  positioningStatement?: string;
   
   // Maturité
-  maturity?: "startup" | "growth" | "established" | "enterprise"; // ✅ NOUVEAU
+  maturity?: "startup" | "growth" | "established" | "enterprise";
   
   // Contexte
   additionalNotes?: string;
-  keyChallenges?: string[]; // ✅ NOUVEAU : Défis actuels
-  uniqueValueProposition?: string; // ✅ NOUVEAU : Proposition de valeur unique
+  keyChallenges?: string[];
+  uniqueValueProposition?: string;
 }
 
-// ===== STRATEGY RESULT (inchangé, déjà complet) =====
+// ===== STRATEGY RESULT =====
 export interface StrategyResult {
   overview: {
     businessName: string;
     industry: string;
     country: string;
-    city?: string; // ✅ NOUVEAU
+    city?: string;
     budget: number;
     marketScore: number;
     growthPotential: string;
@@ -96,7 +96,7 @@ export interface StrategyResult {
   };
 }
 
-// ===== INTERFACES EXISTANTES (inchangées) =====
+// ===== INTERFACES EXISTANTES =====
 
 export interface Competitor {
   name: string;
