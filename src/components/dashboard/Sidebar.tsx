@@ -60,7 +60,8 @@ export default function Sidebar({ onClose }: SidebarProps) {
 
   const handleNavigation = (href: string) => {
     router.push(href);
-    if (onClose) onClose(); // Ferme la sidebar sur mobile après navigation
+    // ✅ Ferme la sidebar sur mobile après navigation
+    if (onClose) onClose();
   };
 
   const getPlanBadge = () => {
@@ -71,12 +72,12 @@ export default function Sidebar({ onClose }: SidebarProps) {
   };
 
   return (
-    <aside className="flex flex-col h-screen w-[260px] bg-[#FFFFFF] border-r border-[#E5E7EB]">
+    <aside className="flex flex-col h-screen w-[260px] bg-[#FFFFFF] border-r border-[#E5E7EB] relative">
       
-      {/* Bouton fermer (mobile uniquement) */}
+      {/* ✅ Bouton fermer (mobile uniquement) */}
       <button 
         onClick={onClose}
-        className="lg:hidden absolute top-4 right-4 p-1 rounded-lg hover:bg-[#F3F4F6] text-[#64748B]"
+        className="lg:hidden absolute top-4 right-4 p-2 rounded-lg hover:bg-[#F3F4F6] text-[#64748B] z-50"
       >
         <X className="h-5 w-5" />
       </button>

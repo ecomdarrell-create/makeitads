@@ -14,15 +14,15 @@ const inter = Inter({
 });
 
 // ═══════════════════════════════════════════════════════════
-// ✅ METADATA SEO & OPEN GRAPH (Favicon configuré pour /public)
+// ✅ METADATA SEO & OPEN GRAPH (Adapté pour l'Afrique Francophone)
 // ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
-    default: "MakeItAds - AI Marketing Strategies That Convert",
+    default: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
     template: "%s | MakeItAds"
   },
-  description: "Stop guessing. MakeItAds analyzes your market, benchmarks competitors, and builds data-backed ad strategies. Get your first strategy free.",
-  keywords: ["AI marketing", "ad strategy", "competitor analysis", "market intelligence", "growth strategy", "advertising AI"],
+  description: "Arrêtez de deviner. MakeItAds analyse votre marché et génère des stratégies publicitaires clés en main, calibrées pour l'Afrique. Paiement unique via Mobile Money.",
+  keywords: ["marketing digital Afrique", "stratégie publicitaire IA", "Facebook Ads Afrique", "Mobile Money", "MakeItAds", "croissance entreprise"],
   authors: [{ name: "MakeItAds" }],
   creator: "MakeItAds",
   publisher: "MakeItAds",
@@ -32,24 +32,24 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    locale: "en_US",
+    locale: "fr_FR",
     url: "https://makeitads.pro",
     siteName: "MakeItAds",
-    title: "MakeItAds - AI Marketing Strategies That Convert",
-    description: "Stop guessing. MakeItAds analyzes your market, benchmarks competitors, and builds data-backed ad strategies.",
+    title: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
+    description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain. Sans abonnement.",
     images: [
       {
         url: "/images/og-image.png", 
         width: 1200,
         height: 630,
-        alt: "MakeItAds Dashboard - AI Marketing Intelligence",
+        alt: "MakeItAds Dashboard - Stratégie Marketing IA",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MakeItAds - AI Marketing Strategies That Convert",
-    description: "Stop guessing. Get data-backed ad strategies powered by AI.",
+    title: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
+    description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain.",
     images: ["/images/og-image.png"],
   },
   robots: {
@@ -63,7 +63,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  // ✅ Configuration Favicon optimisée pour pointer vers tes fichiers dans /public
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -84,7 +83,7 @@ export const metadata: Metadata = {
   manifest: "/site.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
+    statusBarStyle: "default",
     title: "MakeItAds",
   },
   formatDetection: {
@@ -95,7 +94,7 @@ export const metadata: Metadata = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ VIEWPORT - Optimisations Mobile-First (Thème Clair)
+// ✅ VIEWPORT - Optimisations Mobile-First (Thème Clair Forcé)
 // ═══════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: "device-width",
@@ -103,7 +102,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#FAFAFC", // ✅ Couleur de la barre d'adresse mobile assortie au thème clair
+  themeColor: "#FFFFFF", // ✅ Blanc pur pour la barre d'adresse mobile
+  colorScheme: "light", // ✅ FORCE le mode clair au niveau du navigateur
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -118,8 +118,7 @@ const jsonLd = {
       "url": "https://makeitads.pro",
       "logo": "https://makeitads.pro/favicon.ico",
       "sameAs": [
-        "https://twitter.com/makeitads",
-        "https://t.me/theboardroom_group"
+        "https://t.me/MakeItAds_Pro"
       ]
     },
     {
@@ -127,20 +126,19 @@ const jsonLd = {
       "name": "MakeItAds",
       "applicationCategory": "BusinessApplication",
       "operatingSystem": "Web",
-      "description": "AI-powered marketing strategies that convert. Analyze your market, benchmark competitors, and build data-backed ad strategies.",
+      "description": "Plateforme d'intelligence artificielle générant des stratégies publicitaires clés en main pour le marché africain.",
       "url": "https://makeitads.pro",
       "offers": {
         "@type": "AggregateOffer",
-        "priceCurrency": "USD",
-        "lowPrice": "0",
-        "highPrice": "149"
+        "priceCurrency": "XOF",
+        "lowPrice": "2500",
+        "highPrice": "15000"
       }
     },
     {
       "@type": "Person",
       "name": "Darrell Kamga",
-      "alternateName": "Kamga Avoutia Darrell Williams",
-      "jobTitle": "Founder & CEO",
+      "jobTitle": "Fondateur & CEO",
       "worksFor": {
         "@type": "Organization",
         "name": "MakeItAds"
@@ -163,15 +161,15 @@ export default function RootLayout({
 }) {
   return (
     <html 
-      lang="en" 
+      lang="fr" 
       className={`${inter.variable} antialiased`}
+      style={{ colorScheme: "light" }} // ✅ Force le mode clair au niveau HTML
       suppressHydrationWarning
     >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="//makeitads.pro" />
-        <link rel="dns-prefetch" href="//api.makeitads.pro" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
@@ -179,10 +177,10 @@ export default function RootLayout({
       </head>
       
       <body 
-        className={`${inter.className} bg-[#FAFAFC] text-[#111827] min-h-screen overflow-x-hidden`}
+        className={`${inter.className} bg-white dark:bg-white text-[#111827] min-h-screen overflow-x-hidden`}
         suppressHydrationWarning
       >
-        <div id="app-root" className="relative min-h-screen">
+        <div id="app-root" className="relative min-h-screen bg-white dark:bg-white">
           {children}
         </div>
 
@@ -196,7 +194,7 @@ export default function RootLayout({
           href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[9999] focus:bg-[#6366f1] focus:text-white focus:px-4 focus:py-2 focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]"
         >
-          Skip to main content
+          Aller au contenu principal
         </a>
       </body>
     </html>

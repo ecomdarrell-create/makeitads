@@ -5,49 +5,49 @@ import { Check, X } from "lucide-react";
 
 const comparisonRows = [
   {
-    feature: "Persistent business memory",
+    feature: "Mémoire persistante de votre business",
     makeitads: true,
     genericAi: false,
     searchTrends: false,
     platformSignals: false,
   },
   {
-    feature: "Live competitor signal tracking",
+    feature: "Suivi en temps réel des concurrents",
     makeitads: true,
     genericAi: false,
     searchTrends: true,
     platformSignals: true,
   },
   {
-    feature: "Execution-ready growth strategy",
+    feature: "Stratégie de croissance prête à l'exécution",
     makeitads: true,
     genericAi: true,
     searchTrends: false,
     platformSignals: false,
   },
   {
-    feature: "Opportunity detection across channels",
+    feature: "Détection d'opportunités multicanaux",
     makeitads: true,
     genericAi: false,
     searchTrends: false,
     platformSignals: false,
   },
   {
-    feature: "Positioning benchmark against competitors",
+    feature: "Benchmark de positionnement concurrentiel",
     makeitads: true,
     genericAi: false,
     searchTrends: false,
     platformSignals: false,
   },
   {
-    feature: "Campaign roadmap with rationale",
+    feature: "Feuille de route de campagne avec justification",
     makeitads: true,
     genericAi: true,
     searchTrends: false,
     platformSignals: false,
   },
   {
-    feature: "Single workspace for strategy + execution",
+    feature: "Espace unique pour stratégie + exécution",
     makeitads: true,
     genericAi: false,
     searchTrends: false,
@@ -86,15 +86,15 @@ export default function CompetitorsSection() {
           className="mb-12 max-w-5xl text-left"
         >
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-[#6366f1]/20 bg-[#6366f1]/5 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#6366f1]">
-            Competitive intelligence
+            Intelligence concurrentielle
           </div>
 
           <h2 className="text-3xl font-bold leading-[1.02] tracking-[-0.04em] text-[#0F172A] sm:text-4xl md:text-5xl lg:text-6xl">
-            Know what <span className="text-[#8b5cf6]">competitors</span> are doing before it changes your next move.
+            Anticipez les mouvements de vos <span className="text-[#8b5cf6]">concurrents</span> avant qu'ils n'impactent votre stratégie.
           </h2>
 
           <p className="mt-4 max-w-2xl text-left text-sm leading-relaxed text-[#475569] sm:text-base md:text-lg">
-            Most teams are not late because they lack effort. They’re late because the signal arrives after the decision has already been made.
+            Le problème n'est pas le manque d'effort. Le problème, c'est que l'information arrive souvent après que la décision a déjà été prise, vous faisant perdre du temps et du budget.
           </p>
         </motion.div>
 
@@ -108,14 +108,14 @@ export default function CompetitorsSection() {
             className="rounded-[24px] border border-[#E2E8F0] bg-[#F8FAFC] p-5 sm:p-6 shadow-[0_10px_40px_rgba(15,23,42,0.04)]"
           >
             <div className="mb-6 text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748B]">
-              Where the gap shows up
+              Là où se crée la différence
             </div>
 
             <div className="space-y-4">
               {[
-                "Generic AI gives ideas. MakeItAds gives direction.",
-                "Search and platform tools surface fragments. MakeItAds connects them.",
-                "Teams move faster when the pattern is visible before the spend is committed.",
+                "L'IA générique donne des idées. MakeItAds donne une direction claire et actionnable.",
+                "Les outils classiques montrent des fragments. MakeItAds connecte les points pour une vision globale.",
+                "Vous avancez plus vite quand la stratégie est validée avant d'engager le moindre franc.",
               ].map((item) => (
                 <div key={item} className="rounded-2xl border border-[#E2E8F0] bg-white p-4 text-sm text-[#0F172A] shadow-sm">
                   {item}
@@ -137,19 +137,19 @@ export default function CompetitorsSection() {
                 <thead>
                   <tr className="border-b border-[#E2E8F0] bg-[#F8FAFC]">
                     <th className="px-4 py-4 text-left text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748B] sm:px-6">
-                      Capability
+                      Fonctionnalité
                     </th>
                     <th className="px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-[#6366f1] sm:px-6 bg-[#EEF2FF]/50">
                       MakeItAds
                     </th>
                     <th className="px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748B] sm:px-6">
-                      Generic AI
+                      IA Générique
                     </th>
                     <th className="px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748B] sm:px-6">
-                      Search trends
+                      Outils de tendances
                     </th>
                     <th className="px-4 py-4 text-center text-[11px] font-semibold uppercase tracking-[0.24em] text-[#64748B] sm:px-6">
-                      Platform signals
+                      Signaux plateformes
                     </th>
                   </tr>
                 </thead>

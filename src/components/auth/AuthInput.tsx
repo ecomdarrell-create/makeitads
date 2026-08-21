@@ -17,7 +17,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
     return (
       <div className="space-y-1.5">
         {label && (
-          <label className="block text-xs font-medium text-slate-300">
+          <label className="block text-xs font-medium text-[#475569]">
             {label}
           </label>
         )}
@@ -27,7 +27,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none">
             <Icon 
               className={`h-4.5 w-4.5 transition-colors duration-200 ${
-                isFocused ? "text-[#6366f1]" : "text-slate-500"
+                isFocused ? "text-[#6366f1]" : "text-[#94A3B8]"
               }`}
               strokeWidth={2}
             />
@@ -45,15 +45,15 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               props.onBlur?.(e);
             }}
             className={`
-              w-full h-12 rounded-xl border bg-[#0a0a14]/50 
-              pl-11 pr-4 text-sm text-white placeholder:text-slate-500
+              w-full h-12 rounded-xl border bg-white
+              pl-11 pr-4 text-sm text-[#0F172A] placeholder:text-[#94A3B8]
               transition-all duration-200 ease-out
               focus:outline-none focus:ring-2 focus:ring-[#6366f1]/20
               ${error 
                 ? "border-red-500/50 focus:border-red-500" 
                 : isFocused 
                   ? "border-[#6366f1]/50 shadow-[0_0_0_3px_rgba(99,102,241,0.1)]" 
-                  : "border-white/10 hover:border-white/20"
+                  : "border-[#E5E7EB] hover:border-[#CBD5E1]"
               }
               ${className}
             `}
@@ -68,7 +68,7 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
               exit={{ opacity: 0 }}
               className="absolute inset-0 rounded-xl pointer-events-none"
               style={{
-                boxShadow: "0 0 20px rgba(99, 102, 241, 0.15)",
+                boxShadow: "0 0 20px rgba(99, 102, 241, 0.1)",
               }}
             />
           )}
@@ -79,9 +79,9 @@ export const AuthInput = forwardRef<HTMLInputElement, AuthInputProps>(
           <motion.p
             initial={{ opacity: 0, y: -5 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-xs text-red-400 flex items-center gap-1.5"
+            className="text-xs text-red-500 flex items-center gap-1.5"
           >
-            <span className="h-1 w-1 rounded-full bg-red-400" />
+            <span className="h-1 w-1 rounded-full bg-red-500" />
             {error}
           </motion.p>
         )}

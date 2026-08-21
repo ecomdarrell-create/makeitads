@@ -1,525 +1,410 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
-import { User, Mail, Bell, Lock, Save, Check, Shield, Globe, Loader2, Crown, Zap, Key, Trash2, AlertTriangle, Monitor, LogOut, Camera, Eye, EyeOff, RefreshCw, Copy } from "lucide-react";
-import { createClient } from "@/lib/supabase";
-import { usePlan } from "@/hooks/usePlan";
-import { usePermissions } from "@/hooks/usePermissions";
-import { useUsage } from "@/hooks/useUsage";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import PageTransition from "@/components/ui/PageTransition";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  User,
+  Mail,
+  Copy,
+  Check,
+  Pencil,
+  X,
+  Shield,
+  LogOut,
+  HelpCircle,
+  BookOpen,
+  MessageCircle,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import Link from "next/link";
+import { createClient } from "@/lib/supabase";
+import { useSession } from "@/hooks/useSession";
 
-const supabase = createClient();
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT TOGGLE PERSONNALISÉ
+// ══════════════════════════════════════════════════════════
 
-const Toggle = ({ enabled, onChange, label, description }: { enabled: boolean; onChange: (val: boolean) => void; label: string; description: string }) => (
-  <div className="flex items-center justify-between gap-3 py-3 sm:py-4 border-b border-[#E2E8F0] last:border-0">
-    <div className="flex-1 min-w-0 pr-2">
-      <p className="text-xs sm:text-sm font-medium text-[#0F172A] break-words">{label}</p>
-      <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5 break-words">{description}</p>
+function Toggle({
+  checked,
+  onChange,
+  label,
+  description,
+}: {
+  checked: boolean;
+  onChange: (checked: boolean) => void;
+  label: string;
+  description: string;
+}) {
+  return (
+    <div className="flex items-center justify-between py-3">
+      <div className="flex-1 pr-4">
+        <p className="text-sm font-medium text-[#18181B]">{label}</p>
+        <p className="text-xs text-[#71717A] mt-0.5 leading-relaxed">{description}</p>
+      </div>
+      <button
+        onClick={() => onChange(!checked)}
+        className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+          checked ? "bg-[#6366F1]" : "bg-[#E7E7EB]"
+        }`}
+      >
+        <span
+          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+            checked ? "translate-x-5" : "translate-x-0"
+          }`}
+        />
+      </button>
     </div>
-    <button type="button" onClick={() => onChange(!enabled)} 
-      className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${enabled ? "bg-[#6366f1]" : "bg-[#E2E8F0]"}`}>
-      <span className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${enabled ? "translate-x-5" : "translate-x-0"}`} />
-    </button>
-  </div>
-);
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// PAGE PRINCIPALE
+// ══════════════════════════════════════════════════════════
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { isFree, isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
-  const { canAccessAPI } = usePermissions();
-  const { usage: usageData } = useUsage();
+  const { user } = useSession();
   
-  const [loading, setLoading] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  
-  const [firstName, setFirstName] = useState("");
-  const [email, setEmail] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState("");
-  
-  const [marketingSubscribed, setMarketingSubscribed] = useState(true);
-  const [productUpdates, setProductUpdates] = useState(true);
-  const [weeklyReport, setWeeklyReport] = useState(false);
-  const [language, setLanguage] = useState("en");
-  const [theme, setTheme] = useState("dark");
-  const [timezone, setTimezone] = useState("UTC");
+  // États Compte
+  const [fullName, setFullName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [tempName, setTempName] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
 
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordMessage, setPasswordMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  // États Préférences
+  const [importantEmails, setImportantEmails] = useState(true);
+  const [marketingEmails, setMarketingEmails] = useState(false);
 
-  const [apiKey, setApiKey] = useState<string | null>(null);
-  const [apiKeyLoading, setApiKeyLoading] = useState(false);
-  const [showApiKey, setShowApiKey] = useState(false);
-  const [copied, setCopied] = useState(false);
-
-  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
-  const strategiesUsed = usageData?.strategiesUsed || 0;
-  const strategiesLimit = usageData?.strategiesLimit || 1;
+  // États UI
+  const [isCopied, setIsCopied] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   useEffect(() => {
-    const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setFirstName(user.user_metadata?.first_name || "");
-        setEmail(user.email || "");
-        setAvatarUrl(user.user_metadata?.avatar_url || "");
-        setMarketingSubscribed(user.user_metadata?.subscribed_marketing ?? true);
-        setProductUpdates(user.user_metadata?.product_updates ?? true);
-        setWeeklyReport(user.user_metadata?.weekly_report ?? false);
-        setLanguage(user.user_metadata?.language || "en");
-        setTheme(user.user_metadata?.theme || "dark");
-        setTimezone(user.user_metadata?.timezone || "UTC");
-      }
-    };
-    const getApiKey = async () => {
-      if (!canAccessAPI) return;
-      const { data } = await supabase.from("api_keys").select("api_key").limit(1).maybeSingle();
-      if (data) setApiKey(data.api_key);
-    };
-    getUser();
-    getApiKey();
-  }, [canAccessAPI]);
+    if (user) {
+      const name = user.user_metadata?.full_name || user.user_metadata?.first_name || "Utilisateur";
+      setFullName(name);
+      setTempName(name);
+    }
+  }, [user]);
 
-  const handleSave = async () => {
-    setLoading(true); 
-    setSaved(false);
-    const { error } = await supabase.auth.updateUser({ 
-      data: { first_name: firstName, subscribed_marketing: marketingSubscribed, product_updates: productUpdates, weekly_report: weeklyReport, language, theme, timezone } 
-    });
-    if (!error) { setSaved(true); setTimeout(() => setSaved(false), 3000); }
-    setLoading(false);
-  };
+  // --- Handlers ---
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { alert("File size must be less than 2MB"); return; }
-    setUploadingAvatar(true);
+  const handleCopyEmail = async () => {
+    if (!user?.email) return;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}/${crypto.randomUUID()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
-      const { error: updateError } = await supabase.auth.updateUser({ data: { avatar_url: publicUrl } });
-      if (updateError) throw updateError;
-      setAvatarUrl(publicUrl);
-    } catch (error) {
-      console.error("Avatar upload error:", error);
-      alert("Failed to upload avatar. Make sure the 'avatars' bucket exists and is public.");
-    } finally {
-      setUploadingAvatar(false);
+      await navigator.clipboard.writeText(user.email);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Échec de la copie", err);
     }
   };
 
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword !== confirmPassword) { setPasswordMessage({ type: 'error', text: "New passwords do not match." }); return; }
-    if (newPassword.length < 6) { setPasswordMessage({ type: 'error', text: "Password must be at least 6 characters." }); return; }
-    setPasswordLoading(true);
-    setPasswordMessage(null);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) { setPasswordMessage({ type: 'error', text: error.message }); } 
-    else {
-      setPasswordMessage({ type: 'success', text: "Password updated successfully!" });
-      setNewPassword(""); setConfirmPassword("");
-      setTimeout(() => setShowPasswordForm(false), 2000);
+  const handleSaveName = async () => {
+    if (!tempName.trim() || tempName === fullName) {
+      setIsEditingName(false);
+      return;
     }
-    setPasswordLoading(false);
-  };
 
-  const handleGenerateApiKey = async () => {
-    if (!canAccessAPI) return;
-    setApiKeyLoading(true);
+    setIsSaving(true);
+    setSaveStatus("idle");
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("No user found");
-      const newKey = `sk_${crypto.randomUUID().replace(/-/g, '')}`;
-      const { error } = await supabase.from("api_keys").insert({ user_id: user.id, api_key: newKey, key_name: 'Default Key' });
+      const supabase = createClient();
+      const { error } = await supabase.auth.updateUser({
+        data: { full_name: tempName.trim(), first_name: tempName.trim().split(" ")[0] },
+      });
+
       if (error) throw error;
-      setApiKey(newKey);
-    } catch (error) {
-      console.error("API Key generation error:", error);
-      alert("Failed to generate API key. Please check your database setup.");
+
+      setFullName(tempName.trim());
+      setSaveStatus("success");
+      setIsEditingName(false);
+      
+      setTimeout(() => setSaveStatus("idle"), 3000);
+    } catch (err) {
+      console.error(err);
+      setSaveStatus("error");
     } finally {
-      setApiKeyLoading(false);
+      setIsSaving(false);
     }
   };
 
-  const handleRevokeApiKey = async () => {
-    if (!confirm("Are you sure? This will invalidate the current key immediately.")) return;
-    setApiKeyLoading(true);
+  const handleLogout = async () => {
     try {
-      await supabase.from("api_keys").delete().neq("id", "00000000-0000-0000-0000-000000000000");
-      setApiKey(null);
-    } catch (error) { console.error("Revoke error:", error); } 
-    finally { setApiKeyLoading(false); }
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      router.push("/login");
+    } catch (err) {
+      console.error("Erreur de déconnexion", err);
+    }
   };
 
-  const copyApiKey = () => {
-    if (apiKey) { navigator.clipboard.writeText(apiKey); setCopied(true); setTimeout(() => setCopied(false), 2000); }
-  };
-
-  const handleDeleteAccount = async () => {
-    if (!confirm("⚠️ Are you sure you want to delete your account? This action cannot be undone.")) return;
-    if (!confirm("⚠️ FINAL WARNING: All your data will be permanently deleted. Continue?")) return;
-    alert("Account deletion feature: Please contact support@makeitads.pro to process this request securely.");
-  };
-
-  const handleLogout = async () => { await supabase.auth.signOut(); router.push("/login"); };
-
-  if (planLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh] bg-[#FFFFFF]">
-        <Loader2 className="h-8 w-8 animate-spin text-[#6366f1]" />
-      </div>
-    );
-  }
+  const email = user?.email || "non-disponible";
 
   return (
-    <PageTransition>
-      <div className="max-w-6xl mx-auto space-y-5 sm:space-y-6 lg:space-y-8">
-        {/* HEADER */}
-        <div className="flex items-start gap-3">
-          <div className="flex-shrink-0 h-10 w-10 rounded-xl bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center">
-            <User className="h-5 w-5 text-white" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-[#0F172A] no-hyphens">Settings</h1>
-            <p className="text-xs sm:text-sm text-[#64748B] mt-0.5 sm:mt-1">Manage your profile, security, and preferences</p>
-          </div>
-        </div>
+    <div className="max-w-[760px] mx-auto pb-12">
+      {/* ══════════════════════════════════════════════════════
+          HEADER
+      ═══════════════════════════════════════════════════════ */}
+      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+        <h1 className="text-[28px] font-bold text-[#18181B] tracking-tight">Paramètres</h1>
+        <p className="text-[15px] text-[#71717A] mt-1.5">
+          Gérez les informations et préférences associées à votre compte MakeItAds.
+        </p>
+      </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-8">
-          {/* LEFT COLUMN */}
-          <div className="lg:col-span-2 space-y-4 sm:space-y-6">
-            
-            {/* PROFILE INFORMATION */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]">
-                  <User className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">Profile Information</h2>
-              </div>
-              <div className="space-y-4">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4 pb-4 border-b border-[#E2E8F0]">
-                  <div className="relative group cursor-pointer flex-shrink-0" onClick={() => !uploadingAvatar && fileInputRef.current?.click()}>
-                    {avatarUrl ? (
-                      <img src={avatarUrl} alt="Avatar" className="h-14 w-14 sm:h-16 sm:w-16 rounded-full object-cover border-2 border-[#6366f1]/30" />
-                    ) : (
-                      <div className="flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] text-lg sm:text-xl font-bold text-white shadow-lg">
-                        {firstName ? firstName.charAt(0).toUpperCase() : email.charAt(0).toUpperCase()}
-                      </div>
-                    )}
-                    <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                      {uploadingAvatar ? <Loader2 className="h-5 w-5 sm:h-6 sm:w-6 text-white animate-spin" /> : <Camera className="h-5 w-5 sm:h-6 sm:w-6 text-white" />}
-                    </div>
-                  </div>
-                  <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-[#0F172A]">Profile Picture</p>
-                    <p className="text-xs text-[#64748B]">JPG, GIF or PNG. Max size 2MB.</p>
-                    <button onClick={() => fileInputRef.current?.click()} disabled={uploadingAvatar}
-                      className="mt-1 sm:mt-2 text-xs font-medium text-[#6366f1] hover:text-[#4F46E5] transition-colors disabled:opacity-50">
-                      {uploadingAvatar ? "Uploading..." : "Upload new picture"}
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div>
-                    <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">First Name</label>
-                    <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} 
-                      className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl border border-[#E2E8F0] bg-white px-3 sm:px-4 text-sm text-[#0F172A] outline-none transition-all focus:border-[#6366f1] focus:ring-2 focus:ring-[#6366f1]/10 placeholder:text-[#94A3B8]" />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">Email Address</label>
-                    <input type="email" value={email} disabled 
-                      className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 sm:px-4 text-sm text-[#94A3B8] outline-none cursor-not-allowed" />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* NOTIFICATIONS */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-500 to-green-500">
-                  <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">Notifications</h2>
-              </div>
-              <div className="divide-y divide-[#E2E8F0]">
-                <Toggle enabled={marketingSubscribed} onChange={setMarketingSubscribed} label="Marketing Emails" description="Receive tips and product updates from MakeItAds." />
-                <Toggle enabled={productUpdates} onChange={setProductUpdates} label="Product Updates" description="Get notified about new features." />
-                <Toggle enabled={weeklyReport} onChange={setWeeklyReport} label="Weekly Strategy Report" description="Receive a weekly summary of your performance." />
-              </div>
-            </motion.div>
-
-            {/* PREFERENCES */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-[#38bdf8] to-blue-500">
-                  <Globe className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">Preferences</h2>
-              </div>
-              <div className="space-y-3 sm:space-y-4">
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">Language</label>
-                  <select value={language} onChange={(e) => setLanguage(e.target.value)} 
-                    className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl border border-[#E2E8F0] bg-white px-3 sm:px-4 text-sm text-[#0F172A] outline-none transition-all focus:border-[#6366f1]">
-                    <option value="en">English</option>
-                    <option value="fr">Français</option>
-                    <option value="es">Español</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">Theme</label>
-                  <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
-                    {["dark", "light", "system"].map((t) => (
-                      <button key={t} onClick={() => setTheme(t)} 
-                        className={`rounded-lg border px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all active:scale-95 ${theme === t ? "border-[#6366f1] bg-[#EEF2FF] text-[#6366f1]" : "border-[#E2E8F0] bg-white text-[#64748B] hover:border-[#CBD5E1]"}`}>
-                        {t.charAt(0).toUpperCase() + t.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">Timezone</label>
-                  <select value={timezone} onChange={(e) => setTimezone(e.target.value)} 
-                    className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl border border-[#E2E8F0] bg-white px-3 sm:px-4 text-sm text-[#0F172A] outline-none transition-all focus:border-[#6366f1]">
-                    <option value="UTC">UTC</option>
-                    <option value="Europe/Paris">Paris (CET)</option>
-                    <option value="America/New_York">Eastern Time (ET)</option>
-                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
-                  </select>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* SECURITY */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-500 to-orange-500">
-                  <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">Security</h2>
-              </div>
-              <div className="space-y-3 sm:space-y-4">
-                {!showPasswordForm ? (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 py-2">
-                    <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-medium text-[#0F172A]">Password</p>
-                      <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5">Manage your account password</p>
-                    </div>
-                    <button onClick={() => setShowPasswordForm(true)} 
-                      className="rounded-lg border border-[#E2E8F0] bg-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A] transition-all active:scale-95 self-start sm:self-auto">
-                      Change Password
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleChangePassword} className="space-y-3 p-3 sm:p-4 rounded-lg bg-[#F8FAFC] border border-[#E2E8F0]">
-                    {passwordMessage && (
-                      <div className={`text-[10px] sm:text-xs p-2 rounded ${passwordMessage.type === 'error' ? 'bg-red-50 text-red-600' : 'bg-emerald-50 text-emerald-600'}`}>
-                        {passwordMessage.text}
-                      </div>
-                    )}
-                    <div>
-                      <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#64748B] mb-1">New Password</label>
-                      <div className="relative">
-                        <input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required minLength={6}
-                          className="w-full h-10 rounded-lg border border-[#E2E8F0] bg-white px-3 pr-10 text-sm text-[#0F172A] outline-none focus:border-[#6366f1] placeholder:text-[#94A3B8]" placeholder="Min. 6 characters" />
-                        <button type="button" onClick={() => setShowNewPassword(!showNewPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A]">
-                          {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-wider text-[#64748B] mb-1">Confirm Password</label>
-                      <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required
-                        className="w-full h-10 rounded-lg border border-[#E2E8F0] bg-white px-3 text-sm text-[#0F172A] outline-none focus:border-[#6366f1] placeholder:text-[#94A3B8]" placeholder="Confirm new password" />
-                    </div>
-                    <div className="flex gap-2 pt-2">
-                      <button type="submit" disabled={passwordLoading} 
-                        className="flex-1 rounded-lg bg-[#6366f1] py-2 text-xs font-bold text-white hover:bg-[#5558e6] transition-all disabled:opacity-50 flex items-center justify-center gap-2">
-                        {passwordLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Check className="h-3.5 w-3.5" />}
-                        Update Password
-                      </button>
-                      <button type="button" onClick={() => { setShowPasswordForm(false); setPasswordMessage(null); setNewPassword(""); setConfirmPassword(""); }}
-                        className="rounded-lg border border-[#E2E8F0] bg-white px-4 py-2 text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] transition-all">
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+      <div className="space-y-6">
+        {/* ══════════════════════════════════════════════════════
+            SECTION 1 : COMPTE
+        ═══════════════════════════════════════════════════════ */}
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
+          <h2 className="text-xs font-bold text-[#71717A] uppercase tracking-wider mb-3">Compte</h2>
+          <div className="bg-white rounded-[14px] border border-[#E7E7EB] p-5 md:p-6">
+            {/* Nom */}
+            <div className="pb-5 border-b border-[#F7F7F8] mb-5">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-[#18181B]">Nom complet</label>
+                {!isEditingName && (
+                  <button
+                    onClick={() => {
+                      setTempName(fullName);
+                      setIsEditingName(true);
+                      setSaveStatus("idle");
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6366F1] hover:text-[#8B5CF6] transition-colors"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    Modifier
+                  </button>
                 )}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 py-3 sm:py-4 border-t border-[#E2E8F0]">
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-[#0F172A]">Two-Factor Authentication</p>
-                    <p className="text-[10px] sm:text-xs text-[#64748B] mt-0.5">Add an extra layer of security to your account</p>
-                  </div>
-                  <button onClick={() => alert("2FA setup will be available in the next update via Supabase MFA.")} 
-                    className="rounded-lg border border-[#E2E8F0] bg-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0F172A] transition-all active:scale-95 self-start sm:self-auto">
-                    Enable 2FA
-                  </button>
-                </div>
               </div>
-            </motion.div>
 
-            {/* API & INTEGRATIONS */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 relative overflow-hidden shadow-sm">
-              {!canAccessAPI && (
-                <div className="absolute inset-0 backdrop-blur-sm bg-white/80 flex items-center justify-center z-10 p-4">
-                  <div className="text-center">
-                    <Lock className="h-7 w-7 sm:h-8 sm:w-8 text-[#6366f1] mx-auto mb-2" />
-                    <p className="text-xs sm:text-sm font-semibold text-[#0F172A] mb-2">Premium Feature</p>
-                    <button onClick={() => router.push("/dashboard/billing")} 
-                      className="rounded-lg bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1.5 text-xs font-bold text-white hover:scale-105 transition-transform active:scale-95">
-                      Upgrade to Premium
-                    </button>
+              {isEditingName ? (
+                <div className="space-y-3">
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#71717A]" />
+                    <input
+                      type="text"
+                      value={tempName}
+                      onChange={(e) => setTempName(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2.5 rounded-lg border border-[#E7E7EB] text-sm text-[#18181B] focus:border-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/10 outline-none transition-all"
+                      autoFocus
+                    />
                   </div>
-                </div>
-              )}
-              <div className={!canAccessAPI ? "blur-sm" : ""}>
-                <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6 flex-wrap">
-                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-500 to-pink-500">
-                    <Key className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </div>
-                  <h2 className="text-base sm:text-lg font-bold text-[#0F172A]">API & Integrations</h2>
-                  <span className="text-[9px] px-2 py-0.5 rounded-full bg-[#EEF2FF] text-[#6366f1] font-bold border border-[#6366f1]/20">PREMIUM</span>
-                </div>
-                <div className="space-y-3 sm:space-y-4">
-                  <div>
-                    <label className="block text-[10px] sm:text-xs font-bold uppercase tracking-[0.15em] sm:tracking-[0.2em] text-[#64748B] mb-1.5 sm:mb-2">API Key</label>
-                    <div className="flex gap-2">
-                      <div className="relative flex-1">
-                        <input type={showApiKey ? "text" : "password"} value={apiKey || "No key generated"} disabled 
-                          className="w-full h-10 sm:h-12 rounded-lg sm:rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-3 sm:px-4 pr-10 text-sm text-[#94A3B8] outline-none cursor-not-allowed font-mono" />
-                        <button onClick={() => setShowApiKey(!showApiKey)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#94A3B8] hover:text-[#0F172A]">
-                          {showApiKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                        </button>
-                      </div>
-                      {apiKey ? (
-                        <>
-                          <button onClick={copyApiKey} className="rounded-lg border border-[#E2E8F0] bg-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5">
-                            {copied ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />} 
-                            <span className="hidden sm:inline">{copied ? "Copied" : "Copy"}</span>
-                          </button>
-                          <button onClick={handleRevokeApiKey} disabled={apiKeyLoading} className="rounded-lg border border-red-200 bg-red-50 px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-red-600 hover:bg-red-100 transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5">
-                            <Trash2 className="h-3.5 w-3.5" /> <span className="hidden sm:inline">Revoke</span>
-                          </button>
-                        </>
-                      ) : (
-                        <button onClick={handleGenerateApiKey} disabled={apiKeyLoading} className="rounded-lg border border-[#E2E8F0] bg-white px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-[#475569] hover:bg-[#F8FAFC] transition-all active:scale-95 flex-shrink-0 flex items-center gap-1.5">
-                          {apiKeyLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />} 
-                          <span className="hidden sm:inline">Generate</span>
-                        </button>
-                      )}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs">
+                      {saveStatus === "success" && <span className="text-emerald-600 flex items-center gap-1"><Check className="h-3 w-3" /> Modifications enregistrées</span>}
+                      {saveStatus === "error" && <span className="text-red-600 flex items-center gap-1"><AlertCircle className="h-3 w-3" /> Impossible d'enregistrer</span>}
                     </div>
-                    <p className="text-[9px] sm:text-[10px] text-[#64748B] mt-1">Keep this key secret. It grants full access to your account.</p>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => {
+                          setIsEditingName(false);
+                          setSaveStatus("idle");
+                        }}
+                        disabled={isSaving}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-[#71717A] hover:bg-[#F7F7F8] transition-colors disabled:opacity-50"
+                      >
+                        Annuler
+                      </button>
+                      <button
+                        onClick={handleSaveName}
+                        disabled={isSaving || !tempName.trim()}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#6366F1] text-xs font-semibold text-white hover:bg-[#5558e6] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSaving && <Loader2 className="h-3 w-3 animate-spin" />}
+                        Enregistrer
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-
-            {/* DANGER ZONE */}
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} 
-              className="rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 p-4 sm:p-6">
-              <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
-                <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-red-100">
-                  <AlertTriangle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
-                </div>
-                <h2 className="text-base sm:text-lg font-bold text-red-800">Danger Zone</h2>
-              </div>
-              <div className="space-y-3 sm:space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 pt-3 sm:pt-4 border-t border-red-200">
-                  <div className="min-w-0">
-                    <p className="text-xs sm:text-sm font-medium text-red-800">Delete Account</p>
-                    <p className="text-[10px] sm:text-xs text-red-600 mt-0.5">Permanently delete your account and all data</p>
-                  </div>
-                  <button onClick={handleDeleteAccount} 
-                    className="rounded-lg border border-red-300 bg-red-100 px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-semibold text-red-700 hover:bg-red-200 transition-all flex items-center gap-1.5 sm:gap-2 active:scale-95 self-start sm:self-auto">
-                    <Trash2 className="h-3 w-3" />
-                    <span>Delete Account</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* RIGHT COLUMN */}
-          <div className="space-y-4 sm:space-y-6">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} 
-              className="rounded-xl sm:rounded-2xl sm:sticky sm:top-24 border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A] mb-1 sm:mb-2">Save Changes</h3>
-              <p className="text-[10px] sm:text-xs text-[#64748B] mb-4 sm:mb-6">Make sure to save your preferences.</p>
-              <button onClick={handleSave} disabled={loading} 
-                className="group relative w-full flex items-center justify-center gap-2 rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] py-2.5 sm:py-3 text-xs sm:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 transition-all hover:scale-[1.02] hover:shadow-xl hover:shadow-[#8b5cf6]/40 disabled:opacity-70 active:scale-[0.98]">
-                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : saved ? (<><Check className="h-4 w-4" /><span>Saved Successfully</span></>) : (<><Save className="h-4 w-4" /><span>Save Changes</span></>)}
-              </button>
-              {saved && (
-                <motion.p initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} className="text-center text-[10px] sm:text-xs text-emerald-600 mt-2 sm:mt-3">
-                  Your preferences have been updated.
-                </motion.p>
+              ) : (
+                <p className="text-sm text-[#18181B] font-medium">{fullName}</p>
               )}
-            </motion.div>
+            </div>
 
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#6366f1]/20 bg-[#EEF2FF] p-4 sm:p-6">
-              <div className="flex items-center gap-2 mb-2 sm:mb-3">
-                {isEnterprise || isPremium ? <Crown className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-amber-600" /> : isPro ? <Zap className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#6366f1]" /> : null}
-                <h3 className="text-xs sm:text-sm font-bold text-[#0F172A]">Current Plan</h3>
-              </div>
-              <p className="text-xl sm:text-2xl font-bold text-[#0F172A] mb-1 capitalize">{currentPlan}</p>
-              <div className="space-y-1.5 sm:space-y-2 mb-3 sm:mb-4">
-                <div className="flex items-center justify-between text-[10px] sm:text-xs">
-                  <span className="text-[#64748B]">Strategies</span>
-                  <span className="text-[#0F172A] font-bold">{strategiesUsed} / {strategiesLimit === 9999 ? "∞" : strategiesLimit}</span>
-                </div>
-                <div className="h-1.5 bg-[#E2E8F0] rounded-full overflow-hidden">
-                  <div className="h-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" style={{ width: `${Math.min(100, (strategiesUsed / strategiesLimit) * 100)}%` }} />
-                </div>
-              </div>
-              {!isEnterprise && (
-                <button onClick={() => router.push("/dashboard/billing")} 
-                  className="w-full rounded-lg bg-white border border-[#E2E8F0] py-2 text-[10px] sm:text-xs font-semibold text-[#0F172A] hover:bg-[#F8FAFC] transition-colors active:scale-95">
-                  {isFree ? "Upgrade Plan" : "Manage Plan"}
+            {/* Email */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-[#18181B]">Adresse email</label>
+                <button
+                  onClick={handleCopyEmail}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#6366F1] hover:text-[#8B5CF6] transition-colors"
+                >
+                  {isCopied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                  {isCopied ? "Copié ✓" : "Copier"}
                 </button>
-              )}
-            </motion.div>
-
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} 
-              className="rounded-xl sm:rounded-2xl border border-[#E2E8F0] bg-white p-4 sm:p-6 shadow-sm">
-              <h3 className="text-xs sm:text-sm font-bold text-[#0F172A] mb-3 sm:mb-4">Quick Links</h3>
-              <div className="space-y-1 sm:space-y-2">
-                <button onClick={() => router.push("/dashboard/billing")} className="w-full text-left rounded-lg px-2 sm:px-3 py-2 text-[10px] sm:text-xs text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] transition-all active:scale-95">Billing & Plans →</button>
-                <button onClick={() => router.push("/dashboard/strategies/new")} className="w-full text-left rounded-lg px-2 sm:px-3 py-2 text-[10px] sm:text-xs text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] transition-all active:scale-95">New Strategy →</button>
-                <a href="mailto:contact@makeitads.pro" className="w-full text-left rounded-lg px-2 sm:px-3 py-2 text-[10px] sm:text-xs text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#0F172A] transition-all block active:scale-95">Contact Support →</a>
               </div>
-            </motion.div>
-            
-            <button onClick={handleLogout} 
-              className="w-full flex items-center justify-center gap-2 rounded-xl border border-[#E2E8F0] bg-white py-3 text-xs font-semibold text-[#64748B] hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all active:scale-95 shadow-sm">
+              <p className="text-sm text-[#18181B] font-medium truncate">{email}</p>
+              <p className="text-xs text-[#71717A] mt-1.5 leading-relaxed">
+                Votre adresse email est utilisée pour vous connecter à MakeItAds et recevoir les communications importantes liées à votre compte.
+              </p>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* ══════════════════════════════════════════════════════
+            SECTION 2 : PRÉFÉRENCES
+        ═══════════════════════════════════════════════════════ */}
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
+          <h2 className="text-xs font-bold text-[#71717A] uppercase tracking-wider mb-3">Préférences</h2>
+          <div className="bg-white rounded-[14px] border border-[#E7E7EB] p-5 md:p-6">
+            <Toggle
+              checked={importantEmails}
+              onChange={setImportantEmails}
+              label="Recevoir les emails importants"
+              description="Confirmation d'achat, créditing, génération de stratégie et informations importantes liées au compte."
+            />
+            <div className="border-t border-[#F7F7F8] my-2" />
+            <Toggle
+              checked={marketingEmails}
+              onChange={setMarketingEmails}
+              label="Recevoir les nouveautés MakeItAds"
+              description="Nouvelles fonctionnalités, ressources et offres. Vous pouvez vous désinscrire à tout moment."
+            />
+          </div>
+        </motion.section>
+
+        {/* ══════════════════════════════════════════════════════
+            SECTION 3 : SÉCURITÉ & SESSION
+        ═══════════════════════════════════════════════════════ */}
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
+          <h2 className="text-xs font-bold text-[#71717A] uppercase tracking-wider mb-3">Sécurité</h2>
+          <div className="bg-white rounded-[14px] border border-[#E7E7EB] p-5 md:p-6">
+            <div className="flex items-start gap-3 mb-5 pb-5 border-b border-[#F7F7F8]">
+              <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                <Shield className="h-4.5 w-4.5 text-emerald-600" />
+              </div>
+              <div>
+                <p className="text-sm font-medium text-[#18181B]">Session actuelle</p>
+                <p className="text-xs text-[#71717A] mt-0.5">Vous êtes actuellement connecté à cet appareil de manière sécurisée.</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-red-200 bg-red-50 text-sm font-semibold text-red-600 hover:bg-red-100 transition-colors"
+            >
               <LogOut className="h-4 w-4" />
-              <span>Sign Out</span>
+              Se déconnecter
             </button>
           </div>
-        </div>
+        </motion.section>
+
+        {/* ══════════════════════════════════════════════════════
+            SECTION 4 : ASSISTANCE
+        ═══════════════════════════════════════════════════════ */}
+        <motion.section initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+          <h2 className="text-xs font-bold text-[#71717A] uppercase tracking-wider mb-3">Assistance</h2>
+          <div className="bg-[#F7F7F8] rounded-[14px] border border-[#E7E7EB] p-5 md:p-6">
+            <h3 className="text-base font-bold text-[#18181B] mb-1">Besoin d'aide ?</h3>
+            <p className="text-sm text-[#71717A] mb-5 leading-relaxed">
+              Une question concernant votre compte, vos crédits ou votre stratégie ? Notre équipe est là pour vous aider.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 mb-5">
+              <a
+                href="mailto:support@makeitads.pro"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#6366F1] text-sm font-semibold text-white hover:bg-[#5558e6] transition-colors"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Contacter le support
+              </a>
+              <Link
+                href="/dashboard/resources"
+                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-white border border-[#E7E7EB] text-sm font-semibold text-[#18181B] hover:bg-[#FFFFFF] hover:border-[#6366F1]/30 transition-colors"
+              >
+                <BookOpen className="h-4 w-4" />
+                Centre d'aide
+              </Link>
+            </div>
+            <Link
+              href="/dashboard/resources"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-[#6366F1] hover:text-[#8B5CF6] transition-colors"
+            >
+              Vous cherchez une réponse rapide ? Consulter les ressources
+              <HelpCircle className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </motion.section>
+
+        {/* ══════════════════════════════════════════════════════
+            FOOTER LÉGAL
+        ═══════════════════════════════════════════════════════ */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.25 }}
+          className="pt-6 border-t border-[#E7E7EB] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#71717A]"
+        >
+          <div className="flex items-center gap-4">
+            <Link href="/terms" className="hover:text-[#18181B] transition-colors">
+              Conditions d'utilisation
+            </Link>
+            <Link href="/privacy" className="hover:text-[#18181B] transition-colors">
+              Politique de confidentialité
+            </Link>
+          </div>
+          <span className="font-mono text-[10px] text-[#A1A1AA]">
+            MakeItAds v1.0.0
+          </span>
+        </motion.div>
       </div>
-    </PageTransition>
+
+      {/* ══════════════════════════════════════════════════════
+          MODAL DE DÉCONNEXION
+      ═══════════════════════════════════════════════════════ */}
+      <AnimatePresence>
+        {showLogoutModal && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowLogoutModal(false)}
+              className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            >
+              <div className="w-full max-w-sm rounded-[14px] bg-white border border-[#E7E7EB] p-6 shadow-xl">
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center flex-shrink-0">
+                    <LogOut className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-base font-semibold text-[#18181B] mb-1">
+                      Se déconnecter de MakeItAds ?
+                    </h3>
+                    <p className="text-sm text-[#71717A] leading-relaxed">
+                      Vous devrez vous reconnecter pour accéder à votre compte et à vos stratégies.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 justify-end">
+                  <button
+                    onClick={() => setShowLogoutModal(false)}
+                    className="px-4 py-2 rounded-lg border border-[#E7E7EB] text-sm font-medium text-[#18181B] hover:bg-[#F7F7F8] transition-colors"
+                  >
+                    Annuler
+                  </button>
+                  <button
+                    onClick={handleLogout}
+                    className="px-4 py-2 rounded-lg bg-red-600 text-sm font-semibold text-white hover:bg-red-700 transition-colors"
+                  >
+                    Se déconnecter
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

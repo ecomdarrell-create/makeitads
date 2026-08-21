@@ -1,796 +1,404 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import { 
-  Check, Zap, Crown, Building2, Sparkles, ArrowRight, ArrowLeft,
-  Loader2, ChevronDown, X
+  Check, X, ChevronDown, ArrowRight, Target, BarChart3, 
+  Users, Zap, MessageCircle, Lightbulb, LayoutTemplate, 
+  TrendingUp, ShieldCheck, Clock, Briefcase, Store, Building2 
 } from "lucide-react";
-import { useState } from "react";
-import { useSession } from "@/hooks/useSession";
-import { usePlan } from "@/hooks/usePlan";
-
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 
-const pricingPlans = [
+// ======================================================
+// CONFIGURATION CENTRALISÉE DES LIENS CHARIOW
+// Modifie les URLs ici uniquement si elles changent.
+// ======================================================
+const CHARIOW_LINKS = {
+  discovery: "https://hhowawtq.mychariow.shop/plan-start-up",
+  business: "https://hhowawtq.mychariow.shop/plan-business",
+  enterprise: "https://hhowawtq.mychariow.shop/plan-entreprise",
+};
+
+const PRICING_PLANS = [
   {
-    name: "Free",
-    key: "free",
-    icon: Sparkles,
-    price: { monthly: 0, yearly: 0 },
-    color: "from-slate-400 to-slate-500",
-    borderColor: "border-[#E5E7EB]",
-    bg: "bg-white",
-    accentColor: "text-[#64748B]",
-    badgeColor: "bg-slate-100 text-slate-600 border-slate-200",
-    description: "Perfect for testing the waters and exploring basic features.",
+    id: "discovery",
+    name: "Pack Découverte",
+    price: "2 499",
+    oldPrice: "10 000",
+    description: "Idéal pour tester MakeItAds et lancer votre première campagne.",
     features: [
-      "1 AI-generated strategy per month",
-      "Basic market analysis & trends",
-      "Community forum access",
-      "Email support (48h response time)",
-      "Dashboard access with limited features",
-      "Basic competitor overview",
-      "Standard PDF reports",
-      "Access to free templates library",
+      "1 stratégie publicitaire complète",
+      "Ciblage précis (villes, âges, intérêts)",
+      "3 variantes de textes publicitaires",
+      "Guide créatif (formats, dimensions)",
+      "Recommandation de canal (Meta, TikTok, Google)"
     ],
-    cta: "Current plan",
     popular: false,
+    cta: "Obtenir ma stratégie",
+    link: CHARIOW_LINKS.discovery
   },
   {
-    name: "Pro",
-    key: "pro",
-    icon: Zap,
-    price: { monthly: 29, yearly: 23 },
-    color: "from-[#6366f1] to-[#8b5cf6]",
-    borderColor: "border-[#6366f1]",
-    bg: "bg-[#EEF2FF]",
-    accentColor: "text-[#6366f1]",
-    badgeColor: "bg-[#6366f1]/10 text-[#6366f1] border-[#6366f1]/20",
-    description: "For growing businesses ready to scale their marketing efforts.",
+    id: "business",
+    name: "Plan Business",
+    price: "7 499",
+    oldPrice: "25 000",
+    description: "Pour les entrepreneurs qui veulent tester plusieurs angles et scaler.",
     features: [
-      "Everything in Free plan",
-      "10 AI-generated strategies per month",
-      "Advanced competitor intelligence",
-      "Real-time trend analysis & alerts",
-      "SWOT analysis for your business",
-      "Audience insights & segmentation",
-      "Priority email support (24h response)",
-      "Advanced PDF reports with branding",
-      "Competitor ad spy tool",
-      "Market opportunity detection",
-      "Basic API access (1000 calls/month)",
-      "Export strategies to CSV/PDF",
-      "Custom strategy templates",
-      "Performance tracking dashboard",
+      "3 stratégies publicitaires complètes",
+      "Analyse concurrentielle (1 concurrent)",
+      "9 variantes de textes publicitaires",
+      "Ciblage multi-audiences",
+      "Accès au canal Telegram VIP 'The Boardroom'",
+      "Crédits valables 90 jours"
     ],
-    cta: "Upgrade to Pro",
     popular: true,
+    cta: "Choisir Business",
+    link: CHARIOW_LINKS.business
   },
   {
-    name: "Premium",
-    key: "premium",
-    icon: Crown,
-    price: { monthly: 59, yearly: 47 },
-    color: "from-violet-500 to-fuchsia-500",
-    borderColor: "border-violet-300",
-    bg: "bg-white",
-    accentColor: "text-violet-600",
-    badgeColor: "bg-violet-50 text-violet-700 border-violet-200",
-    description: "For serious marketers who need unlimited power and insights.",
+    id: "enterprise",
+    name: "Plan Entreprise",
+    price: "14 990",
+    oldPrice: "50 000",
+    description: "L'arsenal complet pour les agences, freelances et PME établies.",
     features: [
-      "Everything in Pro plan",
-      "Unlimited AI-generated strategies",
-      "Predictive trend forecasting",
-      "Historical market intelligence (5 years)",
-      "Market share analysis & estimation",
-      "Traffic estimation tools",
-      "Dedicated account manager",
-      "Priority phone & email support (1h response)",
-      "White-label PDF reports",
-      "Advanced API access (10,000 calls/month)",
-      "Real-time competitor tracking",
-      "Multi-channel campaign analysis",
-      "Custom AI model training",
-      "Advanced audience segmentation",
-      "A/B testing recommendations",
-      "ROI optimization engine",
-      "Integration with 50+ marketing tools",
-      "Custom strategy workflows",
+      "10 stratégies publicitaires complètes",
+      "Analyse concurrentielle avancée (3 concurrents)",
+      "30 variantes de textes publicitaires",
+      "Recommandations créatives premium",
+      "Accès VIP à vie au canal 'The Boardroom'",
+      "Support client prioritaire"
     ],
-    cta: "Go Premium",
     popular: false,
-  },
-  {
-    name: "Enterprise",
-    key: "enterprise",
-    icon: Building2,
-    price: { monthly: 149, yearly: 119 },
-    color: "from-amber-500 to-orange-500",
-    borderColor: "border-amber-300",
-    bg: "bg-white",
-    accentColor: "text-amber-600",
-    badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
-    description: "For agencies and large teams requiring full customization.",
-    features: [
-      "Everything in Premium plan",
-      "Multi-brand management (unlimited)",
-      "Team collaboration (up to 25 users)",
-      "Custom AI model training on your data",
-      "Dedicated account manager & CSM",
-      "SLA guarantee (99.9% uptime)",
-      "24/7 priority support with phone",
-      "Custom integrations & API",
-      "Unlimited API calls",
-      "On-premise deployment option",
-      "Advanced security & compliance",
-      "Custom reporting & analytics",
-      "White-label solution",
-      "Training sessions for your team",
-      "Quarterly business reviews",
-      "Custom feature development",
-      "Priority feature requests",
-      "Dedicated infrastructure",
-    ],
-    cta: "Book a call",
-    popular: false,
-  },
+    cta: "Passer à l'offre Entreprise",
+    link: CHARIOW_LINKS.enterprise
+  }
 ];
 
-const comparisonCategories = [
-  {
-    category: "AI Strategies",
-    features: [
-      { name: "AI-generated strategies", free: "1/month", pro: "10/month", premium: "Unlimited", enterprise: "Unlimited" },
-      { name: "Strategy templates", free: "5 basic", pro: "25 advanced", premium: "100+ custom", enterprise: "Unlimited custom" },
-      { name: "Custom AI training", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Strategy export (PDF/CSV)", free: "PDF only", pro: "PDF + CSV", premium: "All formats", enterprise: "All formats + API" },
-    ],
-  },
-  {
-    category: "Market Intelligence",
-    features: [
-      { name: "Market analysis", free: "Basic", pro: "Advanced", premium: "Predictive", enterprise: "Custom models" },
-      { name: "Trend detection", free: "Weekly", pro: "Daily", premium: "Real-time", enterprise: "Real-time + alerts" },
-      { name: "Historical data", free: "30 days", pro: "1 year", premium: "5 years", enterprise: "Unlimited" },
-      { name: "Market share analysis", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Traffic estimation", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Opportunity detection", free: false, pro: true, premium: true, enterprise: true },
-    ],
-  },
-  {
-    category: "Competitor Intelligence",
-    features: [
-      { name: "Competitor overview", free: "3 competitors", pro: "10 competitors", premium: "50 competitors", enterprise: "Unlimited" },
-      { name: "Ad spy tool", free: false, pro: true, premium: true, enterprise: true },
-      { name: "Real-time tracking", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Competitor alerts", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Multi-channel analysis", free: false, pro: false, premium: true, enterprise: true },
-    ],
-  },
-  {
-    category: "Reporting & Analytics",
-    features: [
-      { name: "PDF reports", free: "Basic", pro: "Branded", premium: "White-label", enterprise: "Custom" },
-      { name: "Performance dashboard", free: "Limited", pro: "Full", premium: "Advanced", enterprise: "Custom" },
-      { name: "ROI tracking", free: false, pro: "Basic", premium: "Advanced", enterprise: "Custom" },
-      { name: "A/B testing recommendations", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Custom reports", free: false, pro: false, premium: true, enterprise: true },
-    ],
-  },
-  {
-    category: "API & Integrations",
-    features: [
-      { name: "API access", free: false, pro: "1,000 calls/mo", premium: "10,000 calls/mo", enterprise: "Unlimited" },
-      { name: "Webhook support", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Third-party integrations", free: "5 tools", pro: "20 tools", premium: "50+ tools", enterprise: "Custom" },
-      { name: "Custom integrations", free: false, pro: false, premium: false, enterprise: true },
-    ],
-  },
-  {
-    category: "Support & Services",
-    features: [
-      { name: "Email support", free: "48h", pro: "24h", premium: "1h", enterprise: "1h" },
-      { name: "Phone support", free: false, pro: false, premium: true, enterprise: "24/7" },
-      { name: "Dedicated account manager", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Training sessions", free: false, pro: false, premium: "1 session", enterprise: "Unlimited" },
-      { name: "SLA guarantee", free: false, pro: false, premium: false, enterprise: "99.9%" },
-      { name: "On-premise deployment", free: false, pro: false, premium: false, enterprise: true },
-    ],
-  },
-  {
-    category: "Team & Collaboration",
-    features: [
-      { name: "User accounts", free: "1", pro: "1", premium: "5", enterprise: "25" },
-      { name: "Multi-brand management", free: false, pro: false, premium: "3 brands", enterprise: "Unlimited" },
-      { name: "Team collaboration", free: false, pro: false, premium: true, enterprise: true },
-      { name: "Role-based permissions", free: false, pro: false, premium: true, enterprise: true },
-    ],
-  },
+const DELIVERABLES = [
+  { num: "01", title: "Analyse", desc: "Votre activité, votre marché et votre contexte sont analysés en profondeur." },
+  { num: "02", title: "Positionnement", desc: "Identification des opportunités et des angles marketing les plus pertinents." },
+  { num: "03", title: "Stratégie", desc: "Construction d'une feuille de route publicitaire claire et structurée." },
+  { num: "04", title: "Messages", desc: "Création des angles et des textes publicitaires adaptés à votre cible." },
+  { num: "05", title: "Créatifs", desc: "Recommandations précises sur les formats et concepts visuels à produire." },
+  { num: "06", title: "Exécution", desc: "Vous savez exactement quoi lancer, où le lancer et pourquoi." },
 ];
 
-const faqData = [
-  { question: "How accurate are the AI recommendations?", answer: "Our AI analyzes real-time market data with an average accuracy rate of 87%. We continuously train our models on the latest market trends and competitor data to ensure you get the most relevant insights." },
-  { question: "Can I change my plan at any time?", answer: "Absolutely! You can upgrade or downgrade your plan at any time from your billing dashboard. Changes take effect immediately, and we'll prorate any charges." },
-  { question: "Do I need marketing experience to use MakeItAds?", answer: "Not at all! MakeItAds is designed for founders and business owners at any level. Our AI handles the complex analysis and provides actionable recommendations in plain language." },
-  { question: "Can I analyze multiple businesses?", answer: "Yes! Premium plans allow managing up to 3 business profiles, and Enterprise plans support unlimited brands. Each profile gets its own strategies, competitor tracking, and market analysis." },
-  { question: "How often is market data updated?", answer: "Free plans get weekly updates, Pro plans get daily updates, and Premium/Enterprise plans get real-time data feeds. Enterprise customers can also request custom data refresh rates." },
-  { question: "Is there a free trial for paid plans?", answer: "We offer a 14-day free trial for Pro and Premium plans. You can explore all features without commitment. Enterprise plans include a custom demo and proof-of-concept period." },
-  { question: "What payment methods do you accept?", answer: "We accept all major credit cards (Visa, Mastercard, American Express) via Stripe. Enterprise customers can also pay via invoice with NET-30 terms." },
-  { question: "Can I cancel my subscription anytime?", answer: "Yes, you can cancel your subscription at any time from your billing dashboard. Your access will continue until the end of your current billing period." },
+const PROFILES = [
+  { icon: Lightbulb, title: "Entrepreneur", desc: "Vous voulez savoir où investir votre budget publicitaire sans le gaspiller." },
+  { icon: Store, title: "E-commerce", desc: "Vous voulez identifier les bons angles, audiences et canaux pour vos produits." },
+  { icon: Building2, title: "PME", desc: "Vous voulez structurer votre acquisition sans multiplier les outils complexes." },
+  { icon: Briefcase, title: "Marketeur / Agence", desc: "Vous voulez accélérer la préparation et la présentation de vos stratégies clients." },
 ];
+
+const FAQS = [
+  { q: "Est-ce un abonnement mensuel ?", a: "Non, absolument pas. Nous fonctionnons avec un système de packs de crédits à paiement unique. Aucun prélèvement récurrent, aucun engagement." },
+  { q: "Que reçoit-on exactement après l'achat ?", a: "Vous recevez une stratégie complète incluant : la recommandation de plateforme, le ciblage détaillé, plusieurs variantes de textes publicitaires prêts à l'emploi, et un guide pour créer vos visuels." },
+  { q: "Puis-je utiliser MakeItAds si je ne suis pas expert en publicité ?", a: "Oui, c'est fait pour vous. L'outil traduit vos informations en langage publicitaire professionnel. Vous n'avez qu'à copier-coller les recommandations." },
+  { q: "Quelle offre choisir pour commencer ?", a: "Le Pack Découverte est parfait pour tester la qualité de nos stratégies sur une première campagne. Le Plan Business est recommandé si vous souhaitez tester plusieurs angles simultanément." },
+  { q: "Puis-je utiliser plusieurs plateformes publicitaires ?", a: "Oui, notre IA peut vous recommander une stratégie multi-canaux (Meta, TikTok, Google) si votre offre et votre budget le permettent." },
+  { q: "Comment fonctionne le paiement ?", a: "Le paiement est 100% sécurisé via notre partenaire Chariow. Vous pouvez payer par Mobile Money (Orange, Wave, MTN, Moov) ou par carte bancaire. Les crédits sont ajoutés en quelques minutes." },
+  { q: "Puis-je commencer avec une seule stratégie ?", a: "Oui, le Pack Découverte est conçu exactement pour cela : obtenir une stratégie clé en main pour 2 499 FCFA." },
+  { q: "Puis-je passer à une offre supérieure ensuite ?", a: "Oui, vous pouvez acheter un nouveau pack à tout moment. Les crédits s'ajoutent simplement à votre solde existant." },
+];
+
+function AccordionItem({ question, answer, isOpen, onClick }: { question: string, answer: string, isOpen: boolean, onClick: () => void }) {
+  return (
+    <div className="rounded-xl border border-[#E7E7EB] bg-[#FFFFFF] overflow-hidden">
+      <button onClick={onClick} className="w-full flex items-center justify-between p-5 text-left hover:bg-[#F7F7F8] transition-colors">
+        <span className="text-sm font-semibold text-[#18181B] pr-4">{question}</span>
+        <ChevronDown className={`h-4 w-4 text-[#71717A] flex-shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`} />
+      </button>
+      <motion.div initial={false} animate={{ height: isOpen ? "auto" : 0, opacity: isOpen ? 1 : 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
+        <p className="text-sm text-[#71717A] leading-relaxed px-5 pb-5">{answer}</p>
+      </motion.div>
+    </div>
+  );
+}
 
 export default function PricingPage() {
-  const { user } = useSession();
-  const { isFree, isPro, isPremium, isEnterprise, loading: planLoading } = usePlan();
-  const [isYearly, setIsYearly] = useState(false);
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [selectedMobilePlan, setSelectedMobilePlan] = useState<string>("pro");
-
-  const currentPlan = isEnterprise ? "enterprise" : isPremium ? "premium" : isPro ? "pro" : "free";
-
-  const handleUpgrade = async (planName: string) => {
-    if (!user) {
-      window.location.href = `/auth/login?redirect=/pricing&plan=${planName}`;
-      return;
-    }
-
-    setLoadingPlan(planName);
-    try {
-      const billingCycle = isYearly ? 'yearly' : 'monthly';
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planName, billingCycle, userId: user.id, userEmail: user.email }),
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Server error");
-      if (data.url) window.location.href = data.url;
-      else throw new Error("No payment URL returned");
-    } catch (error: any) {
-      console.error('Upgrade error:', error);
-      alert(error.message || "An error occurred");
-    } finally {
-      setLoadingPlan(null);
-    }
-  };
-
-  const renderValue = (value: boolean | string) => {
-    if (typeof value === 'boolean') {
-      return value ? (
-        <Check className="h-5 w-5 text-emerald-600 mx-auto" />
-      ) : (
-        <X className="h-5 w-5 text-[#CBD5E1] mx-auto" />
-      );
-    }
-    return <span className="text-sm text-[#475569] font-medium">{value}</span>;
-  };
-
-  const currentMobilePlan = pricingPlans.find(p => p.key === selectedMobilePlan) || pricingPlans[1];
 
   return (
-    <main className="min-h-screen bg-[#FAFAFC] text-[#111827]">
+    <main className="min-h-screen bg-[#FFFFFF] text-[#18181B]">
       <GlobalNavbar />
 
-      <div className="pt-32 pb-20 px-4 sm:px-6">
-        <div className="max-w-7xl mx-auto">
-          
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.4 }}
-            className="mb-8"
-          >
-            <Link
-              href="/"
-              className="group inline-flex items-center gap-2 rounded-full border border-[#E5E7EB] bg-white px-5 py-2.5 text-sm font-semibold text-[#475569] hover:text-[#111827] hover:bg-[#F9FAFB] hover:border-[#CBD5E1] transition-all"
-            >
-              <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-              Back to Home
-            </Link>
-          </motion.div>
-
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-          >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 text-[#111827] leading-tight tracking-tight">
-              Simple, transparent <span className="text-[#6366f1]">pricing</span>
+      {/* 1. HERO */}
+      <section className="relative z-10 pt-32 pb-16 px-4 sm:px-6 bg-[#F7F7F8]">
+        <div className="max-w-4xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-xs font-semibold mb-6">
+              Des stratégies plus claires. Des décisions plus intelligentes.
+            </span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-[#18181B] mb-6 leading-tight">
+              Passez de l'idée à une stratégie publicitaire prête à exécuter.
             </h1>
-            <p className="text-lg text-[#64748B] max-w-2xl mx-auto mb-8">
-              Choose the plan that fits your needs. Upgrade or downgrade at any time.
+            <p className="text-base sm:text-lg text-[#71717A] max-w-2xl mx-auto mb-8 leading-relaxed">
+              MakeItAds transforme les données de votre marché, votre audience et vos concurrents en stratégies publicitaires structurées et exploitables.
             </p>
-
-            <div className="inline-flex items-center gap-3 sm:gap-4 rounded-full border border-[#E5E7EB] bg-white p-1 sm:p-1.5 shadow-sm">
-              <button
-                onClick={() => setIsYearly(false)}
-                className={`px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all ${
-                  !isYearly ? "bg-[#6366f1] text-white shadow-sm" : "text-[#64748B] hover:text-[#111827]"
-                }`}
-              >
-                Monthly
-              </button>
-              <button
-                onClick={() => setIsYearly(true)}
-                className={`px-4 sm:px-5 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-                  isYearly ? "bg-[#6366f1] text-white shadow-sm" : "text-[#64748B] hover:text-[#111827]"
-                }`}
-              >
-                Yearly
-                <span className="text-[10px] sm:text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">
-                  Save 20%
-                </span>
-              </button>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+              <a href="#pricing-cards" className="inline-flex items-center gap-2 rounded-lg bg-[#6366F1] px-6 py-3 text-sm font-semibold text-white hover:bg-[#5558e6] transition-colors shadow-sm shadow-[#6366F1]/25">
+                Choisir mon offre
+              </a>
+              <Link href="/" className="inline-flex items-center gap-2 rounded-lg border border-[#E7E7EB] bg-[#FFFFFF] px-6 py-3 text-sm font-semibold text-[#18181B] hover:bg-[#F7F7F8] transition-colors">
+                Découvrir MakeItAds
+              </Link>
             </div>
-          </motion.div>
-
-          {/* DESKTOP GRID */}
-          <div className="hidden md:grid grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
-            {pricingPlans.map((planItem, index) => {
-              const Icon = planItem.icon;
-              const isCurrentPlan = currentPlan === planItem.key;
-
-              return (
-                <motion.div
-                  key={planItem.key}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className={`relative rounded-2xl border p-6 sm:p-8 flex flex-col transition-all hover:shadow-md ${
-                    planItem.popular 
-                      ? "border-[#6366f1] bg-[#EEF2FF] shadow-lg shadow-[#6366f1]/10" 
-                      : `${planItem.borderColor} ${planItem.bg}`
-                  }`}
-                >
-                  {planItem.popular && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                      <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
-                        Most Popular
-                      </span>
-                    </div>
-                  )}
-
-                  {isCurrentPlan && (
-                    <div className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
-                      <Check className="h-3 w-3" />
-                      Current Plan
-                    </div>
-                  )}
-
-                  <div className="mb-6">
-                    <div className={`inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br ${planItem.color} mb-4 shadow-sm`}>
-                      <Icon className="h-5 w-5 text-white" />
-                    </div>
-                    <h3 className="text-xl font-bold text-[#111827]">{planItem.name}</h3>
-                    <p className="text-sm text-[#64748B] mt-1">{planItem.description}</p>
-                  </div>
-
-                  <div className="mb-6">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl font-bold text-[#111827]">${isYearly ? planItem.price.yearly : planItem.price.monthly}</span>
-                      <span className="text-sm text-[#64748B]">/month</span>
-                    </div>
-                    {isYearly && planItem.price.monthly > 0 && (
-                      <p className="text-xs text-[#64748B] mt-1">Billed annually (${planItem.price.yearly * 12}/year)</p>
-                    )}
-                  </div>
-
-                  {planItem.name === "Free" ? (
-                    <button 
-                      disabled
-                      className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all mb-6 ${
-                        isCurrentPlan 
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
-                          : "border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                      }`}
-                    >
-                      {isCurrentPlan ? "Current Plan" : "Free"}
-                    </button>
-                  ) : planItem.name === "Enterprise" ? (
-                    <Link 
-                      href="/contact" 
-                      className="w-full rounded-xl py-3 text-sm font-semibold text-center transition-all border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] mb-6 block"
-                    >
-                      {planItem.cta}
-                    </Link>
-                  ) : (
-                    <button
-                      onClick={() => handleUpgrade(planItem.name)}
-                      disabled={loadingPlan === planItem.name || isCurrentPlan}
-                      className={`w-full rounded-xl py-3 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
-                        isCurrentPlan
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
-                          : planItem.popular
-                          ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                          : "border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60 disabled:cursor-not-allowed"
-                      }`}
-                    >
-                      {loadingPlan === planItem.name ? (
-                        <><Loader2 className="h-4 w-4 animate-spin" />Loading...</>
-                      ) : isCurrentPlan ? (
-                        <><Check className="h-4 w-4" />Current Plan</>
-                      ) : (
-                        planItem.cta
-                      )}
-                    </button>
-                  )}
-
-                  <div className="space-y-3 flex-1">
-                    {planItem.features.map((feature, i) => (
-                      <div key={i} className="flex items-start gap-2.5">
-                        <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${planItem.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                          <Check className="h-3 w-3 text-white" />
-                        </div>
-                        <span className="text-sm text-[#475569]">{feature}</span>
-                      </div>
-                    ))}
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
-
-          {/* MOBILE CAROUSEL */}
-          <div className="md:hidden mb-12">
-            <div className="mb-6">
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                {pricingPlans.map((plan) => {
-                  const Icon = plan.icon;
-                  const isSelected = selectedMobilePlan === plan.key;
-                  return (
-                    <button
-                      key={plan.key}
-                      onClick={() => setSelectedMobilePlan(plan.key)}
-                      className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold transition-all border ${
-                        isSelected 
-                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-md`
-                          : "bg-[#F9FAFB] text-[#64748B] border-[#E5E7EB]"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {plan.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentMobilePlan.key}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3 }}
-                className={`relative rounded-2xl border p-6 ${
-                  currentMobilePlan.popular ? "border-[#6366f1] bg-[#EEF2FF] shadow-lg shadow-[#6366f1]/10" : `${currentMobilePlan.borderColor} ${currentMobilePlan.bg}`
-                }`}
-              >
-                {currentMobilePlan.popular && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-4 py-1 text-[10px] font-bold text-white uppercase tracking-wider shadow-md">
-                      Most Popular
-                    </span>
-                  </div>
-                )}
-
-                {currentPlan === currentMobilePlan.key && (
-                  <div className="absolute -top-3 right-4 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white flex items-center gap-1">
-                    <Check className="h-3 w-3" />
-                    Current Plan
-                  </div>
-                )}
-
-                <div className="mb-6">
-                  <div className={`inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${currentMobilePlan.color} mb-4 shadow-sm`}>
-                    <currentMobilePlan.icon className="h-6 w-6 text-white" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-[#111827]">{currentMobilePlan.name}</h3>
-                  <p className="text-sm text-[#64748B] mt-1">{currentMobilePlan.description}</p>
-                </div>
-
-                <div className="mb-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-[#111827]">
-                      ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}
-                    </span>
-                    <span className="text-[#64748B]">/month</span>
-                  </div>
-                  {isYearly && currentMobilePlan.price.monthly > 0 && (
-                    <p className="text-xs text-[#64748B] mt-1">Billed annually (${currentMobilePlan.price.yearly * 12}/year)</p>
-                  )}
-                </div>
-
-                {currentMobilePlan.name === "Free" ? (
-                  <button 
-                    disabled
-                    className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all mb-6 ${
-                      currentPlan === currentMobilePlan.key
-                        ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
-                        : "border border-[#E5E7EB] bg-[#F9FAFB] text-[#9CA3AF] cursor-not-allowed"
-                    }`}
-                  >
-                    {currentPlan === currentMobilePlan.key ? "Current Plan" : "Free"}
-                  </button>
-                ) : currentMobilePlan.name === "Enterprise" ? (
-                  <Link 
-                    href="/contact" 
-                    className="w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] mb-6 block"
-                  >
-                    {currentMobilePlan.cta}
-                  </Link>
-                ) : (
-                  <button
-                    onClick={() => handleUpgrade(currentMobilePlan.name)}
-                    disabled={loadingPlan === currentMobilePlan.name || currentPlan === currentMobilePlan.key}
-                    className={`w-full rounded-xl py-3.5 text-sm font-semibold text-center transition-all flex items-center justify-center gap-2 mb-6 ${
-                      currentPlan === currentMobilePlan.key
-                        ? "bg-emerald-100 text-emerald-700 border border-emerald-200 cursor-default"
-                        : currentMobilePlan.popular
-                        ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white hover:shadow-lg hover:shadow-[#8b5cf6]/30 disabled:opacity-60 disabled:cursor-not-allowed"
-                        : "border border-[#E5E7EB] bg-white text-[#111827] hover:bg-[#F9FAFB] disabled:opacity-60 disabled:cursor-not-allowed"
-                    }`}
-                  >
-                    {loadingPlan === currentMobilePlan.name ? (
-                      <><Loader2 className="h-4 w-4 animate-spin" />Loading...</>
-                    ) : currentPlan === currentMobilePlan.key ? (
-                      <><Check className="h-4 w-4" />Current Plan</>
-                    ) : (
-                      currentMobilePlan.cta
-                    )}
-                  </button>
-                )}
-
-                <div className="space-y-3">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-[#64748B] mb-3">What's included</h4>
-                  {currentMobilePlan.features.map((feature, i) => (
-                    <div key={i} className="flex items-start gap-2.5">
-                      <div className={`h-5 w-5 rounded-full bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                        <Check className="h-3 w-3 text-white" />
-                      </div>
-                      <span className="text-sm text-[#475569]">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-
-          {/* COMPARISON TABLE DESKTOP */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="hidden md:block mb-20"
-          >
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[#111827]">
-                Compare all <span className="text-[#6366f1]">features</span>
-              </h2>
-              <p className="text-base md:text-lg text-[#64748B]">See exactly what you get with each plan</p>
-            </div>
-
-            <div className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm">
-              <div className="grid grid-cols-5 gap-4 p-6 border-b border-[#E5E7EB] bg-[#F9FAFB]">
-                <div className="text-sm font-semibold text-[#64748B]">Feature</div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-[#111827]">Free</div>
-                  <div className="text-xs text-[#64748B]">$0/mo</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-[#6366f1]">Pro</div>
-                  <div className="text-xs text-[#64748B]">${isYearly ? '23' : '29'}/mo</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-violet-600">Premium</div>
-                  <div className="text-xs text-[#64748B]">${isYearly ? '47' : '59'}/mo</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-lg font-bold text-amber-600">Enterprise</div>
-                  <div className="text-xs text-[#64748B]">${isYearly ? '119' : '149'}/mo</div>
-                </div>
-              </div>
-
-              {comparisonCategories.map((category, catIndex) => (
-                <div key={catIndex} className="border-b border-[#E5E7EB] last:border-b-0">
-                  <div className="px-6 py-4 bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                    <h3 className="text-sm font-bold text-[#111827] uppercase tracking-wider">{category.category}</h3>
-                  </div>
-                  
-                  {category.features.map((feature, featIndex) => (
-                    <motion.div 
-                      key={featIndex}
-                      initial={{ opacity: 0, x: -20 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.3, delay: featIndex * 0.05 }}
-                      className="grid grid-cols-5 gap-4 px-6 py-4 border-b border-[#E5E7EB] hover:bg-[#F9FAFB] transition-colors items-center last:border-b-0"
-                    >
-                      <div className="text-sm text-[#475569] font-medium">{feature.name}</div>
-                      <div className="text-center">{renderValue(feature.free)}</div>
-                      <div className="text-center">{renderValue(feature.pro)}</div>
-                      <div className="text-center">{renderValue(feature.premium)}</div>
-                      <div className="text-center">{renderValue(feature.enterprise)}</div>
-                    </motion.div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* COMPARISON TABLE MOBILE */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="md:hidden mb-20"
-          >
-            <div className="text-center mb-8">
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight mb-3 text-[#111827]">
-                Compare <span className="text-[#6366f1]">features</span>
-              </h2>
-              <p className="text-sm text-[#64748B]">Select a plan to see its features</p>
-            </div>
-
-            <div className="mb-6 sticky top-20 z-10 bg-[#FAFAFC]/95 backdrop-blur-md py-3 -mx-4 px-4">
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide" style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
-                <style jsx>{`div::-webkit-scrollbar { display: none; }`}</style>
-                {pricingPlans.map((plan) => {
-                  const Icon = plan.icon;
-                  const isSelected = selectedMobilePlan === plan.key;
-                  return (
-                    <button
-                      key={plan.key}
-                      onClick={() => setSelectedMobilePlan(plan.key)}
-                      className={`flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-xs font-semibold transition-all border ${
-                        isSelected 
-                          ? `bg-gradient-to-r ${plan.color} text-white border-transparent shadow-md`
-                          : "bg-[#F9FAFB] text-[#64748B] border-[#E5E7EB]"
-                      }`}
-                    >
-                      <Icon className="h-3.5 w-3.5" />
-                      {plan.name}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={selectedMobilePlan}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3 }}
-                className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm"
-              >
-                <div className={`px-5 py-4 border-b border-[#E5E7EB] bg-gradient-to-r ${currentMobilePlan.color} bg-opacity-10`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`h-10 w-10 rounded-xl bg-gradient-to-br ${currentMobilePlan.color} flex items-center justify-center shadow-sm`}>
-                      <currentMobilePlan.icon className="h-5 w-5 text-white" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-[#111827]">{currentMobilePlan.name} Plan</h3>
-                      <p className="text-xs text-[#64748B]">
-                        ${isYearly ? currentMobilePlan.price.yearly : currentMobilePlan.price.monthly}/month
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {comparisonCategories.map((category, catIndex) => (
-                  <div key={catIndex} className="border-b border-[#E5E7EB] last:border-b-0">
-                    <div className="px-5 py-3 bg-[#F9FAFB] border-b border-[#E5E7EB]">
-                      <h4 className="text-xs font-bold text-[#111827] uppercase tracking-wider">{category.category}</h4>
-                    </div>
-                    
-                    {category.features.map((feature, featIndex) => {
-                      const value = feature[currentMobilePlan.key as keyof typeof feature];
-                      return (
-                        <div 
-                          key={featIndex}
-                          className="flex items-center justify-between px-5 py-3.5 border-b border-[#E5E7EB] last:border-b-0"
-                        >
-                          <span className="text-sm text-[#475569] flex-1 pr-3">{feature.name}</span>
-                          <div className="flex-shrink-0">
-                            {typeof value === 'boolean' ? (
-                              value ? (
-                                <Check className="h-5 w-5 text-emerald-600" />
-                              ) : (
-                                <X className="h-5 w-5 text-[#CBD5E1]" />
-                              )
-                            ) : (
-                              <span className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${currentMobilePlan.badgeColor}`}>
-                                {value}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
-              </motion.div>
-            </AnimatePresence>
-          </motion.div>
-
-          {/* FAQ SECTION */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="max-w-3xl mx-auto mb-20"
-          >
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-4 text-[#111827]">
-                Frequently asked <span className="text-[#6366f1]">questions</span>
-              </h2>
-              <p className="text-base md:text-lg text-[#64748B]">Everything you need to know about MakeItAds</p>
-            </div>
-            <div className="space-y-4">
-              {faqData.map((faq, index) => (
-                <motion.div 
-                  key={index} 
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
-                  className="rounded-2xl border border-[#E5E7EB] bg-white overflow-hidden shadow-sm"
-                >
-                  <button 
-                    onClick={() => setOpenFaq(openFaq === index ? null : index)} 
-                    className="w-full flex items-center justify-between p-6 text-left hover:bg-[#F9FAFB] transition-colors"
-                  >
-                    <span className="text-base font-semibold text-[#111827] pr-4">{faq.question}</span>
-                    <ChevronDown className={`h-5 w-5 text-[#64748B] transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
-                  </button>
-                  <AnimatePresence>
-                    {openFaq === index && (
-                      <motion.div 
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="overflow-hidden"
-                      >
-                        <div className="px-6 pb-6">
-                          <p className="text-sm text-[#64748B] leading-relaxed">{faq.answer}</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-
-          {/* FINAL CTA */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center"
-          >
-            <div className="rounded-3xl border border-[#6366f1]/20 bg-[#EEF2FF] p-8 md:p-12 max-w-4xl mx-auto">
-              <h2 className="text-2xl md:text-4xl font-bold mb-4 text-[#111827]">Ready to scale your business?</h2>
-              <p className="text-[#64748B] mb-8 max-w-2xl mx-auto">
-                Join thousands of marketers using MakeItAds to dominate their niche.
-              </p>
-              <button 
-                onClick={() => handleUpgrade("Pro")}
-                className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-8 py-4 text-base font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:shadow-xl hover:shadow-[#8b5cf6]/30 transition-all hover:scale-105"
-              >
-                Get Started with Pro <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-            </div>
+            <p className="text-xs text-[#71717A] flex items-center justify-center gap-2">
+              <Check className="h-3.5 w-3.5 text-emerald-600" /> Sans abonnement obligatoire
+              <span className="text-[#E7E7EB]">•</span>
+              <Check className="h-3.5 w-3.5 text-emerald-600" /> Résultats structurés
+              <span className="text-[#E7E7EB]">•</span>
+              <Check className="h-3.5 w-3.5 text-emerald-600" /> Adapté à votre activité
+            </p>
           </motion.div>
         </div>
-      </div>
+      </section>
+
+      {/* 2. CARTES DE PRIX */}
+      <section id="pricing-cards" className="py-16 md:py-24 px-4 sm:px-6 bg-[#F7F7F8]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Des offres adaptées à votre stade de croissance.</h2>
+            <p className="text-[#71717A]">Paiement unique. Pas de surprise. Accès immédiat.</p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+            {PRICING_PLANS.map((plan, i) => (
+              <motion.div 
+                key={plan.id} 
+                initial={{ opacity: 0, y: 30 }} 
+                whileInView={{ opacity: 1, y: 0 }} 
+                viewport={{ once: true }} 
+                transition={{ delay: i * 0.1 }}
+                className={`relative rounded-2xl border p-6 flex flex-col h-full bg-[#FFFFFF] ${
+                  plan.popular 
+                    ? "border-[#6366F1] shadow-[0_8px_30px_-12px_rgba(99,102,241,0.15)] ring-1 ring-[#6366F1]" 
+                    : "border-[#E7E7EB] shadow-sm"
+                }`}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[10px] font-bold text-white uppercase tracking-wider bg-[#6366F1]">
+                    Le plus populaire
+                  </div>
+                )}
+                <div className="mb-6">
+                  <h3 className="text-lg font-bold text-[#18181B] mb-1">{plan.name}</h3>
+                  <p className="text-xs text-[#71717A] leading-relaxed">{plan.description}</p>
+                </div>
+                <div className="mb-6">
+                  <div className="flex items-baseline gap-2 flex-wrap">
+                    <span className="text-3xl font-bold text-[#18181B]">{plan.price}</span>
+                    <span className="text-sm text-[#71717A]">FCFA</span>
+                    {plan.oldPrice && <span className="text-sm text-[#94A3B8] line-through">{plan.oldPrice} FCFA</span>}
+                  </div>
+                  <p className="text-[10px] text-[#71717A] mt-1">Paiement unique · Aucun abonnement</p>
+                </div>
+                <ul className="space-y-3 mb-8 flex-1">
+                  {plan.features.map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-2.5 text-xs text-[#18181B]">
+                      <div className="mt-0.5 flex-shrink-0 h-4 w-4 rounded-full bg-[#6366F1]/10 flex items-center justify-center">
+                        <Check className="h-2.5 w-2.5 text-[#6366F1]" strokeWidth={3} />
+                      </div>
+                      <span className="leading-tight">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <a 
+                  href={plan.link} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`block w-full rounded-lg py-3 text-center text-sm font-semibold transition-all duration-200 ${
+                    plan.popular 
+                      ? "bg-[#6366F1] text-white hover:bg-[#5558e6] shadow-sm shadow-[#6366F1]/25" 
+                      : "bg-[#F7F7F8] text-[#18181B] border border-[#E7E7EB] hover:bg-[#FFFFFF] hover:border-[#6366F1]/30"
+                  }`}
+                >
+                  {plan.cta}
+                </a>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 3. CE QUE VOUS REPARTEZ RÉELLEMENT AVEC */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Voici ce que vous repartez réellement avec.</h2>
+            <p className="text-[#71717A]">Un livrable concret, pas juste des conseils vagues.</p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-x-12 gap-y-8">
+            {DELIVERABLES.map((item, i) => (
+              <div key={i} className="flex gap-4">
+                <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[#6366F1]/10 flex items-center justify-center text-xs font-bold text-[#6366F1]">
+                  {item.num}
+                </span>
+                <div>
+                  <h3 className="text-sm font-bold text-[#18181B] mb-1">{item.title}</h3>
+                  <p className="text-sm text-[#71717A] leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 4. POURQUOI PAS SIMPLEMENT CHATGPT ? */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-[#F7F7F8]">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Pourquoi utiliser MakeItAds plutôt qu'une IA généraliste ?</h2>
+            <p className="text-[#71717A]">MakeItAds est spécialisé dans la décision marketing et la stratégie publicitaire.</p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-[#E7E7EB]">
+                  <th className="text-left py-3 px-4 font-semibold text-[#18181B]">Fonctionnalité</th>
+                  <th className="text-center py-3 px-4 font-semibold text-[#71717A]">IA généraliste</th>
+                  <th className="text-center py-3 px-4 font-semibold text-[#6366F1] bg-[#6366F1]/5 rounded-t-lg">MakeItAds</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { feat: "Contexte marketing structuré", ai: "Limité", mia: true },
+                  { feat: "Analyse du marché local", ai: "Générique", mia: true },
+                  { feat: "Intelligence concurrentielle", ai: "Limitée", mia: true },
+                  { feat: "Recommandation de plateforme", ai: "Générique", mia: true },
+                  { feat: "Structure de campagne", ai: "Variable", mia: true },
+                  { feat: "Angles publicitaires", ai: true, mia: true },
+                  { feat: "Recommandations créatives", ai: "Variable", mia: true },
+                  { feat: "Stratégie orientée exécution", ai: "Variable", mia: true },
+                ].map((row, i) => (
+                  <tr key={i} className="border-b border-[#E7E7EB] last:border-0">
+                    <td className="py-3 px-4 text-[#18181B]">{row.feat}</td>
+                    <td className="py-3 px-4 text-center text-[#71717A]">
+                      {typeof row.ai === "boolean" ? <Check className="h-4 w-4 text-emerald-600 mx-auto" /> : row.ai}
+                    </td>
+                    <td className="py-3 px-4 text-center bg-[#6366F1]/5">
+                      {row.mia && <Check className="h-4 w-4 text-[#6366F1] mx-auto" strokeWidth={3} />}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. POUR QUI ? */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF]">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Conçu pour ceux qui veulent des résultats.</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {PROFILES.map((profile, i) => (
+              <div key={i} className="p-6 rounded-xl border border-[#E7E7EB] bg-[#F7F7F8] text-center hover:border-[#6366F1]/30 transition-colors">
+                <profile.icon className="h-8 w-8 text-[#6366F1] mx-auto mb-4" />
+                <h3 className="text-base font-bold text-[#18181B] mb-2">{profile.title}</h3>
+                <p className="text-sm text-[#71717A] leading-relaxed">{profile.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 6. BLOC SPÉCIAL TELEGRAM */}
+      <section className="py-16 px-4 sm:px-6 bg-[#6366F1]/5 border-y border-[#6366F1]/10">
+        <div className="max-w-3xl mx-auto text-center">
+          <MessageCircle className="h-10 w-10 text-[#6366F1] mx-auto mb-4" />
+          <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Vous avez découvert MakeItAds via une stratégie ?</h2>
+          <p className="text-[#71717A] mb-6 leading-relaxed">
+            La stratégie que vous venez de découvrir peut être réalisée plus rapidement et de manière structurée directement depuis la plateforme. 
+            Au lieu de recommencer vos analyses manuellement, vous pouvez utiliser MakeItAds pour structurer vos prochaines stratégies et accéder à davantage d'outils d'analyse.
+          </p>
+          <Link href="/" className="inline-flex items-center gap-2 rounded-lg bg-[#6366F1] px-6 py-3 text-sm font-semibold text-white hover:bg-[#5558e6] transition-colors shadow-sm shadow-[#6366F1]/25">
+            Commencer avec MakeItAds <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
+
+      {/* 7. COMMENT ÇA FONCTIONNE */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF]">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-12">Comment ça fonctionne ?</h2>
+          <div className="grid md:grid-cols-3 gap-8 relative">
+            <div className="hidden md:block absolute top-8 left-1/6 right-1/6 h-0.5 bg-[#E7E7EB] -z-10" />
+            {[
+              { num: "01", title: "Définissez votre activité", desc: "Répondez à 7 questions simples sur votre offre et votre marché." },
+              { num: "02", title: "MakeItAds analyse votre contexte", desc: "Notre moteur croise vos données avec les réalités du marché local." },
+              { num: "03", title: "Obtenez votre stratégie exploitable", desc: "Recevez un plan d'action complet, prêt à être copié-collé." }
+            ].map((step, i) => (
+              <div key={i} className="relative bg-[#FFFFFF] p-4">
+                <div className="w-16 h-16 rounded-full bg-[#F7F7F8] border border-[#E7E7EB] flex items-center justify-center mx-auto mb-4 text-lg font-bold text-[#6366F1]">
+                  {step.num}
+                </div>
+                <h3 className="text-base font-bold text-[#18181B] mb-2">{step.title}</h3>
+                <p className="text-sm text-[#71717A]">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+          <p className="mt-12 text-sm font-medium text-[#6366F1]">Moins de temps à chercher. Plus de temps à exécuter.</p>
+        </div>
+      </section>
+
+      {/* 8. RÉASSURANCE */}
+      <section className="py-12 px-4 sm:px-6 bg-[#F7F7F8] border-y border-[#E7E7EB]">
+        <div className="max-w-5xl mx-auto flex flex-wrap justify-center gap-x-8 gap-y-4 text-sm font-medium text-[#71717A]">
+          {["Stratégies structurées", "Analyse orientée décision", "Interface simple", "Résultats exploitables", "Pas besoin d'être expert"].map((item, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <ShieldCheck className="h-4 w-4 text-emerald-600" />
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 9. FAQ */}
+      <section className="py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF]">
+        <div className="max-w-3xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-4">Questions fréquentes</h2>
+            <p className="text-[#71717A]">Tout ce que vous devez savoir avant de commencer.</p>
+          </div>
+          <div className="space-y-3">
+            {FAQS.map((faq, i) => (
+              <AccordionItem 
+                key={i} 
+                question={faq.q} 
+                answer={faq.a} 
+                isOpen={openFaq === i} 
+                onClick={() => setOpenFaq(openFaq === i ? null : i)} 
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* 10. FINAL CTA */}
+      <section className="py-20 md:py-28 px-4 sm:px-6 bg-[#F7F7F8]">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="text-2xl md:text-4xl font-bold text-[#18181B] mb-4 leading-tight">
+            Votre prochaine campagne mérite mieux qu'une stratégie improvisée.
+          </h2>
+          <p className="text-[#71717A] mb-8 max-w-xl mx-auto">
+            Donnez à votre marketing une direction claire avant d'investir votre prochain budget publicitaire.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a href="#pricing-cards" className="inline-flex items-center gap-2 rounded-lg bg-[#6366F1] px-6 py-3 text-sm font-semibold text-white hover:bg-[#5558e6] transition-colors shadow-sm shadow-[#6366F1]/25">
+              Choisir mon offre
+            </a>
+            <Link href="/" className="inline-flex items-center gap-2 rounded-lg border border-[#E7E7EB] bg-[#FFFFFF] px-6 py-3 text-sm font-semibold text-[#18181B] hover:bg-[#F7F7F8] transition-colors">
+              Découvrir MakeItAds
+            </Link>
+          </div>
+        </div>
+      </section>
 
       <GlobalFooter />
     </main>

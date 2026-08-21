@@ -34,26 +34,27 @@ export default function HeroSection() {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
           
-          {/* TITRE - Texte premium noir */}
+          {/* TITRE - Épuré, percutant, en 2 temps */}
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
             className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.1] text-[#0F172A] mb-6"
           >
-            <span className="block">Know your <span className="text-[#8b5cf6]">market</span>.</span>
-            <span className="block">Outsmart <span className="text-[#8b5cf6]">competitors</span>.</span>
-            <span className="block">Scale with <span className="text-[#8b5cf6]">confidence</span>.</span>
+            <span className="block">Ne lancez plus de pubs au hasard.</span>
+            <span className="block">
+              Sachez <span className="text-[#8b5cf6]">où</span>, <span className="text-[#8b5cf6]">qui</span>, <span className="text-[#8b5cf6]">quoi</span> et <span className="text-[#8b5cf6]">pourquoi</span>.
+            </span>
           </motion.h1>
 
-          {/* SOUS-TITRE - Gris premium */}
+          {/* SOUS-TITRE - Explication claire et épurée */}
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
             className="max-w-2xl text-sm sm:text-base md:text-lg lg:text-xl text-[#475569] leading-relaxed mb-8"
           >
-            MakeItAds turns competitor tracking, market analysis and positioning into one complete growth strategy your team can act on.
+            MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l'Afrique.
           </motion.p>
 
           {/* IMAGE HERO - Effet Apple/Stripe premium sur fond blanc */}
@@ -74,7 +75,7 @@ export default function HeroSection() {
               
               <Image
                 src="/images/couv-X.png"
-                alt="MakeItAds Dashboard - Multi-device preview"
+                alt="MakeItAds Dashboard - Aperçu de la stratégie générée"
                 width={1400}
                 height={900}
                 priority
@@ -93,21 +94,21 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.24 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl mx-auto sm:mx-0"
           >
-            {/* Bouton principal violet - texte blanc conservé */}
+            {/* Bouton principal violet */}
             <button
               onClick={handleHeroCta}
               className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-10px_rgba(99,102,241,0.7)] w-full sm:w-auto"
             >
-              Open Your Workspace
+              Obtenir ma stratégie
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Bouton secondaire - adapté au white theme */}
+            {/* Bouton secondaire */}
             <a
               href="#how-it-works"
               className="flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] w-full sm:w-auto"
             >
-              See How It Works
+              Voir comment ça marche
             </a>
           </motion.div>
 
