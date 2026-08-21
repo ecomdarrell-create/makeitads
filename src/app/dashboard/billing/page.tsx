@@ -1,23 +1,22 @@
 "use client";
 
-// ✅ Empêche Next.js de pré-générer cette page statiquement au build, 
-// ce qui résout l'erreur "prerender error" pour les routes de dashboard.
+// ✅ Force le rendu dynamique pour éviter les erreurs de pré-génération
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { 
   Check, Crown, Building2, Sparkles, CreditCard, Loader2,
-  Download, Shield, AlertCircle, Zap, Plus, MoreHorizontal,
-  ArrowUpRight, Clock, BadgeCheck, X, FileText, Calendar,
-  ExternalLink, Trash2, DollarSign
+  Shield, AlertCircle, Zap, BadgeCheck, X, FileText, 
+  ArrowUpRight, ExternalLink, DollarSign
 } from "lucide-react";
 import { useSession } from "@/hooks/useSession";
 import { usePlan } from "@/hooks/usePlan";
 import PageTransition from "@/components/ui/PageTransition";
 
-export default function BillingPage() {
+// ✅ Sous-composant qui contient toute la logique et l'utilisation de useSearchParams
+function BillingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user } = useSession();
@@ -151,388 +150,383 @@ export default function BillingPage() {
   ];
 
   return (
-    <PageTransition>
-      <div className="space-y-5 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-12">
+    <div className="space-y-5 sm:space-y-6 lg:space-y-8 max-w-7xl mx-auto pb-12">
 
-        {/* MESSAGES */}
-        <AnimatePresence>
-          {successMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50 p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
-            >
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-                <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+      {/* MESSAGES */}
+      <AnimatePresence>
+        {successMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="rounded-xl sm:rounded-2xl border border-emerald-200 bg-emerald-50 p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+          >
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-emerald-800">Succès</p>
+              <p className="text-[10px] sm:text-xs text-emerald-700 truncate">{successMessage}</p>
+            </div>
+            <button onClick={() => setSuccessMessage("")} className="text-emerald-600 hover:text-emerald-800 flex-shrink-0 p-1">
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+        {errorMessage && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
+          >
+            <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
+              <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs sm:text-sm font-semibold text-red-800">Erreur</p>
+              <p className="text-[10px] sm:text-xs text-red-700 truncate">{errorMessage}</p>
+            </div>
+            <button onClick={() => setErrorMessage("")} className="text-red-600 hover:text-red-800 flex-shrink-0 p-1">
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* HEADER */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#E7E7EB] bg-gradient-to-br from-white via-[#F7F7F8] to-white p-5 sm:p-8 shadow-sm"
+      >
+        <div className="absolute top-0 right-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-gradient-to-bl from-[#6366f1]/5 via-transparent to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
+        
+        <div className="relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-5 sm:mb-8">
+            <div className="flex items-start gap-3">
+              <div className={`flex-shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${plans.find(p => p.key === currentPlan)?.color || 'from-slate-400 to-slate-500'} flex items-center justify-center shadow-md`}>
+                {(() => {
+                  const Icon = plans.find(p => p.key === currentPlan)?.icon || Sparkles;
+                  return <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />;
+                })()}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-emerald-800">Succès</p>
-                <p className="text-[10px] sm:text-xs text-emerald-700 truncate">{successMessage}</p>
-              </div>
-              <button onClick={() => setSuccessMessage("")} className="text-emerald-600 hover:text-emerald-800 flex-shrink-0 p-1">
-                <X className="h-4 w-4" />
-              </button>
-            </motion.div>
-          )}
-          {errorMessage && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className="rounded-xl sm:rounded-2xl border border-red-200 bg-red-50 p-3 sm:p-5 flex items-center gap-3 sm:gap-4"
-            >
-              <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-red-100 flex items-center justify-center flex-shrink-0">
-                <AlertCircle className="h-4 w-4 sm:h-5 sm:w-5 text-red-600" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs sm:text-sm font-semibold text-red-800">Erreur</p>
-                <p className="text-[10px] sm:text-xs text-red-700 truncate">{errorMessage}</p>
-              </div>
-              <button onClick={() => setErrorMessage("")} className="text-red-600 hover:text-red-800 flex-shrink-0 p-1">
-                <X className="h-4 w-4" />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* HEADER */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl sm:rounded-3xl border border-[#E7E7EB] bg-gradient-to-br from-white via-[#F7F7F8] to-white p-5 sm:p-8 shadow-sm"
-        >
-          <div className="absolute top-0 right-0 w-[300px] sm:w-[400px] h-[300px] sm:h-[400px] bg-gradient-to-bl from-[#6366f1]/5 via-transparent to-transparent rounded-full blur-3xl -translate-y-1/2 translate-x-1/4" />
-          
-          <div className="relative z-10">
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-5 sm:mb-8">
-              <div className="flex items-start gap-3">
-                <div className={`flex-shrink-0 h-11 w-11 sm:h-12 sm:w-12 rounded-xl sm:rounded-2xl bg-gradient-to-br ${plans.find(p => p.key === currentPlan)?.color || 'from-slate-400 to-slate-500'} flex items-center justify-center shadow-md`}>
-                  {(() => {
-                    const Icon = plans.find(p => p.key === currentPlan)?.icon || Sparkles;
-                    return <Icon className="h-5 w-5 sm:h-6 sm:w-6 text-white" />;
-                  })()}
+                <p className="text-[10px] sm:text-xs font-medium text-[#71717A] uppercase tracking-wider">Plan Actuel</p>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-lg sm:text-2xl font-bold text-[#18181B] capitalize">{currentPlan}</h1>
+                  {currentPlan !== "free" && (
+                    <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-emerald-700">
+                      Actif
+                    </span>
+                  )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-[10px] sm:text-xs font-medium text-[#71717A] uppercase tracking-wider">Plan Actuel</p>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h1 className="text-lg sm:text-2xl font-bold text-[#18181B] capitalize">{currentPlan}</h1>
-                    {currentPlan !== "free" && (
-                      <span className="rounded-full bg-emerald-100 border border-emerald-200 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-semibold text-emerald-700">
-                        Actif
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-xs sm:text-sm text-[#71717A] max-w-md mt-1 sm:mt-2">
-                    {currentPlan === "free" 
-                      ? "Passez à un plan supérieur pour débloquer les stratégies IA." 
-                      : currentPlan === "enterprise"
-                      ? "Vous êtes sur le plan Enterprise."
-                      : `Gérez votre abonnement ${currentPlan} ci-dessous.`}
-                  </p>
-                </div>
-              </div>
-
-              <div className="sm:text-right pl-14 sm:pl-0">
-                <div className="inline-flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-4xl font-bold text-[#18181B]">
-                    {currentPlan === "free" ? "0" : plans.find(p => p.key === currentPlan)?.price || "0"} €
-                  </span>
-                  <span className="text-xs sm:text-sm text-[#71717A]">/mois</span>
-                </div>
-                {currentPlan !== "free" && currentPlan !== "enterprise" && (
-                  <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">
-                    Prochaine facturation : {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}
-                  </p>
-                )}
+                <p className="text-xs sm:text-sm text-[#71717A] max-w-md mt-1 sm:mt-2">
+                  {currentPlan === "free" 
+                    ? "Passez à un plan supérieur pour débloquer les stratégies IA." 
+                    : currentPlan === "enterprise"
+                    ? "Vous êtes sur le plan Enterprise."
+                    : `Gérez votre abonnement ${currentPlan} ci-dessous.`}
+                </p>
               </div>
             </div>
-          </div>
-        </motion.div>
 
-        {/* TABS */}
-        <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-1 sm:p-1.5 overflow-x-auto scrollbar-hide shadow-sm">
-          <div className="flex items-center gap-1 min-w-max">
-            {[
-              { key: "plans", label: "Plans", icon: Zap },
-              { key: "card", label: "Paiement", icon: CreditCard },
-              { key: "history", label: "Historique", icon: FileText },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key as any)}
-                  className={`flex items-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
-                    activeTab === tab.key
-                      ? "bg-[#6366F1]/10 text-[#6366F1] shadow-sm"
-                      : "text-[#71717A] hover:text-[#18181B] hover:bg-[#F7F7F8]"
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+            <div className="sm:text-right pl-14 sm:pl-0">
+              <div className="inline-flex items-baseline gap-1">
+                <span className="text-2xl sm:text-4xl font-bold text-[#18181B]">
+                  {currentPlan === "free" ? "0" : plans.find(p => p.key === currentPlan)?.price || "0"} €
+                </span>
+                <span className="text-xs sm:text-sm text-[#71717A]">/mois</span>
+              </div>
+              {currentPlan !== "free" && currentPlan !== "enterprise" && (
+                <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">
+                  Prochaine facturation : {new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toLocaleDateString('fr-FR', { month: 'short', day: 'numeric', year: 'numeric' })}
+                </p>
+              )}
+            </div>
           </div>
         </div>
+      </motion.div>
 
-        {/* TAB CONTENT */}
-        <AnimatePresence mode="wait">
-          
-          {/* PLANS TAB */}
-          {activeTab === "plans" && (
-            <motion.div
-              key="plans"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-5 sm:space-y-6"
-            >
-              {/* Toggle Monthly/Yearly */}
-              <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
-                <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? "text-[#18181B]" : "text-[#71717A]"}`}>Mensuel</span>
-                <button
-                  onClick={() => setIsYearly(!isYearly)}
-                  className={`relative h-7 w-12 sm:h-8 sm:w-14 rounded-full transition-all duration-300 ${isYearly ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" : "bg-[#E7E7EB]"}`}
+      {/* TABS */}
+      <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-1 sm:p-1.5 overflow-x-auto scrollbar-hide shadow-sm">
+        <div className="flex items-center gap-1 min-w-max">
+          {[
+            { key: "plans", label: "Plans", icon: Zap },
+            { key: "card", label: "Paiement", icon: CreditCard },
+            { key: "history", label: "Historique", icon: FileText },
+          ].map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key as any)}
+                className={`flex items-center gap-1.5 sm:gap-2 rounded-lg sm:rounded-xl px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium transition-all whitespace-nowrap ${
+                  activeTab === tab.key
+                    ? "bg-[#6366F1]/10 text-[#6366F1] shadow-sm"
+                    : "text-[#71717A] hover:text-[#18181B] hover:bg-[#F7F7F8]"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* TAB CONTENT */}
+      <AnimatePresence mode="wait">
+        
+        {/* PLANS TAB */}
+        {activeTab === "plans" && (
+          <motion.div
+            key="plans"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-5 sm:space-y-6"
+          >
+            {/* Toggle Monthly/Yearly */}
+            <div className="flex items-center justify-center gap-2 sm:gap-4 flex-wrap">
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${!isYearly ? "text-[#18181B]" : "text-[#71717A]"}`}>Mensuel</span>
+              <button
+                onClick={() => setIsYearly(!isYearly)}
+                className={`relative h-7 w-12 sm:h-8 sm:w-14 rounded-full transition-all duration-300 ${isYearly ? "bg-gradient-to-r from-[#6366f1] to-[#8b5cf6]" : "bg-[#E7E7EB]"}`}
+              >
+                <motion.div
+                  animate={{ x: isYearly ? (typeof window !== 'undefined' && window.innerWidth >= 640 ? 28 : 20) : 4 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  className="absolute top-1 h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white shadow-lg"
+                />
+              </button>
+              <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? "text-[#18181B]" : "text-[#71717A]"}`}>Annuel</span>
+              {isYearly && (
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="rounded-full bg-emerald-100 border border-emerald-200 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-emerald-700"
                 >
+                  Économisez 20%
+                </motion.span>
+              )}
+            </div>
+
+            {/* Plans Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+              {plans.map((p, index) => {
+                const Icon = p.icon;
+                const isCurrent = currentPlan === p.key;
+                const displayPrice = isYearly && p.yearlyPrice > 0 ? Math.round(p.yearlyPrice / 12) : p.price;
+                const isCustomPlan = p.key === "enterprise";
+                
+                return (
                   <motion.div
-                    animate={{ x: isYearly ? (typeof window !== 'undefined' && window.innerWidth >= 640 ? 28 : 20) : 4 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    className="absolute top-1 h-5 w-5 sm:h-6 sm:w-6 rounded-full bg-white shadow-lg"
-                  />
-                </button>
-                <span className={`text-xs sm:text-sm font-medium transition-colors ${isYearly ? "text-[#18181B]" : "text-[#71717A]"}`}>Annuel</span>
-                {isYearly && (
-                  <motion.span
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="rounded-full bg-emerald-100 border border-emerald-200 px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs font-bold text-emerald-700"
+                    key={p.key}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.08 }}
+                    className={`relative rounded-xl sm:rounded-2xl border ${p.borderColor} ${p.bg} p-4 sm:p-6 flex flex-col transition-all hover:border-[#6366F1]/30 shadow-sm hover:shadow-md`}
                   >
-                    Économisez 20%
-                  </motion.span>
-                )}
-              </div>
+                    {p.popular && (
+                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                        <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 sm:px-4 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider shadow-lg shadow-[#6366f1]/25">
+                          Le plus populaire
+                        </span>
+                      </div>
+                    )}
 
-              {/* Plans Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-                {plans.map((p, index) => {
-                  const Icon = p.icon;
-                  const isCurrent = currentPlan === p.key;
-                  const displayPrice = isYearly && p.yearlyPrice > 0 ? Math.round(p.yearlyPrice / 12) : p.price;
-                  const isCustomPlan = p.key === "enterprise";
-                  
-                  return (
-                    <motion.div
-                      key={p.key}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.08 }}
-                      className={`relative rounded-xl sm:rounded-2xl border ${p.borderColor} ${p.bg} p-4 sm:p-6 flex flex-col transition-all hover:border-[#6366F1]/30 shadow-sm hover:shadow-md`}
-                    >
-                      {p.popular && (
-                        <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                          <span className="rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-3 sm:px-4 py-0.5 sm:py-1 text-[9px] sm:text-[10px] font-bold text-white uppercase tracking-wider shadow-lg shadow-[#6366f1]/25">
-                            Le plus populaire
-                          </span>
-                        </div>
+                    <div className="mb-4 sm:mb-5">
+                      <div className={`inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br ${p.color} mb-3 sm:mb-4 shadow-md`}>
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                      </div>
+                      <h3 className="text-base sm:text-lg font-bold text-[#18181B]">{p.name}</h3>
+                      <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">{p.description}</p>
+                    </div>
+
+                    <div className="mb-4 sm:mb-5">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-2xl sm:text-3xl font-bold text-[#18181B]">{displayPrice} €</span>
+                        <span className="text-xs sm:text-sm text-[#71717A]">/mois</span>
+                      </div>
+                      {isYearly && p.yearlyPrice > 0 && (
+                        <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">Facturé {p.yearlyPrice} €/an</p>
                       )}
+                    </div>
 
-                      <div className="mb-4 sm:mb-5">
-                        <div className={`inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-lg sm:rounded-xl bg-gradient-to-br ${p.color} mb-3 sm:mb-4 shadow-md`}>
-                          <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                        </div>
-                        <h3 className="text-base sm:text-lg font-bold text-[#18181B]">{p.name}</h3>
-                        <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">{p.description}</p>
-                      </div>
+                    <button
+                      onClick={() => !isCurrent && p.key !== "free" && !isCustomPlan && handleUpgrade(p.key)}
+                      disabled={isCurrent || loadingPlan === p.key || p.key === "free" || isCustomPlan}
+                      className={`w-full rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all mb-4 sm:mb-5 flex items-center justify-center gap-1.5 sm:gap-2 active:scale-[0.98] ${
+                        isCurrent
+                          ? "bg-[#F7F7F8] text-[#94A3B8] cursor-default"
+                          : p.key === "free"
+                          ? "bg-[#F7F7F8] text-[#94A3B8] cursor-default"
+                          : isCustomPlan
+                          ? "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 cursor-default border border-amber-300"
+                          : `bg-gradient-to-r ${p.color} text-white hover:shadow-lg hover:scale-[1.02]`
+                      } disabled:opacity-60`}
+                    >
+                      {loadingPlan === p.key ? (
+                        <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
+                      ) : isCurrent ? (
+                        <>
+                          <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                          <span>Plan actuel</span>
+                        </>
+                      ) : p.key === "free" ? (
+                        "Gratuit"
+                      ) : isCustomPlan ? (
+                        <>
+                          <span>Contacter les ventes</span>
+                          <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        </>
+                      ) : (
+                        <>
+                          <span>Mettre à niveau</span>
+                          <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                        </>
+                      )}
+                    </button>
 
-                      <div className="mb-4 sm:mb-5">
-                        <div className="flex items-baseline gap-1">
-                          <span className="text-2xl sm:text-3xl font-bold text-[#18181B]">{displayPrice} €</span>
-                          <span className="text-xs sm:text-sm text-[#71717A]">/mois</span>
-                        </div>
-                        {isYearly && p.yearlyPrice > 0 && (
-                          <p className="text-[10px] sm:text-xs text-[#71717A] mt-1">Facturé {p.yearlyPrice} €/an</p>
-                        )}
-                      </div>
-
-                      <button
-                        onClick={() => !isCurrent && p.key !== "free" && !isCustomPlan && handleUpgrade(p.key)}
-                        disabled={isCurrent || loadingPlan === p.key || p.key === "free" || isCustomPlan}
-                        className={`w-full rounded-lg sm:rounded-xl px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold transition-all mb-4 sm:mb-5 flex items-center justify-center gap-1.5 sm:gap-2 active:scale-[0.98] ${
-                          isCurrent
-                            ? "bg-[#F7F7F8] text-[#94A3B8] cursor-default"
-                            : p.key === "free"
-                            ? "bg-[#F7F7F8] text-[#94A3B8] cursor-default"
-                            : isCustomPlan
-                            ? "bg-gradient-to-r from-amber-100 to-orange-100 text-amber-800 cursor-default border border-amber-300"
-                            : `bg-gradient-to-r ${p.color} text-white hover:shadow-lg hover:scale-[1.02]`
-                        } disabled:opacity-60`}
-                      >
-                        {loadingPlan === p.key ? (
-                          <Loader2 className="h-3.5 w-3.5 sm:h-4 sm:w-4 animate-spin" />
-                        ) : isCurrent ? (
-                          <>
-                            <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                            <span>Plan actuel</span>
-                          </>
-                        ) : p.key === "free" ? (
-                          "Gratuit"
-                        ) : isCustomPlan ? (
-                          <>
-                            <span>Contacter les ventes</span>
-                            <ExternalLink className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </>
-                        ) : (
-                          <>
-                            <span>Mettre à niveau</span>
-                            <ArrowUpRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                          </>
-                        )}
-                      </button>
-
-                      <div className="space-y-2 sm:space-y-3 flex-1">
-                        {p.features.map((feature, i) => (
-                          <div key={i} className="flex items-start gap-2 sm:gap-2.5">
-                            <div className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br ${p.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
-                              <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
-                            </div>
-                            <span className="text-[11px] sm:text-sm text-[#475569]">{feature}</span>
+                    <div className="space-y-2 sm:space-y-3 flex-1">
+                      {p.features.map((feature, i) => (
+                        <div key={i} className="flex items-start gap-2 sm:gap-2.5">
+                          <div className={`h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-gradient-to-br ${p.color} flex items-center justify-center flex-shrink-0 mt-0.5`}>
+                            <Check className="h-2.5 w-2.5 sm:h-3 sm:w-3 text-white" />
                           </div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          )}
-
-          {/* PAYMENT METHOD TAB */}
-          {activeTab === "card" && (
-            <motion.div
-              key="card"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-5 sm:space-y-6"
-            >
-              <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-5 sm:p-8 shadow-sm">
-                <h2 className="text-base sm:text-lg font-bold text-[#18181B] mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                  <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
-                    <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </div>
-                  <span>Méthode de paiement</span>
-                </h2>
-
-                {currentPlan !== "free" && currentPlan !== "enterprise" ? (
-                  <div className="text-center py-8 sm:py-12">
-                    <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-[#F7F7F8] flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                      <CreditCard className="h-7 w-7 sm:h-8 sm:w-8 text-[#94A3B8]" />
+                          <span className="text-[11px] sm:text-sm text-[#475569]">{feature}</span>
+                        </div>
+                      ))}
                     </div>
-                    <h3 className="text-base sm:text-lg font-semibold text-[#18181B] mb-2">Gérez votre carte</h3>
-                    <p className="text-xs sm:text-sm text-[#71717A] mb-5 sm:mb-6 px-4">
-                      Utilisez le portail client pour mettre à jour votre méthode de paiement
-                    </p>
-                    <button
-                      onClick={() => {
-                        setSuccessMessage("Le portail s'ouvrira dans un nouvel onglet (bientôt disponible)");
-                        setTimeout(() => setSuccessMessage(""), 3000);
-                      }}
-                      className="rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:shadow-lg transition-all active:scale-[0.98]"
-                    >
-                      Ouvrir le portail de paiement
-                    </button>
-                  </div>
-                ) : (
-                  <div className="text-center py-8 sm:py-12">
-                    <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-[#F7F7F8] flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                      <CreditCard className="h-7 w-7 sm:h-8 sm:w-8 text-[#94A3B8]" />
-                    </div>
-                    <h3 className="text-base sm:text-lg font-semibold text-[#18181B] mb-2">
-                      {currentPlan === "enterprise" ? "Facturation personnalisée" : "Aucune méthode de paiement"}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[#71717A] mb-5 sm:mb-6 px-4">
-                      {currentPlan === "enterprise" 
-                        ? "Les plans Enterprise bénéficient d'accords de facturation personnalisés." 
-                        : "Ajoutez une méthode de paiement lorsque vous passez à un plan payant."}
-                    </p>
-                    <button
-                      onClick={() => setActiveTab("plans")}
-                      className="rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:shadow-lg transition-all active:scale-[0.98]"
-                    >
-                      Voir les plans
-                    </button>
-                  </div>
-                )}
-              </div>
-            </motion.div>
-          )}
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
 
-          {/* BILLING HISTORY TAB */}
-          {activeTab === "history" && (
-            <motion.div
-              key="history"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="space-y-5 sm:space-y-6"
-            >
-              <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-5 sm:p-8 shadow-sm">
-                <h2 className="text-base sm:text-lg font-bold text-[#18181B] mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
-                  <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                    <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
-                  </div>
-                  <span>Historique de facturation</span>
-                </h2>
-
-                <div className="text-center py-8 sm:py-12">
-                  <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-[#F7F7F8] flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                    <FileText className="h-7 w-7 sm:h-8 sm:w-8 text-[#94A3B8]" />
-                  </div>
-                  <h3 className="text-base sm:text-lg font-semibold text-[#18181B] mb-2">Aucune facture pour le moment</h3>
-                  <p className="text-xs sm:text-sm text-[#71717A] mb-5 sm:mb-6 px-4">
-                    {currentPlan === "enterprise" 
-                      ? "La facturation Enterprise est gérée séparément." 
-                      : "Votre historique de facturation apparaîtra ici après votre premier paiement."}
-                  </p>
-                  <button
-                    onClick={() => setActiveTab("plans")}
-                    className="rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:shadow-lg transition-all active:scale-[0.98]"
-                  >
-                    Voir les plans
-                  </button>
+        {/* PAYMENT METHOD TAB */}
+        {activeTab === "card" && (
+          <motion.div
+            key="card"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-5 sm:p-8 shadow-sm">
+              <h2 className="text-base sm:text-lg font-bold text-[#18181B] mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center">
+                  <CreditCard className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
                 </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+                <span>Méthode de paiement</span>
+              </h2>
 
-        {/* FOOTER SECURITY */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] p-4 sm:p-5"
-        >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
-            <div className="flex items-center gap-2 sm:gap-3">
-              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-[#38bdf8] flex-shrink-0" />
-              <div>
-                <p className="text-xs sm:text-sm font-semibold text-[#18181B]">Sécurisé par Stripe</p>
-                <p className="text-[10px] sm:text-xs text-[#71717A]">Chiffrement SSL 256 bits. Conforme PCI DSS.</p>
+              <div className="text-center py-8 sm:py-12">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-[#F7F7F8] flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <CreditCard className="h-7 w-7 sm:h-8 sm:w-8 text-[#94A3B8]" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-[#18181B] mb-2">
+                  {currentPlan === "enterprise" ? "Facturation personnalisée" : "Gérez votre carte"}
+                </h3>
+                <p className="text-xs sm:text-sm text-[#71717A] mb-5 sm:mb-6 px-4">
+                  {currentPlan === "enterprise" 
+                    ? "Les plans Enterprise bénéficient d'accords de facturation personnalisés." 
+                    : "Utilisez le portail client pour mettre à jour votre méthode de paiement."}
+                </p>
+                <button
+                  onClick={() => {
+                    setSuccessMessage("Le portail s'ouvrira dans un nouvel onglet (bientôt disponible)");
+                    setTimeout(() => setSuccessMessage(""), 3000);
+                  }}
+                  className="rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  Ouvrir le portail de paiement
+                </button>
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-[#94A3B8] flex-wrap">
-              <span>Annulez à tout moment</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Aucun frais caché</span>
-              <span className="hidden sm:inline">•</span>
-              <span>Garantie 30 jours</span>
+          </motion.div>
+        )}
+
+        {/* BILLING HISTORY TAB */}
+        {activeTab === "history" && (
+          <motion.div
+            key="history"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="space-y-5 sm:space-y-6"
+          >
+            <div className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-white p-5 sm:p-8 shadow-sm">
+              <h2 className="text-base sm:text-lg font-bold text-[#18181B] mb-5 sm:mb-6 flex items-center gap-2 sm:gap-3">
+                <div className="h-9 w-9 sm:h-10 sm:w-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-white" />
+                </div>
+                <span>Historique de facturation</span>
+              </h2>
+
+              <div className="text-center py-8 sm:py-12">
+                <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-xl sm:rounded-2xl bg-[#F7F7F8] flex items-center justify-center mx-auto mb-3 sm:mb-4">
+                  <FileText className="h-7 w-7 sm:h-8 sm:w-8 text-[#94A3B8]" />
+                </div>
+                <h3 className="text-base sm:text-lg font-semibold text-[#18181B] mb-2">Aucune facture pour le moment</h3>
+                <p className="text-xs sm:text-sm text-[#71717A] mb-5 sm:mb-6 px-4">
+                  {currentPlan === "enterprise" 
+                    ? "La facturation Enterprise est gérée séparément." 
+                    : "Votre historique de facturation apparaîtra ici après votre premier paiement."}
+                </p>
+                <button
+                  onClick={() => setActiveTab("plans")}
+                  className="rounded-lg sm:rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] px-5 sm:px-6 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-white hover:shadow-lg transition-all active:scale-[0.98]"
+                >
+                  Voir les plans
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* FOOTER SECURITY */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.4 }}
+        className="rounded-xl sm:rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] p-4 sm:p-5"
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-[#38bdf8] flex-shrink-0" />
+            <div>
+              <p className="text-xs sm:text-sm font-semibold text-[#18181B]">Sécurisé par Stripe</p>
+              <p className="text-[10px] sm:text-xs text-[#71717A]">Chiffrement SSL 256 bits. Conforme PCI DSS.</p>
             </div>
           </div>
-        </motion.div>
+          <div className="flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-[#94A3B8] flex-wrap">
+            <span>Annulez à tout moment</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Aucun frais caché</span>
+            <span className="hidden sm:inline">•</span>
+            <span>Garantie 30 jours</span>
+          </div>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// ✅ Composant principal qui enveloppe le contenu dans Suspense pour satisfaire Next.js
+export default function BillingPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[60vh] bg-[#F7F7F8]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#6366f1] border-t-transparent" />
       </div>
-    </PageTransition>
+    }>
+      <PageTransition>
+        <BillingContent />
+      </PageTransition>
+    </Suspense>
   );
 }
