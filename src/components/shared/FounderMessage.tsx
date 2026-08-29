@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, MessageCircle } from "lucide-react";
+import { X } from "lucide-react";
 
 // ✅ Clé localStorage pour mémoriser la fermeture
 const STORAGE_KEY = "founder_message_dismissed";
@@ -94,56 +94,48 @@ export default function FounderMessage() {
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 30, scale: 0.95, transition: { duration: 0.3, ease: "easeIn" } }}
           transition={{ duration: 0.4, ease: "easeOut" }}
-          className="fixed bottom-6 right-6 z-50 w-[calc(100vw-32px)] sm:w-[420px] bg-[#FFFFFF] rounded-2xl shadow-[0_12px_40px_-10px_rgba(24,24,27,0.15)] border border-[#E7E7EB] overflow-hidden"
+          // ✅ TAILLE RÉDUITE : w-[340px] au lieu de 420px, rounded-xl au lieu de 2xl
+          className="fixed bottom-4 right-4 z-50 w-[calc(100vw-24px)] sm:w-[340px] bg-[#FFFFFF] rounded-xl shadow-[0_8px_30px_-10px_rgba(24,24,27,0.15)] border border-[#E7E7EB] overflow-hidden"
           role="dialog"
           aria-labelledby="founder-message-title"
         >
-          {/* Ligne d'accent subtile en haut pour le côté premium */}
-          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6]" />
+          {/* ✅ BANDE VIOLETTE SUPPRIMÉE ICI */}
 
-          {/* Bouton fermer */}
+          {/* Bouton fermer (taille réduite) */}
           <button
             onClick={handleClose}
-            className="absolute top-4 right-4 p-1.5 rounded-full text-[#71717A] hover:text-[#18181B] hover:bg-[#F7F7F8] transition-colors z-10"
+            className="absolute top-2.5 right-2.5 p-1 rounded-md text-[#71717A] hover:text-[#18181B] hover:bg-[#F7F7F8] transition-colors z-10"
             aria-label="Fermer le message"
           >
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           </button>
 
-          {/* En-tête : Icône + Nom + Statut (Pas de photo, pas de logo) */}
-          <div className="p-6 pb-2 flex items-start gap-4 relative">
-            <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#6366F1]/10 flex items-center justify-center mt-1">
-              <MessageCircle className="h-5 w-5 text-[#6366F1]" />
-            </div>
-            
-            <div className="flex-1 min-w-0 pr-6">
-              <h3 id="founder-message-title" className="text-base font-bold text-[#18181B] leading-tight">
-                {message.name}
-              </h3>
-              <p className="text-xs text-[#71717A] font-semibold uppercase tracking-wide mt-0.5">
-                {message.role}
-              </p>
-            </div>
+          {/* En-tête : Nom + Statut uniquement (Icône supprimée) */}
+          <div className="p-4 pb-2 relative">
+            <h3 id="founder-message-title" className="text-sm font-bold text-[#18181B] leading-tight">
+              {message.name}
+            </h3>
+            <p className="text-[10px] text-[#71717A] font-semibold uppercase tracking-wide mt-0.5">
+              {message.role}
+            </p>
           </div>
 
-          {/* Corps du message */}
-          <div className="px-6 pb-4">
-            <p className="text-[15px] font-medium text-[#18181B] leading-[1.6]">
+          {/* Corps du message (police réduite) */}
+          <div className="px-4 pb-3">
+            <p className="text-[13px] font-medium text-[#18181B] leading-[1.5]">
               {message.text}
             </p>
             
-            <p className="mt-4 text-[14px] text-[#71717A] italic">
-              — {message.name.split(" ")[0]}
-            </p>
+            {/* ✅ SIGNATURE ET TIRET SUPPRIMÉS ICI */}
           </div>
 
-          {/* Bouton d'action */}
-          <div className="px-6 pb-6 pt-2">
+          {/* Bouton d'action (taille réduite) */}
+          <div className="px-4 pb-4 pt-1">
             {message.buttonText && message.buttonUrl && (
               <a
                 href={message.buttonUrl}
                 onClick={handleClose}
-                className="block w-full text-center py-3 px-4 rounded-xl bg-[#6366F1] text-white font-semibold text-[14px] shadow-sm shadow-[#6366F1]/20 hover:bg-[#5558e6] hover:shadow-md transition-all duration-200"
+                className="block w-full text-center py-2.5 px-3 rounded-lg bg-[#6366F1] text-white font-semibold text-[13px] shadow-sm shadow-[#6366F1]/20 hover:bg-[#5558e6] hover:shadow-md transition-all duration-200"
               >
                 {message.buttonText}
               </a>

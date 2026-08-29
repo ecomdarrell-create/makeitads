@@ -4,11 +4,8 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { useSession } from "@/hooks/useSession";
-import { getCTAHref } from "@/config/cta.config";
 
 export default function HeroSection() {
-  const { user } = useSession();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -17,14 +14,16 @@ export default function HeroSection() {
   }, []);
 
   const handleHeroCta = () => {
-    window.location.href = getCTAHref("hero", !!user);
+    const element = document.getElementById("pricing");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   if (!mounted) return null;
 
   return (
     <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 pb-12 sm:pb-16 bg-[#FFFFFF]">
-      {/* Fond premium avec halos adaptés au white theme */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/8 rounded-full blur-[150px]" />
         <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
@@ -33,8 +32,6 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
-          
-          {/* TITRE - Épuré, percutant, en 2 temps */}
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -47,7 +44,6 @@ export default function HeroSection() {
             </span>
           </motion.h1>
 
-          {/* SOUS-TITRE - Explication claire et épurée */}
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -57,22 +53,16 @@ export default function HeroSection() {
             MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l'Afrique.
           </motion.p>
 
-          {/* IMAGE HERO - Effet Apple/Stripe premium sur fond blanc */}
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
             className="relative w-full mb-10"
           >
-            {/* Halo lumineux violet subtil derrière */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[70%] bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-transparent blur-[100px] rounded-full -z-10" />
-            
-            {/* Container premium avec ombre studio */}
             <div className="relative">
-              {/* Ombre portée réaliste sous l'image (effet flottant) */}
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-20 bg-[#0F172A]/10 blur-[40px] rounded-full" />
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-12 bg-[#6366f1]/10 blur-[30px] rounded-full" />
-              
               <Image
                 src="/images/couv-X.png"
                 alt="MakeItAds Dashboard - Aperçu de la stratégie générée"
@@ -87,14 +77,12 @@ export default function HeroSection() {
             </div>
           </motion.div>
 
-          {/* BOUTONS D'ACTION */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.24 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl mx-auto sm:mx-0"
           >
-            {/* Bouton principal violet */}
             <button
               onClick={handleHeroCta}
               className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-10px_rgba(99,102,241,0.7)] w-full sm:w-auto"
@@ -103,7 +91,6 @@ export default function HeroSection() {
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
             </button>
 
-            {/* Bouton secondaire */}
             <a
               href="#how-it-works"
               className="flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] w-full sm:w-auto"
@@ -111,7 +98,6 @@ export default function HeroSection() {
               Voir comment ça marche
             </a>
           </motion.div>
-
         </div>
       </div>
     </section>

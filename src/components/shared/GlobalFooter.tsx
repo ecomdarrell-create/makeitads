@@ -7,7 +7,7 @@ export default function GlobalFooter() {
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
           
-          {/* Colonne 1 : Marque & Centre d'aide (Pill blanc) */}
+          {/* Colonne 1 : Marque & Centre d'aide */}
           <div className="lg:col-span-1">
             <Link href="/" className="flex items-center gap-1.5 mb-4">
               <span className="text-xl font-bold tracking-tight text-[#18181B]">
@@ -18,7 +18,7 @@ export default function GlobalFooter() {
               L'intelligence marketing calibrée pour l'Afrique. Arrêtez de deviner, commencez à convertir avec des stratégies publicitaires prêtes à l'emploi.
             </p>
             
-            {/* ✅ Centre d'aide en design pill blanc premium */}
+            {/* Centre d'aide en design pill blanc premium */}
             <Link 
               href="/dashboard/resources/faq" 
               className="inline-flex items-center gap-2 rounded-full bg-[#FFFFFF] border border-[#E7E7EB] px-4 py-2.5 text-sm font-semibold text-[#18181B] hover:border-[#6366F1]/30 hover:shadow-sm transition-all"
@@ -33,7 +33,7 @@ export default function GlobalFooter() {
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#71717A] mb-4">Produit</h4>
             <ul className="space-y-3 text-sm">
               <li><Link href="/#features" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Fonctionnalités</Link></li>
-              <li><Link href="/#pricing" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
+              <li><Link href="/pricing" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
               <li><Link href="/dashboard" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tableau de bord</Link></li>
             </ul>
           </div>
@@ -52,7 +52,7 @@ export default function GlobalFooter() {
             </ul>
           </div>
 
-          {/* Colonne 4 : Entreprise (Cohérent avec le menu mobile) */}
+          {/* Colonne 4 : Entreprise */}
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#71717A] mb-4">Entreprise</h4>
             <ul className="space-y-3 text-sm">
