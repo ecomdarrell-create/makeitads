@@ -374,7 +374,7 @@ export default function LandingPage() {
               Ils ont transformé leur <span className="text-[#6366F1]">marketing</span>
             </h2>
           </motion.div>
-          <PremiumStories variant="middle" />
+             <PremiumStories variant="bottom" />
         </div>
       </section>
 
