@@ -86,14 +86,15 @@ const faqData = [
   { question: "Combien de temps faut-il pour recevoir mon dossier payant ?", answer: "La livraison est quasi instantanée après confirmation du paiement. Vous recevez tout directement sur notre canal Telegram sécurisé." }
 ];
 
+// ✅ NOUVEAUX PRIX OPTIMISÉS : 9 900 FCFA et 24 900 FCFA
 const pricingPlans = [
   { 
     id: "pro", 
     name: "Plan Pro", 
-    price: "4 900", 
-    oldPrice: "9 900",
+    price: "9 900", 
+    oldPrice: "19 900",
     period: "/mois",
-    description: "Idéal pour les entrepreneurs qui lancent leur première campagne et veulent tester le marché.", 
+    description: "Idéal pour les entrepreneurs qui lancent leur première campagne et veulent des résultats concrets.", 
     features: [
       "2 stratégies publicitaires complètes / mois",
       "6 variantes de textes publicitaires / mois",
@@ -106,12 +107,12 @@ const pricingPlans = [
     link: "https://hhowawtq.mychariow.shop/plan-start-up" 
   },
   { 
-    id: "agence", 
-    name: "Plan Agence", 
-    price: "14 900", 
-    oldPrice: "29 900",
+    id: "premium", 
+    name: "Plan Premium", 
+    price: "24 900", 
+    oldPrice: "39 900",
     period: "/mois",
-    description: "Tout le Plan Pro, plus des fonctionnalités avancées pour scaler votre business.", 
+    description: "Tout le Plan Pro, plus des fonctionnalités avancées pour scaler ton business ou gérer plusieurs projets.", 
     features: [
       "✅ Tout le Plan Pro inclus",
       "5 stratégies publicitaires complètes / mois",
@@ -121,7 +122,7 @@ const pricingPlans = [
       "Accès VIP au groupe privé Telegram"
     ], 
     popular: false, 
-    ctaText: "S'abonner au Plan Agence", 
+    ctaText: "S'abonner au Plan Premium", 
     link: "https://hhowawtq.mychariow.shop/plan-business" 
   },
 ];
