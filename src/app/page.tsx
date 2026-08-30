@@ -86,7 +86,6 @@ const faqData = [
   { question: "Combien de temps faut-il pour recevoir mon dossier payant ?", answer: "La livraison est quasi instantanée après confirmation du paiement. Vous recevez tout directement sur notre canal Telegram sécurisé." }
 ];
 
-// ✅ NOUVEAU SYSTÈME DE PRICING MENSUEL AVEC PRIX DE LANCEMENT
 const pricingPlans = [
   { 
     id: "pro", 
@@ -131,7 +130,7 @@ function BeforeAfterSection() {
   return (
     <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
       <div className="max-w-7xl mx-auto">
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="text-center mb-10 md:mb-14 max-w-3xl mx-auto">
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="text-left sm:text-left mb-10 md:mb-14 max-w-3xl">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-[1.15] text-[#18181B] mb-4">
             Voyez ce qui change avec{" "}
             <span className="bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#6366F1] bg-clip-text text-transparent">MakeItAds</span>
@@ -142,9 +141,9 @@ function BeforeAfterSection() {
         <div className="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
           <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6, ease: "easeOut" }} className="relative">
             <div className="sticky top-24">
-              <div className="flex items-center gap-2 mb-4 md:mb-6 justify-center md:justify-start">
+              <div className="flex items-center gap-2 mb-4 md:mb-6 justify-start">
                 <div className="h-2 w-2 rounded-full bg-[#94A3B8]" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-[#71717A]">Sans MakeItAds</span>
+                <span className="text-xs font-medium uppercase tracking-wider text-[#71717A]">Sans MakeItAds</span>
               </div>
               <div className="rounded-2xl bg-[#F7F7F8] border border-[#E7E7EB] p-5 md:p-6 shadow-sm">
                 <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#E7E7EB] mb-4 md:mb-5">
@@ -164,9 +163,9 @@ function BeforeAfterSection() {
           </motion.div>
 
           <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6, ease: "easeOut", delay: 0.15 }} className="relative group">
-            <div className="flex items-center gap-2 mb-4 md:mb-6 justify-center md:justify-start">
+            <div className="flex items-center gap-2 mb-4 md:mb-6 justify-start">
               <div className="h-2 w-2 rounded-full bg-[#6366F1]" />
-              <span className="text-xs font-semibold uppercase tracking-wider text-[#6366F1]">Avec MakeItAds</span>
+              <span className="text-xs font-medium uppercase tracking-wider text-[#6366F1]">Avec MakeItAds</span>
             </div>
             <motion.div whileHover={{ y: -4, transition: { duration: 0.3 } }} className="rounded-2xl bg-white border border-[#6366F1]/10 p-5 md:p-6 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.1)] group-hover:shadow-[0_15px_40px_-10px_rgba(99,102,241,0.15)] transition-shadow duration-500">
               <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-[#F7F7F8] mb-4 md:mb-5">
@@ -174,7 +173,7 @@ function BeforeAfterSection() {
                 <div className="absolute inset-0 bg-gradient-to-t from-[#18181B]/80 via-[#18181B]/20 to-transparent" />
                 <div className="absolute top-3 md:top-4 left-3 md:left-4 flex items-center gap-1.5 bg-white/95 backdrop-blur-sm rounded-full px-2.5 md:px-3 py-1 md:py-1.5 shadow-lg">
                   <Sparkles className="h-3 md:h-3.5 w-3 md:w-3.5 text-[#6366F1]" />
-                  <span className="text-[10px] md:text-xs font-bold text-[#18181B]">Score : 94/100</span>
+                  <span className="text-[10px] md:text-xs font-medium text-[#18181B]">Score : 94/100</span>
                 </div>
               </div>
 
@@ -183,8 +182,8 @@ function BeforeAfterSection() {
                   <motion.div key={i} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1 }} className="flex items-center gap-2.5 md:gap-3 p-2.5 md:p-3 rounded-lg bg-[#F7F7F8] group-hover:bg-[#EEF2FF] transition-colors duration-200">
                     <div className={`flex-shrink-0 ${item.color}`}><item.icon className="h-3.5 md:h-4 w-3.5 md:w-4" /></div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-[9px] md:text-[10px] uppercase tracking-wider text-[#71717A] font-semibold">{item.label}</p>
-                      <p className="text-[11px] md:text-xs font-semibold text-[#18181B] truncate">{item.value}</p>
+                      <p className="text-[9px] md:text-[10px] uppercase tracking-wider text-[#71717A] font-medium">{item.label}</p>
+                      <p className="text-[11px] md:text-xs font-medium text-[#18181B] truncate">{item.value}</p>
                     </div>
                   </motion.div>
                 ))}
@@ -193,10 +192,10 @@ function BeforeAfterSection() {
               <div className="pt-4 border-t border-[#E7E7EB] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-3.5 md:h-4 w-3.5 md:w-4 text-emerald-500" />
-                  <p className="text-[11px] md:text-xs font-semibold text-[#18181B]">Prêt à lancer</p>
+                  <p className="text-[11px] md:text-xs font-medium text-[#18181B]">Prêt à lancer</p>
                 </div>
                 <Link href="#pricing" className="flex items-center gap-1 text-[#6366F1] group/link">
-                  <span className="text-[11px] md:text-xs font-bold">Voir les offres</span>
+                  <span className="text-[11px] md:text-xs font-medium">Voir les offres</span>
                   <ArrowRight className="h-3 md:h-3.5 w-3 md:w-3.5 group-hover/link:translate-x-1 transition-transform" />
                 </Link>
               </div>
@@ -222,19 +221,19 @@ function PricingCard({ plan }: { plan: any }) {
       }`}
     >
       {plan.popular && (
-        <div className="absolute -top-2.5 md:-top-3 left-1/2 -translate-x-1/2 rounded-full px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider shadow-md bg-gradient-to-r from-[#6366F1] to-[#8B5CF6]">
+        <div className="absolute -top-2.5 md:-top-3 left-1/2 -translate-x-1/2 rounded-full px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] font-medium text-white uppercase tracking-wider shadow-md bg-gradient-to-r from-[#6366F1] to-[#8B5CF6]">
           Le plus populaire
         </div>
       )}
 
       <div className="mb-4 md:mb-5">
-        <h3 className="text-base md:text-lg font-bold text-[#18181B] mb-1">{plan.name}</h3>
+        <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-1">{plan.name}</h3>
         <p className="text-xs text-[#71717A] leading-relaxed">{plan.description}</p>
       </div>
 
       <div className="mb-5 md:mb-6">
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-2xl md:text-3xl font-bold text-[#18181B]">{plan.price}</span>
+          <span className="text-2xl md:text-3xl font-medium text-[#18181B]">{plan.price}</span>
           <span className="text-xs md:text-sm text-[#71717A]">FCFA{plan.period}</span>
           <span className="text-xs md:text-sm text-[#94A3B8] line-through">{plan.oldPrice} FCFA</span>
         </div>
@@ -256,7 +255,7 @@ function PricingCard({ plan }: { plan: any }) {
         href={plan.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block w-full rounded-lg py-2.5 md:py-3 text-center text-xs md:text-sm font-semibold transition-all duration-200 border ${
+        className={`block w-full rounded-lg py-2.5 md:py-3 text-center text-xs md:text-sm font-medium transition-all duration-200 border ${
           plan.popular
             ? "bg-[#6366F1] text-white border-[#6366F1] hover:bg-[#5558e6] shadow-sm shadow-[#6366F1]/20"
             : "bg-[#FFFFFF] text-[#18181B] border-[#E7E7EB] hover:bg-[#F7F7F8] hover:border-[#6366F1]/30"
@@ -299,8 +298,8 @@ export default function LandingPage() {
       <PremiumStories variant="top" />
 
       <section className="relative z-10 py-6 md:py-8 border-y border-[#E7E7EB] bg-[#F7F7F8]">
-        <div className="max-w-5xl mx-auto px-4 text-center">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-semibold mb-4">Compatible avec vos plateformes</p>
+        <div className="max-w-5xl mx-auto px-4 text-left sm:text-left">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-medium mb-4">Compatible avec vos plateformes</p>
           <div className="relative overflow-hidden">
             <div className="flex animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
               {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => {
@@ -319,11 +318,11 @@ export default function LandingPage() {
 
       <section id="how-it-works" className="relative z-10 bg-[#FFFFFF] py-12 md:py-20 px-4 sm:px-6 overflow-hidden">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Un processus <span className="text-[#6366F1]">simple</span> et <span className="text-[#6366F1]">humain</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#71717A] max-w-xl mx-auto">De votre idée à votre campagne lancée, sans tableau de bord complexe.</p>
+            <p className="text-sm sm:text-base text-[#71717A] max-w-xl">De votre idée à votre campagne lancée, sans tableau de bord complexe.</p>
           </motion.div>
 
           <div className="space-y-12 md:space-y-20">
@@ -331,18 +330,18 @@ export default function LandingPage() {
               const isReversed = index % 2 !== 0;
               return (
                 <div key={step.number} className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${isReversed ? "md:[&>*:first-child]:order-2" : ""}`}>
-                  <motion.div initial={{ opacity: 0, x: isReversed ? 20 : -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: "easeOut" }} className={`text-center md:text-${isReversed ? 'right' : 'left'}`}>
+                  <motion.div initial={{ opacity: 0, x: isReversed ? 20 : -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: "easeOut" }} className={`text-left`}>
                     <div className="relative inline-block">
-                      <span className="text-5xl md:text-7xl font-black text-[#6366f1]/5 absolute -top-6 left-1/2 -translate-x-1/2 md:left-0 md:translate-x-0 select-none leading-none">{step.number}</span>
+                      <span className="text-5xl md:text-7xl font-black text-[#6366f1]/5 absolute -top-6 left-0 select-none leading-none">{step.number}</span>
                       <div className="relative z-10 pt-8 md:pt-10">
                         <motion.h3 initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-xl md:text-2xl font-bold text-[#18181B] mb-3 leading-[1.2]">{step.title}</motion.h3>
-                        <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.35 }} className="text-sm md:text-base text-[#71717A] leading-relaxed max-w-md mx-auto md:mx-0">{step.description}</motion.p>
+                        <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.35 }} className="text-sm md:text-base text-[#71717A] leading-relaxed max-w-md">{step.description}</motion.p>
                         
                         {index === 0 && (
                           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-6">
                             <button 
                               onClick={scrollToPricing}
-                              className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#333333] transition-all"
+                              className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#333333] transition-all"
                             >
                               Voir les offres <ArrowRight className="h-4 w-4" />
                             </button>
@@ -366,10 +365,9 @@ export default function LandingPage() {
 
       <BeforeAfterSection />
 
-      {/* ✅ AVIS CLIENTS (CARROUSEL HORIZONTAL STYLE STORY) */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white overflow-hidden">
         <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Ils ont transformé leur <span className="text-[#6366F1]">marketing</span>
             </h2>
@@ -378,24 +376,23 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ PRICING (Mise à jour : Mensuel, prix réduits, icônes du bas supprimées) */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
         <div className="max-w-5xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Investissez dans votre <span className="text-[#6366F1]">croissance</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#71717A] max-w-xl mx-auto">Des formules d'abonnement flexibles, conçues pour tester et scaler votre marché.</p>
+            <p className="text-sm sm:text-base text-[#71717A] max-w-xl">Des formules d'abonnement flexibles, conçues pour tester et scaler votre marché.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl">
             {pricingPlans.map((plan) => (
               <PricingCard key={plan.id} plan={plan} />
             ))}
           </div>
           
-          <div className="text-center mt-8 md:mt-10">
-            <p className="text-xs text-[#71717A] flex items-center justify-center gap-2">
+          <div className="text-left sm:text-left mt-8 md:mt-10">
+            <p className="text-xs text-[#71717A] flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-emerald-500" />
               Paiement 100% sécurisé via Chariow (Mobile Money & Carte)
             </p>
@@ -403,10 +400,9 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ FAQ ÉTENDUE */}
       <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
         <div className="max-w-3xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-12">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Questions <span className="text-[#6366F1]">fréquentes</span>
             </h2>
@@ -425,7 +421,7 @@ export default function LandingPage() {
                   onClick={() => setOpenFaq(openFaq === index ? null : index)} 
                   className="w-full flex items-center justify-between p-3 sm:p-4 md:p-5 text-left hover:bg-[#F0F0F2] transition-colors"
                 >
-                  <span className="text-sm sm:text-base font-semibold text-[#18181B] pr-4 leading-snug">{faq.question}</span>
+                  <span className="text-sm sm:text-base font-medium text-[#18181B] pr-4 leading-snug">{faq.question}</span>
                   <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 text-[#71717A] transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
                 </button>
                 <AnimatePresence>
@@ -443,14 +439,13 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION BLOGGING / RESSOURCES (Déplacée à la fin, avant le CTA final) */}
       <section id="resources" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
         <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-10 md:mb-14">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Nos <span className="text-[#6366F1]">Ressources</span> gratuites
             </h2>
-            <p className="text-sm sm:text-base text-[#71717A] max-w-xl mx-auto">Des guides pratiques pour maximiser vos campagnes, même avant de passer à l'action.</p>
+            <p className="text-sm sm:text-base text-[#71717A] max-w-xl">Des guides pratiques pour maximiser vos campagnes, même avant de passer à l'action.</p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
@@ -470,11 +465,11 @@ export default function LandingPage() {
               >
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-3.5 h-3.5 text-[#6366F1]" />
-                  <span className="text-[10px] uppercase tracking-wider text-[#71717A] font-semibold">{res.date}</span>
+                  <span className="text-[10px] uppercase tracking-wider text-[#71717A] font-medium">{res.date}</span>
                 </div>
-                <h3 className="text-base md:text-lg font-bold text-[#18181B] mb-2 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
+                <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-2 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
                 <p className="text-sm text-[#71717A] leading-relaxed mb-4">{res.description}</p>
-                <div className="inline-flex items-center gap-1 text-sm font-semibold text-[#6366F1] group-hover:gap-2 transition-all">
+                <div className="inline-flex items-center gap-1 text-sm font-medium text-[#6366F1] group-hover:gap-2 transition-all">
                   Lire l'article <ArrowRight className="w-4 h-4" />
                 </div>
               </motion.a>
@@ -483,27 +478,26 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ CTA FINAL */}
       <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF] border-t border-[#E7E7EB]">
-        <div className="max-w-3xl mx-auto text-center">
+        <div className="max-w-3xl mx-auto text-left sm:text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-[1.15] mb-6 text-[#18181B]">
               Prêt à préparer votre <span className="text-[#6366F1]">prochaine campagne ?</span>
             </h2>
-            <p className="text-sm sm:text-base md:text-lg text-[#71717A] mb-8 max-w-xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg text-[#71717A] mb-8 max-w-xl leading-relaxed">
               Votre stratégie commence ici. Obtenez une intelligence marché, une analyse concurrentielle et un plan d'exécution complet en un seul endroit.
             </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
               <button 
                 onClick={scrollToPricing}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-semibold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
               >
                 Voir les offres et débloquer l'accès <ArrowRight className="h-4 w-4" />
               </button>
               <a 
                 href="#faq"
                 onClick={scrollToFAQ}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#F7F7F8] border border-[#E7E7EB] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-semibold text-[#18181B] hover:bg-[#E7E7EB] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#F7F7F8] border border-[#E7E7EB] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-[#18181B] hover:bg-[#E7E7EB] transition-all"
               >
                 Voir les questions fréquentes
               </a>
