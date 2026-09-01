@@ -42,7 +42,6 @@ export default function GlobalFooter() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#71717A] mb-4">Ressources</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/resources" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Guides & Articles</Link></li>
               <li><Link href="/#faq" className="text-[#18181B] hover:text-[#6366F1] transition-colors">FAQ</Link></li>
               <li>
                 <a href="https://t.me/MakeItAds_Pro" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[#18181B] hover:text-[#6366F1] transition-colors">

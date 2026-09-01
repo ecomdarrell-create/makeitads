@@ -231,7 +231,7 @@ const pricingPlans = [
     period: "/mois",
     description: "Tout le Plan Pro, plus des fonctionnalités avancées pour scaler ton business ou gérer plusieurs projets.", 
     features: [
-      "✅ Tout le Plan Pro inclus",
+      "Tout le Plan Pro inclus",
       "5 stratégies publicitaires complètes / mois",
       "15 variantes de textes publicitaires / mois",
       "Analyse concurrentielle avancée (2 concurrents)",
