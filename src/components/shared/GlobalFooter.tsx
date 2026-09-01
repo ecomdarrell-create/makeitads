@@ -20,7 +20,7 @@ export default function GlobalFooter() {
             
             {/* Centre d'aide en design pill blanc premium */}
             <Link 
-              href="/dashboard/resources/faq" 
+              href="/help" 
               className="inline-flex items-center gap-2 rounded-full bg-[#FFFFFF] border border-[#E7E7EB] px-4 py-2.5 text-sm font-semibold text-[#18181B] hover:border-[#6366F1]/30 hover:shadow-sm transition-all"
             >
               <HelpCircle className="h-4 w-4 text-[#6366F1]" />
@@ -32,8 +32,8 @@ export default function GlobalFooter() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#71717A] mb-4">Produit</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/#features" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Fonctionnalités</Link></li>
-              <li><Link href="/pricing" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
+              <li><Link href="/#how-it-works" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Fonctionnement</Link></li>
+              <li><Link href="/#pricing" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
               <li><Link href="/dashboard" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Tableau de bord</Link></li>
             </ul>
           </div>
@@ -42,8 +42,8 @@ export default function GlobalFooter() {
           <div>
             <h4 className="text-xs font-bold uppercase tracking-wider text-[#71717A] mb-4">Ressources</h4>
             <ul className="space-y-3 text-sm">
-              <li><Link href="/dashboard/resources" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Guides & Articles</Link></li>
-              <li><Link href="/#success-stories" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Témoignages</Link></li>
+              <li><Link href="/resources" className="text-[#18181B] hover:text-[#6366F1] transition-colors">Guides & Articles</Link></li>
+              <li><Link href="/#faq" className="text-[#18181B] hover:text-[#6366F1] transition-colors">FAQ</Link></li>
               <li>
                 <a href="https://t.me/MakeItAds_Pro" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-[#18181B] hover:text-[#6366F1] transition-colors">
                   Canal Telegram <ExternalLink className="h-3 w-3" />

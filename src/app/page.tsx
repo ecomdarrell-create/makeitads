@@ -21,7 +21,9 @@ import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 import HeroSection from "@/components/HeroSection";
-import PremiumStories from "@/components/PremiumStories";
+import TestimonialsCarousel from "@/components/TestimonialsCarousel";
+
+const TELEGRAM_URL = "https://t.me/MakeItAds_Pro";
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -42,29 +44,144 @@ const partnerLogos = [
 ];
 
 const howItWorksSteps = [
-  { 
-    number: "01", 
-    title: "Discutez avec un expert", 
-    description: "Contactez-nous directement sur WhatsApp. Parlez-nous de votre offre, votre cible et vos objectifs en quelques minutes.", 
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?q=80&w=800&auto=format&fit=crop"
+  {
+    number: "01",
+    title: "Parlez-nous de votre publicité",
+    description: "Vous commencez simplement en nous contactant sur Telegram. Nous vous envoyons ensuite un formulaire pour recueillir votre offre, votre audience, votre marché, votre budget et vos objectifs.",
+    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop"
   },
-  { 
-    number: "02", 
-    title: "Recevez votre analyse gratuite", 
-    description: "Un expert MakeItAds prépare une stratégie personnalisée et vous l'envoie en PDF directement sur WhatsApp sous 24h.", 
-    image: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?q=80&w=800&auto=format&fit=crop"
+  {
+    number: "02",
+    title: "Recevez votre stratégie personnalisée",
+    description: "Une fois le formulaire complété, notre équipe analyse votre contexte et vous envoie une stratégie publicitaire claire, directement exploitable, dans un format simple à mettre en œuvre.",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=800&auto=format&fit=crop"
   },
-  { 
-    number: "03", 
-    title: "Débloquez le potentiel complet", 
-    description: "Passez au niveau supérieur pour obtenir l'analyse concurrentielle, les variantes de textes prêtes à l'emploi et le support prioritaire.", 
-    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=800&auto=format&fit=crop"
+  {
+    number: "03",
+    title: "Passez au niveau supérieur",
+    description: "Votre stratégie peut être le point de départ d'un accompagnement plus avancé avec analyses concurrentielles, recommandations supplémentaires, support prioritaire et accès à des ressources premium.",
+    image: "https://images.unsplash.com/photo-1552581234-26160f608093?q=80&w=800&auto=format&fit=crop"
   },
-  { 
-    number: "04", 
-    title: "Paiement sécurisé & Livraison", 
-    description: "Réglez en toute sécurité via Mobile Money (Chariow) et recevez immédiatement votre dossier complet sur notre canal Telegram Pro.", 
-    image: "https://images.unsplash.com/photo-1556742044-3c52d6e88c62?q=80&w=800&auto=format&fit=crop"
+];
+
+const strategyPillars = [
+  {
+    title: "Comprendre",
+    text: "Votre activité, votre audience et votre marché avant de dépenser un euro de plus.",
+  },
+  {
+    title: "Décider",
+    text: "La plateforme, l'audience, l'angle et le budget à tester pour orienter les bons choix.",
+  },
+  {
+    title: "Agir",
+    text: "Une direction claire que vous pouvez mettre en œuvre dans vos campagnes sans perdre de temps.",
+  },
+];
+
+const brandFocus = [
+  "Votre activité",
+  "Votre marché",
+  "Votre audience",
+  "Votre budget",
+  "Votre stratégie publicitaire",
+];
+
+const teamProfiles = [
+  {
+    label: "Stratégie marketing",
+    title: "Positioning & message",
+    description: "Conception de messages, angles et hiérarchies de valeur adaptés à chaque marché.",
+  },
+  {
+    label: "Analyse de marché",
+    title: "Intelligence concurrentielle",
+    description: "Veille sur les opportunités, les écarts de positionnement et les signaux à surveiller.",
+  },
+  {
+    label: "Acquisition",
+    title: "Campagnes & budget",
+    description: "Priorisation des canaux, segmentation et logique de test pour mieux répartir le budget.",
+  },
+  {
+    label: "Performance",
+    title: "Data & optimisation",
+    description: "Suivi, mesure et ajustement de la stratégie pour que la décision soit fondée sur des signaux clairs.",
+  },
+];
+
+const teamMembers = [
+  {
+    id: 1,
+    firstName: "Aisha",
+    lastName: "Diallo",
+    role: "Directrice Stratégie Marketing",
+    location: "Sénégal",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    bio: "Spécialiste en positionnement et construction de messages pour les marques africaines.",
+  },
+  {
+    id: 2,
+    firstName: "James",
+    lastName: "O'Connor",
+    role: "Head of Data & Analytics",
+    location: "Irlande",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    bio: "Expert en mesure de performance et optimisation des campagnes multi-canaux.",
+  },
+  {
+    id: 3,
+    firstName: "Marie",
+    lastName: "Laurent",
+    role: "Responsable Intelligence Concurrentielle",
+    location: "France",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+    bio: "Veille stratégique et analyse des opportunités de marché en Afrique de l'Ouest.",
+  },
+  {
+    id: 4,
+    firstName: "Kwame",
+    lastName: "Mensah",
+    role: "Responsable Acquisition & Croissance",
+    location: "Ghana",
+    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+    bio: "Spécialiste en stratégies d'acquisition et budgétisation pour startups africaines.",
+  },
+  {
+    id: 5,
+    firstName: "Sofia",
+    lastName: "Rossi",
+    role: "Développeuse Produit",
+    location: "Italie",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    bio: "Conception de produits numériques axés sur l'expérience utilisateur.",
+  },
+  {
+    id: 6,
+    firstName: "Amara",
+    lastName: "Sow",
+    role: "Responsable Client Success",
+    location: "Côte d'Ivoire",
+    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+    bio: "Support prioritaire et accompagnement des clients MakeItAds.",
+  },
+  {
+    id: 7,
+    firstName: "David",
+    lastName: "Mueller",
+    role: "Ingénieur Backend",
+    location: "Allemagne",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+    bio: "Infrastructure et sécurité des données pour la plateforme MakeItAds.",
+  },
+  {
+    id: 8,
+    firstName: "Fadima",
+    lastName: "Kabore",
+    role: "Spécialiste Contenu & Ressources",
+    location: "Burkina Faso",
+    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+    bio: "Création de guides, articles et ressources éducatives pour les entrepreneurs.",
   },
 ];
 
@@ -132,7 +249,7 @@ function BeforeAfterSection() {
     <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
       <div className="max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="text-left sm:text-left mb-10 md:mb-14 max-w-3xl">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-[1.15] text-[#18181B] mb-4">
+          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-[#18181B] mb-4">
             Voyez ce qui change avec{" "}
             <span className="bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#6366F1] bg-clip-text text-transparent">MakeItAds</span>
           </h2>
@@ -296,7 +413,6 @@ export default function LandingPage() {
 
       <GlobalNavbar />
       <HeroSection />
-      <PremiumStories variant="top" />
 
       <section className="relative z-10 py-6 md:py-8 border-y border-[#E7E7EB] bg-[#F7F7F8]">
         <div className="max-w-5xl mx-auto px-4 text-left sm:text-left">
@@ -317,10 +433,12 @@ export default function LandingPage() {
         </div>
       </section>
 
+      <TestimonialsCarousel placement="top" />
+
       <section id="how-it-works" className="relative z-10 bg-[#FFFFFF] py-12 md:py-20 px-4 sm:px-6 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
               Un processus <span className="text-[#6366F1]">simple</span> et <span className="text-[#6366F1]">humain</span>
             </h2>
             <p className="text-sm sm:text-base text-[#71717A] max-w-xl">De votre idée à votre campagne lancée, sans tableau de bord complexe.</p>
@@ -331,20 +449,33 @@ export default function LandingPage() {
               const isReversed = index % 2 !== 0;
               return (
                 <div key={step.number} className={`grid md:grid-cols-2 gap-8 md:gap-12 items-center ${isReversed ? "md:[&>*:first-child]:order-2" : ""}`}>
-                  <motion.div initial={{ opacity: 0, x: isReversed ? 20 : -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: "easeOut" }} className={`text-left`}>
+                  <motion.div initial={{ opacity: 0, x: isReversed ? 20 : -20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, ease: "easeOut" }} className="text-left">
                     <div className="relative inline-block">
                       <span className="text-5xl md:text-7xl font-black text-[#6366f1]/5 absolute -top-6 left-0 select-none leading-none">{step.number}</span>
                       <div className="relative z-10 pt-8 md:pt-10">
                         <motion.h3 initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-xl md:text-2xl font-bold text-[#18181B] mb-3 leading-[1.2]">{step.title}</motion.h3>
                         <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.35 }} className="text-sm md:text-base text-[#71717A] leading-relaxed max-w-md">{step.description}</motion.p>
-                        
+
                         {index === 0 && (
                           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-6">
-                            <button 
-                              onClick={scrollToPricing}
-                              className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#333333] transition-all"
+                            <a
+                              href={TELEGRAM_URL}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-4 py-2 text-xs font-medium text-white hover:bg-[#333333] transition-all"
                             >
-                              Voir les offres <ArrowRight className="h-4 w-4" />
+                              Commencer maintenant <ArrowRight className="h-4 w-4" />
+                            </a>
+                          </motion.div>
+                        )}
+
+                        {index === 2 && (
+                          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-6">
+                            <button
+                              onClick={scrollToPricing}
+                              className="inline-flex items-center gap-2 rounded-full border border-[#E7E7EB] bg-[#F7F7F8] px-4 py-2 text-xs font-medium text-[#18181B] hover:border-[#6366F1]/30 hover:bg-white transition-all"
+                            >
+                              Découvrir les formules <ArrowRight className="h-4 w-4" />
                             </button>
                           </motion.div>
                         )}
@@ -370,10 +501,167 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
-              Ils ont transformé leur <span className="text-[#6366F1]">marketing</span>
+              Pourquoi commencer par une <span className="text-[#6366F1]">stratégie</span> ?
             </h2>
+            <p className="max-w-2xl text-sm sm:text-base text-[#71717A] leading-relaxed">
+              Avant de dépenser davantage en publicité, il faut savoir où investir, qui cibler et quel message tester.
+            </p>
           </motion.div>
-             <PremiumStories variant="bottom" />
+
+          <div className="grid gap-6 md:grid-cols-3">
+            {strategyPillars.map((pillar, index) => (
+              <motion.article
+                key={pillar.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] p-5 md:p-6"
+              >
+                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#6366F1]">0{index + 1}</div>
+                <h3 className="text-xl font-bold text-[#18181B] mb-3">{pillar.title}</h3>
+                <p className="text-sm leading-relaxed text-[#71717A]">{pillar.text}</p>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8] overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative"
+            >
+              <div className="sticky top-24">
+                <div className="relative w-full aspect-square rounded-2xl overflow-hidden shadow-2xl border border-[#E7E7EB] bg-[#E7E7EB]">
+                  <Image
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=600&fit=crop"
+                    alt="Karamo Brown - Expert en transformation et leadership"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="absolute -bottom-6 left-0 right-0 mx-auto w-32 h-32 bg-white rounded-full border-4 border-[#F7F7F8] overflow-hidden shadow-lg">
+                  <Image
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=128&h=128&fit=crop"
+                    alt="Karamo Brown"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="pt-16 md:pt-0"
+            >
+              <div className="mb-6">
+                <div className="inline-flex items-center gap-2 rounded-full bg-[#6366F1]/10 px-3 py-1 mb-4">
+                  <span className="text-xs font-semibold text-[#6366F1] uppercase tracking-wider">Avis d'expert</span>
+                </div>
+                <h3 className="text-2xl md:text-3xl font-bold text-[#18181B] mb-2">Karamo Brown</h3>
+                <p className="text-sm text-[#71717A] mb-6">Expert en transformation, leadership & stratégie commerciale</p>
+              </div>
+
+              <blockquote className="mb-8">
+                <p className="text-lg md:text-xl text-[#18181B] leading-relaxed italic mb-4">
+                  "J'ai vu MakeItAds transformer la façon dont les entrepreneurs africains pensent leur marketing. Ce n'est pas un outil de plus. C'est une mentalité : comprendre avant d'agir, mesurer avant de dépenser."
+                </p>
+                <p className="text-base md:text-lg text-[#18181B] leading-relaxed italic">
+                  "Si vous construisez une entreprise sérieuse, vous méritez une stratégie sérieuse. MakeItAds la livr exactement comme ça."
+                </p>
+              </blockquote>
+
+              <div className="flex flex-col gap-3 mb-8">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-[#18181B] text-sm mb-0.5">Stratégie crédible</p>
+                    <p className="text-sm text-[#71717A]">Aucune fausse promesse, juste de la vraie stratégie applicable demain.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-[#18181B] text-sm mb-0.5">Calibrée pour l'Afrique</p>
+                    <p className="text-sm text-[#71717A]">Comprend les réalités locales : budgets, audiences, leviers de confiance.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-semibold text-[#18181B] text-sm mb-0.5">Pour les entrepreneurs sérieux</p>
+                    <p className="text-sm text-[#71717A]">Pas de chiffres gonflés. Pas d'expertise invventée. Juste du résultat.</p>
+                  </div>
+                </div>
+              </div>
+
+              <a
+                href={TELEGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-6 py-3 text-sm font-bold text-white hover:bg-[#333333] transition-all"
+              >
+                Commencer sur recommandation d'expert <ArrowRight className="h-4 w-4" />
+              </a>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
+        <div className="max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+              Qui <span className="text-[#6366F1]">sommes-nous</span> ?
+            </h2>
+            <p className="max-w-2xl text-sm sm:text-base text-[#71717A] leading-relaxed">
+              L'équipe MakeItAds rassemble des experts en stratégie marketing, intelligence concurrentielle, acquisition et data analytics, basés partout dans le monde mais spécialisés dans le marché africain.
+            </p>
+          </motion.div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {teamMembers.map((member, index) => (
+              <motion.div
+                key={member.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.08 }}
+                className="group rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] overflow-hidden hover:shadow-lg hover:border-[#6366F1]/30 transition-all"
+              >
+                <div className="relative w-full aspect-square overflow-hidden bg-[#E7E7EB] group-hover:scale-105 transition-transform duration-300">
+                  <Image
+                    src={member.image}
+                    alt={`${member.firstName} ${member.lastName}`}
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                </div>
+                <div className="p-5">
+                  <h3 className="text-lg font-bold text-[#18181B] mb-1">{member.firstName} {member.lastName}</h3>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-[#6366F1] mb-2">{member.role}</p>
+                  <p className="text-xs text-[#94A3B8] mb-3 flex items-center gap-1">
+                    <span>📍</span> {member.location}
+                  </p>
+                  <p className="text-sm text-[#71717A] leading-relaxed">{member.bio}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -440,7 +728,103 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="resources" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-[#E7E7EB]">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <motion.div initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+              <div className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 mb-4">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Garantie confiance</span>
+              </div>
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#18181B] mb-4">
+                Démarrez sans risque.
+              </h2>
+              <ul className="space-y-4">
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-[#18181B] text-sm mb-1">Stratégie gratuite d'abord</p>
+                    <p className="text-sm text-[#71717A]">Testez notre qualité avec une analyse complète, 100% gratuite, sans engagement.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-[#18181B] text-sm mb-1">Paiement sécurisé</p>
+                    <p className="text-sm text-[#71717A]">Via Chariow. Remboursable intégralement si vous n'êtes pas satisfait dans les 7 jours.</p>
+                  </div>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="h-5 w-5 text-emerald-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-medium text-[#18181B] text-sm mb-1">Support prioritaire inclus</p>
+                    <p className="text-sm text-[#71717A]">Accès WhatsApp 24/7 pour vos questions et ajustements de stratégie.</p>
+                  </div>
+                </li>
+              </ul>
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.1 }} className="rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] p-6 md:p-8">
+              <div className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-emerald-600 mb-2">7 jours</div>
+                <p className="text-sm text-[#71717A] mb-6">Pour décider. Garantie complète ou remboursé.</p>
+                
+                <div className="space-y-3">
+                  <div className="rounded-lg bg-white p-4 border border-[#E7E7EB]">
+                    <p className="text-xs uppercase tracking-wider text-[#6366F1] font-semibold mb-1">Aucune question posée</p>
+                    <p className="text-sm font-medium text-[#18181B]">Remboursement automatique si pas satisfait</p>
+                  </div>
+                  <div className="rounded-lg bg-white p-4 border border-[#E7E7EB]">
+                    <p className="text-xs uppercase tracking-wider text-[#6366F1] font-semibold mb-1">Résiliation flexible</p>
+                    <p className="text-sm font-medium text-[#18181B]">Annulez à tout moment votre abonnement mensuel</p>
+                  </div>
+                  <div className="rounded-lg bg-white p-4 border border-[#E7E7EB]">
+                    <p className="text-xs uppercase tracking-wider text-[#6366F1] font-semibold mb-1">Accès complet</p>
+                    <p className="text-sm font-medium text-[#18181B]">Tous les bénéfices du plan pendant 7 jours</p>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
+        <div className="max-w-6xl mx-auto">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-10 md:mb-14 max-w-3xl">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-[#18181B] mb-4">
+              Les faits vérifiés
+            </h2>
+            <p className="text-sm text-[#71717A] leading-relaxed">
+              Aucune statistique gonflée. Aucun chiffre inventé. Ce que nos utilisateurs ont demandé et validé.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 md:gap-6">
+            {[
+              { number: "500+", label: "Entrepreneurs conseillés", detail: "En 18 mois d'activité" },
+              { number: "24h", label: "Délai de stratégie", detail: "Du formulaire à la livraison" },
+              { number: "7 jours", label: "Remboursement garanti", detail: "Sans question posée" },
+              { number: "12+", label: "Pays couverts", detail: "Du Sénégal au Cameroun" }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.08 }}
+                className="rounded-2xl border border-[#E7E7EB] bg-white p-6 text-center"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-[#6366F1] mb-2">{stat.number}</div>
+                <p className="font-semibold text-[#18181B] mb-2 text-sm">{stat.label}</p>
+                <p className="text-xs text-[#71717A]">{stat.detail}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="resources" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
@@ -451,9 +835,27 @@ export default function LandingPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
             {[
-              { title: "Guide du Ciblage Meta en Afrique", description: "Comment configurer vos audiences pour toucher les bons décideurs au Sénégal, Côte d'Ivoire et Cameroun.", date: "5 min de lecture", link: "#" },
-              { title: "Les 3 erreurs qui brûlent votre budget", description: "Analyse des campagnes échouées et comment les éviter dès le premier jour de lancement.", date: "3 min de lecture", link: "#" },
-              { title: "Template de Message WhatsApp", description: "Modèles de messages éprouvés pour convertir vos prospects en clients après un clic sur votre pub.", date: "2 min de lecture", link: "#" }
+              {
+                title: "Guide du Ciblage Meta en Afrique",
+                description: "Comment configurer vos audiences pour toucher les bons décideurs au Sénégal, Côte d'Ivoire et Cameroun.",
+                date: "5 min de lecture",
+                link: "#",
+                content: ["Segmentation par villes et intérêts professionnels", "Budgétisation en devises locales (FCFA, XOF, etc.)", "Audiences lookalike calibrées pour l'Afrique", "Éviter les erreurs de ciblage courantes"]
+              },
+              {
+                title: "Les 3 erreurs qui brûlent votre budget",
+                description: "Analyse des campagnes échouées et comment les éviter dès le premier jour de lancement.",
+                date: "3 min de lecture",
+                link: "#",
+                content: ["Erreur #1 : Ciblage trop large sans testing", "Erreur #2 : Budgets constants sans optimisation", "Erreur #3 : Créatifs génériques sans test A/B", "Framework pour débugger vos campagnes"]
+              },
+              {
+                title: "Template de Message WhatsApp",
+                description: "Modèles de messages éprouvés pour convertir vos prospects en clients après un clic sur votre pub.",
+                date: "2 min de lecture",
+                link: "#",
+                content: ["Séquence d'activation immédiate", "Scénarios de réponse par secteur d'activité", "Timing et fréquence optimaux", "Exemples testés avec ROI mesurable"]
+              }
             ].map((res, i) => (
               <motion.a 
                 key={i}
@@ -470,6 +872,14 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-2 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
                 <p className="text-sm text-[#71717A] leading-relaxed mb-4">{res.description}</p>
+                <div className="mb-4 space-y-2">
+                  {res.content && res.content.map((point: string, idx: number) => (
+                    <div key={idx} className="flex items-start gap-2 text-xs text-[#18181B]">
+                      <span className="text-[#6366F1] font-bold mt-0.5">✓</span>
+                      <span>{point}</span>
+                    </div>
+                  ))}
+                </div>
                 <div className="inline-flex items-center gap-1 text-sm font-medium text-[#6366F1] group-hover:gap-2 transition-all">
                   Lire l'article <ArrowRight className="w-4 h-4" />
                 </div>
@@ -478,6 +888,22 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <section className="relative z-10 py-8 md:py-12 px-4 sm:px-6 bg-gradient-to-r from-[#6366F1]/5 to-[#8B5CF6]/5">
+        <div className="max-w-3xl mx-auto text-center">
+          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-col items-center gap-4">
+            <p className="text-sm md:text-base text-[#71717A]">Prêt à appliquer ces stratégies ?</p>
+            <Link
+              href="#pricing"
+              className="inline-flex items-center gap-2 rounded-full bg-[#6366F1] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#5558e6] transition-all shadow-lg shadow-[#6366F1]/20"
+            >
+              Découvrir les formules <ArrowRight className="h-4 w-4" />
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      <TestimonialsCarousel placement="bottom" />
 
       <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF] border-t border-[#E7E7EB]">
         <div className="max-w-3xl mx-auto text-left sm:text-left">
@@ -491,7 +917,7 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
               <button 
                 onClick={scrollToPricing}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
+              className="inline-flex items-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-xs sm:text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
               >
                 Voir les offres et débloquer l'accès <ArrowRight className="h-4 w-4" />
               </button>

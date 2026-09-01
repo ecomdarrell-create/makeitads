@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -19,6 +20,14 @@ export default function HeroSection() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  const heroTitle = (
+    <>
+      <span className="block">Connaissez votre <span className="text-[#8b5cf6]">marché.</span></span>
+      <span className="block">Devancez la <span className="text-[#8b5cf6]">concurrence.</span></span>
+      <span className="block">Croissez en <span className="text-[#8b5cf6]">confiance.</span></span>
+    </>
+  );
 
   if (!mounted) return null;
 
@@ -36,19 +45,16 @@ export default function HeroSection() {
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.1] text-[#0F172A] mb-6"
+            className="text-3xl sm:text-4xl md:text-6xl lg:text-7xl font-bold tracking-[-0.04em] leading-[1.1] text-[#0F172A] mb-6"
           >
-            <span className="block">Ne lancez plus de pubs au hasard.</span>
-            <span className="block">
-              Sachez <span className="text-[#8b5cf6]">où</span>, <span className="text-[#8b5cf6]">qui</span>, <span className="text-[#8b5cf6]">quoi</span> et <span className="text-[#8b5cf6]">pourquoi</span>.
-            </span>
+            {heroTitle}
           </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.08 }}
-            className="max-w-2xl text-sm sm:text-base md:text-lg lg:text-xl text-[#475569] leading-relaxed mb-8"
+            className="max-w-2xl text-xs sm:text-sm md:text-lg lg:text-xl text-[#475569] leading-relaxed mb-6"
           >
             MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l'Afrique.
           </motion.p>
@@ -83,19 +89,19 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.24 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl mx-auto sm:mx-0"
           >
-            <button
-              onClick={handleHeroCta}
-              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-10px_rgba(99,102,241,0.7)] w-full sm:w-auto"
+            <Link
+              href="/dashboard"
+              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-10px_rgba(99,102,241,0.7)] w-full sm:w-auto"
             >
-              Obtenir ma stratégie
+              Accéder à votre espace
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
 
             <a
               href="#how-it-works"
-              className="flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-6 sm:px-8 py-3.5 sm:py-4 text-sm font-bold text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-5 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] w-full sm:w-auto"
             >
-              Voir comment ça marche
+              Découvrez comment ça marche
             </a>
           </motion.div>
         </div>

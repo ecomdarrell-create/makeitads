@@ -9,10 +9,12 @@ export default function GlobalNavbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
-    { name: "Comment ça marche", href: "#how-it-works" },
+    { name: "Accueil", href: "/" },
+    { name: "Fonctionnement", href: "#how-it-works" },
     { name: "Ressources", href: "#resources" },
     { name: "Tarifs", href: "#pricing" },
     { name: "FAQ", href: "#faq" },
+    { name: "À propos", href: "/about" },
   ];
 
   const handleLinkClick = () => setIsMobileMenuOpen(false);
@@ -41,7 +43,7 @@ export default function GlobalNavbar() {
             </Link>
           ))}
           <Link
-            href="/parametres"
+            href="/dashboard/settings"
             className="flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-normal text-[#18181B] bg-[#F7F7F8] hover:bg-[#E7E7EB] transition-colors border border-[#E7E7EB]"
           >
             <Settings className="w-3.5 h-3.5" />
@@ -83,7 +85,7 @@ export default function GlobalNavbar() {
               
               <div className="pt-3 mt-3 border-t border-[#E7E7EB]">
                 <Link
-                  href="/parametres"
+                  href="/dashboard/settings"
                   className="flex items-center gap-3 text-sm font-normal text-[#18181B] hover:text-[#6366F1] transition-colors py-2.5 px-2 rounded-lg hover:bg-[#F7F7F8]"
                   onClick={handleLinkClick}
                 >
@@ -96,8 +98,8 @@ export default function GlobalNavbar() {
               
               <div className="pt-3 mt-3 border-t border-[#E7E7EB] space-y-1">
                 <p className="text-[10px] font-medium text-[#A1A1AA] uppercase tracking-wider px-2 mb-1">Informations</p>
-                <Link href="/a-propos" className="block text-sm font-normal text-[#52525B] hover:text-[#18181B] transition-colors py-2 px-2 rounded-lg hover:bg-[#F7F7F8]" onClick={handleLinkClick}>À propos</Link>
-                <Link href="/recrutement" className="block text-sm font-normal text-[#52525B] hover:text-[#18181B] transition-colors py-2 px-2 rounded-lg hover:bg-[#F7F7F8]" onClick={handleLinkClick}>Recrutement</Link>
+                <Link href="/about" className="block text-sm font-normal text-[#52525B] hover:text-[#18181B] transition-colors py-2 px-2 rounded-lg hover:bg-[#F7F7F8]" onClick={handleLinkClick}>À propos</Link>
+                <Link href="/careers" className="block text-sm font-normal text-[#52525B] hover:text-[#18181B] transition-colors py-2 px-2 rounded-lg hover:bg-[#F7F7F8]" onClick={handleLinkClick}>Recrutement</Link>
                 <Link href="/contact" className="block text-sm font-normal text-[#52525B] hover:text-[#18181B] transition-colors py-2 px-2 rounded-lg hover:bg-[#F7F7F8]" onClick={handleLinkClick}>Contact</Link>
               </div>
             </div>
