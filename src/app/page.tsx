@@ -525,7 +525,7 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
-
+      </section>
 
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
         <div className="max-w-5xl mx-auto">
@@ -607,21 +607,21 @@ export default function LandingPage() {
                 title: "Guide du Ciblage Meta en Afrique",
                 description: "Comment configurer vos audiences pour toucher les bons décideurs au Sénégal, Côte d'Ivoire et Cameroun.",
                 date: "5 min de lecture",
-                link: "#",
+                link: "/insights/guide-analyse-concurrents-ia-2026",
                 content: ["Segmentation par villes et intérêts professionnels", "Budgétisation en devises locales (FCFA, XOF, etc.)", "Audiences lookalike calibrées pour l'Afrique", "Éviter les erreurs de ciblage courantes"]
               },
               {
                 title: "Les 3 erreurs qui brûlent votre budget",
                 description: "Analyse des campagnes échouées et comment les éviter dès le premier jour de lancement.",
                 date: "3 min de lecture",
-                link: "#",
+                link: "/insights/reduire-cac-saas-donnees",
                 content: ["Erreur #1 : Ciblage trop large sans testing", "Erreur #2 : Budgets constants sans optimisation", "Erreur #3 : Créatifs génériques sans test A/B", "Framework pour débugger vos campagnes"]
               },
               {
                 title: "Template de Message WhatsApp",
                 description: "Modèles de messages éprouvés pour convertir vos prospects en clients après un clic sur votre pub.",
                 date: "2 min de lecture",
-                link: "#",
+                link: "/insights/strategie-marketing-saas-0-a-10k-mrr",
                 content: ["Séquence d'activation immédiate", "Scénarios de réponse par secteur d'activité", "Timing et fréquence optimaux", "Exemples testés avec ROI mesurable"]
               }
             ].map((res, i) => (
