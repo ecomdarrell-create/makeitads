@@ -248,7 +248,9 @@ export default function LandingPage() {
 
       <GlobalNavbar />
       <HeroSection />
-      <PremiumStories variant="top" />
+      
+      {/* ✅ CORRECTION : Suppression de la prop 'variant' */}
+      <PremiumStories />
 
       <section className="relative z-10 py-10 border-y border-[#E2E8F0] bg-[#F8FAFC]">
         <div className="max-w-5xl mx-auto text-center">
@@ -288,7 +290,8 @@ export default function LandingPage() {
       </section>
 
       <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6 bg-[#FFFFFF]">
-        <PremiumStories variant="bottom" />
+        {/* ✅ CORRECTION : Suppression de la prop 'variant' */}
+        <PremiumStories />
       </section>
 
       <section id="faq" className="relative z-10 py-16 md:py-24 px-6 bg-[#F8FAFC]">

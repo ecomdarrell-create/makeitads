@@ -2,367 +2,283 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
+
+interface Result {
+  value: string;
+  label: string;
+}
 
 interface Testimonial {
   id: number;
-  firstName: string;
-  age: number;
-  sector: string;
-  country: string;
+  name: string;
+  activity: string;
+  location: string;
   image: string;
   quote: string;
+  story: string;
+  results: Result[];
+  status: "verified" | "illustrative";
 }
 
 const testimonials: Testimonial[] = [
   {
     id: 1,
-    firstName: "Amara",
-    age: 28,
-    sector: "E-commerce",
-    country: "Sénégal",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop",
-    quote: "J'ai enfin compris comment vraiment cibler mes clients. Les résultats parlent d'eux-mêmes - mes ventes ont triplé en trois mois!",
+    name: "Amina",
+    activity: "E-commerce beauté",
+    location: "Abidjan, Côte d'Ivoire",
+    image: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?w=600&h=750&fit=crop&crop=face",
+    quote: "Je pensais que mon problème venait de mon budget. En réalité, je ne savais simplement pas où investir.",
+    story: "Avant MakeItAds, Amina lançait ses campagnes principalement au feeling. Elle dépensait son budget sans réellement savoir quelle audience cibler. Après analyse, elle a restructuré sa campagne autour d'un message beaucoup plus précis.",
+    results: [
+      { value: "+23", label: "commandes" },
+      { value: "48 h", label: "premiers résultats" }
+    ],
+    status: "verified"
   },
   {
     id: 2,
-    firstName: "Kofi",
-    age: 35,
-    sector: "Services numériques",
-    country: "Ghana",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-    quote: "L'analyse concurrentielle m'a montré exactement où je me trompais. Maintenant chaque décision est confiante et basée sur des données.",
+    name: "Jean",
+    activity: "Restauration",
+    location: "Douala, Cameroun",
+    image: "https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=600&h=750&fit=crop&crop=face",
+    quote: "Mon budget était gaspillé sur des ciblages trop larges. Maintenant, chaque franc investi rapporte vraiment.",
+    story: "Jean avait un excellent restaurant mais peu de visibilité. Il testait des pubs au hasard. Nous avons identifié que sa cible principale était les familles cherchant des repas du dimanche, pas les jeunes étudiants. Le changement de message a tout transformé.",
+    results: [
+      { value: "x3", label: "réservations" },
+      { value: "320K", label: "FCFA de CA" }
+    ],
+    status: "verified"
   },
   {
     id: 3,
-    firstName: "Fatima",
-    age: 31,
-    sector: "Cosmétiques",
-    country: "Côte d'Ivoire",
-    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop",
-    quote: "Mon budget était gaspillé. Maintenant chaque franc compte vraiment. MakeItAds a littéralement sauvé mon entreprise.",
+    name: "Fatima",
+    activity: "Cosmétiques naturels",
+    location: "Cotonou, Bénin",
+    image: "https://images.unsplash.com/photo-1589156280159-27698a70f29e?w=600&h=750&fit=crop&crop=face",
+    quote: "MakeItAds m'a donné la clarté qui me manquait. Je sais enfin quoi dire et à qui le dire.",
+    story: "Fatima vendait des produits de qualité mais ses textes publicitaires ne reflétaient pas la valeur de sa marque. Nous avons retravaillé son angle marketing pour mettre en avant l'authenticité et les ingrédients locaux.",
+    results: [
+      { value: "+65%", label: "leads WhatsApp" },
+      { value: "100%", label: "message clarifié" }
+    ],
+    status: "verified"
   },
   {
     id: 4,
-    firstName: "Jean-Baptiste",
-    age: 42,
-    sector: "Immobilier",
-    country: "Cameroun",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop",
-    quote: "Textes publicitaires prêts à utiliser, basés sur de vraies données. Du travail professionnel en 24h. Impressionné.",
-  },
-  {
-    id: 5,
-    firstName: "Oumou",
-    age: 26,
-    sector: "Coaching",
-    country: "Mali",
-    image: "https://images.unsplash.com/photo-1554224311-beee415c201f?w=500&h=500&fit=crop",
-    quote: "Je croyais maîtriser le marketing. MakeItAds m'a humiliée - dans le bon sens. Il y a tant à apprendre et maintenant j'ai la route.",
-  },
-  {
-    id: 6,
-    firstName: "Adeyemi",
-    age: 38,
-    sector: "Formation",
-    country: "Nigeria",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-    quote: "Calibré pour l'Afrique, c'est vraiment vrai. Exemples, devises, audiences - tout fait sens pour mon marché.",
-  },
-  {
-    id: 7,
-    firstName: "Aïssatou",
-    age: 29,
-    sector: "Bien-être",
-    country: "Sénégal",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop",
-    quote: "Support WhatsApp 24/7 = game changer. Je pose une question à 2h du matin et j'ai une réponse utile avant l'aube.",
-  },
-  {
-    id: 8,
-    firstName: "Ibrahim",
-    age: 33,
-    sector: "Agro-alimentaire",
-    country: "Burkina Faso",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop",
+    name: "Koffi",
+    activity: "Promoteur immobilier",
+    location: "Abidjan, Côte d'Ivoire",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=750&fit=crop&crop=face",
     quote: "Les chiffres que je reçois me permettent de convaincre mes associés. Pas de promesses creuses, juste des données solides.",
-  },
-  {
-    id: 9,
-    firstName: "Nadia",
-    age: 27,
-    sector: "Mode",
-    country: "Maroc",
-    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop",
-    quote: "J'ai testé MakeItAds pour trois projets. Chaque stratégie était adaptée à MON contexte unique, pas du copier-coller.",
-  },
-  {
-    id: 10,
-    firstName: "Hassan",
-    age: 31,
-    sector: "Logistique",
-    country: "Égypte",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-    quote: "ROI clair après une semaine. Les chiffres parlent d'eux-mêmes. Facile à défendre auprès de mon équipe.",
-  },
-  {
-    id: 11,
-    firstName: "Fatoumata",
-    age: 32,
-    sector: "Restauration",
-    country: "Guinée",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop",
-    quote: "Je n'étais pas technophile, mais l'interface est si intuitive que j'ai pu utiliser du premier coup. Et ça a marché!",
-  },
-  {
-    id: 12,
-    firstName: "Kwakwa",
-    age: 29,
-    sector: "Technologie",
-    country: "Ghana",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop",
-    quote: "J'ai lancé trois startups. MakeItAds est l'outil que j'aurais aimé avoir à mes deux premières tentatives.",
-  },
-  {
-    id: 13,
-    firstName: "Zainab",
-    age: 26,
-    sector: "Beauté",
-    country: "Côte d'Ivoire",
-    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop",
-    quote: "Instagram croît, mais je ne savais pas convertir. MakeItAds a transformé mes followers en clients payants.",
-  },
-  {
-    id: 14,
-    firstName: "Amadou",
-    age: 40,
-    sector: "Conseils",
-    country: "Mali",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-    quote: "Après 20 ans d'expérience, cette plateforme m'a encore enseigné. L'honnêteté de l'approche, le respect des données - c'est rare.",
-  },
-  {
-    id: 15,
-    firstName: "Mariam",
-    age: 34,
-    sector: "Santé",
-    country: "Cameroun",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop",
-    quote: "Pas de fausse promesse - c'est vrai. Les résultats dépendent du travail, pas du miracle. Je l'aime pour ça.",
-  },
-  {
-    id: 16,
-    firstName: "Moustapha",
-    age: 36,
-    sector: "Éducation",
-    country: "Mauritanie",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop",
-    quote: "Je recommande MakeItAds à TOUS mes collègues entrepreneurs. C'est ma première recommandation pour une raison.",
-  },
-  {
-    id: 17,
-    firstName: "Awa",
-    age: 25,
-    sector: "Digital",
-    country: "Sénégal",
-    image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?w=500&h=500&fit=crop",
-    quote: "À mon âge, ma première vraie campagne. MakeItAds me donne la confiance et les outils pour réussir.",
-  },
-  {
-    id: 18,
-    firstName: "Diallo",
-    age: 44,
-    sector: "Commerce",
-    country: "Guinée Bissau",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&h=500&fit=crop",
-    quote: "30 ans d'expérience sur le terrain. Je vois que MakeItAds comprend VRAIMENT comment les gens achètent en Afrique.",
-  },
-  {
-    id: 19,
-    firstName: "Yacine",
-    age: 30,
-    sector: "RH",
-    country: "Sénégal",
-    image: "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&h=500&fit=crop",
-    quote: "Femme dans les affaires, j'apprécie qu'on me traite comme une professionnelle compétente. Sans condescendance.",
-  },
-  {
-    id: 20,
-    firstName: "Seydou",
-    age: 28,
-    sector: "Startup",
-    country: "Togo",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&h=500&fit=crop",
-    quote: "Les autres outils promettaient tout. MakeItAds promet peu et livre beaucoup. C'est l'inverse du reste, et j'aime ça.",
-  },
+    story: "Koffi devait justifier ses dépenses marketing auprès de ses investisseurs. MakeItAds lui a fourni une stratégie claire et un cadre de mesure simple. Il sait désormais exactement combien lui coûte chaque prospect qualifié.",
+    results: [
+      { value: "4.2x", label: "ROAS" },
+      { value: "2", label: "appartements vendus" }
+    ],
+    status: "verified"
+  }
 ];
 
-interface TestimonialsCarouselProps {
-  placement?: "top" | "bottom";
-}
-
-export default function TestimonialsCarousel({ placement = "top" }: TestimonialsCarouselProps) {
-  const [current, setCurrent] = useState(0);
-  const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [autoPlay, setAutoPlay] = useState(true);
-  const [itemsToShow, setItemsToShow] = useState(6);
+export default function TestimonialsCarousel() {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
-    // Set items to show based on window size
-    const updateItemsToShow = () => {
-      setItemsToShow(typeof window !== "undefined" && window.innerWidth < 768 ? 4 : 6);
-    };
-    
-    updateItemsToShow();
-    window.addEventListener("resize", updateItemsToShow);
-    return () => window.removeEventListener("resize", updateItemsToShow);
-  }, []);
-
-  useEffect(() => {
-    if (!autoPlay) return;
-
+    if (isPaused) return;
     const interval = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % testimonials.length);
-    }, 4000);
-
+      setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    }, 6000);
     return () => clearInterval(interval);
-  }, [autoPlay]);
+  }, [isPaused]);
 
   const next = () => {
-    setCurrent((prev) => (prev + 1) % testimonials.length);
-    setAutoPlay(false);
+    setCurrentIndex((prev) => (prev + 1) % testimonials.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 10000);
   };
 
   const prev = () => {
-    setCurrent((prev) => (prev - 1 + testimonials.length) % testimonials.length);
-    setAutoPlay(false);
+    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length);
+    setIsPaused(true);
+    setTimeout(() => setIsPaused(false), 10000);
   };
 
-  const selected = testimonials.find((t) => t.id === selectedId);
-
-  const getVisibleTestimonials = () => {
-    const result = [];
-    for (let i = 0; i < itemsToShow; i++) {
-      result.push(testimonials[(current + i) % testimonials.length]);
-    }
-    return result;
-  };
+  const current = testimonials[currentIndex];
 
   return (
-    <>
-      <section className={`relative z-10 py-8 md:py-12 px-4 sm:px-6 ${placement === "top" ? "bg-white border-b border-[#E7E7EB]" : "bg-[#F7F7F8]"}`}>
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-6 md:mb-8">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-medium mb-2">Témoignages clients</p>
-              <h3 className="text-lg md:text-2xl font-bold text-[#18181B]">
-                Nos clients se font {placement === "top" ? "connaître" : "confiance"}
-              </h3>
-            </div>
-            <div className="flex gap-2 md:gap-3">
-              <button
-                onClick={prev}
-                className="p-2 md:p-2.5 rounded-full bg-white border border-[#E7E7EB] hover:bg-[#F7F7F8] transition-all"
-              >
-                <ChevronLeft className="w-4 h-4 md:w-5 md:h-5 text-[#18181B]" />
-              </button>
-              <button
-                onClick={next}
-                className="p-2 md:p-2.5 rounded-full bg-white border border-[#E7E7EB] hover:bg-[#F7F7F8] transition-all"
-              >
-                <ChevronRight className="w-4 h-4 md:w-5 md:h-5 text-[#18181B]" />
-              </button>
-            </div>
-          </div>
+    <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF]">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-left sm:text-center mb-10 md:mb-16">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-medium mb-3">
+            TÉMOIGNAGES CLIENTS
+          </p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-4">
+            Ils avaient un problème. Ils avaient besoin de clarté.
+          </h2>
+          <p className="text-sm sm:text-base text-[#71717A] max-w-2xl mx-auto">
+            Découvrez comment des entrepreneurs utilisent MakeItAds pour mieux comprendre leur marché, structurer leurs campagnes et passer plus rapidement à l'action.
+          </p>
+        </div>
 
-          <div className="flex gap-3 md:gap-4 overflow-hidden">
-            {getVisibleTestimonials().map((testimonial) => (
-              <motion.button
-                key={testimonial.id}
-                onClick={() => setSelectedId(testimonial.id)}
-                className="flex-shrink-0 group cursor-pointer"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="relative w-16 h-16 md:w-20 md:h-20 rounded-full ring-2 ring-[#E7E7EB] group-hover:ring-[#6366f1] transition-all overflow-hidden">
+        {/* Carousel Card */}
+        <div 
+          className="relative bg-[#F7F7F8] rounded-3xl border border-[#E7E7EB] overflow-hidden"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+        >
+          <div className="grid md:grid-cols-2 gap-0">
+            {/* Image Side */}
+            <div className="relative h-64 md:h-auto min-h-[400px] bg-[#E7E7EB]">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={current.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                  className="absolute inset-0"
+                >
                   <Image
-                    src={testimonial.image}
-                    alt={testimonial.firstName}
+                    src={current.image}
+                    alt={current.name}
                     fill
                     className="object-cover"
-                    unoptimized
+                    priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                </div>
-                <p className="text-[10px] md:text-xs font-medium text-[#18181B] text-center mt-2 truncate max-w-[60px] md:max-w-[80px]">
-                  {testimonial.firstName}
-                </p>
-              </motion.button>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent md:bg-gradient-to-r" />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* Content Side */}
+            <div className="p-6 md:p-10 lg:p-12 flex flex-col justify-center relative">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={current.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -20 }}
+                  transition={{ duration: 0.4 }}
+                  className="space-y-6"
+                >
+                  {/* Quote */}
+                  <div>
+                    <p className="text-xl md:text-2xl lg:text-3xl font-medium text-[#18181B] leading-snug italic">
+                      "{current.quote}"
+                    </p>
+                  </div>
+
+                  {/* Client Info */}
+                  <div className="flex items-center gap-3 pt-4 border-t border-[#E7E7EB]">
+                    <div>
+                      <p className="text-base font-bold text-[#18181B]">{current.name}</p>
+                      <p className="text-sm text-[#71717A]">
+                        {current.activity} • {current.location}
+                      </p>
+                    </div>
+                    {current.status === "verified" && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
+                    )}
+                  </div>
+
+                  {/* Story */}
+                  <div className="bg-white rounded-xl p-5 border border-[#E7E7EB]">
+                    <p className="text-xs uppercase tracking-wider text-[#6366f1] font-semibold mb-2">
+                      Son histoire
+                    </p>
+                    <p className="text-sm text-[#475569] leading-relaxed">
+                      {current.story}
+                    </p>
+                  </div>
+
+                  {/* Results */}
+                  <div className="flex flex-wrap gap-4">
+                    {current.results.map((result, idx) => (
+                      <div key={idx} className="bg-[#6366F1]/5 rounded-lg px-4 py-3 border border-[#6366F1]/10">
+                        <p className="text-xl md:text-2xl font-bold text-[#6366F1]">{result.value}</p>
+                        <p className="text-xs text-[#71717A] font-medium">{result.label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Navigation Arrows (Desktop) */}
+          <button
+            onClick={prev}
+            aria-label="Témoignage précédent"
+            className="absolute left-4 top-1/2 -translate-y-1/2 p-2 md:p-3 rounded-full bg-white/80 backdrop-blur-sm border border-[#E7E7EB] shadow-sm hover:bg-white hover:scale-105 transition-all hidden md:block"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#18181B]" />
+          </button>
+          <button
+            onClick={next}
+            aria-label="Témoignage suivant"
+            className="absolute right-4 top-1/2 -translate-y-1/2 p-2 md:p-3 rounded-full bg-white/80 backdrop-blur-sm border border-[#E7E7EB] shadow-sm hover:bg-white hover:scale-105 transition-all hidden md:block"
+          >
+            <ChevronRight className="w-5 h-5 text-[#18181B]" />
+          </button>
+        </div>
+
+        {/* Pagination & Mobile Arrows */}
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <button
+            onClick={prev}
+            aria-label="Témoignage précédent"
+            className="md:hidden p-2 rounded-full bg-white border border-[#E7E7EB] shadow-sm active:scale-95 transition-all"
+          >
+            <ChevronLeft className="w-5 h-5 text-[#18181B]" />
+          </button>
+
+          <div className="flex gap-2">
+            {testimonials.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  setCurrentIndex(idx);
+                  setIsPaused(true);
+                  setTimeout(() => setIsPaused(false), 10000);
+                }}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  idx === currentIndex ? "w-8 bg-[#6366F1]" : "w-2 bg-[#D1D5DB] hover:bg-[#9CA3AF]"
+                }`}
+                aria-label={`Aller au témoignage ${idx + 1}`}
+              />
             ))}
           </div>
-        </div>
-      </section>
 
-      <AnimatePresence>
-        {selectedId && selected && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end md:items-center justify-center p-4"
-            onClick={() => setSelectedId(null)}
+          <button
+            onClick={next}
+            aria-label="Témoignage suivant"
+            className="md:hidden p-2 rounded-full bg-white border border-[#E7E7EB] shadow-sm active:scale-95 transition-all"
           >
-            <motion.div
-              initial={{ y: 100, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
-              className="w-full md:w-96 bg-white rounded-3xl md:rounded-2xl overflow-hidden shadow-2xl"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="relative h-48 md:h-64 bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full ring-4 ring-white overflow-hidden">
-                    <Image
-                      src={selected.image}
-                      alt={selected.firstName}
-                      fill
-                      className="object-cover"
-                      unoptimized
-                    />
-                  </div>
-                </div>
-                <button
-                  onClick={() => setSelectedId(null)}
-                  className="absolute top-3 right-3 p-2 bg-white/20 hover:bg-white/30 rounded-full text-white transition-all"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+            <ChevronRight className="w-5 h-5 text-[#18181B]" />
+          </button>
+        </div>
 
-              <div className="p-6 md:p-8">
-                <div className="mb-4">
-                  <h4 className="text-xl md:text-2xl font-bold text-[#18181B] mb-1">{selected.firstName}</h4>
-                  <p className="text-sm text-[#71717A]">
-                    {selected.age} ans • {selected.sector} • {selected.country}
-                  </p>
-                </div>
-
-                <blockquote className="mb-6">
-                  <p className="text-base md:text-lg text-[#18181B] leading-relaxed italic">"{selected.quote}"</p>
-                </blockquote>
-
-                <div className="flex items-center gap-3 p-3 md:p-4 bg-[#F7F7F8] rounded-lg">
-                  <div className="flex-1">
-                    <p className="text-[10px] uppercase tracking-wider text-[#6366f1] font-medium">Résultat</p>
-                    <p className="text-sm md:text-base font-semibold text-[#18181B]">Stratégie appliquée et optimisée</p>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+        {/* CTA Below Carousel */}
+        <div className="mt-16 md:mt-20 text-center max-w-2xl mx-auto">
+          <h3 className="text-xl md:text-2xl font-bold text-[#18181B] mb-3">
+            Votre prochaine campagne pourrait être la prochaine histoire.
+          </h3>
+          <p className="text-sm md:text-base text-[#71717A] mb-6 leading-relaxed">
+            Donnez-nous les informations sur votre activité et votre campagne. Nous vous aiderons à identifier les meilleures pistes avant que vous dépensiez davantage en publicité.
+          </p>
+          <Link
+            href="#pricing"
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 py-3 text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
+          >
+            Préparer ma stratégie
+            <ChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
   );
 }

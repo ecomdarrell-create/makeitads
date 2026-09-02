@@ -14,6 +14,8 @@ import {
   Users,
   DollarSign,
   Calendar,
+  ShieldCheck,
+  Zap,
 } from "lucide-react";
 import { useState } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
@@ -22,8 +24,6 @@ import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 import HeroSection from "@/components/HeroSection";
 import TestimonialsCarousel from "@/components/TestimonialsCarousel";
-
-const TELEGRAM_URL = "https://t.me/MakeItAds_Pro";
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -64,127 +64,6 @@ const howItWorksSteps = [
   },
 ];
 
-const strategyPillars = [
-  {
-    title: "Comprendre",
-    text: "Votre activité, votre audience et votre marché avant de dépenser un euro de plus.",
-  },
-  {
-    title: "Décider",
-    text: "La plateforme, l'audience, l'angle et le budget à tester pour orienter les bons choix.",
-  },
-  {
-    title: "Agir",
-    text: "Une direction claire que vous pouvez mettre en œuvre dans vos campagnes sans perdre de temps.",
-  },
-];
-
-const brandFocus = [
-  "Votre activité",
-  "Votre marché",
-  "Votre audience",
-  "Votre budget",
-  "Votre stratégie publicitaire",
-];
-
-const teamProfiles = [
-  {
-    label: "Stratégie marketing",
-    title: "Positioning & message",
-    description: "Conception de messages, angles et hiérarchies de valeur adaptés à chaque marché.",
-  },
-  {
-    label: "Analyse de marché",
-    title: "Intelligence concurrentielle",
-    description: "Veille sur les opportunités, les écarts de positionnement et les signaux à surveiller.",
-  },
-  {
-    label: "Acquisition",
-    title: "Campagnes & budget",
-    description: "Priorisation des canaux, segmentation et logique de test pour mieux répartir le budget.",
-  },
-  {
-    label: "Performance",
-    title: "Data & optimisation",
-    description: "Suivi, mesure et ajustement de la stratégie pour que la décision soit fondée sur des signaux clairs.",
-  },
-];
-
-const teamMembers = [
-  {
-    id: 1,
-    firstName: "Aisha",
-    lastName: "Diallo",
-    role: "Directrice Stratégie Marketing",
-    location: "Sénégal",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    bio: "Spécialiste en positionnement et construction de messages pour les marques africaines.",
-  },
-  {
-    id: 2,
-    firstName: "James",
-    lastName: "O'Connor",
-    role: "Head of Data & Analytics",
-    location: "Irlande",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    bio: "Expert en mesure de performance et optimisation des campagnes multi-canaux.",
-  },
-  {
-    id: 3,
-    firstName: "Marie",
-    lastName: "Laurent",
-    role: "Responsable Intelligence Concurrentielle",
-    location: "France",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-    bio: "Veille stratégique et analyse des opportunités de marché en Afrique de l'Ouest.",
-  },
-  {
-    id: 4,
-    firstName: "Kwame",
-    lastName: "Mensah",
-    role: "Responsable Acquisition & Croissance",
-    location: "Ghana",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
-    bio: "Spécialiste en stratégies d'acquisition et budgétisation pour startups africaines.",
-  },
-  {
-    id: 5,
-    firstName: "Sofia",
-    lastName: "Rossi",
-    role: "Développeuse Produit",
-    location: "Italie",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    bio: "Conception de produits numériques axés sur l'expérience utilisateur.",
-  },
-  {
-    id: 6,
-    firstName: "Amara",
-    lastName: "Sow",
-    role: "Responsable Client Success",
-    location: "Côte d'Ivoire",
-    image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
-    bio: "Support prioritaire et accompagnement des clients MakeItAds.",
-  },
-  {
-    id: 7,
-    firstName: "David",
-    lastName: "Mueller",
-    role: "Ingénieur Backend",
-    location: "Allemagne",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
-    bio: "Infrastructure et sécurité des données pour la plateforme MakeItAds.",
-  },
-  {
-    id: 8,
-    firstName: "Fadima",
-    lastName: "Kabore",
-    role: "Spécialiste Contenu & Ressources",
-    location: "Burkina Faso",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
-    bio: "Création de guides, articles et ressources éducatives pour les entrepreneurs.",
-  },
-];
-
 const strategyItems = [
   { icon: Users, label: "Audience Cible", value: "Femmes 25-40 ans, Abidjan +25km", color: "text-[#6366F1]" },
   { icon: Target, label: "Angle Marketing", value: "Preuve sociale + Livraison gratuite", color: "text-[#8B5CF6]" },
@@ -203,53 +82,70 @@ const faqData = [
   { question: "Combien de temps faut-il pour recevoir mon dossier payant ?", answer: "La livraison est quasi instantanée après confirmation du paiement. Vous recevez tout directement sur notre canal Telegram sécurisé." }
 ];
 
-// ✅ NOUVEAUX PRIX OPTIMISÉS : 9 900 FCFA et 24 900 FCFA
+// ✅ NOUVEAU SYSTÈME DE PRICING ANNUEL (PRO, PREMIUM, ELITE)
 const pricingPlans = [
   { 
     id: "pro", 
     name: "Plan Pro", 
-    price: "9 900", 
-    oldPrice: "19 900",
-    period: "/mois",
-    description: "Idéal pour les entrepreneurs qui lancent leur première campagne et veulent des résultats concrets.", 
+    price: "10 000", 
+    period: "/an",
+    description: "L'essentiel pour démarrer et structurer vos premières campagnes avec clarté et méthode.", 
     features: [
       "2 stratégies publicitaires complètes / mois",
       "6 variantes de textes publicitaires / mois",
       "Ciblage précis (villes, âges, intérêts)",
-      "Guide créatif (formats, dimensions)",
-      "Accès au groupe privé Telegram"
+      "Guide créatif et recommandations de formats",
+      "Accès au canal Telegram communautaire",
+      "Support standard (réponse sous 24h)"
     ], 
     popular: true, 
-    ctaText: "S'abonner au Plan Pro", 
+    ctaText: "Souscrire au Plan Pro", 
     link: "https://hhowawtq.mychariow.shop/plan-start-up" 
   },
   { 
     id: "premium", 
     name: "Plan Premium", 
-    price: "24 900", 
-    oldPrice: "39 900",
-    period: "/mois",
-    description: "Tout le Plan Pro, plus des fonctionnalités avancées pour scaler ton business ou gérer plusieurs projets.", 
+    price: "50 000", 
+    period: "/an",
+    description: "Pour les entrepreneurs et freelances qui veulent tester plusieurs angles et scaler leur activité.", 
     features: [
       "Tout le Plan Pro inclus",
       "5 stratégies publicitaires complètes / mois",
       "15 variantes de textes publicitaires / mois",
-      "Analyse concurrentielle avancée (2 concurrents)",
-      "Support prioritaire WhatsApp 24/7",
-      "Accès VIP au groupe privé Telegram"
+      "1 analyse concurrentielle approfondie / trimestre",
+      "Accès VIP au canal Telegram (contenu exclusif)",
+      "Support prioritaire WhatsApp"
     ], 
     popular: false, 
-    ctaText: "S'abonner au Plan Premium", 
+    ctaText: "Souscrire au Plan Premium", 
     link: "https://hhowawtq.mychariow.shop/plan-business" 
+  },
+  { 
+    id: "elite", 
+    name: "Plan Elite", 
+    price: "250 000", 
+    period: "/an",
+    description: "L'accompagnement sur-mesure pour les entreprises qui exigent l'excellence et une croissance maîtrisée.", 
+    features: [
+      "Tout le Plan Premium inclus",
+      "15 stratégies publicitaires complètes / mois",
+      "Analyse concurrentielle complète chaque mois",
+      "1 session de consulting stratégique mensuelle (30 min)",
+      "Audit trimestriel de vos campagnes en cours",
+      "Support ultra-prioritaire (réponse sous 1h)"
+    ], 
+    popular: false, 
+    ctaText: "Réserver un appel sur Telegram", 
+    link: "https://t.me/MakeitAds_CEO" 
   },
 ];
 
-function BeforeAfterSection() {
+function BeforeAfterSection({ scrollToPricing }: { scrollToPricing: () => void }) {
   return (
     <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
       <div className="max-w-7xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-100px" }} transition={{ duration: 0.6 }} className="text-left sm:text-left mb-10 md:mb-14 max-w-3xl">
-          <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight leading-[1.15] text-[#18181B] mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight leading-[1.15] text-[#18181B] mb-4">
             Voyez ce qui change avec{" "}
             <span className="bg-gradient-to-r from-[#6366F1] via-[#8B5CF6] to-[#6366F1] bg-clip-text text-transparent">MakeItAds</span>
           </h2>
@@ -312,10 +208,10 @@ function BeforeAfterSection() {
                   <CheckCircle2 className="h-3.5 md:h-4 w-3.5 md:w-4 text-emerald-500" />
                   <p className="text-[11px] md:text-xs font-medium text-[#18181B]">Prêt à lancer</p>
                 </div>
-                <Link href="#pricing" className="flex items-center gap-1 text-[#6366F1] group/link">
+                <button onClick={scrollToPricing} className="flex items-center gap-1 text-[#6366F1] group/link">
                   <span className="text-[11px] md:text-xs font-medium">Voir les offres</span>
                   <ArrowRight className="h-3 md:h-3.5 w-3 md:w-3.5 group-hover/link:translate-x-1 transition-transform" />
-                </Link>
+                </button>
               </div>
             </motion.div>
           </motion.div>
@@ -332,39 +228,38 @@ function PricingCard({ plan }: { plan: any }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className={`relative group rounded-2xl border p-5 md:p-6 flex flex-col transition-all duration-300 h-full bg-[#FFFFFF] ${
+      className={`relative group rounded-2xl border p-6 md:p-8 flex flex-col transition-all duration-300 h-full bg-[#FFFFFF] ${
         plan.popular
-          ? "border-[#6366F1] shadow-[0_8px_30px_-12px_rgba(99,102,241,0.15)] hover:shadow-[0_15px_40px_-10px_rgba(99,102,241,0.2)] hover:-translate-y-1 ring-1 ring-[#6366F1]"
+          ? "border-[#6366F1]/30 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.1)] hover:shadow-[0_15px_40px_-10px_rgba(99,102,241,0.15)] hover:-translate-y-1"
           : "border-[#E7E7EB] shadow-sm hover:shadow-[0_8px_25px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-1"
       }`}
     >
       {plan.popular && (
-        <div className="absolute -top-2.5 md:-top-3 left-1/2 -translate-x-1/2 rounded-full px-2.5 md:px-3 py-0.5 md:py-1 text-[9px] md:text-[10px] font-medium text-white uppercase tracking-wider shadow-md bg-gradient-to-r from-[#6366F1] to-[#8B5CF6]">
-          Le plus populaire
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[10px] font-medium text-white uppercase tracking-wider shadow-sm bg-[#6366F1]">
+          Le plus choisi
         </div>
       )}
 
-      <div className="mb-4 md:mb-5">
-        <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-1">{plan.name}</h3>
-        <p className="text-xs text-[#71717A] leading-relaxed">{plan.description}</p>
+      <div className="mb-6">
+        <h3 className="text-lg font-medium text-[#18181B] mb-2">{plan.name}</h3>
+        <p className="text-sm text-[#71717A] leading-relaxed font-normal">{plan.description}</p>
       </div>
 
-      <div className="mb-5 md:mb-6">
+      <div className="mb-6 pb-6 border-b border-[#F0F0F2]">
         <div className="flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-2xl md:text-3xl font-medium text-[#18181B]">{plan.price}</span>
-          <span className="text-xs md:text-sm text-[#71717A]">FCFA{plan.period}</span>
-          <span className="text-xs md:text-sm text-[#94A3B8] line-through">{plan.oldPrice} FCFA</span>
+          <span className="text-3xl font-medium text-[#18181B]">{plan.price}</span>
+          <span className="text-sm text-[#71717A] font-normal">FCFA{plan.period}</span>
         </div>
-        <p className="text-[10px] text-[#71717A] mt-1.5 font-medium">Abonnement mensuel · Annulable à tout moment</p>
+        <p className="text-[11px] text-[#94A3B8] mt-2 font-normal">Facturation annuelle · Sans engagement</p>
       </div>
 
-      <ul className="space-y-2.5 md:space-y-3 mb-5 md:mb-6 flex-1">
+      <ul className="space-y-3 mb-8 flex-1">
         {plan.features.map((feature: string, i: number) => (
-          <li key={i} className="flex items-start gap-2 md:gap-2.5 text-[11px] md:text-xs text-[#18181B]">
-            <div className="mt-0.5 flex-shrink-0 h-3.5 md:h-4 w-3.5 md:w-4 rounded-full bg-[#6366F1]/10 flex items-center justify-center">
-              <Check className="h-2 md:h-2.5 w-2 md:w-2.5 text-[#6366F1]" strokeWidth={3} />
+          <li key={i} className="flex items-start gap-3 text-sm text-[#475569] font-normal leading-relaxed">
+            <div className="mt-0.5 flex-shrink-0 h-4 w-4 rounded-full bg-[#6366F1]/10 flex items-center justify-center">
+              <Check className="h-2.5 w-2.5 text-[#6366F1]" strokeWidth={3} />
             </div>
-            <span className="leading-tight">{feature}</span>
+            <span>{feature}</span>
           </li>
         ))}
       </ul>
@@ -373,10 +268,12 @@ function PricingCard({ plan }: { plan: any }) {
         href={plan.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block w-full rounded-lg py-2.5 md:py-3 text-center text-xs md:text-sm font-medium transition-all duration-200 border ${
+        className={`block w-full rounded-xl py-3 text-center text-sm font-medium transition-all duration-200 border ${
           plan.popular
             ? "bg-[#6366F1] text-white border-[#6366F1] hover:bg-[#5558e6] shadow-sm shadow-[#6366F1]/20"
-            : "bg-[#FFFFFF] text-[#18181B] border-[#E7E7EB] hover:bg-[#F7F7F8] hover:border-[#6366F1]/30"
+            : plan.id === "elite" 
+              ? "bg-[#18181B] text-white border-[#18181B] hover:bg-[#333333]" 
+              : "bg-[#FFFFFF] text-[#18181B] border-[#E7E7EB] hover:bg-[#F7F7F8] hover:border-[#6366F1]/30"
         }`}
       >
         {plan.ctaText}
@@ -433,12 +330,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TestimonialsCarousel placement="top" />
-
       <section id="how-it-works" className="relative z-10 bg-[#FFFFFF] py-12 md:py-20 px-4 sm:px-6 overflow-hidden">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
-            <h2 className="text-xl sm:text-2xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[#18181B] mb-3">
               Un processus <span className="text-[#6366F1]">simple</span> et <span className="text-[#6366F1]">humain</span>
             </h2>
             <p className="text-sm sm:text-base text-[#71717A] max-w-xl">De votre idée à votre campagne lancée, sans tableau de bord complexe.</p>
@@ -453,19 +348,17 @@ export default function LandingPage() {
                     <div className="relative inline-block">
                       <span className="text-5xl md:text-7xl font-black text-[#6366f1]/5 absolute -top-6 left-0 select-none leading-none">{step.number}</span>
                       <div className="relative z-10 pt-8 md:pt-10">
-                        <motion.h3 initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-xl md:text-2xl font-bold text-[#18181B] mb-3 leading-[1.2]">{step.title}</motion.h3>
+                        <motion.h3 initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-xl md:text-2xl font-medium text-[#18181B] mb-3 leading-[1.2]">{step.title}</motion.h3>
                         <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.35 }} className="text-sm md:text-base text-[#71717A] leading-relaxed max-w-md">{step.description}</motion.p>
 
                         {index === 0 && (
                           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-6">
-                            <a
-                              href={TELEGRAM_URL}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-2 rounded-full bg-[#18181B] px-4 py-2 text-xs font-medium text-white hover:bg-[#333333] transition-all"
+                            <button
+                              onClick={scrollToPricing}
+                              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-5 py-2.5 text-sm font-medium text-white hover:bg-[#5558e6] transition-all min-w-[180px]"
                             >
                               Commencer maintenant <ArrowRight className="h-4 w-4" />
-                            </a>
+                            </button>
                           </motion.div>
                         )}
 
@@ -473,7 +366,7 @@ export default function LandingPage() {
                           <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-6">
                             <button
                               onClick={scrollToPricing}
-                              className="inline-flex items-center gap-2 rounded-full border border-[#E7E7EB] bg-[#F7F7F8] px-4 py-2 text-xs font-medium text-[#18181B] hover:border-[#6366F1]/30 hover:bg-white transition-all"
+                              className="inline-flex items-center justify-center gap-2 rounded-full border border-[#E7E7EB] bg-[#F7F7F8] px-5 py-2.5 text-sm font-medium text-[#18181B] hover:border-[#6366F1]/30 hover:bg-white transition-all min-w-[180px]"
                             >
                               Découvrir les formules <ArrowRight className="h-4 w-4" />
                             </button>
@@ -495,48 +388,68 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <BeforeAfterSection />
+      <BeforeAfterSection scrollToPricing={scrollToPricing} />
 
-      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white overflow-hidden">
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-xl sm:text-2xl md:text-3xl font-medium tracking-tight text-[#18181B] mb-3">
               Pourquoi commencer par une <span className="text-[#6366F1]">stratégie</span> ?
             </h2>
-            <p className="max-w-2xl text-sm sm:text-base text-[#71717A] leading-relaxed">
-              Avant de dépenser davantage en publicité, il faut savoir où investir, qui cibler et quel message tester.
+            <p className="text-xs sm:text-sm text-[#71717A] max-w-2xl">
+              Avant de dépenser davantage en publicité, il faut savoir où investir, qui cibler et quel message tester. Une stratégie solide est la fondation de toute croissance durable.
             </p>
           </motion.div>
 
           <div className="grid gap-6 md:grid-cols-3">
-            {strategyPillars.map((pillar, index) => (
+            {[
+              {
+                title: "Comprendre",
+                desc: "Nous analysons votre activité, votre audience et votre marché local avant de dépenser un euro. Cela évite les erreurs coûteuses dès le premier jour.",
+                icon: Users
+              },
+              {
+                title: "Décider",
+                desc: "Nous choisissons la plateforme idéale, l'audience précise et l'angle marketing qui résonne avec la culture locale pour maximiser chaque franc investi.",
+                icon: Target
+              },
+              {
+                title: "Agir",
+                desc: "Vous recevez une direction claire et des textes prêts à l'emploi. Plus de perte de temps à chercher quoi écrire, vous pouvez lancer vos campagnes immédiatement.",
+                icon: Zap
+              }
+            ].map((pillar, index) => (
               <motion.article
                 key={pillar.title}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="rounded-2xl border border-[#E7E7EB] bg-[#F7F7F8] p-5 md:p-6"
+                className="rounded-2xl border border-[#E7E7EB] bg-[#FFFFFF] p-5 md:p-8 hover:shadow-lg hover:border-[#6366F1]/30 transition-all duration-300 group"
               >
-                <div className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#6366F1]">0{index + 1}</div>
-                <h3 className="text-xl font-bold text-[#18181B] mb-3">{pillar.title}</h3>
-                <p className="text-sm leading-relaxed text-[#71717A]">{pillar.text}</p>
+                <div className="h-10 w-10 md:h-12 md:w-12 rounded-full bg-[#6366F1]/10 flex items-center justify-center mb-4 md:mb-6 group-hover:bg-[#6366F1] transition-colors">
+                  <pillar.icon className="h-5 w-5 md:h-6 md:w-6 text-[#6366F1] group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-2">{pillar.title}</h3>
+                <p className="text-xs md:text-sm leading-relaxed text-[#71717A]">{pillar.desc}</p>
               </motion.article>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
-        <div className="max-w-5xl mx-auto">
+      <TestimonialsCarousel />
+
+      <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
+        <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[#18181B] mb-3">
               Investissez dans votre <span className="text-[#6366F1]">croissance</span>
             </h2>
-            <p className="text-sm sm:text-base text-[#71717A] max-w-xl">Des formules d'abonnement flexibles, conçues pour tester et scaler votre marché.</p>
+            <p className="text-sm sm:text-base text-[#71717A] max-w-xl">Des formules d'abonnement annuelles, conçues pour tester et scaler votre marché en toute sérénité.</p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 max-w-4xl">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
             {pricingPlans.map((plan) => (
               <PricingCard key={plan.id} plan={plan} />
             ))}
@@ -551,10 +464,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
+      <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F7F7F8]">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-12">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[#18181B] mb-3">
               Questions <span className="text-[#6366F1]">fréquentes</span>
             </h2>
             <p className="text-sm sm:text-base text-[#71717A]">Tout ce que vous devez savoir avant de commencer</p>
@@ -566,11 +479,11 @@ export default function LandingPage() {
                 initial={{ opacity: 0, y: 10 }} 
                 whileInView={{ opacity: 1, y: 0 }} 
                 viewport={{ once: true }} 
-                className="rounded-xl border border-[#E7E7EB] bg-[#F7F7F8]/50 overflow-hidden"
+                className="rounded-xl border border-[#E7E7EB] bg-[#FFFFFF] overflow-hidden"
               >
                 <button 
                   onClick={() => setOpenFaq(openFaq === index ? null : index)} 
-                  className="w-full flex items-center justify-between p-3 sm:p-4 md:p-5 text-left hover:bg-[#F0F0F2] transition-colors"
+                  className="w-full flex items-center justify-between p-4 sm:p-5 text-left hover:bg-[#F7F7F8] transition-colors"
                 >
                   <span className="text-sm sm:text-base font-medium text-[#18181B] pr-4 leading-snug">{faq.question}</span>
                   <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 text-[#71717A] transition-transform flex-shrink-0 ${openFaq === index ? "rotate-180" : ""}`} />
@@ -578,7 +491,7 @@ export default function LandingPage() {
                 <AnimatePresence>
                   {openFaq === index && (
                     <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3 }} className="overflow-hidden">
-                      <div className="px-3 sm:px-4 md:px-5 pb-3 sm:pb-4 md:pb-5">
+                      <div className="px-4 sm:px-5 pb-5">
                         <p className="text-xs sm:text-sm text-[#71717A] leading-relaxed">{faq.answer}</p>
                       </div>
                     </motion.div>
@@ -590,12 +503,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-
-
-      <section id="resources" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
+      <section id="resources" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-10 md:mb-14">
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-[#18181B] mb-3">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight text-[#18181B] mb-3">
               Nos <span className="text-[#6366F1]">Ressources</span> gratuites
             </h2>
             <p className="text-sm sm:text-base text-[#71717A] max-w-xl">Des guides pratiques pour maximiser vos campagnes, même avant de passer à l'action.</p>
@@ -608,21 +519,18 @@ export default function LandingPage() {
                 description: "Comment configurer vos audiences pour toucher les bons décideurs au Sénégal, Côte d'Ivoire et Cameroun.",
                 date: "5 min de lecture",
                 link: "/insights/guide-analyse-concurrents-ia-2026",
-                content: ["Segmentation par villes et intérêts professionnels", "Budgétisation en devises locales (FCFA, XOF, etc.)", "Audiences lookalike calibrées pour l'Afrique", "Éviter les erreurs de ciblage courantes"]
               },
               {
                 title: "Les 3 erreurs qui brûlent votre budget",
                 description: "Analyse des campagnes échouées et comment les éviter dès le premier jour de lancement.",
                 date: "3 min de lecture",
                 link: "/insights/reduire-cac-saas-donnees",
-                content: ["Erreur #1 : Ciblage trop large sans testing", "Erreur #2 : Budgets constants sans optimisation", "Erreur #3 : Créatifs génériques sans test A/B", "Framework pour débugger vos campagnes"]
               },
               {
                 title: "Template de Message WhatsApp",
                 description: "Modèles de messages éprouvés pour convertir vos prospects en clients après un clic sur votre pub.",
                 date: "2 min de lecture",
                 link: "/insights/strategie-marketing-saas-0-a-10k-mrr",
-                content: ["Séquence d'activation immédiate", "Scénarios de réponse par secteur d'activité", "Timing et fréquence optimaux", "Exemples testés avec ROI mesurable"]
               }
             ].map((res, i) => (
               <motion.a 
@@ -632,7 +540,7 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: i * 0.1 }}
-                className="group bg-white p-5 md:p-6 rounded-2xl border border-[#E7E7EB] hover:shadow-lg hover:border-[#6366F1]/30 transition-all duration-300 block"
+                className="group bg-[#F7F7F8] p-5 md:p-6 rounded-2xl border border-[#E7E7EB] hover:shadow-lg hover:border-[#6366F1]/30 transition-all duration-300 block"
               >
                 <div className="flex items-center gap-2 mb-3">
                   <Calendar className="w-3.5 h-3.5 text-[#6366F1]" />
@@ -640,14 +548,6 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-base md:text-lg font-medium text-[#18181B] mb-2 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
                 <p className="text-sm text-[#71717A] leading-relaxed mb-4">{res.description}</p>
-                <div className="mb-4 space-y-2">
-                  {res.content && res.content.map((point: string, idx: number) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs text-[#18181B]">
-                      <span className="text-[#6366F1] font-bold mt-0.5">✓</span>
-                      <span>{point}</span>
-                    </div>
-                  ))}
-                </div>
                 <div className="inline-flex items-center gap-1 text-sm font-medium text-[#6366F1] group-hover:gap-2 transition-all">
                   Lire l'article <ArrowRight className="w-4 h-4" />
                 </div>
@@ -657,26 +557,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="relative z-10 py-8 md:py-12 px-4 sm:px-6 bg-gradient-to-r from-[#6366F1]/5 to-[#8B5CF6]/5">
-        <div className="max-w-3xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="flex flex-col items-center gap-4">
-            <p className="text-sm md:text-base text-[#71717A]">Prêt à appliquer ces stratégies ?</p>
-            <Link
-              href="#pricing"
-              className="inline-flex items-center gap-2 rounded-full bg-[#6366F1] px-6 py-2.5 text-sm font-semibold text-white hover:bg-[#5558e6] transition-all shadow-lg shadow-[#6366F1]/20"
-            >
-              Découvrir les formules <ArrowRight className="h-4 w-4" />
-            </Link>
-          </motion.div>
-        </div>
-      </section>
-
-      <TestimonialsCarousel placement="bottom" />
-
-      <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6 bg-[#FFFFFF] border-t border-[#E7E7EB]">
+      <section className="relative z-10 py-16 md:py-24 px-4 sm:px-6 bg-[#F7F7F8] border-t border-[#E7E7EB]">
         <div className="max-w-3xl mx-auto text-left sm:text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight leading-[1.15] mb-6 text-[#18181B]">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-medium tracking-tight leading-[1.15] mb-6 text-[#18181B]">
               Prêt à préparer votre <span className="text-[#6366F1]">prochaine campagne ?</span>
             </h2>
             <p className="text-sm sm:text-base md:text-lg text-[#71717A] mb-8 max-w-xl leading-relaxed">
@@ -685,14 +569,14 @@ export default function LandingPage() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
               <button 
                 onClick={scrollToPricing}
-                className="inline-flex items-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-xs sm:text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02] min-w-[180px]"
               >
                 Voir les offres et débloquer l'accès <ArrowRight className="h-4 w-4" />
               </button>
               <a 
                 href="#faq"
                 onClick={scrollToFAQ}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#F7F7F8] border border-[#E7E7EB] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-[#18181B] hover:bg-[#E7E7EB] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white border border-[#E7E7EB] px-5 py-2.5 sm:px-8 sm:py-3 text-sm font-medium text-[#18181B] hover:bg-[#F7F7F8] transition-all min-w-[180px]"
               >
                 Voir les questions fréquentes
               </a>

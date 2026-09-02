@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
 
 export default function HeroSection() {
   const [mounted, setMounted] = useState(false);
@@ -89,14 +88,16 @@ export default function HeroSection() {
             transition={{ duration: 0.5, delay: 0.24 }}
             className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl mx-auto sm:mx-0"
           >
-            <Link
-              href="/dashboard"
+            {/* ✅ BOUTON RENOMMÉ ET REDIRIGÉ VERS #pricing */}
+            <button
+              onClick={handleHeroCta}
               className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold text-white shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-[#5558e6] transition-all hover:scale-[1.02] hover:shadow-[0_0_60px_-10px_rgba(99,102,241,0.7)] w-full sm:w-auto"
             >
-              Accéder à votre espace
+              Obtenir ma stratégie complète
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            </button>
 
+            {/* ✅ EXCEPTION : Garde sa redirection vers #how-it-works */}
             <a
               href="#how-it-works"
               className="flex items-center justify-center gap-2 rounded-full border border-[#E2E8F0] bg-white px-5 sm:px-8 py-3 sm:py-4 text-xs sm:text-sm font-bold text-[#0F172A] hover:bg-[#F8FAFC] hover:border-[#CBD5E1] transition-all shadow-[0_2px_10px_rgba(15,23,42,0.04)] w-full sm:w-auto"
