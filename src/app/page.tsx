@@ -24,6 +24,7 @@ import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
 import HeroSection from "@/components/HeroSection";
 import WhyChooseSection from "../components/WhyChooseSection";
+import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
 
 function LinkedinIcon({ className }: { className?: string }) {
@@ -70,26 +71,28 @@ const faqData = [
   { question: "La stratégie gratuite est-elle vraiment gratuite ?", answer: "Oui, à 100%. C'est notre façon de vous prouver la qualité de notre travail avant que vous n'investissiez un seul franc. Aucun engagement requis." },
   { question: "Quelle est la différence avec les plans payants ?", answer: "Le PDF gratuit vous donne une vision globale. Les plans payants débloquent des stratégies mensuelles récurrentes, des textes publicitaires prêts à copier-coller, et l'analyse détaillée de vos concurrents." },
   { question: "Le paiement est-il sécurisé ?", answer: "Absolument. Nous utilisons Chariow, une plateforme sécurisée qui accepte le Mobile Money (Orange, Wave, MTN, Moov) et les cartes bancaires." },
+  { question: "Puis-je annuler mon abonnement à tout moment ?", answer: "Oui, vous pouvez mettre fin à votre abonnement à tout moment sans frais cachés ni pénalité. Nous croyons en la rétention par la qualité, pas par le blocage." },
+  { question: "Comment se passe le support WhatsApp ?", answer: "Dès votre souscription, vous êtes ajouté à un canal ou groupe dédié où nos experts répondent à vos questions sous 24h (ou 1h pour le plan Elite)." },
   { question: "Est-ce vraiment adapté au marché africain ?", answer: "Oui, c'est notre ADN. MakeItAds est calibré pour les réalités locales : budgets en FCFA, ciblage par villes africaines, et leviers de confiance locaux." }
 ];
 
-// ✅ NOUVELLE MINI-FAQ DE RÉASSURANCE SOUS LES PRIX
 const pricingReassuranceFaq = [
   { q: "Pourquoi un abonnement annuel à ce prix ?", a: "Cela nous permet de vous offrir le meilleur tarif possible tout en garantissant un accompagnement de qualité et des mises à jour continues de vos stratégies tout au long de l'année." },
   { q: "Que se passe-t-il juste après le paiement ?", a: "Vous recevez immédiatement un email de confirmation. Un expert vous contacte ensuite sous 24h pour récupérer vos informations et lancer la première stratégie." },
-  { q: "Puis-je changer de plan ou annuler ?", a: "Oui, vous pouvez upgrader votre plan à tout moment. L'annulation est simple et sans frais cachés, conformément à nos conditions générales." }
+  { q: "Puis-je changer de plan ou annuler ?", a: "Oui, vous pouvez upgrader votre plan à tout moment. L'annulation est simple et sans frais cachés, conformément à nos conditions générales." },
+  { q: "Les stratégies sont-elles adaptées à mon budget réel ?", a: "Absolument. Chaque stratégie est calibrée en fonction du budget que vous nous indiquez dans le formulaire initial." }
 ];
 
 const events = [
   { title: "Masterclass Marketing Digital", location: "Abidjan • Mars 2024", attendees: "45 participants", image: "/images/events/event-masterclass-abidjan.jpg" },
   { title: "Atelier Stratégies Publicitaires", location: "Dakar • Juin 2024", attendees: "38 participants", image: "/images/events/event-atelier-dakar.jpg" },
   { title: "Conférence Croissance Digitale", location: "Douala • Sept. 2024", attendees: "120 entrepreneurs", image: "/images/events/event-conference-douala.jpg" },
-  { title: "Webinaire Facebook Ads", location: "En ligne • Fév. 2024", attendees: "523 inscrits", image: "/images/events/event-webinaire-facebook.jpg" },
   { title: "Formation LinkedIn", location: "Cotonou • Mai 2024", attendees: "32 professionnels", image: "/images/events/event-formation-linkedin.jpg" },
   { title: "Bootcamp Marketing", location: "Lomé • Août 2024", attendees: "41 participants", image: "/images/events/event-bootcamp-lome.jpg" },
 ];
 const duplicatedEvents = [...events, ...events, ...events];
 
+// ✅ CONFIGURATION DES COULEURS : FOND BLANC PARTOUT, COULEURS UNIQUEMENT SUR COCHES ET BOUTONS
 const pricingPlans = [
   { 
     id: "gratuit", 
@@ -107,10 +110,12 @@ const pricingPlans = [
     popular: false, 
     ctaText: "Obtenir ma stratégie gratuite", 
     link: "https://forms.gle/5Ps9Xsri67w1VoEN9",
-    color: "border-emerald-500/30",
     checkColor: "text-emerald-500",
     bgCheck: "bg-emerald-500/10",
-    bgCard: "bg-[#FFFFFF]"
+    ctaBg: "bg-emerald-500",
+    ctaHover: "hover:bg-emerald-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
   },
   { 
     id: "pro", 
@@ -129,10 +134,12 @@ const pricingPlans = [
     popular: true, 
     ctaText: "Souscrire au plan Pro", 
     link: "https://hhowawtq.mychariow.shop/plan-start-up/checkout",
-    color: "border-[#6366F1]/30",
     checkColor: "text-[#6366F1]",
     bgCheck: "bg-[#6366F1]/10",
-    bgCard: "bg-[#FFFFFF]"
+    ctaBg: "bg-[#6366F1]",
+    ctaHover: "hover:bg-[#5558e6]",
+    ctaTextCol: "text-white",
+    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
   },
   { 
     id: "premium", 
@@ -152,10 +159,12 @@ const pricingPlans = [
     popular: false, 
     ctaText: "Souscrire au plan Premium", 
     link: "https://hhowawtq.mychariow.shop/plan-business/checkout",
-    color: "border-[#8B5CF6]/30",
-    checkColor: "text-[#8B5CF6]",
-    bgCheck: "bg-[#8B5CF6]/10",
-    bgCard: "bg-[#F5F3FF]" // ✅ Fond distinct pour le plan Premium
+    checkColor: "text-rose-500",
+    bgCheck: "bg-rose-500/10",
+    ctaBg: "bg-rose-500",
+    ctaHover: "hover:bg-rose-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur (plus de fond rose)
   },
   { 
     id: "elite", 
@@ -175,10 +184,12 @@ const pricingPlans = [
     popular: false, 
     ctaText: "Souscrire au plan Elite", 
     link: "https://hhowawtq.mychariow.shop/prd_3kt8qhd9/checkout",
-    color: "border-amber-500/30",
-    checkColor: "text-amber-500",
+    checkColor: "text-amber-500", // ✅ Orange dorée
     bgCheck: "bg-amber-500/10",
-    bgCard: "bg-[#FFFFFF]"
+    ctaBg: "bg-amber-500", // ✅ Bouton CTA orange dorée (exactement la même couleur que la coche)
+    ctaHover: "hover:bg-amber-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
   },
 ];
 
@@ -191,8 +202,8 @@ function PricingCard({ plan }: { plan: any }) {
       transition={{ duration: 0.6 }}
       className={`relative group rounded-2xl border p-4 md:p-6 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
         plan.popular
-          ? `${plan.color} shadow-[0_8px_30px_-12px_rgba(99,102,241,0.15)] hover:shadow-[0_15px_40px_-10px_rgba(99,102,241,0.2)] hover:-translate-y-1`
-          : `${plan.color} shadow-sm hover:shadow-[0_8px_25px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-1`
+          ? `${plan.id === 'pro' ? 'border-[#6366F1]/30' : 'border-rose-500/30'} shadow-[0_8px_30px_-12px_rgba(99,102,241,0.15)] hover:shadow-[0_15px_40px_-10px_rgba(99,102,241,0.2)] hover:-translate-y-1`
+          : `border-[#E7E7EB] shadow-sm hover:shadow-[0_8px_25px_-10px_rgba(0,0,0,0.05)] hover:-translate-y-1`
       }`}
     >
       {plan.popular && (
@@ -227,20 +238,11 @@ function PricingCard({ plan }: { plan: any }) {
         ))}
       </ul>
 
-      {/* ✅ BOUTON EN FORME DE LONGUE BULLE EN PASTILLE */}
       <a
         href={plan.link}
         target="_blank"
         rel="noopener noreferrer"
-        className={`block w-full rounded-full py-3 text-center text-xs md:text-sm font-medium transition-all duration-200 border ${
-          plan.id === "gratuit"
-            ? "bg-emerald-500 text-white border-emerald-500 hover:bg-emerald-600 shadow-sm shadow-emerald-500/20"
-            : plan.popular
-            ? "bg-[#6366F1] text-white border-[#6366F1] hover:bg-[#5558e6] shadow-sm shadow-[#6366F1]/20"
-            : plan.id === "elite" 
-              ? "bg-[#18181B] text-white border-[#18181B] hover:bg-[#333333]" 
-              : "bg-[#FFFFFF] text-[#18181B] border-[#E7E7EB] hover:bg-[#F7F7F8] hover:border-[#6366F1]/30"
-        }`}
+        className={`block w-full rounded-full py-3 text-center text-xs md:text-sm font-medium transition-all duration-200 border ${plan.ctaBg} ${plan.ctaHover} ${plan.ctaTextCol} shadow-sm`}
       >
         {plan.ctaText}
       </a>
@@ -279,7 +281,7 @@ export default function LandingPage() {
 
       <TrustpilotCarousel 
         reviews={section1Reviews} 
-        title="Ne nous croyez pas, Croyez-les…" 
+        title={<span>Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span>…</span>} 
         footerNote="Une note de 4.8 sur 5 sur la base de 312 avis. Nos avis 4 et 5 étoiles." 
       />
 
@@ -352,6 +354,7 @@ export default function LandingPage() {
       </section>
 
       <WhyChooseSection />
+      <EntrepreneursCarousel />
 
       <section className="relative z-10 py-10 md:py-16 bg-[#FFFFFF] overflow-hidden border-t border-[#F0F0F2]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-6 md:mb-10">
@@ -377,7 +380,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION PRICING */}
       <section id="pricing" className="relative z-10 py-10 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-8 md:mb-14">
@@ -400,7 +402,6 @@ export default function LandingPage() {
             </p>
           </div>
 
-          {/* ✅ MINI-FAQ DE RÉASSURANCE SOUS LES PRIX (SANS TITRE) */}
           <div className="max-w-3xl mx-auto mt-12 md:mt-16 space-y-3">
             {pricingReassuranceFaq.map((faq, index) => (
               <motion.div 
@@ -432,14 +433,12 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION AVIS 2 (DÉPLACÉE ICI, APRÈS LES TARIFS) */}
       <TrustpilotCarousel 
         reviews={section2Reviews} 
         title="Des résultats qui parlent d'eux-mêmes" 
         footerNote="Une note de 4.7 sur 5 sur la base de 289 avis. Nos avis 3, 4 et 5 étoiles." 
       />
 
-      {/* ✅ SECTION RESSOURCES / BLOGS */}
       <section id="resources" className="relative z-10 py-10 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
         <div className="max-w-6xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-8 md:mb-14">

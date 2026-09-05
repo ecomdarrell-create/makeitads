@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, ReactNode } from "react";
 import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
 interface Review {
@@ -13,7 +13,7 @@ interface Review {
 
 interface TrustpilotCarouselProps {
   reviews: Review[];
-  title: string;
+  title: ReactNode; // ✅ CORRIGÉ : Accepte maintenant du JSX (comme les spans colorés)
   footerNote: string;
 }
 
@@ -51,7 +51,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
         </h2>
 
         <div className="relative group">
-          {/* Flèche Gauche (Toujours visible sur mobile, hover sur desktop) */}
+          {/* Flèche Gauche */}
           <button
             onClick={() => scroll("left")}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
@@ -101,7 +101,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
             ))}
           </div>
 
-          {/* Flèche Droite (Toujours visible sur mobile, hover sur desktop) */}
+          {/* Flèche Droite */}
           <button
             onClick={() => scroll("right")}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
