@@ -19,11 +19,9 @@ const duplicatedEntrepreneurs = [...entrepreneurs, ...entrepreneurs, ...entrepre
 
 export default function EntrepreneursCarousel() {
   return (
-    // ✅ FOND CLAIR ÉPURÉ POUR TOUTE LA SECTION
     <section className="relative z-10 bg-[#F8F8FC] py-12 md:py-20 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         
-        {/* Badge "VU SUR…" */}
         <div className="flex justify-center mb-6 md:mb-8">
           <div className="inline-flex items-center gap-3 md:gap-4 bg-white border border-[#E2E2EC] rounded-full px-5 py-2.5 md:px-6 md:py-3 shadow-sm">
             <span className="text-[12px] md:text-[13px] font-bold text-[#18181B] tracking-wide">
@@ -47,20 +45,17 @@ export default function EntrepreneursCarousel() {
           </div>
         </div>
 
-        {/* Titre principal (adapté au fond clair) */}
         <h2 className="text-[28px] md:text-[52px] font-black uppercase tracking-[-0.5px] text-center mb-4 md:mb-5 leading-tight">
           <span className="text-[#6366F1]">VALIDÉ</span>{" "}
           <span className="text-[#080810]">PAR NOS ENTREPRENEURS</span>
         </h2>
 
-        {/* Texte sous le titre (adapté au fond clair) */}
         <div className="max-w-[800px] mx-auto text-center mb-8 md:mb-12 px-2">
           <p className="text-[12px] md:text-[15px] leading-[1.7] text-[#475569]">
             Et oui! MakeItAds c'est la <strong className="text-[#080810] font-bold">référence en stratégie publicitaire pour entrepreneurs africains</strong> et ça c'est confirmé par des centaines d'entrepreneurs à travers toute l'Afrique francophone: Cameroun, Côte d'Ivoire, Sénégal, Mali, RDC, Burkina Faso, Togo et bien d'autres. On peut pas te promettre de faire exploser ton business du jour au lendemain mais on peut te promettre une <strong className="text-[#080810] font-bold">stratégie claire et immédiatement actionnable</strong>. Découvre les <strong className="text-[#080810] font-bold">témoignages de notre communauté</strong>.
           </p>
         </div>
 
-        {/* Carrousel de photos */}
         <div className="relative w-full overflow-hidden group">
           <div className="flex gap-[10px] md:gap-4 animate-[scroll-entrepreneurs_35s_linear_infinite] group-hover:[animation-play-state:paused] w-max">
             {duplicatedEntrepreneurs.map((entrepreneur, index) => (

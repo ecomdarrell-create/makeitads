@@ -17,7 +17,7 @@ import {
   ShieldCheck,
   Zap,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
@@ -48,26 +48,26 @@ const partnerLogos = [
 const howItWorksSteps = [
   {
     number: "01",
-    title: "Remplissez le formulaire gratuit",
-    description: "Décrivez votre activité, votre cible et vos objectifs en 2 minutes via notre formulaire sécurisé.",
+    title: "Contactez-nous sur WhatsApp",
+    description: "Décrivez votre activité, votre cible et vos objectifs en 2 minutes. C'est la première étape pour une stratégie sur-mesure.",
     image: "/images/process/step-1-formulaire.jpg"
   },
   {
     number: "02",
-    title: "Recevez votre stratégie par email",
+    title: "Recevez votre stratégie sur WhatsApp",
     description: "Notre équipe analyse votre contexte et vous envoie une stratégie claire, directement exploitable, sous 24 à 48h.",
     image: "/images/process/step-2-strategie-email.jpg"
   },
   {
     number: "03",
-    title: "Rejoignez notre canal Telegram",
+    title: "Rejoignez notre canal WhatsApp",
     description: "Accédez à notre communauté privée pour des ressources exclusives et nos formules d'accompagnement Premium et Elite.",
     image: "/images/process/step-3-communaute-telegram.jpg"
   },
 ];
 
 const faqData = [
-  { question: "Comment obtenir mon analyse gratuite ?", answer: "C'est simple ! Cliquez sur 'Obtenir ma stratégie', remplissez le formulaire en 2 minutes. Un expert MakeItAds analysera votre cas et vous enverra un PDF personnalisé par email sous 24 à 48h." },
+  { question: "Comment obtenir mon analyse gratuite ?", answer: "C'est simple ! Contactez-nous sur WhatsApp. Un expert MakeItAds analysera votre cas et vous enverra un PDF personnalisé sur WhatsApp sous 24 à 48h." },
   { question: "La stratégie gratuite est-elle vraiment gratuite ?", answer: "Oui, à 100%. C'est notre façon de vous prouver la qualité de notre travail avant que vous n'investissiez un seul franc. Aucun engagement requis." },
   { question: "Quelle est la différence avec les plans payants ?", answer: "Le PDF gratuit vous donne une vision globale. Les plans payants débloquent des stratégies mensuelles récurrentes, des textes publicitaires prêts à copier-coller, et l'analyse détaillée de vos concurrents." },
   { question: "Le paiement est-il sécurisé ?", answer: "Absolument. Nous utilisons Chariow, une plateforme sécurisée qui accepte le Mobile Money (Orange, Wave, MTN, Moov) et les cartes bancaires." },
@@ -78,9 +78,9 @@ const faqData = [
 
 const pricingReassuranceFaq = [
   { q: "Pourquoi un abonnement annuel à ce prix ?", a: "Cela nous permet de vous offrir le meilleur tarif possible tout en garantissant un accompagnement de qualité et des mises à jour continues de vos stratégies tout au long de l'année." },
-  { q: "Que se passe-t-il juste après le paiement ?", a: "Vous recevez immédiatement un email de confirmation. Un expert vous contacte ensuite sous 24h pour récupérer vos informations et lancer la première stratégie." },
+  { q: "Que se passe-t-il juste après le paiement ?", a: "Vous recevez immédiatement un message WhatsApp de confirmation. Un expert vous contacte ensuite sous 24h pour récupérer vos informations et lancer la première stratégie." },
   { q: "Puis-je changer de plan ou annuler ?", a: "Oui, vous pouvez upgrader votre plan à tout moment. L'annulation est simple et sans frais cachés, conformément à nos conditions générales." },
-  { q: "Les stratégies sont-elles adaptées à mon budget réel ?", a: "Absolument. Chaque stratégie est calibrée en fonction du budget que vous nous indiquez dans le formulaire initial." }
+  { q: "Les stratégies sont-elles adaptées à mon budget réel ?", a: "Absolument. Chaque stratégie est calibrée en fonction du budget que vous nous indiquez lors de notre échange." }
 ];
 
 const events = [
@@ -92,7 +92,6 @@ const events = [
 ];
 const duplicatedEvents = [...events, ...events, ...events];
 
-// ✅ CONFIGURATION DES COULEURS : FOND BLANC PARTOUT, COULEURS UNIQUEMENT SUR COCHES ET BOUTONS
 const pricingPlans = [
   { 
     id: "gratuit", 
@@ -109,13 +108,13 @@ const pricingPlans = [
     ], 
     popular: false, 
     ctaText: "Obtenir ma stratégie gratuite", 
-    link: "https://forms.gle/5Ps9Xsri67w1VoEN9",
+    link: "https://wa.me/",
     checkColor: "text-emerald-500",
     bgCheck: "bg-emerald-500/10",
     ctaBg: "bg-emerald-500",
     ctaHover: "hover:bg-emerald-600",
     ctaTextCol: "text-white",
-    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
+    bgCard: "bg-[#FFFFFF]"
   },
   { 
     id: "pro", 
@@ -129,7 +128,7 @@ const pricingPlans = [
       "6 variantes de textes publicitaires / mois",
       "Ciblage précis (villes, âges, intérêts)",
       "Guide créatif et recommandations",
-      "Accès au canal Telegram communautaire"
+      "Accès au canal WhatsApp communautaire"
     ], 
     popular: true, 
     ctaText: "Souscrire au plan Pro", 
@@ -139,7 +138,7 @@ const pricingPlans = [
     ctaBg: "bg-[#6366F1]",
     ctaHover: "hover:bg-[#5558e6]",
     ctaTextCol: "text-white",
-    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
+    bgCard: "bg-[#FFFFFF]"
   },
   { 
     id: "premium", 
@@ -164,7 +163,7 @@ const pricingPlans = [
     ctaBg: "bg-rose-500",
     ctaHover: "hover:bg-rose-600",
     ctaTextCol: "text-white",
-    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur (plus de fond rose)
+    bgCard: "bg-[#FFFFFF]"
   },
   { 
     id: "elite", 
@@ -184,12 +183,12 @@ const pricingPlans = [
     popular: false, 
     ctaText: "Souscrire au plan Elite", 
     link: "https://hhowawtq.mychariow.shop/prd_3kt8qhd9/checkout",
-    checkColor: "text-amber-500", // ✅ Orange dorée
+    checkColor: "text-amber-500",
     bgCheck: "bg-amber-500/10",
-    ctaBg: "bg-amber-500", // ✅ Bouton CTA orange dorée (exactement la même couleur que la coche)
+    ctaBg: "bg-amber-500",
     ctaHover: "hover:bg-amber-600",
     ctaTextCol: "text-white",
-    bgCard: "bg-[#FFFFFF]" // ✅ Fond blanc pur
+    bgCard: "bg-[#FFFFFF]"
   },
 ];
 
@@ -269,7 +268,7 @@ export default function LandingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#FFFFFF] text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20 selection:text-[#18181B]">
+    <main className="min-h-screen bg-[#FFFFFF] text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20 selection:text-[#18181B]" suppressHydrationWarning>
       <div className="fixed inset-0 z-0 pointer-events-none">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-[#6366f1]/5 rounded-full blur-[100px] opacity-60" />
         <div className="absolute bottom-0 right-0 w-[600px] h-[400px] bg-[#8b5cf6]/5 rounded-full blur-[80px] opacity-40" />
@@ -324,19 +323,6 @@ export default function LandingPage() {
                       <div className="relative z-10 pt-6 md:pt-10">
                         <motion.h3 initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }} className="text-base md:text-2xl font-medium text-[#18181B] mb-2 md:mb-3 leading-[1.2]">{step.title}</motion.h3>
                         <motion.p initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.35 }} className="text-xs md:text-base text-[#71717A] leading-relaxed max-w-md">{step.description}</motion.p>
-
-                        {index === 0 && (
-                          <motion.div initial={{ opacity: 0, y: 15 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.5 }} className="mt-4 md:mt-6">
-                            <a
-                              href="https://forms.gle/5Ps9Xsri67w1VoEN9"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-5 py-2.5 text-xs md:text-sm font-medium text-white hover:bg-[#5558e6] transition-all min-w-[160px]"
-                            >
-                              Commencer maintenant <ArrowRight className="h-3.5 w-3.5" />
-                            </a>
-                          </motion.div>
-                        )}
                       </div>
                     </div>
                   </motion.div>
@@ -439,42 +425,127 @@ export default function LandingPage() {
         footerNote="Une note de 4.7 sur 5 sur la base de 289 avis. Nos avis 3, 4 et 5 étoiles." 
       />
 
-      <section id="resources" className="relative z-10 py-10 md:py-20 px-4 sm:px-6 bg-[#FFFFFF]">
-        <div className="max-w-6xl mx-auto">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left sm:text-left mb-8 md:mb-14">
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-medium tracking-tight text-[#18181B] mb-2">
-              Nos <span className="text-[#6366F1]">Ressources</span> gratuites
+      {/* ✅ SECTION TABLEAU DE COMPARAISON MAKEITADS VS CONCURRENTS (FOND CLAIR) */}
+      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
+        <div className="max-w-5xl mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-8 md:mb-12"
+          >
+            <h2 className="text-[24px] md:text-[42px] font-black uppercase tracking-[-0.5px] leading-tight text-[#18181B]">
+              ARRÊTEZ DE PAYER TROP CHER.
             </h2>
-            <p className="text-xs sm:text-sm text-[#71717A] max-w-xl">Des guides pratiques pour maximiser vos campagnes, même avant de passer à l'action.</p>
+            <p className="text-[16px] md:text-[24px] font-bold text-[#71717A] mt-2">
+              Voici ce que vous obtenez vraiment avec <span className="text-[#6366F1]">MakeItAds</span>.
+            </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-[38%_31%_31%] md:grid-cols-[40%_30%_30%] w-full rounded-2xl overflow-hidden border border-[#E7E7EB] bg-[#FFFFFF]">
+            {/* Header Row */}
+            <div className="bg-[#F8F8FC] h-[56px] md:h-[68px] border-b border-r border-[#E7E7EB]" />
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="bg-[#6366F1] h-[56px] md:h-[68px] flex items-center justify-center border-b border-[#8B5CF6] relative z-10 md:scale-y-[1.02] scale-y-[1.01] origin-center"
+            >
+              <span className="text-[13px] md:text-[16px] font-extrabold text-white">
+                Make<span className="text-[#C4B5FD]">ItAds</span>
+              </span>
+            </motion.div>
+            <div className="bg-[#FFFFFF] h-[56px] md:h-[68px] flex items-center justify-center border-b border-l border-[#E7E7EB]">
+              <span className="text-[10px] md:text-[11px] font-bold text-[#9094A8] uppercase tracking-[1.5px]">
+                Concurrents
+              </span>
+            </div>
+
+            {/* Rows */}
             {[
-              { title: "Guide du Ciblage Meta en Afrique", description: "Comment configurer vos audiences pour toucher les bons décideurs.", date: "5 min", link: "/insights/guide-analyse-concurrents-ia-2026" },
-              { title: "Les 3 erreurs qui brûlent votre budget", description: "Analyse des campagnes échouées et comment les éviter.", date: "3 min", link: "/insights/reduire-cac-saas-donnees" },
-              { title: "Template de Message WhatsApp", description: "Modèles de messages éprouvés pour convertir vos prospects.", date: "2 min", link: "/insights/strategie-marketing-saas-0-a-10k-mrr" }
-            ].map((res, i) => (
-              <motion.a 
-                key={i}
-                href={res.link}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                className="group bg-[#F7F7F8] p-4 md:p-6 rounded-2xl border border-[#E7E7EB] hover:shadow-lg hover:border-[#6366F1]/30 transition-all duration-300 block"
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar className="w-3.5 h-3.5 text-[#6366F1]" />
-                  <span className="text-[10px] uppercase tracking-wider text-[#71717A] font-medium">{res.date} de lecture</span>
-                </div>
-                <h3 className="text-sm md:text-base font-medium text-[#18181B] mb-2 group-hover:text-[#6366F1] transition-colors">{res.title}</h3>
-                <p className="text-xs text-[#71717A] leading-relaxed mb-4">{res.description}</p>
-                <div className="inline-flex items-center gap-1 text-xs font-medium text-[#6366F1] group-hover:gap-2 transition-all">
-                  Lire l'article <ArrowRight className="w-3.5 h-3.5" />
-                </div>
-              </motion.a>
+              { critere: "Délai de livraison", mi: "Moins de 24h", comp: "2 à 4 semaines", isIcon: false },
+              { critere: "Prix d'entrée", mi: "Gratuit", comp: "300.000 FCFA+", isIcon: false },
+              { critere: "Personnalisation", mi: "100% sur mesure", comp: "Template générique", isIcon: false },
+              { critere: "Plateforme recommandée", mi: "1 plateforme précise", comp: "\"Testez tout\"", isIcon: false },
+              { critere: "Messages publicitaires", mi: "Prêts à copier-coller", comp: "À rédiger soi-même", isIcon: false },
+              { critere: "Analyse concurrence", mi: "Incluse (plan Pro+)", comp: "En option payante", isIcon: false },
+              { critere: "Budget allocation", mi: "Détaillée et précise", comp: "Estimation vague", isIcon: false },
+              { critere: "Adapté au marché africain", mi: "check", comp: "cross", isIcon: true },
+              { critere: "Paiement Mobile Money", mi: "check", comp: "cross", isIcon: true },
+              { critere: "Support WhatsApp/Telegram", mi: "check", comp: "cross", isIcon: true },
+            ].map((row, i) => (
+              <Fragment key={i}>
+                {/* Critère */}
+                <motion.div 
+                  initial={{ opacity: 0, x: -10 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-[#F8F8FC] border-t border-r border-[#E7E7EB] px-3 md:px-5 py-3 md:py-4 flex items-center"
+                >
+                  <span className="text-[11px] md:text-[13px] font-semibold text-[#18181B] leading-tight">
+                    {row.critere}
+                  </span>
+                </motion.div>
+
+                {/* MakeItAds */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.1 + (i * 0.05) }}
+                  className="bg-[#6366F1] border-t border-[#8B5CF6] relative z-10 px-2 md:px-3 py-3 md:py-4 flex items-center justify-center md:scale-y-[1.02] scale-y-[1.01] origin-center"
+                >
+                  {row.isIcon ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" className="md:w-6 md:h-6 w-[18px] h-[18px]">
+                      <circle cx="12" cy="12" r="12" fill="#FFFFFF" />
+                      <path d="M8 12L11 15L16 9" stroke="#6366F1" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  ) : (
+                    <span className="text-[12px] md:text-[14px] font-bold text-white text-center leading-tight">
+                      {row.mi}
+                    </span>
+                  )}
+                </motion.div>
+
+                {/* Concurrents */}
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.15 + (i * 0.05) }}
+                  className="bg-[#FFFFFF] border-t border-l border-[#E7E7EB] px-2 md:px-3 py-3 md:py-4 flex items-center justify-center"
+                >
+                  {row.isIcon ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" className="md:w-5 md:h-5 w-4 h-4" fill="none" stroke="#FF4D4D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                  ) : (
+                    <span className="text-[11px] md:text-[13px] font-normal text-[#9094A8] text-center leading-tight">
+                      {row.comp}
+                    </span>
+                  )}
+                </motion.div>
+              </Fragment>
             ))}
           </div>
+
+          {/* Bouton CTA */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.6 }}
+            className="flex justify-center mt-7 md:mt-10"
+          >
+            <button
+              onClick={scrollToPricing}
+              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366F1] text-white font-bold text-[14px] md:text-[16px] px-8 md:px-12 py-3.5 md:py-4 shadow-[0_4px_24px_rgba(99,102,241,0.25)] hover:bg-[#5558e6] transition-all duration-200 hover:scale-[1.02]"
+            >
+              Voir les offres MakeItAds <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+          </motion.div>
         </div>
       </section>
 
