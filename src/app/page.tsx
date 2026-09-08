@@ -60,25 +60,25 @@ const howItWorksSteps = [
   },
   {
     number: "03",
-    title: "Rejoignez notre canal WhatsApp",
-    description: "Accédez à notre communauté privée pour des ressources exclusives et nos formules d'accompagnement Premium et Elite.",
+    title: "Rejoignez le MakeItAds Business Club",
+    description: "Accédez au MakeItAds Business Club pour des ressources exclusives, du networking et nos formules d'accompagnement Premium et Elite.",
     image: "/images/process/step-3-communaute-telegram.jpg"
   },
 ];
 
 const faqData = [
-  { question: "Comment obtenir mon analyse gratuite ?", answer: "C'est simple ! Contactez-nous sur WhatsApp. Un expert MakeItAds analysera votre cas et vous enverra un PDF personnalisé sur WhatsApp sous 24 à 48h." },
+  { question: "Comment obtenir mon analyse gratuite ?", answer: "C'est simple ! Contactez-nous via le bouton dédié. Un expert MakeItAds analysera votre cas et vous enverra un PDF personnalisé sous 24 à 48h." },
   { question: "La stratégie gratuite est-elle vraiment gratuite ?", answer: "Oui, à 100%. C'est notre façon de vous prouver la qualité de notre travail avant que vous n'investissiez un seul franc. Aucun engagement requis." },
   { question: "Quelle est la différence avec les plans payants ?", answer: "Le PDF gratuit vous donne une vision globale. Les plans payants débloquent des stratégies mensuelles récurrentes, des textes publicitaires prêts à copier-coller, et l'analyse détaillée de vos concurrents." },
   { question: "Le paiement est-il sécurisé ?", answer: "Absolument. Nous utilisons Chariow, une plateforme sécurisée qui accepte le Mobile Money (Orange, Wave, MTN, Moov) et les cartes bancaires." },
   { question: "Puis-je annuler mon abonnement à tout moment ?", answer: "Oui, vous pouvez mettre fin à votre abonnement à tout moment sans frais cachés ni pénalité. Nous croyons en la rétention par la qualité, pas par le blocage." },
-  { question: "Comment se passe le support WhatsApp ?", answer: "Dès votre souscription, vous êtes ajouté à un canal ou groupe dédié où nos experts répondent à vos questions sous 24h (ou 1h pour le plan Elite)." },
+  { question: "Qu'est-ce que le MakeItAds Business Club ?", answer: "C'est notre communauté privée réservée aux membres. Dès votre souscription, vous y êtes ajouté pour échanger, poser vos questions et bénéficier d'un support réactif (sous 24h, ou 1h pour le plan Elite)." },
   { question: "Est-ce vraiment adapté au marché africain ?", answer: "Oui, c'est notre ADN. MakeItAds est calibré pour les réalités locales : budgets en FCFA, ciblage par villes africaines, et leviers de confiance locaux." }
 ];
 
 const pricingReassuranceFaq = [
   { q: "Pourquoi un abonnement annuel à ce prix ?", a: "Cela nous permet de vous offrir le meilleur tarif possible tout en garantissant un accompagnement de qualité et des mises à jour continues de vos stratégies tout au long de l'année." },
-  { q: "Que se passe-t-il juste après le paiement ?", a: "Vous recevez immédiatement un message WhatsApp de confirmation. Un expert vous contacte ensuite sous 24h pour récupérer vos informations et lancer la première stratégie." },
+  { q: "Que se passe-t-il juste après le paiement ?", a: "Vous recevez immédiatement un message de confirmation et l'accès au MakeItAds Business Club. Un expert vous contacte ensuite sous 24h pour lancer votre première stratégie." },
   { q: "Puis-je changer de plan ou annuler ?", a: "Oui, vous pouvez upgrader votre plan à tout moment. L'annulation est simple et sans frais cachés, conformément à nos conditions générales." },
   { q: "Les stratégies sont-elles adaptées à mon budget réel ?", a: "Absolument. Chaque stratégie est calibrée en fonction du budget que vous nous indiquez lors de notre échange." }
 ];
@@ -108,7 +108,7 @@ const pricingPlans = [
     ], 
     popular: false, 
     ctaText: "Obtenir ma stratégie gratuite", 
-    link: "https://wa.me/",
+    link: "https://t.me/MakeitAds_CEO",
     checkColor: "text-emerald-500",
     bgCheck: "bg-emerald-500/10",
     ctaBg: "bg-emerald-500",
@@ -128,11 +128,11 @@ const pricingPlans = [
       "6 variantes de textes publicitaires / mois",
       "Ciblage précis (villes, âges, intérêts)",
       "Guide créatif et recommandations",
-      "Accès au canal WhatsApp communautaire"
+      "Accès au MakeItAds Business Club"
     ], 
     popular: true, 
     ctaText: "Souscrire au plan Pro", 
-    link: "https://hhowawtq.mychariow.shop/plan-start-up/checkout",
+    link: "https://hhowawtq.mychariow.shop/plan-pro",
     checkColor: "text-[#6366F1]",
     bgCheck: "bg-[#6366F1]/10",
     ctaBg: "bg-[#6366F1]",
@@ -143,9 +143,9 @@ const pricingPlans = [
   { 
     id: "premium", 
     name: "Plan Premium", 
-    price: "50 000", 
+    price: "25 000", 
     period: "/an",
-    currencyNote: "~76 € / ~82 $",
+    currencyNote: "~38 € / ~41 $",
     description: "Pour les entrepreneurs qui veulent tester plusieurs angles et scaler leur activité.", 
     features: [
       "Tout le Plan Pro inclus",
@@ -153,11 +153,11 @@ const pricingPlans = [
       "15 variantes de textes publicitaires / mois",
       "1 analyse concurrentielle / trimestre",
       "1 publication de votre entreprise sur nos canaux / mois",
-      "Support prioritaire WhatsApp"
+      "Support prioritaire"
     ], 
     popular: false, 
     ctaText: "Souscrire au plan Premium", 
-    link: "https://hhowawtq.mychariow.shop/plan-business/checkout",
+    link: "https://hhowawtq.mychariow.shop/plan-prem",
     checkColor: "text-rose-500",
     bgCheck: "bg-rose-500/10",
     ctaBg: "bg-rose-500",
@@ -168,9 +168,9 @@ const pricingPlans = [
   { 
     id: "elite", 
     name: "Plan Elite", 
-    price: "250 000", 
+    price: "100 000", 
     period: "/an",
-    currencyNote: "~380 € / ~410 $",
+    currencyNote: "~152 € / ~164 $",
     description: "L'accompagnement sur-mesure pour les entreprises qui exigent l'excellence.", 
     features: [
       "Tout le Plan Premium inclus",
@@ -182,7 +182,7 @@ const pricingPlans = [
     ], 
     popular: false, 
     ctaText: "Souscrire au plan Elite", 
-    link: "https://hhowawtq.mychariow.shop/prd_3kt8qhd9/checkout",
+    link: "https://hhowawtq.mychariow.shop/plan-elit",
     checkColor: "text-amber-500",
     bgCheck: "bg-amber-500/10",
     ctaBg: "bg-amber-500",
