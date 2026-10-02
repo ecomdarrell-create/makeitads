@@ -20,7 +20,6 @@ import { BackButton } from '@/components/ui/BackButton';
 
 export default function GeneratePage() {
   const router = useRouter();
-  const supabase = createClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showSummary, setShowSummary] = useState(false);
@@ -28,6 +27,7 @@ export default function GeneratePage() {
   const [creditsBalance, setCreditsBalance] = useState(0);
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('complete');
+  const [supabaseError, setSupabaseError] = useState('');
 
   const totalSteps = 8;
   const completeGenerationAllowed = hasFeature(currentPlan, 'pro');
@@ -58,15 +58,51 @@ export default function GeneratePage() {
   }, [formData, currentStep]);
 
   const loadCreditsBalance = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      const { data: profile } = await supabase
+    try {
+      const supabase = createClient();
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+      if (authError) {
+        throw new Error(`Authentification Supabase (${authError.code || 'sans code'}): ${authError.message}`);
+      }
+
+      if (!user) {
+        setSupabaseError('Aucune session utilisateur active. Reconnectez-vous puis réessayez.');
+        return;
+      }
+
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('credits_balance, plan')
         .eq('id', user.id)
-        .single();
-      setCreditsBalance(profile?.credits_balance || 0);
-      setCurrentPlan(normalizePlanId(profile?.plan));
+        .maybeSingle();
+
+      if (profileError) {
+        console.error('Erreur de lecture du profil Supabase:', {
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details,
+          hint: profileError.hint,
+        });
+        setSupabaseError(`Lecture du profil impossible (${profileError.code || 'erreur Supabase'}): ${profileError.message}`);
+        return;
+      }
+
+      if (!profile) {
+        setSupabaseError('Votre session est active, mais aucun profil correspondant n’existe dans la table profiles. Le profil doit être créé côté base de données avant de générer une stratégie.');
+        return;
+      }
+
+      setCreditsBalance(profile.credits_balance || 0);
+      setCurrentPlan(normalizePlanId(profile.plan));
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('Erreur de connexion Supabase:', message);
+      setSupabaseError(
+        message.includes('project\'s URL and API key are required')
+          ? 'Configuration Supabase absente au runtime : définissez NEXT_PUBLIC_SUPABASE_URL et NEXT_PUBLIC_SUPABASE_ANON_KEY pour cet environnement Vercel.'
+          : `Connexion Supabase impossible : ${message}`
+      );
     }
   };
 
@@ -114,6 +150,7 @@ export default function GeneratePage() {
     setIsGenerating(true);
 
     try {
+      const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         alert('Vous devez être connecté');
@@ -197,6 +234,12 @@ export default function GeneratePage() {
               : 'Quelques informations sur votre entreprise nous permettront de construire une stratégie adaptée.'}
         </p>
       </div>
+
+      {supabaseError && (
+        <div role="alert" className="mb-5 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          {supabaseError}
+        </div>
+      )}
 
       {!showSummary && !isGenerating && (
         <div className="mb-5 rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm">
