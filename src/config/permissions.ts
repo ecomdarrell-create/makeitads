@@ -3,7 +3,7 @@ export interface PlanPermissions {
   // Stratégies AI
   strategyGeneration: {
     enabled: boolean;
-    monthlyLimit: number;
+    monthlyCredits: number;
   };
   
   // Intelligence concurrentielle
@@ -211,7 +211,7 @@ export interface PlanPermissions {
 // Configuration par plan
 export const PLAN_PERMISSIONS: Record<string, PlanPermissions> = {
   free: {
-    strategyGeneration: { enabled: true, monthlyLimit: 1 },
+    strategyGeneration: { enabled: true, monthlyCredits: 10 },
     competitorIntelligence: { enabled: false, maxCompetitors: 0 },
     trendAnalysis: { enabled: false, realTime: false },
     swotAnalysis: { enabled: false },
@@ -251,7 +251,7 @@ export const PLAN_PERMISSIONS: Record<string, PlanPermissions> = {
   },
 
   pro: {
-    strategyGeneration: { enabled: true, monthlyLimit: 10 },
+    strategyGeneration: { enabled: true, monthlyCredits: 15 },
     competitorIntelligence: { enabled: true, maxCompetitors: 10 },
     trendAnalysis: { enabled: true, realTime: false },
     swotAnalysis: { enabled: true },
@@ -291,7 +291,7 @@ export const PLAN_PERMISSIONS: Record<string, PlanPermissions> = {
   },
 
   premium: {
-    strategyGeneration: { enabled: true, monthlyLimit: -1 },
+    strategyGeneration: { enabled: true, monthlyCredits: 30 },
     competitorIntelligence: { enabled: true, maxCompetitors: 50 },
     trendAnalysis: { enabled: true, realTime: true },
     swotAnalysis: { enabled: true },
@@ -331,7 +331,7 @@ export const PLAN_PERMISSIONS: Record<string, PlanPermissions> = {
   },
 
   enterprise: {
-    strategyGeneration: { enabled: true, monthlyLimit: -1 },
+    strategyGeneration: { enabled: true, monthlyCredits: 80 },
     competitorIntelligence: { enabled: true, maxCompetitors: -1 },
     trendAnalysis: { enabled: true, realTime: true },
     swotAnalysis: { enabled: true },
@@ -405,7 +405,8 @@ export function getFeatureLimit(plan: string, feature: keyof PlanPermissions): n
   if (!featureConfig) return 0;
   
   // Retourne la première limite trouvée
-  return featureConfig.monthlyLimit 
+  return featureConfig.monthlyCredits
+    ?? featureConfig.monthlyLimit
     ?? featureConfig.maxCompetitors 
     ?? featureConfig.monthlyCalls 
     ?? featureConfig.limit 

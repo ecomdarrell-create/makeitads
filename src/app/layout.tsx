@@ -118,7 +118,7 @@ const jsonLd = {
       "url": "https://makeitads.pro",
       "logo": "https://makeitads.pro/favicon.ico",
       "sameAs": [
-        "https://t.me/MakeItAds_Pro"
+        "https://t.me/MakeitAds_CEO"
       ]
     },
     {

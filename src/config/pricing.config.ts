@@ -9,10 +9,11 @@ export interface PricingPlan {
   description: string;
   monthlyPrice: number;
   yearlyPrice: number;
+  welcomeCredits: number;
+  monthlyCredits: number;
   stripePriceId: string | null;
   features: string[];
   limits: {
-    strategiesPerMonth: number; // -1 = unlimited
     businesses: number; // -1 = unlimited
     // Intelligence features
     competitorIntelligence: boolean;
@@ -54,16 +55,17 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
     description: "Perfect for testing the waters.",
     monthlyPrice: 0,
     yearlyPrice: 0,
+    welcomeCredits: 10,
+    monthlyCredits: 0,
     stripePriceId: null,
     features: [
-      "1 strategy per month",
+      "10 welcome credits (one-time offer)",
       "Basic market analysis",
       "Email support",
       "Dashboard access",
       "Community access",
     ],
     limits: {
-      strategiesPerMonth: 1,
       businesses: 1,
       // Intelligence
       competitorIntelligence: false,
@@ -102,10 +104,12 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
     description: "For growing businesses.",
     monthlyPrice: 29,
     yearlyPrice: 23,
+    welcomeCredits: 0,
+    monthlyCredits: 15,
     stripePriceId: "price_pro_monthly",
     features: [
       "Everything in Free",
-      "10 strategies per month",
+      "15 credits renewed every month",
       "Competitor intelligence",
       "Trend intelligence",
       "SWOT analysis",
@@ -118,7 +122,6 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       "Priority email support",
     ],
     limits: {
-      strategiesPerMonth: 10,
       businesses: 3,
       // Intelligence
       competitorIntelligence: true,
@@ -158,11 +161,12 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
     description: "For serious marketers.",
     monthlyPrice: 59,
     yearlyPrice: 47,
+    welcomeCredits: 0,
+    monthlyCredits: 30,
     stripePriceId: "price_premium_monthly",
     features: [
       "Everything in Pro",
-      "Unlimited strategies",
-      "Predictive trends",
+      "30 credits renewed every month",
       "Historical intelligence",
       "Market share analysis",
       "Traffic estimation",
@@ -174,7 +178,6 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       "White-label reports",
     ],
     limits: {
-      strategiesPerMonth: -1, // unlimited
       businesses: 10,
       // Intelligence
       competitorIntelligence: true,
@@ -209,10 +212,12 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
   },
   enterprise: {
     id: "enterprise",
-    name: "Enterprise",
+    name: "Élite",
     description: "For agencies & teams.",
     monthlyPrice: 149,
     yearlyPrice: 119,
+    welcomeCredits: 0,
+    monthlyCredits: 80,
     stripePriceId: null,
     features: [
       "Everything in Premium",
@@ -227,7 +232,6 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       "Custom contracts",
     ],
     limits: {
-      strategiesPerMonth: -1, // unlimited
       businesses: -1, // unlimited
       // Intelligence
       competitorIntelligence: true,
@@ -263,6 +267,17 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
 } as const;
 
 export type PlanId = keyof typeof PRICING_CONFIG;
+
+export function normalizePlanId(planId?: string | null): PlanId {
+  const normalized = (planId || 'free').toLowerCase().trim();
+  const validPlans: PlanId[] = ['free', 'pro', 'premium', 'enterprise'];
+
+  if (normalized === 'elite' || normalized === 'élite') {
+    return 'enterprise';
+  }
+
+  return validPlans.includes(normalized as PlanId) ? (normalized as PlanId) : 'free';
+}
 
 // ======================================================
 // HELPERS
@@ -303,11 +318,11 @@ export function hasPermission(
 // Helper : obtenir la limite d'une feature
 export function getLimit(
   userPlanId: string,
-  feature: "strategiesPerMonth" | "businesses"
+  feature: "monthlyCredits" | "businesses"
 ): number {
-  const plan = PRICING_CONFIG[userPlanId];
+  const plan = PRICING_CONFIG[normalizePlanId(userPlanId)];
   if (!plan) return 0;
-  return plan.limits[feature];
+  return feature === 'monthlyCredits' ? plan.monthlyCredits : plan.limits.businesses;
 }
 
 // Helper : vérifier si le quota est atteint
@@ -315,7 +330,7 @@ export function isQuotaReached(
   userPlanId: string,
   used: number
 ): boolean {
-  const limit = getLimit(userPlanId, "strategiesPerMonth");
+  const limit = getLimit(userPlanId, "monthlyCredits");
   if (limit === -1) return false; // unlimited
   return used >= limit;
 }
@@ -325,7 +340,7 @@ export function getQuotaRemaining(
   userPlanId: string,
   used: number
 ): number {
-  const limit = getLimit(userPlanId, "strategiesPerMonth");
+  const limit = getLimit(userPlanId, "monthlyCredits");
   if (limit === -1) return 9999; // unlimited
   return Math.max(0, limit - used);
 }

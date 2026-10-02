@@ -26,7 +26,7 @@ const FAQS = [
   },
   {
     question: "Comment contacter le support ?",
-    answer: "Vous pouvez nous écrire à support@makeitads.pro ou nous contacter directement via notre canal Telegram dédié. Nous répondons généralement en moins de 24 heures ouvrées."
+    answer: "Vous pouvez nous écrire à support@makeitads.pro ou nous contacter directement via Telegram sur https://t.me/MakeitAds_CEO. Nous répondons généralement en moins de 24 heures ouvrées."
   },
   {
     question: "Mes données sont-elles en sécurité ?",
@@ -84,8 +84,8 @@ export default function ContactPage() {
             </div>
             <h3 className="text-base sm:text-lg font-bold text-[#18181B] mb-2">Telegram</h3>
             <p className="text-xs sm:text-sm text-[#71717A] mb-3">Rejoignez la communauté</p>
-            <a href="https://t.me/MakeItAds_Pro" target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-semibold text-[#6366F1] hover:underline">
-              @MakeItAds_Pro
+            <a href="https://t.me/MakeitAds_CEO" target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm font-semibold text-[#6366F1] hover:underline">
+              @MakeitAds_CEO
             </a>
           </div>
           <div className="rounded-2xl sm:rounded-3xl border border-[#E7E7EB] bg-[#FFFFFF] p-6 sm:p-8 shadow-sm sm:col-span-2 md:col-span-1">

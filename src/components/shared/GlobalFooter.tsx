@@ -1,17 +1,22 @@
 import Link from "next/link";
-import { SiMeta, SiGoogle, SiTiktok, SiInstagram } from "react-icons/si";
+import { SiMeta, SiInstagram, SiTiktok } from "react-icons/si";
 
 export default function GlobalFooter() {
+  const slogan = "La plateforme N°1 pour automatiser votre acquisition client en Afrique.";
+
   return (
     <footer className="bg-[#F7F7F8] border-t border-[#E7E7EB] pt-12 pb-8 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
         <div className="col-span-1 md:col-span-1">
-          <Link href="/" className="text-lg font-medium text-[#18181B] tracking-tight">
-            MakeIt<span className="text-[#6366F1]">Ads</span>
-          </Link>
-          <p className="text-xs text-[#71717A] mt-2 leading-relaxed">
-            Stratégies publicitaires premium calibrées pour l'Afrique.
-          </p>
+          {/* ✅ Logo minimaliste collé + Slogan exact en dessous */}
+          <div className="flex flex-col">
+            <Link href="/" className="text-lg font-semibold text-[#18181B] tracking-tight">
+              MakeIt<span className="text-[#6366F1]">Ads</span>
+            </Link>
+            <p className="text-[11px] text-[#71717A] mt-1.5 leading-snug max-w-[240px]">
+              {slogan}
+            </p>
+          </div>
         </div>
         
         <div>
@@ -19,7 +24,7 @@ export default function GlobalFooter() {
           <ul className="space-y-2 text-xs text-[#71717A]">
             <li><Link href="#how-it-works" className="hover:text-[#6366F1] transition-colors">Comment ça marche</Link></li>
             <li><Link href="#pricing" className="hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
-            <li><Link href="/a-propos" className="hover:text-[#6366F1] transition-colors">À propos</Link></li>
+            <li><Link href="/dashboard" className="hover:text-[#6366F1] transition-colors">Dashboard</Link></li>
           </ul>
         </div>
 

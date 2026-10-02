@@ -2,7 +2,6 @@ import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
 export async function createClient() {
-  // ✅ Next.js 15 : cookies() retourne une Promise, il faut l'attendre
   const cookieStore = await cookies();
 
   return createServerClient(
@@ -19,7 +18,7 @@ export async function createClient() {
               cookieStore.set(name, value, options)
             );
           } catch {
-            // Ignoré si appelé depuis un Server Component sans middleware
+            // Server Component
           }
         },
       },
