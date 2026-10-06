@@ -3,32 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
 // ============================================
-// TYPES
-// ============================================
-
-interface ChariowWebhookPayload {
-  event?: string;
-  customer_email?: string;
-  customer_name?: string;
-  product_name?: string;
-  product_id?: string;
-  amount?: number;
-  currency?: string;
-  status?: string;
-  order_id?: string;
-  data?: {
-    customer_email?: string;
-    customer_name?: string;
-    product_name?: string;
-    product_id?: string;
-    amount?: number;
-    currency?: string;
-    status?: string;
-    order_id?: string;
-  };
-}
-
-// ============================================
 // CRÉATION DU CLIENT SUPABASE (à l'appel)
 // ============================================
 
@@ -48,12 +22,86 @@ function getSupabaseAdmin() {
 }
 
 // ============================================
-// DÉTECTION DU PLAN
+// EXTRACTION ROBUSTE DES CHAMPS
 // ============================================
 
-function detectPlan(payload: ChariowWebhookPayload): PlanId | null {
-  const data = payload.data || payload;
-  const productName = (data.product_name || '').toLowerCase();
+function extractEmail(payload: any): string | null {
+  const candidates = [
+    payload?.customer_email,
+    payload?.email,
+    payload?.customer?.email,
+    payload?.buyer?.email,
+    payload?.data?.customer_email,
+    payload?.data?.email,
+    payload?.data?.customer?.email,
+    payload?.data?.buyer?.email,
+    payload?.data?.customer?.user?.email,
+    payload?.sale?.customer_email,
+    payload?.sale?.email,
+    payload?.sale?.customer?.email,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.includes('@')) {
+      return candidate.toLowerCase().trim();
+    }
+  }
+  return null;
+}
+
+function extractProductName(payload: any): string | null {
+  const candidates = [
+    payload?.product_name,
+    payload?.product?.name,
+    payload?.product?.title,
+    payload?.data?.product_name,
+    payload?.data?.product?.name,
+    payload?.data?.product?.title,
+    payload?.sale?.product_name,
+    payload?.sale?.product?.name,
+    payload?.items?.[0]?.product_name,
+    payload?.items?.[0]?.name,
+    payload?.data?.items?.[0]?.product_name,
+    payload?.data?.items?.[0]?.name,
+    payload?.data?.items?.[0]?.product?.name,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.toLowerCase().trim();
+    }
+  }
+  return null;
+}
+
+function extractOrderId(payload: any): string | null {
+  const candidates = [
+    payload?.order_id,
+    payload?.order?.id,
+    payload?.sale_id,
+    payload?.sale?.id,
+    payload?.id,
+    payload?.data?.order_id,
+    payload?.data?.order?.id,
+    payload?.data?.sale_id,
+    payload?.data?.sale?.id,
+    payload?.data?.id,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate;
+    }
+    if (typeof candidate === 'number') {
+      return String(candidate);
+    }
+  }
+  return null;
+}
+
+function detectPlan(payload: any): PlanId | null {
+  const productName = extractProductName(payload);
+  if (!productName) return null;
 
   if (productName.includes('elite') || productName.includes('élite')) {
     return 'enterprise';
@@ -74,37 +122,44 @@ function detectPlan(payload: ChariowWebhookPayload): PlanId | null {
 
 export async function POST(req: NextRequest) {
   try {
-    const secret = req.headers.get('x-chariow-secret');
-    const expectedSecret = process.env.CHARIOW_WEBHOOK_SECRET;
+    const rawBody = await req.text();
+    console.log('=== WEBHOOK CHARIOW RECU ===');
+    console.log('Body brut:', rawBody.slice(0, 2000));
 
-    if (expectedSecret && secret !== expectedSecret) {
-      console.warn('Webhook Chariow : secret invalide');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      console.error('Impossible de parser le JSON');
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    const payload: ChariowWebhookPayload = await req.json();
-    console.log('Webhook Chariow recu:', JSON.stringify(payload).slice(0, 500));
+    console.log('Payload structure:', JSON.stringify(payload, null, 2).slice(0, 2000));
 
-    const data = payload.data || payload;
-    const email = (data.customer_email || '').toLowerCase().trim();
-
+    const email = extractEmail(payload);
     if (!email) {
-      console.error('Pas d email dans le payload');
-      return NextResponse.json({ error: 'No email' }, { status: 400 });
+      console.error('Pas d email trouve. Structure recue:', Object.keys(payload));
+      return NextResponse.json(
+        { error: 'No email found', keys: Object.keys(payload) },
+        { status: 400 }
+      );
     }
 
     const plan = detectPlan(payload);
     if (!plan) {
-      console.error('Plan introuvable dans:', data.product_name);
-      return NextResponse.json({ error: 'Unknown plan' }, { status: 400 });
+      console.error('Plan introuvable. Product name extrait:', extractProductName(payload));
+      return NextResponse.json(
+        { error: 'Unknown plan', productName: extractProductName(payload) },
+        { status: 400 }
+      );
     }
 
-    console.log(`Vente detectee : ${email} -> Plan ${plan}`);
+    const orderId = extractOrderId(payload);
+    console.log(`Vente detectee : ${email} -> Plan ${plan} (order: ${orderId})`);
 
     const planConfig = PRICING_CONFIG[plan];
     const monthlyCredits = planConfig.monthlyCredits;
 
-    // Création du client Supabase admin à l'appel (pas au build)
     const supabaseAdmin = getSupabaseAdmin();
 
     const { data: usersList, error: listError } =
@@ -120,7 +175,7 @@ export async function POST(req: NextRequest) {
     );
 
     if (!matchingUser) {
-      console.warn(`Aucun utilisateur pour ${email}`);
+      console.warn(`Aucun utilisateur Supabase pour ${email}`);
       return NextResponse.json({
         success: true,
         warning: 'No matching user',
@@ -148,10 +203,10 @@ export async function POST(req: NextRequest) {
       type: 'purchase',
       amount: monthlyCredits,
       balance_after: monthlyCredits,
-      description: `Achat du plan ${plan} via Chariow (${data.order_id || 'order inconnu'})`,
+      description: `Achat du plan ${plan} via Chariow (${orderId || 'order inconnu'})`,
     });
 
-    console.log(`Profil mis a jour : ${email} -> ${plan} + ${monthlyCredits} credits`);
+    console.log(`SUCCES : ${email} -> ${plan} + ${monthlyCredits} credits`);
 
     return NextResponse.json({
       success: true,
