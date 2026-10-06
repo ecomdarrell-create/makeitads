@@ -117,6 +117,62 @@ function detectPlan(payload: any): PlanId | null {
 }
 
 // ============================================
+// RECHERCHE UTILISATEUR (via profiles)
+// ============================================
+
+async function findUserByEmail(
+  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
+  email: string
+): Promise<{ id: string; email: string } | null> {
+  // Tentative 1 : chercher dans la table profiles
+  try {
+    const { data: profile } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email')
+      .ilike('email', email)
+      .maybeSingle();
+
+    if (profile?.id) {
+      return { id: profile.id, email: profile.email || email };
+    }
+  } catch (e) {
+    console.warn('Recherche via profiles echouee, fallback listUsers:', e);
+  }
+
+  // Tentative 2 : pagination complète sur auth.users
+  try {
+    let page = 1;
+    const perPage = 1000;
+    const maxPages = 20; // sécurité : 20 000 utilisateurs max
+
+    while (page <= maxPages) {
+      const { data, error } = await supabaseAdmin.auth.admin.listUsers({
+        page,
+        perPage,
+      });
+
+      if (error) {
+        console.error('Erreur listUsers page', page, error);
+        break;
+      }
+
+      const users = data?.users || [];
+      const match = users.find((u) => u.email?.toLowerCase() === email);
+      if (match) {
+        return { id: match.id, email: match.email || email };
+      }
+
+      if (users.length < perPage) break;
+      page++;
+    }
+  } catch (e) {
+    console.error('Erreur fallback listUsers:', e);
+  }
+
+  return null;
+}
+
+// ============================================
 // POST /api/webhooks/chariow
 // ============================================
 
@@ -134,11 +190,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    console.log('Payload structure:', JSON.stringify(payload, null, 2).slice(0, 2000));
-
     const email = extractEmail(payload);
     if (!email) {
-      console.error('Pas d email trouve. Structure recue:', Object.keys(payload));
+      console.error('Pas d email trouve. Cles du payload:', Object.keys(payload));
       return NextResponse.json(
         { error: 'No email found', keys: Object.keys(payload) },
         { status: 400 }
@@ -147,7 +201,7 @@ export async function POST(req: NextRequest) {
 
     const plan = detectPlan(payload);
     if (!plan) {
-      console.error('Plan introuvable. Product name extrait:', extractProductName(payload));
+      console.error('Plan introuvable. Product name:', extractProductName(payload));
       return NextResponse.json(
         { error: 'Unknown plan', productName: extractProductName(payload) },
         { status: 400 }
@@ -162,19 +216,9 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
-    const { data: usersList, error: listError } =
-      await supabaseAdmin.auth.admin.listUsers();
+    const user = await findUserByEmail(supabaseAdmin, email);
 
-    if (listError) {
-      console.error('Erreur listUsers:', listError);
-      return NextResponse.json({ error: 'Users fetch failed' }, { status: 500 });
-    }
-
-    const matchingUser = usersList.users.find(
-      (u) => u.email?.toLowerCase() === email
-    );
-
-    if (!matchingUser) {
+    if (!user) {
       console.warn(`Aucun utilisateur Supabase pour ${email}`);
       return NextResponse.json({
         success: true,
@@ -184,6 +228,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // Mise à jour du profil
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -191,15 +236,16 @@ export async function POST(req: NextRequest) {
         credits_balance: monthlyCredits,
         updated_at: new Date().toISOString(),
       })
-      .eq('id', matchingUser.id);
+      .eq('id', user.id);
 
     if (updateError) {
       console.error('Erreur update profil:', updateError);
       return NextResponse.json({ error: 'Update failed' }, { status: 500 });
     }
 
+    // Enregistrement de la transaction
     await supabaseAdmin.from('credit_transactions').insert({
-      user_id: matchingUser.id,
+      user_id: user.id,
       type: 'purchase',
       amount: monthlyCredits,
       balance_after: monthlyCredits,
@@ -210,7 +256,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      userId: matchingUser.id,
+      userId: user.id,
       plan,
       creditsAdded: monthlyCredits,
     });
