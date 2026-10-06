@@ -3,18 +3,6 @@ import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
 // ============================================
-// CLIENT SUPABASE ADMIN (bypass RLS)
-// ============================================
-
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  {
-    auth: { autoRefreshToken: false, persistSession: false },
-  }
-);
-
-// ============================================
 // TYPES
 // ============================================
 
@@ -28,7 +16,6 @@ interface ChariowWebhookPayload {
   currency?: string;
   status?: string;
   order_id?: string;
-  // Chariow peut envoyer les données à plat ou dans un objet "data"
   data?: {
     customer_email?: string;
     customer_name?: string;
@@ -39,6 +26,25 @@ interface ChariowWebhookPayload {
     status?: string;
     order_id?: string;
   };
+}
+
+// ============================================
+// CRÉATION DU CLIENT SUPABASE (à l'appel)
+// ============================================
+
+function getSupabaseAdmin() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !key) {
+    throw new Error(
+      'Variables Supabase manquantes : NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requises.'
+    );
+  }
+
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 // ============================================
@@ -98,7 +104,9 @@ export async function POST(req: NextRequest) {
     const planConfig = PRICING_CONFIG[plan];
     const monthlyCredits = planConfig.monthlyCredits;
 
-    // Trouver l'utilisateur par email
+    // Création du client Supabase admin à l'appel (pas au build)
+    const supabaseAdmin = getSupabaseAdmin();
+
     const { data: usersList, error: listError } =
       await supabaseAdmin.auth.admin.listUsers();
 
@@ -121,7 +129,6 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Mettre à jour le profil
     const { error: updateError } = await supabaseAdmin
       .from('profiles')
       .update({
@@ -136,7 +143,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Update failed' }, { status: 500 });
     }
 
-    // Enregistrer la transaction
     await supabaseAdmin.from('credit_transactions').insert({
       user_id: matchingUser.id,
       type: 'purchase',
@@ -161,7 +167,7 @@ export async function POST(req: NextRequest) {
 }
 
 // ============================================
-// GET — pour tester que l'endpoint existe
+// GET — test de l'endpoint
 // ============================================
 
 export async function GET() {
