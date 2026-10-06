@@ -1,4 +1,5 @@
 import { FormData } from '../types';
+import { RequiredLabel } from '../RequiredLabel';
 
 interface StepProps {
   formData: FormData;
@@ -19,10 +20,11 @@ export function Step4Market({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Pays principal de ciblage
+          <RequiredLabel>Pays principal de ciblage</RequiredLabel>
         </label>
         <input
           type="text"
+          required
           value={formData.mainCountry}
           onChange={(e) => updateFormData({ mainCountry: e.target.value })}
           placeholder="Cameroun"
@@ -49,7 +51,7 @@ export function Step4Market({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Principaux concurrents (jusqu'à 5)
+          Principaux concurrents (jusqu&apos;à 5)
         </label>
         <textarea
           value={formData.competitors}

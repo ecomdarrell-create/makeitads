@@ -1,6 +1,7 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import { BusinessProfile, StrategyResult } from "../types";
 import { buildStrategyPrompt } from "@/ai/promptBuilder";
+import { DEFAULT_AI_CONFIG } from "@/lib/ai/provider";
 import { normalizeToStrategyResult } from "./groq"; // ✅ Import correct maintenant
 
 export async function callClaudeProvider(
@@ -11,13 +12,13 @@ export async function callClaudeProvider(
   const prompt = buildStrategyPrompt(profile);
 
   console.log("\n🤖 [Claude] Appel API avec paramètres optimisés:");
-  console.log(`   → Modèle: claude-3-5-sonnet-20241022`);
+  console.log(`   → Modèle: ${DEFAULT_AI_CONFIG.model}`);
   console.log(`   → Business: ${profile.name}`);
   console.log(`   → Industry: ${profile.industry}`);
 
   try {
     const response = await anthropic.messages.create({
-      model: "claude-3-5-sonnet-20241022",
+      model: DEFAULT_AI_CONFIG.model,
       max_tokens: 8192,
       system: `You are a world-class Senior Marketing Strategist with 20+ years of experience. You specialize in creating hyper-personalized, data-driven marketing strategies.
       
@@ -40,7 +41,7 @@ CRITICAL RULES:
       .replace(/}\s*$/, "}")
       .trim();
 
-    let parsed: any;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(cleaned);
       console.log("✅ [Claude] JSON parsé avec succès");
@@ -53,8 +54,8 @@ CRITICAL RULES:
     // ✅ On réutilise exactement la même normalisation que Groq
     return normalizeToStrategyResult(parsed, profile);
 
-  } catch (error: any) {
-    console.error("💥 [Claude] Erreur:", error.message);
+  } catch (error: unknown) {
+    console.error("💥 [Claude] Erreur:", error instanceof Error ? error.message : error);
     throw error;
   }
 }

@@ -35,8 +35,10 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const isMobile = window.innerWidth < 768;
-      const scrollAmount = isMobile ? 296 : 396;
+      const firstCard = scrollContainerRef.current.querySelector<HTMLElement>('.snap-start');
+      const styles = window.getComputedStyle(scrollContainerRef.current);
+      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
+      const scrollAmount = firstCard ? firstCard.offsetWidth + gap : 396;
       const currentScroll = scrollContainerRef.current.scrollLeft;
       const targetScroll = direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
       scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: "smooth" });
@@ -44,9 +46,9 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
   };
 
   return (
-    <section className="relative z-10 py-10 md:py-16 bg-[#FFFFFF]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <h2 className="text-lg md:text-2xl font-bold text-[#1A1A1A] mb-6 md:mb-8 text-center md:text-left">
+    <section className="relative z-10 w-full py-10 md:py-16 bg-[#FFFFFF]">
+      <div className="mx-auto w-full max-w-7xl px-0 sm:px-6">
+        <h2 className="px-4 sm:px-0 text-lg md:text-2xl font-bold text-[#1A1A1A] mb-6 md:mb-8 text-center md:text-left">
           {title}
         </h2>
 
@@ -61,7 +63,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
 
           <div
             ref={scrollContainerRef}
-            className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-2 md:px-0"
+            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-4 md:gap-4 md:px-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
             <style jsx>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
@@ -69,7 +71,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[280px] md:w-[380px] snap-start bg-white border border-[#E8E8E8] rounded-[12px] p-4 md:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                className="flex-shrink-0 w-[calc(100vw-32px)] sm:w-[380px] snap-start bg-white border border-[#E8E8E8] rounded-xl p-4 md:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <StarRating rating={review.rating} />
@@ -108,7 +110,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
           </button>
         </div>
 
-        <div className="mt-8 flex flex-col md:flex-row items-center md:items-center gap-2 md:gap-3 text-center md:text-left">
+        <div className="mt-8 flex flex-col items-center gap-2 px-4 text-center md:flex-row md:gap-3 md:px-0 md:text-left">
           <p className="text-xs md:text-sm text-[#4A4A4A] font-medium">{footerNote}</p>
           <span className="text-[#00B67A] font-bold text-base md:text-lg tracking-tight flex items-center gap-1">
             <svg viewBox="0 0 24 24" className="w-4 h-4 md:w-5 md:h-5" fill="currentColor">

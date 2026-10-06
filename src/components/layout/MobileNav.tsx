@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, PlusCircle, Layers, Coins, User } from 'lucide-react';
+import { LayoutDashboard, PlusCircle, Layers, Coins, User, BadgeDollarSign } from 'lucide-react';
 
 const mobileNavItems = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Generate', href: '/dashboard/generate', icon: PlusCircle },
   { name: 'Strategies', href: '/dashboard/strategies', icon: Layers },
   { name: 'Credits', href: '/dashboard/credits', icon: Coins },
+  { name: 'Plans', href: '/dashboard/pricing', icon: BadgeDollarSign },
   { name: 'Profile', href: '/dashboard/settings', icon: User },
 ];
 

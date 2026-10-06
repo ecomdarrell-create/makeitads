@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { SiMeta, SiInstagram, SiTiktok } from "react-icons/si";
 
 export default function GlobalFooter() {
   const slogan = "La plateforme N°1 pour automatiser votre acquisition client en Afrique.";
@@ -22,8 +21,8 @@ export default function GlobalFooter() {
         <div>
           <h4 className="text-sm font-medium text-[#18181B] mb-3">Navigation</h4>
           <ul className="space-y-2 text-xs text-[#71717A]">
-            <li><Link href="#how-it-works" className="hover:text-[#6366F1] transition-colors">Comment ça marche</Link></li>
-            <li><Link href="#pricing" className="hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
+            <li><Link href="/#how-it-works" className="hover:text-[#6366F1] transition-colors">Comment ça marche</Link></li>
+            <li><Link href="/#pricing" className="hover:text-[#6366F1] transition-colors">Tarifs</Link></li>
             <li><Link href="/dashboard" className="hover:text-[#6366F1] transition-colors">Dashboard</Link></li>
           </ul>
         </div>
@@ -32,17 +31,16 @@ export default function GlobalFooter() {
           <h4 className="text-sm font-medium text-[#18181B] mb-3">Légal</h4>
           <ul className="space-y-2 text-xs text-[#71717A]">
             <li><Link href="/privacy" className="hover:text-[#6366F1] transition-colors">Confidentialité</Link></li>
-            <li><Link href="/terms" className="hover:text-[#6366F1] transition-colors">Conditions d'utilisation</Link></li>
+            <li><Link href="/terms" className="hover:text-[#6366F1] transition-colors">Conditions d&apos;utilisation</Link></li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-sm font-medium text-[#18181B] mb-3">Réseaux</h4>
-          <div className="flex gap-3 text-[#71717A]">
-            <SiMeta className="w-4 h-4 hover:text-[#6366F1] transition-colors cursor-pointer" />
-            <SiInstagram className="w-4 h-4 hover:text-[#6366F1] transition-colors cursor-pointer" />
-            <SiTiktok className="w-4 h-4 hover:text-[#6366F1] transition-colors cursor-pointer" />
-          </div>
+          <h4 className="text-sm font-medium text-[#18181B] mb-3">Contact & aide</h4>
+          <ul className="space-y-2 text-xs text-[#71717A]">
+            <li><Link href="/contact" className="hover:text-[#6366F1] transition-colors">Contacter MakeItAds</Link></li>
+            <li><a href="https://t.me/MakeitAds_CEO" target="_blank" rel="noreferrer" className="hover:text-[#6366F1] transition-colors">Support sur Telegram</a></li>
+          </ul>
         </div>
       </div>
       

@@ -1,8 +1,30 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { CreditCard, TrendingUp, TrendingDown } from 'lucide-react';
 import { BackButton } from '@/components/ui/BackButton';
+
+function CreditRing({ value, total, label, color, detail }: { value: number; total: number; label: string; color: string; detail: string }) {
+  const radius = 25;
+  const circumference = 2 * Math.PI * radius;
+  const percentage = total > 0 ? Math.min(Math.max(value / total, 0), 1) : 0;
+  const dashOffset = circumference * (1 - percentage);
+
+  return (
+    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-gray-200 bg-white p-3 sm:p-4">
+      <div className="relative h-[68px] w-[68px] shrink-0" aria-label={`${label}: ${value}`}>
+        <svg viewBox="0 0 64 64" className="h-full w-full -rotate-90">
+          <circle cx="32" cy="32" r={radius} fill="none" stroke="#E5E7EB" strokeWidth="7" />
+          <circle cx="32" cy="32" r={radius} fill="none" stroke={color} strokeWidth="7" strokeLinecap="round" strokeDasharray={circumference} strokeDashoffset={dashOffset} />
+        </svg>
+        <span className="absolute inset-0 flex items-center justify-center text-sm font-bold text-slate-900">{value}</span>
+      </div>
+      <div className="min-w-0">
+        <p className="text-[11px] font-semibold text-slate-900 sm:text-xs">{label}</p>
+        <p className="mt-1 text-[10px] leading-relaxed text-slate-500">{detail}</p>
+      </div>
+    </div>
+  );
+}
 
 export default async function CreditsPage() {
   const supabase = await createClient();
@@ -36,6 +58,8 @@ export default async function CreditsPage() {
     diagnostics: transactions?.filter(t => t.type === 'generation_flash').reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0,
     welcome: transactions?.filter(t => t.type === 'welcome_bonus').reduce((sum, t) => sum + t.amount, 0) || 0,
   };
+  const totalActivity = creditsBalance + totalUsed + totalAdded;
+  const totalConsumption = breakdown.strategies + breakdown.diagnostics;
 
   return (
     <div className="px-4 py-5 sm:px-6 sm:py-6 max-w-5xl mx-auto">
@@ -46,65 +70,24 @@ export default async function CreditsPage() {
           Vos crédits
         </h1>
         <p className="text-[10px] sm:text-xs text-gray-600">
-          Gérez votre solde et consultez l'historique.
+          Gérez votre solde et consultez l&apos;historique.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
-        <div className="bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] rounded-lg p-3 text-white">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <CreditCard className="w-3.5 h-3.5" />
-            <span className="text-[10px] font-medium text-white/80">Solde actuel</span>
-          </div>
-          <p className="text-xl sm:text-2xl font-bold">{creditsBalance}</p>
-          <p className="text-[9px] text-white/70 mt-0.5">crédits disponibles</p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <TrendingDown className="w-3.5 h-3.5 text-red-500" />
-            <span className="text-[10px] font-medium text-gray-600">Total utilisé</span>
-          </div>
-          <p className="text-xl sm:text-2xl font-bold text-[#111827]">{totalUsed}</p>
-          <p className="text-[9px] text-gray-500 mt-0.5">crédits consommés</p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-3">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-            <span className="text-[10px] font-medium text-gray-600">Total ajouté</span>
-          </div>
-          <p className="text-xl sm:text-2xl font-bold text-[#111827]">{totalAdded}</p>
-          <p className="text-[9px] text-gray-500 mt-0.5">crédits reçus</p>
-        </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mb-5">
+        <CreditRing value={creditsBalance} total={totalActivity} label="Solde actuel" detail="Crédits disponibles" color="#6366F1" />
+        <CreditRing value={totalUsed} total={totalActivity} label="Total utilisé" detail="Crédits consommés" color="#E11D48" />
+        <CreditRing value={totalAdded} total={totalActivity} label="Total ajouté" detail="Crédits reçus" color="#059669" />
       </div>
 
       <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 mb-5">
         <h2 className="text-xs sm:text-sm font-semibold text-[#111827] mb-3">
           Répartition de votre consommation
         </h2>
-        <div className="space-y-2.5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#6366F1]"></div>
-              <span className="text-[10px] sm:text-xs text-gray-700">Stratégies complètes</span>
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-[#111827]">{breakdown.strategies} crédits</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-[#8B5CF6]"></div>
-              <span className="text-[10px] sm:text-xs text-gray-700">Diagnostics flash</span>
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-[#111827]">{breakdown.diagnostics} crédits</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-              <span className="text-[10px] sm:text-xs text-gray-700">Crédits de bienvenue</span>
-            </div>
-            <span className="text-[10px] sm:text-xs font-semibold text-[#111827]">{breakdown.welcome} crédits</span>
-          </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <CreditRing value={breakdown.strategies} total={totalConsumption} label="Stratégies complètes" detail="Crédits consommés" color="#6366F1" />
+          <CreditRing value={breakdown.diagnostics} total={totalConsumption} label="Diagnostics flash" detail="Crédits consommés" color="#8B5CF6" />
+          <CreditRing value={breakdown.welcome} total={Math.max(breakdown.welcome, 10)} label="Bonus de bienvenue" detail="Crédits attribués" color="#059669" />
         </div>
       </div>
 
@@ -119,7 +102,7 @@ export default async function CreditsPage() {
                 Passez au plan Pro pour recevoir 15 crédits renouvelés chaque mois.
               </p>
               <Link
-                href="/pricing"
+                href="/dashboard/pricing"
                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] sm:text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
               >
                 Voir les plans

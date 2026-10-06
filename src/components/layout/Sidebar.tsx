@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Layers, PlusCircle, BarChart3, Coins, BookOpen, Settings } from 'lucide-react';
+import { LayoutDashboard, Layers, PlusCircle, BarChart3, Coins, BookOpen, Settings, BadgeDollarSign } from 'lucide-react';
 
 const navItems = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -10,6 +10,7 @@ const navItems = [
   { name: 'Generate', href: '/dashboard/generate', icon: PlusCircle },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Credits', href: '/dashboard/credits', icon: Coins },
+  { name: 'Plans', href: '/dashboard/pricing', icon: BadgeDollarSign },
   { name: 'Resources', href: '/dashboard/resources', icon: BookOpen },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
@@ -18,7 +19,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen fixed left-0 top-0 bg-white border-r border-gray-200 z-30">
+    <aside className="hidden md:flex flex-col w-64 h-[calc(100vh-3.5rem)] fixed left-0 top-14 bg-white border-r border-gray-200 z-30">
       {/* Logo */}
       <div className="h-16 flex items-center px-6 border-b border-gray-100">
         <h1 className="text-xl font-semibold tracking-tight">
@@ -51,7 +52,7 @@ export function Sidebar() {
       {/* Footer Sidebar */}
       <div className="p-4 border-t border-gray-100">
         <div className="bg-[#F9FAFB] rounded-lg p-3 border border-gray-200">
-          <p className="text-xs font-medium text-gray-900">Besoin d'aide ?</p>
+          <p className="text-xs font-medium text-gray-900">Besoin d&apos;aide ?</p>
           <p className="text-xs text-gray-500 mt-1 mb-2">Consultez nos ressources ou contactez le support.</p>
           <a
             href="https://t.me/MakeitAds_CEO"

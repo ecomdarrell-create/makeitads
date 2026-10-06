@@ -1,4 +1,5 @@
 import { FormData } from '../types';
+import { RequiredLabel } from '../RequiredLabel';
 
 interface StepProps {
   formData: FormData;
@@ -19,10 +20,11 @@ export function Step1Company({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Nom de l'entreprise
+          <RequiredLabel>Nom de l&apos;entreprise</RequiredLabel>
         </label>
         <input
           type="text"
+          required
           value={formData.companyName}
           onChange={(e) => updateFormData({ companyName: e.target.value })}
           placeholder="Ex: Maison K"
@@ -32,10 +34,11 @@ export function Step1Company({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Que fait votre entreprise ?
+          <RequiredLabel>Que fait votre entreprise ?</RequiredLabel>
         </label>
         <textarea
           value={formData.companyDescription}
+          required
           onChange={(e) => updateFormData({ companyDescription: e.target.value })}
           placeholder="Décrivez votre activité en quelques phrases..."
           rows={3}
@@ -45,10 +48,11 @@ export function Step1Company({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Secteur d'activité
+          <RequiredLabel>Secteur d&apos;activité</RequiredLabel>
         </label>
         <select
           value={formData.sector}
+          required
           onChange={(e) => updateFormData({ sector: e.target.value })}
           className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none transition-all bg-white"
         >

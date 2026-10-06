@@ -2,14 +2,11 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Image from "next/image";
 
 export default function HeroSection() {
-  const [mounted, setMounted] = useState(false);
-
   useEffect(() => {
-    setMounted(true);
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
@@ -26,8 +23,6 @@ export default function HeroSection() {
     </>
   );
 
-  if (!mounted) return null;
-
   return (
     <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16 bg-[#FFFFFF]">
       <div className="absolute inset-0 z-0">
@@ -38,12 +33,12 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
-          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-[-0.03em] leading-[1.15] text-[#0F172A] mb-6">
+          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-5">
             {heroTitle}
           </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl text-sm sm:text-base md:text-lg text-[#475569] leading-relaxed mb-8">
-            MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l'Afrique.
+          <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl text-sm md:text-base text-[#475569] leading-relaxed mb-7">
+            MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l&apos;Afrique.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }} className="relative w-full mb-10">

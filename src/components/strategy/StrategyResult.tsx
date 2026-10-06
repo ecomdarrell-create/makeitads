@@ -1,157 +1,509 @@
 'use client';
 
 import { useState } from 'react';
-import { Copy, Check, ChevronDown, ChevronUp, Sparkles } from 'lucide-react';
+import {
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Lock,
+  Sparkles,
+  ArrowRight,
+} from 'lucide-react';
+import {
+  getSectionsForStrategy,
+  isSectionLocked,
+  PLAN_LABELS,
+  type PlanTier,
+  type SectionConfig,
+} from '@/config/strategy-sections.config';
+import { ExecutiveSummary } from './ExecutiveSummary';
+import { InsightsSection } from './InsightsSection';
+import { PrioritiesSection } from './PrioritiesSection';
+import { ActionPlanSection } from './ActionPlanSection';
+import { UpgradeModal } from './UpgradeModal';
+
+// ============================================
+// TYPES
+// ============================================
 
 interface StrategyResultProps {
   strategy: any;
   strategyType: 'flash' | 'complete';
+  userPlan: PlanTier;
 }
 
-export function StrategyResult({ strategy, strategyType }: StrategyResultProps) {
-  const [expandedSections, setExpandedSections] = useState<string[]>(['overview']);
+// ============================================
+// COMPOSANT PRINCIPAL
+// ============================================
+
+export function StrategyResult({
+  strategy,
+  strategyType,
+  userPlan,
+}: StrategyResultProps) {
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [copiedItems, setCopiedItems] = useState<string[]>([]);
+  const [upgradeModal, setUpgradeModal] = useState<{
+    isOpen: boolean;
+    targetPlan: PlanTier;
+    sectionTitle?: string;
+  }>({ isOpen: false, targetPlan: 'pro' });
+
+  const data = strategy.data || strategy;
+  const sections = getSectionsForStrategy(strategyType);
+
+  const availableSections = sections.filter(
+    (s) => !isSectionLocked(userPlan, s) && data[s.id] !== undefined
+  );
+  const lockedSections = sections.filter((s) => isSectionLocked(userPlan, s));
 
   const toggleSection = (sectionId: string) => {
-    setExpandedSections(prev =>
-      prev.includes(sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId]
+    setExpandedSections((prev) =>
+      prev.includes(sectionId)
+        ? prev.filter((id) => id !== sectionId)
+        : [...prev, sectionId]
     );
   };
 
   const copyToClipboard = (text: string, itemId: string) => {
     navigator.clipboard.writeText(text);
-    setCopiedItems(prev => [...prev, itemId]);
-    setTimeout(() => setCopiedItems(prev => prev.filter(id => id !== itemId)), 2000);
-  };
-
-  const calculateReadinessScore = () => {
-    let score = 60;
-    const data = strategy.data || strategy;
-    if (data.diagnostic || data.analyse_marche) score += 10;
-    if (data.avatar_client || data.ciblage_exact) score += 10;
-    if (data.scripts_whatsapp && data.scripts_whatsapp.length >= 3) score += 10;
-    if (data.allocation_budget) score += 5;
-    if (data.conseil_expert) score += 5;
-    return Math.min(score, 100);
-  };
-
-  const readinessScore = calculateReadinessScore();
-  const data = strategy.data || strategy;
-
-  const CopyBtn = ({ text, itemId }: { text: string; itemId: string }) => {
-    const isCopied = copiedItems.includes(itemId);
-    return (
-      <button
-        onClick={() => copyToClipboard(text, itemId)}
-        className="inline-flex items-center gap-1 px-2 py-1 text-[10px] font-medium text-gray-600 bg-white border border-gray-200 rounded hover:bg-gray-50 hover:border-[#6366F1] transition-all"
-      >
-        {isCopied ? <><Check className="w-3 h-3 text-green-600" /> Copié</> : <><Copy className="w-3 h-3" /> Copier</>}
-      </button>
+    setCopiedItems((prev) => [...prev, itemId]);
+    setTimeout(
+      () => setCopiedItems((prev) => prev.filter((id) => id !== itemId)),
+      2000
     );
   };
 
-  const Accordion = ({ id, title, icon, children, copyText, highlight = false }: any) => {
-    const isExpanded = expandedSections.includes(id);
-    return (
-      <div className={`rounded-lg border overflow-hidden transition-all ${highlight ? 'bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-200' : 'bg-white border-gray-200'}`}>
-        <button onClick={() => toggleSection(id)} className="w-full flex items-center justify-between p-3 sm:p-4 hover:bg-gray-50 transition-colors">
-          <div className="flex items-center gap-2">
-            <span className="text-sm">{icon}</span>
-            <h3 className="text-xs sm:text-sm font-semibold text-[#111827]">{title}</h3>
-          </div>
-          <div className="flex items-center gap-2">
-            {copyText && <div onClick={(e) => e.stopPropagation()}><CopyBtn text={copyText} itemId={id} /></div>}
-            {isExpanded ? <ChevronUp className="w-4 h-4 text-gray-400" /> : <ChevronDown className="w-4 h-4 text-gray-400" />}
-          </div>
-        </button>
-        {isExpanded && <div className="px-3 sm:px-4 pb-4 pt-0"><div className="text-xs sm:text-sm text-gray-700 leading-relaxed">{children}</div></div>}
-      </div>
-    );
-  };
+  const readinessScore = data.executive_summary?.preparation ?? 50;
 
   return (
-    <div className="space-y-3 sm:space-y-4">
-      {/* Score */}
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4">
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#6366F1]" />
-            <h3 className="text-xs sm:text-sm font-semibold text-[#111827]">Strategy Readiness</h3>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className={`text-sm sm:text-base font-bold ${readinessScore >= 80 ? 'text-green-600' : readinessScore >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
-              {readinessScore}
-            </span>
-            <span className="text-[10px] text-gray-500">/100</span>
-          </div>
-        </div>
-        <div className="h-1.5 sm:h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div className={`h-full rounded-full transition-all duration-1000 ${readinessScore >= 80 ? 'bg-green-500' : readinessScore >= 60 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${readinessScore}%` }}></div>
-        </div>
-        <p className="text-[10px] text-gray-600 mt-2">
-          {readinessScore >= 80 ? 'Votre stratégie est complète et prête à être implémentée.' : readinessScore >= 60 ? 'Votre stratégie est bonne mais peut être améliorée.' : 'Votre stratégie nécessite des compléments pour être efficace.'}
-        </p>
-      </div>
+    <div className="space-y-4">
+      {/* ─── EXECUTIVE SUMMARY ─── */}
+      {data.executive_summary && (
+        <ExecutiveSummary summary={data.executive_summary} />
+      )}
 
-      {/* Sections Flash */}
-      {strategyType === 'flash' ? (
+      {/* Fallback : score simple si pas de summary */}
+      {!data.executive_summary && (
+        <div className="rounded-xl border border-slate-200 bg-white p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="h-4 w-4 text-[#6366F1]" />
+              <h3 className="text-sm font-semibold text-[#18181B]">
+                Niveau de préparation stratégique
+              </h3>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-base font-bold text-slate-600">
+                {readinessScore}
+              </span>
+              <span className="text-xs text-slate-500">/ 100</span>
+            </div>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+            <div
+              className="h-full rounded-full bg-slate-400 transition-all duration-700"
+              style={{ width: `${readinessScore}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* ─── INSIGHTS ─── */}
+      {data.insights && <InsightsSection insights={data.insights} />}
+
+      {/* ─── PRIORITÉS ─── */}
+      {data.priorities && <PrioritiesSection priorities={data.priorities} />}
+
+      {/* ─── PLAN D'ACTION ─── */}
+      {data.action_plan && <ActionPlanSection plan={data.action_plan} />}
+
+      {/* ─── SECTIONS DÉTAILLÉES ─── */}
+      {availableSections
+        .filter(
+          (s) =>
+            ![
+              'executive_summary',
+              'insights',
+              'priorities',
+              'action_plan',
+            ].includes(s.id)
+        )
+        .map((section) => (
+          <SectionRenderer
+            key={section.id}
+            section={section}
+            userPlan={userPlan}
+            data={data}
+            isExpanded={expandedSections.includes(section.id)}
+            onToggle={() => toggleSection(section.id)}
+            copiedItems={copiedItems}
+            onCopy={copyToClipboard}
+          />
+        ))}
+
+      {/* ─── SÉPARATEUR + SECTIONS VERROUILLÉES ─── */}
+      {lockedSections.length > 0 && (
         <>
-          <Accordion id="overview" title="Diagnostic" icon="🎯" copyText={data.diagnostic}>{data.diagnostic}</Accordion>
-          <Accordion id="avatar" title="Avatar client idéal" icon="👤" copyText={data.avatar_client}>{data.avatar_client}</Accordion>
-          <Accordion id="angle" title="Angle publicitaire" icon="💡" copyText={data.angle_publicitaire}>{data.angle_publicitaire}</Accordion>
-          {data.makeitads_teaser && (
-            <Accordion id="teaser" title="Contenu Premium" icon="🔒" highlight>
-              <p className="mb-3">{data.makeitads_teaser}</p>
-              <button className="px-3 py-1.5 text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors">Débloquer avec le Plan Pro</button>
-            </Accordion>
-          )}
-        </>
-      ) : (
-        <>
-          <Accordion id="overview" title="Analyse du marché" icon="📊" copyText={data.analyse_marche}>{data.analyse_marche}</Accordion>
-          {data.ciblage_exact && (
-            <Accordion id="targeting" title="Ciblage exact" icon="🎯">
-              <div className="space-y-2">
-                <div><span className="text-[10px] font-medium text-gray-600">Villes :</span><p className="text-xs text-gray-700">{data.ciblage_exact.villes?.join(', ')}</p></div>
-                <div><span className="text-[10px] font-medium text-gray-600">Âges :</span><p className="text-xs text-gray-700">{data.ciblage_exact.ages}</p></div>
-                <div><span className="text-[10px] font-medium text-gray-600">Intérêts :</span><p className="text-xs text-gray-700">{data.ciblage_exact.interets?.join(', ')}</p></div>
-                <div><span className="text-[10px] font-medium text-gray-600">Comportements :</span><p className="text-xs text-gray-700">{data.ciblage_exact.comportements?.join(', ')}</p></div>
-              </div>
-            </Accordion>
-          )}
-          {data.scripts_whatsapp && (
-            <Accordion id="scripts" title="Scripts WhatsApp" icon="💬">
-              <div className="space-y-2.5">
-                {data.scripts_whatsapp.map((script: string, index: number) => (
-                  <div key={index} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
-                    <div className="flex items-start justify-between gap-2 mb-2">
-                      <span className="text-[10px] font-medium text-gray-700">Script {index + 1}</span>
-                      <CopyBtn text={script} itemId={`script-${index}`} />
-                    </div>
-                    <p className="text-xs text-gray-600 whitespace-pre-wrap">{script}</p>
-                  </div>
-                ))}
-              </div>
-            </Accordion>
-          )}
-          {data.allocation_budget && <Accordion id="budget" title="Allocation budgétaire" icon="💰" copyText={data.allocation_budget}>{data.allocation_budget}</Accordion>}
-          {data.conseil_expert && <Accordion id="expert" title="Conseil expert" icon="⭐" copyText={data.conseil_expert} highlight>{data.conseil_expert}</Accordion>}
+          <div className="relative flex items-center gap-3 pt-2">
+            <div className="h-px flex-1 bg-slate-200" />
+            <span className="text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">
+              Sections avancées
+            </span>
+            <div className="h-px flex-1 bg-slate-200" />
+          </div>
+
+          <p className="text-xs leading-relaxed text-slate-500">
+            Ces sections sont disponibles dans les plans supérieurs. Débloquez-les
+            pour étendre votre stratégie et accélérer votre croissance.
+          </p>
+
+          {lockedSections.map((section) => (
+            <LockedSection
+              key={section.id}
+              section={section}
+              onUpgradeClick={(targetPlan, sectionTitle) =>
+                setUpgradeModal({ isOpen: true, targetPlan, sectionTitle })
+              }
+            />
+          ))}
         </>
       )}
 
-      {/* Actions supplémentaires */}
-      <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
-        <h3 className="text-xs sm:text-sm font-semibold text-[#111827] mb-1.5">🚀 Actions supplémentaires</h3>
-        <p className="text-[10px] text-gray-700 mb-3">Améliorez votre stratégie avec ces fonctionnalités avancées.</p>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-          <button className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-gray-200 hover:border-[#6366F1] transition-colors">
-            <span className="text-[10px] font-medium text-gray-700">Générer 3 variantes de hooks</span>
-            <span className="text-[9px] text-[#6366F1] font-semibold">1 crédit</span>
-          </button>
-          <button className="flex items-center justify-between p-2.5 bg-white rounded-lg border border-gray-200 hover:border-[#6366F1] transition-colors">
-            <span className="text-[10px] font-medium text-gray-700">Analyse concurrentielle</span>
-            <span className="text-[9px] text-[#6366F1] font-semibold">3 crédits</span>
-          </button>
+      {/* ─── MODAL UPGRADE ─── */}
+      <UpgradeModal
+        isOpen={upgradeModal.isOpen}
+        onClose={() => setUpgradeModal({ ...upgradeModal, isOpen: false })}
+        targetPlan={upgradeModal.targetPlan}
+        sectionTitle={upgradeModal.sectionTitle}
+      />
+    </div>
+  );
+}
+
+// ============================================
+// RENDERER DE SECTION DÉBLOQUÉE
+// ============================================
+
+interface SectionRendererProps {
+  section: SectionConfig;
+  userPlan: PlanTier;
+  data: any;
+  isExpanded: boolean;
+  onToggle: () => void;
+  copiedItems: string[];
+  onCopy: (text: string, itemId: string) => void;
+}
+
+function SectionRenderer({
+  section,
+  userPlan,
+  data,
+  isExpanded,
+  onToggle,
+  copiedItems,
+  onCopy,
+}: SectionRendererProps) {
+  const Icon = section.icon;
+  const hasContent = data[section.id] !== undefined && data[section.id] !== null;
+  const content = data[section.id];
+
+  if (!hasContent) {
+    return <EmptySection section={section} />;
+  }
+
+  return (
+    <div
+      className={`overflow-hidden rounded-xl border transition-all ${
+        section.minPlan === 'enterprise' && userPlan === 'enterprise'
+          ? 'border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/40 to-white'
+          : 'border-slate-200 bg-white'
+      }`}
+    >
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+        className="flex w-full cursor-pointer items-center justify-between p-4 transition-colors hover:bg-slate-50/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#6366F1] focus-visible:ring-inset"
+      >
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#6366F1]/10 text-[#6366F1]">
+            <Icon className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-semibold text-[#18181B]">
+            {section.title}
+          </h3>
+        </div>
+        <div className="flex items-center gap-2">
+          {typeof content === 'string' && (
+            <CopyButton
+              text={content}
+              itemId={section.id}
+              copiedItems={copiedItems}
+              onCopy={onCopy}
+            />
+          )}
+          {isExpanded ? (
+            <ChevronUp className="h-4 w-4 text-slate-400" />
+          ) : (
+            <ChevronDown className="h-4 w-4 text-slate-400" />
+          )}
+        </div>
+      </div>
+
+      {isExpanded && (
+        <div className="border-t border-slate-100 px-4 pb-4 pt-4">
+          <SectionContent
+            section={section}
+            content={content}
+            copiedItems={copiedItems}
+            onCopy={onCopy}
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================
+// CONTENU DE SECTION
+// ============================================
+
+function SectionContent({
+  section,
+  content,
+  copiedItems,
+  onCopy,
+}: {
+  section: SectionConfig;
+  content: any;
+  copiedItems: string[];
+  onCopy: (text: string, itemId: string) => void;
+}) {
+  if (section.id === 'ciblage_exact' && typeof content === 'object') {
+    return (
+      <div className="space-y-3">
+        <StructuredField label="Villes" values={content.villes} />
+        <StructuredField label="Âges" values={[content.ages]} />
+        <StructuredField label="Intérêts" values={content.interets} />
+        <StructuredField label="Comportements" values={content.comportements} />
+      </div>
+    );
+  }
+
+  if (section.id === 'kpis' && Array.isArray(content)) {
+    return (
+      <div className="space-y-2">
+        {content.map((kpi: any, i: number) => (
+          <div
+            key={i}
+            className="rounded-lg border border-slate-100 bg-slate-50/60 p-3"
+          >
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-semibold text-[#18181B]">
+                {kpi.nom}
+              </span>
+              <span className="rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-semibold text-[#6366F1]">
+                {kpi.objectif}
+              </span>
+            </div>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
+              {kpi.pourquoi}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (
+    (section.id === 'scripts_whatsapp' || section.id === 'hooks') &&
+    Array.isArray(content)
+  ) {
+    return (
+      <div className="space-y-3">
+        {content.map((item: string, i: number) => (
+          <div
+            key={i}
+            className="rounded-lg border border-slate-100 bg-slate-50/60 p-3"
+          >
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+                {section.id === 'hooks' ? `Variante ${i + 1}` : `Script ${i + 1}`}
+              </span>
+              <CopyButton
+                text={item}
+                itemId={`${section.id}-${i}`}
+                copiedItems={copiedItems}
+                onCopy={onCopy}
+                compact
+              />
+            </div>
+            <p className="whitespace-pre-wrap text-xs leading-relaxed text-[#18181B]">
+              {item}
+            </p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (typeof content === 'string') {
+    return (
+      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
+        {content}
+      </p>
+    );
+  }
+
+  return (
+    <pre className="overflow-x-auto rounded-lg bg-slate-50 p-3 text-xs text-slate-700">
+      {JSON.stringify(content, null, 2)}
+    </pre>
+  );
+}
+
+// ============================================
+// SOUS-COMPOSANTS
+// ============================================
+
+function CopyButton({
+  text,
+  itemId,
+  copiedItems,
+  onCopy,
+  compact = false,
+}: {
+  text: string;
+  itemId: string;
+  copiedItems: string[];
+  onCopy: (text: string, itemId: string) => void;
+  compact?: boolean;
+}) {
+  const isCopied = copiedItems.includes(itemId);
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onCopy(text, itemId);
+      }}
+      className={`inline-flex items-center gap-1 rounded border border-slate-200 bg-white font-medium text-slate-600 transition-colors hover:border-[#6366F1] hover:text-[#6366F1] ${
+        compact ? 'px-1.5 py-0.5 text-[10px]' : 'px-2 py-1 text-[11px]'
+      }`}
+    >
+      {isCopied ? (
+        <>
+          <Check className="h-3 w-3 text-emerald-600" />
+          <span className="text-emerald-600">Copié</span>
+        </>
+      ) : (
+        <>
+          <Copy className="h-3 w-3" />
+          Copier
+        </>
+      )}
+    </button>
+  );
+}
+
+function StructuredField({
+  label,
+  values,
+}: {
+  label: string;
+  values?: string[];
+}) {
+  if (!values || values.length === 0) return null;
+  return (
+    <div>
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+        {label}
+      </p>
+      <p className="text-xs leading-relaxed text-[#18181B]">
+        {values.join(', ')}
+      </p>
+    </div>
+  );
+}
+
+function LockedSection({
+  section,
+  onUpgradeClick,
+}: {
+  section: SectionConfig;
+  onUpgradeClick: (targetPlan: PlanTier, sectionTitle: string) => void;
+}) {
+  const Icon = section.icon;
+  const requiredLabel = PLAN_LABELS[section.minPlan];
+
+  return (
+    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="flex items-center justify-between border-b border-slate-100 p-4">
+        <div className="flex items-center gap-3">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+            <Icon className="h-4 w-4" />
+          </div>
+          <h3 className="text-sm font-semibold text-slate-500">
+            {section.title}
+          </h3>
+        </div>
+        <Lock className="h-4 w-4 text-slate-400" />
+      </div>
+
+      <div className="relative p-4">
+        <div
+          className="select-none text-sm leading-relaxed text-slate-500 blur-[3px]"
+          aria-hidden
+        >
+          {section.previewText}
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-[1px]">
+          <div className="px-4 text-center">
+            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+              Section verrouillée
+            </p>
+            <p className="mb-3 text-sm font-semibold text-[#18181B]">
+              Disponible avec le plan {requiredLabel}
+            </p>
+            <button
+              type="button"
+              onClick={() => onUpgradeClick(section.minPlan, section.title)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-4 py-2 text-xs font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6]"
+            >
+              Passer au plan {requiredLabel}
+              <ArrowRight className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EmptySection({ section }: { section: SectionConfig }) {
+  const Icon = section.icon;
+  return (
+    <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-4">
+      <div className="flex items-center gap-3">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-400">
+          <Icon className="h-4 w-4" />
+        </div>
+        <div>
+          <h3 className="text-sm font-semibold text-slate-500">
+            {section.title}
+          </h3>
+          <p className="mt-0.5 text-[11px] text-slate-400">
+            Cette section n&apos;a pas été générée pour cette stratégie.
+          </p>
         </div>
       </div>
     </div>

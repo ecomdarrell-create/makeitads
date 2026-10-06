@@ -15,12 +15,14 @@ export interface PricingPlan {
   features: string[];
   limits: {
     businesses: number; // -1 = unlimited
-    // Intelligence features
+
+    // ─── Intelligence features ───
     competitorIntelligence: boolean;
     trendIntelligence: boolean;
     predictiveTrends: boolean;
     historicalIntelligence: boolean;
-    // Analysis features
+
+    // ─── Analysis features ───
     swotAnalysis: boolean;
     audienceInsights: boolean;
     marketShareAnalysis: boolean;
@@ -28,18 +30,27 @@ export interface PricingPlan {
     growthForecast: boolean;
     keywordOpportunities: boolean;
     advertisingIntelligence: boolean;
-    // Export & Integration
+
+    // ─── Strategy features (structure par plan) ───
+    strategyFlash: boolean;             // Démo — 3 sections
+    strategyCompleteBasic: boolean;     // Pro — 8 sections
+    strategyCompleteAdvanced: boolean;  // Premium — 12 sections
+    strategyCompleteElite: boolean;     // Élite — 16+ sections
+
+    // ─── Export & Integration ───
     pdfExport: boolean;
     advancedReports: boolean;
     whiteLabelReports: boolean;
     apiAccess: boolean;
     customIntegrations: boolean;
-    // Support & Services
+
+    // ─── Support & Services ───
     prioritySupport: boolean;
     dedicatedManager: boolean;
     slaGuarantee: boolean;
     customTraining: boolean;
-    // Team features
+
+    // ─── Team features ───
     teamCollaboration: boolean;
     multiBrandManagement: boolean;
     ssoSaml: boolean;
@@ -48,30 +59,50 @@ export interface PricingPlan {
   cta: string;
 }
 
+// ======================================================
+// COÛTS EN CRÉDITS (centralisés)
+// ======================================================
+
+export const CREDIT_COSTS = {
+  DIAGNOSTIC_FLASH: 1,
+  STRATEGIE_COMPLETE: 5,
+  ANALYSE_CONCURRENTIELLE: 3,
+  ANALYSE_PUBLICITAIRE: 2,
+  GENERATION_HOOKS: 1,
+} as const;
+
+export type CreditAction = keyof typeof CREDIT_COSTS;
+
+// ======================================================
+// CONFIGURATION DES PLANS
+// ======================================================
+
 export const PRICING_CONFIG: Record<string, PricingPlan> = {
+  // ─── DÉMO ───
   free: {
     id: "free",
-    name: "Free",
-    description: "Perfect for testing the waters.",
+    name: "Démo",
+    description: "Découvrez la qualité de l'intelligence MakeItAds.",
     monthlyPrice: 0,
     yearlyPrice: 0,
     welcomeCredits: 10,
     monthlyCredits: 0,
     stripePriceId: null,
     features: [
-      "10 welcome credits (one-time offer)",
-      "Basic market analysis",
-      "Email support",
-      "Dashboard access",
-      "Community access",
+      "10 crédits de bienvenue (offre unique)",
+      "Diagnostic Flash (3 sections)",
+      "Accès au dashboard",
+      "Support communautaire",
     ],
     limits: {
       businesses: 1,
+
       // Intelligence
       competitorIntelligence: false,
       trendIntelligence: false,
       predictiveTrends: false,
       historicalIntelligence: false,
+
       // Analysis
       swotAnalysis: false,
       audienceInsights: false,
@@ -80,54 +111,64 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       growthForecast: false,
       keywordOpportunities: false,
       advertisingIntelligence: false,
+
+      // Strategy
+      strategyFlash: true,
+      strategyCompleteBasic: false,
+      strategyCompleteAdvanced: false,
+      strategyCompleteElite: false,
+
       // Export
       pdfExport: false,
       advancedReports: false,
       whiteLabelReports: false,
       apiAccess: false,
       customIntegrations: false,
+
       // Support
       prioritySupport: false,
       dedicatedManager: false,
       slaGuarantee: false,
       customTraining: false,
+
       // Team
       teamCollaboration: false,
       multiBrandManagement: false,
       ssoSaml: false,
     },
-    cta: "Current plan",
+    cta: "Commencer",
   },
+
+  // ─── PRO ───
   pro: {
     id: "pro",
     name: "Pro",
-    description: "For growing businesses.",
-    monthlyPrice: 29,
-    yearlyPrice: 23,
+    description: "Pour les entrepreneurs qui veulent scaler leurs premières ventes.",
+    monthlyPrice: 10000,
+    yearlyPrice: 10000,
     welcomeCredits: 0,
-    monthlyCredits: 15,
+    monthlyCredits: 50,
     stripePriceId: "price_pro_monthly",
     features: [
-      "Everything in Free",
-      "15 credits renewed every month",
-      "Competitor intelligence",
-      "Trend intelligence",
-      "SWOT analysis",
-      "Audience insights",
-      "Campaign builder",
-      "Analytics dashboard",
-      "Creative studio",
-      "PDF export",
-      "Growth roadmap",
-      "Priority email support",
+      "Tout le plan Démo",
+      "50 crédits renouvelés chaque mois",
+      "Stratégie Complète Basique (8 sections)",
+      "Scripts WhatsApp prêts à l'emploi",
+      "Allocation budgétaire sur 7 jours",
+      "Ciblage précis",
+      "Guide créatif",
+      "KPIs à suivre",
+      "Support email (48h)",
     ],
     limits: {
       businesses: 3,
+
       // Intelligence
       competitorIntelligence: true,
       trendIntelligence: true,
       predictiveTrends: false,
       historicalIntelligence: false,
+
       // Analysis
       swotAnalysis: true,
       audienceInsights: true,
@@ -136,54 +177,65 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       growthForecast: false,
       keywordOpportunities: true,
       advertisingIntelligence: false,
+
+      // Strategy
+      strategyFlash: true,
+      strategyCompleteBasic: true,
+      strategyCompleteAdvanced: false,
+      strategyCompleteElite: false,
+
       // Export
       pdfExport: true,
       advancedReports: false,
       whiteLabelReports: false,
       apiAccess: false,
       customIntegrations: false,
+
       // Support
       prioritySupport: true,
       dedicatedManager: false,
       slaGuarantee: false,
       customTraining: false,
+
       // Team
       teamCollaboration: false,
       multiBrandManagement: false,
       ssoSaml: false,
     },
     popular: true,
-    cta: "Upgrade to Pro",
+    cta: "Choisir le Plan Pro",
   },
+
+  // ─── PREMIUM ───
   premium: {
     id: "premium",
     name: "Premium",
-    description: "For serious marketers.",
-    monthlyPrice: 59,
-    yearlyPrice: 47,
+    description: "Pour les marketeurs sérieux qui veulent dominer leur niche.",
+    monthlyPrice: 25000,
+    yearlyPrice: 25000,
     welcomeCredits: 0,
-    monthlyCredits: 30,
+    monthlyCredits: 150,
     stripePriceId: "price_premium_monthly",
     features: [
-      "Everything in Pro",
-      "30 credits renewed every month",
-      "Historical intelligence",
-      "Market share analysis",
-      "Traffic estimation",
-      "Growth forecast",
-      "Advertising intelligence",
-      "Advanced reports",
-      "API access",
-      "Priority support 24/7",
-      "White-label reports",
+      "Tout le plan Pro",
+      "150 crédits renouvelés chaque mois",
+      "Stratégie Complète Avancée (12 sections)",
+      "Analyse concurrentielle",
+      "Génération de hooks (5 variantes)",
+      "Analyse d'audience approfondie",
+      "Stratégie de croissance (3 mois)",
+      "Support prioritaire (12h)",
+      "Rapports avancés",
     ],
     limits: {
       businesses: 10,
+
       // Intelligence
       competitorIntelligence: true,
       trendIntelligence: true,
       predictiveTrends: true,
       historicalIntelligence: true,
+
       // Analysis
       swotAnalysis: true,
       audienceInsights: true,
@@ -192,52 +244,66 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       growthForecast: true,
       keywordOpportunities: true,
       advertisingIntelligence: true,
+
+      // Strategy
+      strategyFlash: true,
+      strategyCompleteBasic: true,
+      strategyCompleteAdvanced: true,
+      strategyCompleteElite: false,
+
       // Export
       pdfExport: true,
       advancedReports: true,
       whiteLabelReports: true,
       apiAccess: true,
       customIntegrations: false,
+
       // Support
       prioritySupport: true,
       dedicatedManager: false,
       slaGuarantee: false,
       customTraining: false,
+
       // Team
       teamCollaboration: true,
       multiBrandManagement: false,
       ssoSaml: false,
     },
-    cta: "Go Premium",
+    cta: "Choisir le Plan Premium",
   },
+
+  // ─── ÉLITE ───
   enterprise: {
     id: "enterprise",
     name: "Élite",
-    description: "For agencies & teams.",
-    monthlyPrice: 149,
-    yearlyPrice: 119,
+    description: "Pour les agences et équipes en croissance rapide.",
+    monthlyPrice: 100000,
+    yearlyPrice: 100000,
     welcomeCredits: 0,
-    monthlyCredits: 80,
+    monthlyCredits: 500,
     stripePriceId: null,
     features: [
-      "Everything in Premium",
-      "Multi-brand management",
-      "Team collaboration (10+ seats)",
-      "Custom AI training",
-      "Dedicated account manager",
-      "SLA guarantee",
-      "Custom integrations",
-      "Advanced security",
-      "SSO & SAML",
-      "Custom contracts",
+      "Tout le plan Premium",
+      "500 crédits renouvelés chaque mois",
+      "Stratégie Complète Élite (16+ sections)",
+      "Consulting stratégique mensuel",
+      "Formation personnalisée",
+      "Accompagnement avancé",
+      "Rapports white-label",
+      "Support prioritaire 24/7",
+      "Multi-marques",
+      "Collaboration d'équipe (10 sièges)",
+      "Accès API",
     ],
     limits: {
-      businesses: -1, // unlimited
+      businesses: -1,
+
       // Intelligence
       competitorIntelligence: true,
       trendIntelligence: true,
       predictiveTrends: true,
       historicalIntelligence: true,
+
       // Analysis
       swotAnalysis: true,
       audienceInsights: true,
@@ -246,27 +312,40 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       growthForecast: true,
       keywordOpportunities: true,
       advertisingIntelligence: true,
+
+      // Strategy
+      strategyFlash: true,
+      strategyCompleteBasic: true,
+      strategyCompleteAdvanced: true,
+      strategyCompleteElite: true,
+
       // Export
       pdfExport: true,
       advancedReports: true,
       whiteLabelReports: true,
       apiAccess: true,
       customIntegrations: true,
+
       // Support
       prioritySupport: true,
       dedicatedManager: true,
       slaGuarantee: true,
       customTraining: true,
+
       // Team
       teamCollaboration: true,
       multiBrandManagement: true,
       ssoSaml: true,
     },
-    cta: "Book a call",
+    cta: "Choisir le Plan Élite",
   },
 } as const;
 
 export type PlanId = keyof typeof PRICING_CONFIG;
+
+// ======================================================
+// NORMALISATION DU PLAN
+// ======================================================
 
 export function normalizePlanId(planId?: string | null): PlanId {
   const normalized = (planId || 'free').toLowerCase().trim();
@@ -283,12 +362,12 @@ export function normalizePlanId(planId?: string | null): PlanId {
 // HELPERS
 // ======================================================
 
-// Helper : obtenir un plan par ID
+// Obtenir un plan par ID
 export function getPlan(planId: string): PricingPlan | undefined {
   return PRICING_CONFIG[planId];
 }
 
-// Helper : vérifier si un plan est supérieur ou égal à un autre
+// Vérifier si un plan est supérieur ou égal à un autre
 export function hasFeature(
   userPlanId: string,
   requiredPlanId: string
@@ -299,13 +378,13 @@ export function hasFeature(
   return userIndex >= requiredIndex;
 }
 
-// Helper : obtenir le prix
+// Obtenir le prix
 export function getPrice(planId: PlanId, isYearly: boolean): number {
   const plan = PRICING_CONFIG[planId];
   return isYearly ? plan.yearlyPrice : plan.monthlyPrice;
 }
 
-// Helper : vérifier si une feature spécifique est disponible
+// Vérifier si une feature spécifique est disponible
 export function hasPermission(
   userPlanId: string,
   feature: keyof PricingPlan["limits"]
@@ -315,7 +394,7 @@ export function hasPermission(
   return plan.limits[feature] === true;
 }
 
-// Helper : obtenir la limite d'une feature
+// Obtenir la limite d'une feature
 export function getLimit(
   userPlanId: string,
   feature: "monthlyCredits" | "businesses"
@@ -325,34 +404,34 @@ export function getLimit(
   return feature === 'monthlyCredits' ? plan.monthlyCredits : plan.limits.businesses;
 }
 
-// Helper : vérifier si le quota est atteint
+// Vérifier si le quota est atteint
 export function isQuotaReached(
   userPlanId: string,
   used: number
 ): boolean {
   const limit = getLimit(userPlanId, "monthlyCredits");
-  if (limit === -1) return false; // unlimited
+  if (limit === -1) return false;
   return used >= limit;
 }
 
-// Helper : obtenir le quota restant
+// Obtenir le quota restant
 export function getQuotaRemaining(
   userPlanId: string,
   used: number
 ): number {
   const limit = getLimit(userPlanId, "monthlyCredits");
-  if (limit === -1) return 9999; // unlimited
+  if (limit === -1) return 9999;
   return Math.max(0, limit - used);
 }
 
-// Helper : obtenir toutes les features disponibles pour un plan
+// Obtenir toutes les features disponibles pour un plan
 export function getAvailableFeatures(planId: string): string[] {
   const plan = PRICING_CONFIG[planId];
   if (!plan) return [];
   return plan.features;
 }
 
-// Helper : comparer deux plans
+// Comparer deux plans
 export function comparePlans(
   planId1: string,
   planId2: string
@@ -363,7 +442,7 @@ export function comparePlans(
   return index1 - index2;
 }
 
-// Helper : obtenir le plan suivant
+// Obtenir le plan suivant
 export function getNextPlan(currentPlanId: string): PlanId | null {
   const planOrder: PlanId[] = ["free", "pro", "premium", "enterprise"];
   const currentIndex = planOrder.indexOf(currentPlanId as PlanId);
@@ -373,12 +452,20 @@ export function getNextPlan(currentPlanId: string): PlanId | null {
   return planOrder[currentIndex + 1];
 }
 
-// Helper : vérifier si un plan est "premium" ou supérieur
+// Vérifier si un plan est "premium" ou supérieur
 export function isPremiumOrAbove(planId: string): boolean {
   return hasFeature(planId, "premium");
 }
 
-// Helper : vérifier si un plan est "enterprise"
+// Vérifier si un plan est "enterprise"
 export function isEnterprise(planId: string): boolean {
   return planId === "enterprise";
 }
+
+// Labels commerciaux (pour affichage UI)
+export const PLAN_LABELS: Record<PlanId, string> = {
+  free: "Démo",
+  pro: "Pro",
+  premium: "Premium",
+  enterprise: "Élite",
+};

@@ -1,4 +1,5 @@
 import { FormData } from '../types';
+import { RequiredLabel } from '../RequiredLabel';
 
 interface StepProps {
   formData: FormData;
@@ -19,10 +20,11 @@ export function Step2Offer({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Produit ou service principal
+          <RequiredLabel>Produit ou service principal</RequiredLabel>
         </label>
         <input
           type="text"
+          required
           value={formData.mainProduct}
           onChange={(e) => updateFormData({ mainProduct: e.target.value })}
           placeholder="Ex: Crème hydratante bio"
@@ -85,7 +87,7 @@ export function Step2Offer({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          L'offre est-elle déjà commercialisée ?
+          L&apos;offre est-elle déjà commercialisée ?
         </label>
         <select
           value={formData.isCommercialized}

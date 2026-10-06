@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Check } from "lucide-react";
+import { ArrowDown, ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 const values = [
   {
@@ -34,15 +34,15 @@ export default function WhyChooseSection() {
   const gridOrder = [values[0], values[1], values[3], values[2]];
 
   return (
-    <section className="relative z-10 py-10 md:py-20 bg-[#F1F1F6]">
+    <section id="fonctionnalites" className="relative z-10 py-10 md:py-20 bg-[#F1F1F6]">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         
         <div className="text-center mb-8 md:mb-12 max-w-3xl mx-auto">
-          <h2 className="text-[22px] md:text-[32px] font-extrabold text-[#080810] mb-3 md:mb-4 leading-tight">
+          <h2 className="text-2xl md:text-3xl font-semibold text-[#18181B] mb-3 md:mb-4 leading-tight">
             Pourquoi choisir MakeItAds ?
           </h2>
-          <p className="text-[13px] md:text-[15px] text-[#9094A8] leading-[1.6]">
-            Depuis le premier jour, notre engagement n'a jamais changé: donner à chaque entrepreneur africain une stratégie publicitaire claire, précise et immédiatement actionnable.
+          <p className="text-sm md:text-base text-[#71717A] leading-relaxed">
+            Depuis le premier jour, notre engagement n&apos;a jamais changé : donner à chaque entrepreneur africain une stratégie publicitaire claire, précise et immédiatement actionnable.
           </p>
         </div>
 
@@ -68,29 +68,15 @@ export default function WhyChooseSection() {
             </motion.div>
           ))}
 
-          <svg className="hidden md:block absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 600 400">
-            <path d="M 310 80 Q 300 60 290 80" fill="none" stroke="#8B5CF6" strokeWidth="2.5" markerEnd="url(#arrowhead)" />
-            <path d="M 520 210 Q 540 200 520 190" fill="none" stroke="#8B5CF6" strokeWidth="2.5" markerEnd="url(#arrowhead)" />
-            <path d="M 310 320 Q 300 340 290 320" fill="none" stroke="#8B5CF6" strokeWidth="2.5" markerEnd="url(#arrowhead)" />
-            <path d="M 80 210 Q 60 200 80 190" fill="none" stroke="#8B5CF6" strokeWidth="2.5" markerEnd="url(#arrowhead)" />
-            <defs>
-              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
-                <polygon points="0 0, 10 3.5, 0 7" fill="#8B5CF6" />
-              </marker>
-            </defs>
-          </svg>
-
-          <svg className="md:hidden absolute inset-0 w-full h-full pointer-events-none z-0" viewBox="0 0 300 300">
-            <path d="M 155 50 Q 150 40 145 50" fill="none" stroke="#8B5CF6" strokeWidth="1.5" markerEnd="url(#arrowhead-m)" />
-            <path d="M 250 155 Q 260 150 250 145" fill="none" stroke="#8B5CF6" strokeWidth="1.5" markerEnd="url(#arrowhead-m)" />
-            <path d="M 155 250 Q 150 260 145 250" fill="none" stroke="#8B5CF6" strokeWidth="1.5" markerEnd="url(#arrowhead-m)" />
-            <path d="M 50 155 Q 40 150 50 145" fill="none" stroke="#8B5CF6" strokeWidth="1.5" markerEnd="url(#arrowhead-m)" />
-            <defs>
-              <marker id="arrowhead-m" markerWidth="6" markerHeight="5" refX="5" refY="2.5" orient="auto">
-                <polygon points="0 0, 6 2.5, 0 5" fill="#8B5CF6" />
-              </marker>
-            </defs>
-          </svg>
+          <span aria-hidden="true" className="pointer-events-none absolute left-1/2 top-[25%] z-20 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-indigo-100 bg-white text-indigo-600 shadow-sm">
+            <ArrowRight className="h-3.5 w-3.5" />
+          </span>
+          <span aria-hidden="true" className="pointer-events-none absolute right-[25%] top-1/2 z-20 flex h-6 w-6 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-indigo-100 bg-white text-indigo-600 shadow-sm">
+            <ArrowDown className="h-3.5 w-3.5" />
+          </span>
+          <span aria-hidden="true" className="pointer-events-none absolute bottom-[25%] left-1/2 z-20 flex h-6 w-6 -translate-x-1/2 translate-y-1/2 items-center justify-center rounded-full border border-indigo-100 bg-white text-indigo-600 shadow-sm">
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </span>
         </div>
 
         <div className="flex justify-center mt-10 md:mt-16 px-4">

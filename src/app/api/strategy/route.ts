@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
+import { DEFAULT_AI_CONFIG } from "@/lib/ai/provider";
 
 const promptTemplate = `You are MakeItAds, an AI assistant that turns product descriptions into complete ad strategies.
 
@@ -24,35 +26,17 @@ async function generateStrategy(description: string) {
     throw new Error("Missing ANTHROPIC_API_KEY");
   }
 
-  const body = {
-    model: "claude-3.5-sonic",
-    max_tokens_to_sample: 600,
-    temperature: 0.7,
-    top_p: 1,
-    stop_sequences: ["###"],
-    instructions: promptTemplate.replace("{description}", description),
-  };
-
-  const response = await fetch("https://api.anthropic.com/v1/complete", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-API-Key": apiKey,
-    },
-    body: JSON.stringify(body),
+  const anthropic = new Anthropic({ apiKey });
+  const response = await anthropic.messages.create({
+    model: DEFAULT_AI_CONFIG.model,
+    max_tokens: 900,
+    temperature: 0.5,
+    system: 'Tu es le conseiller MakeItAds. Réponds en français, distingue les recommandations des résultats mesurés et n’invente aucun chiffre de performance.',
+    messages: [{ role: 'user', content: promptTemplate.replace("{description}", description) }],
   });
 
-  if (!response.ok) {
-    const errorData = await response.text();
-    throw new Error(`Anthropic API error: ${response.status} ${errorData}`);
-  }
-
-  const json = await response.json();
-  const output = json?.completion ?? json?.completion?.text ?? null;
-  if (!output) {
-    throw new Error("Aucune réponse de l'API Anthropic");
-  }
-
+  const output = response.content.find((block) => block.type === 'text')?.text;
+  if (!output?.trim()) throw new Error("Aucune réponse de l'API Claude");
   return output.trim();
 }
 

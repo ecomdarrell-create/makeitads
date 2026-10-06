@@ -5,11 +5,16 @@ interface CreditCenterProps {
   used: number;
   flashCount: number;
   completeCount: number;
+  currency?: string; // ✅ Ajout de la propriété currency (optionnelle)
 }
 
-export function CreditCenter({ balance, used, flashCount, completeCount }: CreditCenterProps) {
+export function CreditCenter({ balance, used, flashCount, completeCount, currency }: CreditCenterProps) {
   const total = balance + used;
   const generatedStrategies = flashCount + completeCount;
+  
+  // Petit helper pour afficher la devise proprement si elle existe
+  const currencyDisplay = currency ? ` (${currency})` : '';
+
   const ringStats = [
     {
       label: 'Restants',
@@ -63,11 +68,11 @@ export function CreditCenter({ balance, used, flashCount, completeCount }: Credi
 
         <div className="flex-1 min-w-0">
           <div className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${item.softColor}`}>
-            {item.label}
+            {item.label}{item.label === 'Restants' ? currencyDisplay : ''}
           </div>
           <p className="mt-2 text-[10px] text-slate-600">
             {item.label === 'Restants'
-              ? 'Crédits disponibles'
+              ? `Crédits disponibles${currencyDisplay}`
               : item.label === 'Flash'
                 ? 'Diagnostics rapides'
                 : 'Stratégies complètes'}
@@ -90,7 +95,7 @@ export function CreditCenter({ balance, used, flashCount, completeCount }: Credi
         href="/dashboard/credits"
         className="block w-full text-center text-[10px] sm:text-xs font-medium text-[#6366F1] bg-indigo-50 py-1.5 sm:py-2 rounded-lg hover:bg-indigo-100 transition-colors"
       >
-        Voir l'historique →
+        Voir l&apos;historique →
       </Link>
     </div>
   );

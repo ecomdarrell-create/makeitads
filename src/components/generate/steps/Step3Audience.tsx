@@ -1,4 +1,5 @@
 import { FormData } from '../types';
+import { RequiredLabel } from '../RequiredLabel';
 
 interface StepProps {
   formData: FormData;
@@ -19,10 +20,11 @@ export function Step3Audience({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Client idéal (description)
+          <RequiredLabel>Client idéal (description)</RequiredLabel>
         </label>
         <textarea
           value={formData.idealClient}
+          required
           onChange={(e) => updateFormData({ idealClient: e.target.value })}
           placeholder="Ex: Femmes actives 25-40 ans, soucieuses de leur apparence..."
           rows={2}
@@ -48,7 +50,7 @@ export function Step3Audience({ formData, updateFormData }: StepProps) {
         </div>
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-            Tranche d'âge
+            Tranche d&apos;âge
           </label>
           <input
             type="text"
@@ -63,10 +65,11 @@ export function Step3Audience({ formData, updateFormData }: StepProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-            Pays
+            <RequiredLabel>Pays ciblé</RequiredLabel>
           </label>
           <input
             type="text"
+            required
             value={formData.country}
             onChange={(e) => updateFormData({ country: e.target.value })}
             placeholder="Cameroun"
@@ -89,7 +92,7 @@ export function Step3Audience({ formData, updateFormData }: StepProps) {
 
       <div>
         <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-          Pouvoir d'achat approximatif
+          Pouvoir d&apos;achat approximatif
         </label>
         <select
           value={formData.purchasingPower}

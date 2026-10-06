@@ -6,6 +6,7 @@ import Image from "next/image";
 import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { useState, Fragment } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
+import { formatPlanPrice, type Currency } from "@/lib/currency";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
@@ -13,6 +14,7 @@ import HeroSection from "@/components/HeroSection";
 import WhyChooseSection from "../components/WhyChooseSection";
 import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
+import SaaSChatbot from "@/components/shared/SaaSChatbot";
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (<svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" /></svg>);
@@ -36,6 +38,8 @@ const faqData = [
   { question: "Est-ce adapté au marché africain ?", answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux." }
 ];
 
+const defaultCurrency: Currency = 'XOF';
+
 const pricingPlans = [
   { 
     id: "demo", name: "MakeItAds Démo", price: "0 FCFA", 
@@ -44,28 +48,27 @@ const pricingPlans = [
     checkColor: "text-emerald-500", bgCheck: "bg-emerald-500/10", ctaBg: "bg-emerald-500", ctaHover: "hover:bg-emerald-600", ctaTextCol: "text-white", bgCard: "bg-white" 
   },
   { 
-    id: "pro", name: "MakeItAds Pro", price: "10 000 FCFA/an", durationNote: "12 mois d'accès",
+    id: "pro", name: "MakeItAds Pro", price: formatPlanPrice('pro', defaultCurrency), durationNote: "12 mois d'accès",
     features: ["15 crédits renouvelés chaque mois", "6 variantes de textes", "Ciblage précis", "Recommandations plateforme", "Guide créatif", "Accès communauté", "Adapté marché local"],
     popular: true, ctaText: "Choisir le Plan Pro", link: "https://makeitads.mychariow.com/plan-pro", 
     checkColor: "text-[#6366F1]", bgCheck: "bg-[#6366F1]/10", ctaBg: "bg-[#6366F1]", ctaHover: "hover:bg-[#5558e6]", ctaTextCol: "text-white", bgCard: "bg-white" 
   },
   { 
-    id: "premium", name: "MakeItAds Premium", price: "25 000 FCFA/an", durationNote: "12 mois d'accès",
+    id: "premium", name: "MakeItAds Premium", price: formatPlanPrice('premium', defaultCurrency), durationNote: "12 mois d'accès",
     features: ["30 crédits renouvelés chaque mois", "15 variantes de textes", "Analyse concurrentielle", "Publication / visibilité", "Support prioritaire", "Canal Telegram VIP", "Stratégie de croissance"],
     popular: false, ctaText: "Choisir le Plan Premium", link: "https://makeitads.mychariow.com/plan-prem", 
     checkColor: "text-rose-500", bgCheck: "bg-rose-500/10", ctaBg: "bg-rose-500", ctaHover: "hover:bg-rose-600", ctaTextCol: "text-white", bgCard: "bg-white" 
   },
   { 
-    id: "enterprise", name: "MakeItAds Élite", price: "100 000 FCFA/an", durationNote: "12 mois d'accès",
+    id: "enterprise", name: "MakeItAds Élite", price: formatPlanPrice('enterprise', defaultCurrency), durationNote: "12 mois d'accès",
     features: ["80 crédits renouvelés chaque mois", "Analyse concurrentielle mensuelle", "Accompagnement sur mesure", "4 publications / mois", "Consulting stratégique 30min", "Support < 1 heure", "Accompagnement avancé"],
     popular: false, ctaText: "Choisir le Plan Élite", link: "https://makeitads.mychariow.com/plan-elit",
     checkColor: "text-amber-500", bgCheck: "bg-amber-500/10", ctaBg: "bg-amber-500", ctaHover: "hover:bg-amber-600", ctaTextCol: "text-white", bgCard: "bg-white" 
   },
 ];
 
-// ✅ COMPOSANT PRICING CARD ANTI-DÉBORDEMENT (Optimisé pour 320px)
-function PricingCard({ plan }: { plan: any }) {
-const isWide = plan.id === 'premium' || plan.id === 'enterprise';
+function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
+  const isWide = plan.id === 'premium' || plan.id === 'enterprise';
   
   return (
     <motion.div 
@@ -104,7 +107,6 @@ const isWide = plan.id === 'premium' || plan.id === 'enterprise';
       </div>
 
       <div className={`flex-1 ${isWide ? 'md:w-2/3' : ''}`}>
-        {/* ✅ grid-cols-2 avec min-w-0 et hyphens-auto pour empêcher tout débordement sur mobile */}
         <ul className={`grid ${isWide ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2'} gap-x-1.5 gap-y-1.5`}>
           {plan.features.map((feature: string, i: number) => (
             <li key={i} className="flex items-start gap-1 text-[9px] md:text-[11px] text-[#475569] leading-tight min-w-0">
@@ -125,11 +127,11 @@ export default function LandingPage() {
   const scrollToPricing = () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <main className="min-h-screen bg-white text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20">
+    <main className="min-h-screen bg-white text-[#18181B] overflow-x-clip selection:bg-[#6366f1]/20">
       <GlobalNavbar />
       <HeroSection />
 
-      <TrustpilotCarousel reviews={section1Reviews} title={<span className="text-left block text-lg md:text-2xl font-bold">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span>…</span>} footerNote="Note de 4.8/5 sur 312 avis." />
+      <TrustpilotCarousel reviews={section1Reviews} title={<span className="block text-left text-2xl font-semibold leading-tight md:text-3xl">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span>…</span>} footerNote="Note de 4.8/5 sur 312 avis." />
 
       <section className="relative z-10 py-6 border-y border-gray-100 bg-[#F8F8FC]">
         <div className="max-w-5xl mx-auto px-4">
@@ -150,8 +152,8 @@ export default function LandingPage() {
       <section id="how-it-works" className="relative z-10 bg-white py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
-            <h2 className="text-lg md:text-2xl font-bold tracking-tight text-[#18181B] mb-2">Comment ça marche ?</h2>
-            <p className="text-xs md:text-sm text-[#71717A] max-w-xl">Obtenez une stratégie publicitaire complète en seulement quelques étapes.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">Comment ça marche ?</h2>
+            <p className="text-sm md:text-base leading-relaxed text-[#71717A] max-w-xl">Obtenez une stratégie publicitaire complète en seulement quelques étapes.</p>
           </motion.div>
 
           <div className="flex justify-start mb-6 md:mb-10 overflow-x-auto pb-2">
@@ -198,11 +200,11 @@ export default function LandingPage() {
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="grid gap-5 md:grid-cols-[1.1fr_0.9fr] md:items-end mb-8 md:mb-12">
             <div>
               <p className="text-[10px] md:text-[11px] font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">Pourquoi une stratégie ?</p>
-              <h2 className="text-lg md:text-3xl font-black text-[#18181B] mb-3 leading-tight">
+              <h2 className="text-2xl md:text-3xl font-semibold text-[#18181B] mb-3 leading-tight">
                 Une bonne campagne ne se lance pas au hasard.<br className="hidden md:block" />
                 <span className="text-[#6366F1]">Elle se construit avant le budget.</span>
               </h2>
-              <p className="text-xs md:text-base text-[#71717A] leading-relaxed max-w-2xl">
+              <p className="text-sm md:text-base text-[#71717A] leading-relaxed max-w-2xl">
                 Avant d’investir, clarifiez qui vous voulez convaincre, ce que vous allez lui dire et comment vous saurez si votre campagne fonctionne.
               </p>
             </div>
@@ -212,7 +214,7 @@ export default function LandingPage() {
             </div>
           </motion.div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="relative">
             {[
               {
                 title: "Comprendre le vrai problème",
@@ -239,22 +241,27 @@ export default function LandingPage() {
                 accent: "from-[#EC4899] to-[#F472B6]",
               },
             ].map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.08, duration: 0.45 }}
-                className="group relative flex min-h-[230px] flex-col overflow-hidden rounded-xl border border-gray-200 bg-white p-4 md:p-5 shadow-[0_10px_30px_rgba(15,23,42,0.04)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_18px_38px_rgba(15,23,42,0.09)]"
-              >
-                <div className="mb-5 flex items-center justify-between">
-                  <div className={`h-1.5 flex-1 rounded-full bg-gradient-to-r ${item.accent}`} />
-                  <span className="ml-3 text-[10px] font-bold tabular-nums text-[#71717A]">0{index + 1} / 04</span>
-                </div>
-                <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2 leading-tight">{item.title}</h3>
-                <p className="text-xs md:text-sm text-[#71717A] leading-relaxed">{item.text}</p>
-                <p className="mt-auto border-t border-gray-100 pt-4 text-[10px] md:text-[11px] font-semibold text-[#18181B]">{item.output}</p>
-              </motion.div>
+                <motion.div
+                  key={item.title}
+                  initial={{ opacity: 0.92, y: 12 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-8% 0px -8% 0px' }}
+                  transition={{ duration: 0.35, ease: 'easeOut' }}
+                  style={{ zIndex: index + 1, top: `${88 + index * 9}px`, transform: `scale(${1 - index * 0.012})` }}
+                  className="sticky mx-auto mb-[48vh] flex min-h-[260px] max-w-4xl flex-col rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_12px_36px_rgba(15,23,42,0.08)] transition-shadow duration-500 last:mb-0 sm:min-h-[280px] sm:p-6 md:min-h-[300px] md:p-8"
+                >
+                  <div className="mb-6 flex items-center gap-3">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[11px] font-bold text-indigo-700 ring-1 ring-indigo-100">0{index + 1}</span>
+                    <div className={`h-1 flex-1 rounded-full bg-gradient-to-r ${item.accent} opacity-80`} />
+                    <span className="text-[9px] font-semibold uppercase tracking-[0.14em] text-slate-400">Étape {index + 1} / 4</span>
+                  </div>
+                  <div className="max-w-2xl">
+                    <p className="mb-2 text-[9px] font-semibold uppercase tracking-[0.16em] text-indigo-600">Intelligence marketing</p>
+                    <h3 className="mb-3 text-base font-bold leading-snug text-slate-900 sm:text-xl md:text-2xl">{item.title}</h3>
+                    <p className="text-xs leading-relaxed text-slate-600 sm:text-sm">{item.text}</p>
+                  </div>
+                  <p className="mt-auto border-t border-slate-100 pt-4 text-[10px] font-semibold text-slate-800 sm:text-xs">{item.output}</p>
+                </motion.div>
             ))}
           </div>
         </div>
@@ -263,18 +270,17 @@ export default function LandingPage() {
       <WhyChooseSection />
       <EntrepreneursCarousel />
 
-      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
-        <div className="max-w-6xl mx-auto">
-          <TrustpilotCarousel reviews={section2Reviews} title={<span className="text-left block text-lg md:text-2xl font-bold">Des résultats qui parlent <span className="text-[#6366F1]">d'eux-mêmes</span></span>} footerNote="Note de 4.7/5 sur 289 avis." />
+      <section id="avis" className="relative z-10 py-12 md:py-20 px-0 sm:px-6 bg-[#F8F8FC]">
+        <div className="w-full">
+          <TrustpilotCarousel reviews={section2Reviews} title={<span className="block text-left text-2xl font-semibold leading-tight md:text-3xl">Des résultats qui parlent <span className="text-[#6366F1]">d&apos;eux-mêmes</span></span>} footerNote="Note de 4.7/5 sur 289 avis." />
         </div>
       </section>
 
-      {/* ✅ SECTION TARIFS BENTO GRID ASYMÉTRIQUE STRICTE */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
-            <h2 className="text-lg md:text-2xl font-bold tracking-tight text-[#18181B] mb-2">Investissez dans votre <span className="text-[#6366F1]">croissance</span></h2>
-            <p className="text-xs md:text-sm text-[#71717A] max-w-xl">Des formules annuelles avec crédits mensuels, conçues pour scaler.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">Investissez dans votre <span className="text-[#6366F1]">croissance</span></h2>
+            <p className="text-sm md:text-base leading-relaxed text-[#71717A] max-w-xl">Des formules annuelles avec crédits mensuels, conçues pour scaler.</p>
           </motion.div>
 
           <div className="grid grid-cols-2 gap-3 md:gap-5 w-full">
@@ -294,12 +300,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION COMPARAISON AVEC TITRE VIOLET */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
-            <h2 className="text-lg md:text-2xl font-bold tracking-tight text-[#18181B] mb-2">Comparez les <span className="text-[#6366F1]">formules</span></h2>
-            <p className="text-xs md:text-sm text-[#71717A]">Comprenez rapidement ce que chaque niveau débloque.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">Comparez les <span className="text-[#6366F1]">formules</span></h2>
+            <p className="text-sm md:text-base leading-relaxed text-[#71717A]">Comprenez rapidement ce que chaque niveau débloque.</p>
           </motion.div>
 
           <div className="overflow-x-auto pb-4 -mx-4 px-4 md:mx-0 md:px-0 md:overflow-visible">
@@ -335,12 +340,11 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION FAQ AVEC TITRE VIOLET */}
       <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
-            <h2 className="text-lg md:text-2xl font-bold tracking-tight text-[#18181B] mb-2">Questions <span className="text-[#6366F1]">fréquentes</span></h2>
-            <p className="text-xs md:text-sm text-[#71717A]">Tout ce que vous devez savoir avant de commencer.</p>
+            <h2 className="text-2xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">Questions <span className="text-[#6366F1]">fréquentes</span></h2>
+            <p className="text-sm md:text-base leading-relaxed text-[#71717A]">Tout ce que vous devez savoir avant de commencer.</p>
           </motion.div>
           <div className="space-y-3">
             {faqData.map((faq, index) => (
@@ -369,11 +373,11 @@ export default function LandingPage() {
       <section className="relative z-10 py-10 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="text-lg md:text-2xl font-bold tracking-tight leading-[1.15] mb-3 text-[#18181B]">
+            <h2 className="text-2xl md:text-3xl font-semibold leading-tight mb-3 text-[#18181B]">
               Prêt à préparer votre <span className="text-[#6366F1]">prochaine campagne ?</span>
             </h2>
-            <p className="text-xs md:text-sm text-[#71717A] mb-5 max-w-xl leading-relaxed">
-              Votre stratégie commence ici. Obtenez une intelligence marché et un plan d'exécution complet.
+            <p className="text-sm md:text-base text-[#71717A] mb-5 max-w-xl leading-relaxed">
+              Votre stratégie commence ici. Obtenez une intelligence marché et un plan d&apos;exécution complet.
             </p>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
               <button onClick={scrollToPricing} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 text-xs md:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]">
@@ -388,6 +392,7 @@ export default function LandingPage() {
       </section>
 
       <GlobalFooter />
+      <SaaSChatbot />
     </main>
   );
 }

@@ -9,6 +9,8 @@ import { NextBestAction } from '@/components/dashboard/NextBestAction';
 import { RecentStrategies } from '@/components/dashboard/RecentStrategies';
 import { PlanFeatures } from '@/components/dashboard/PlanFeatures';
 import { BackButton } from '@/components/ui/BackButton';
+import { ensureUserProfile } from '@/lib/profiles/ensure-profile';
+import { getCurrencySymbol, type Currency } from '@/lib/currency';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -16,7 +18,10 @@ export default async function DashboardPage() {
 
   if (!user) redirect('/login');
 
-  const { data: profile } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+  const profile = await ensureUserProfile(user);
+  
+  const userCurrency = (profile?.currency as Currency) || 'XOF';
+  const currencySymbol = getCurrencySymbol(userCurrency);
 
   const { data: strategies } = await supabase
     .from('strategies')
@@ -39,7 +44,7 @@ export default async function DashboardPage() {
   const creditsBalance = profile?.credits_balance || 0;
   const currentPlan = normalizePlanId(profile?.plan);
 
-  const profileComplete = Boolean(profile?.first_name && profile?.country);
+  const profileComplete = Boolean(profile?.first_name && profile?.currency);
   const healthScore = (profileComplete ? 50 : 0) + (totalStrategies > 0 ? 50 : 0);
 
   let nextAction = {
@@ -73,7 +78,7 @@ export default async function DashboardPage() {
       title: "Rechargez vos crédits",
       description: "Votre solde ne couvre pas le coût de la prochaine génération disponible.",
       action: "Voir les plans",
-      href: "/pricing",
+      href: "/dashboard/pricing",
       cost: 0,
     };
   }
@@ -81,10 +86,6 @@ export default async function DashboardPage() {
   return (
     <div className="px-4 py-5 space-y-5 sm:px-6 sm:py-6 sm:space-y-6">
       
-      {/* BOUTON RETOUR */}
-      <BackButton href="/" label="Retour à l'accueil" />
-
-      {/* LOGO MINIME À GAUCHE - UNIQUEMENT SUR MOBILE */}
       <div className="md:hidden flex justify-start py-2 border-b border-gray-100 mb-2">
         <h1 className="text-sm font-semibold tracking-tight">
           <span className="text-[#111827]">MakeIt</span>
@@ -92,8 +93,7 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      {/* Header principal */}
-      <Header firstName={profile?.first_name} credits={creditsBalance} plan={currentPlan} />
+      <Header firstName={profile?.first_name} credits={creditsBalance} plan={currentPlan} currency={userCurrency} />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         <div className="lg:col-span-2 space-y-5 sm:space-y-6">
@@ -107,9 +107,10 @@ export default async function DashboardPage() {
             balance={creditsBalance} 
             used={creditsUsed} 
             flashCount={flashCount} 
-            completeCount={completeCount} 
+            completeCount={completeCount}
+            currency={userCurrency}
           />
-          <PlanFeatures currentPlan={currentPlan} />
+          <PlanFeatures currentPlan={currentPlan} currency={userCurrency} />
           <HealthScore
             score={healthScore}
             profileComplete={profileComplete}
@@ -118,11 +119,13 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* NOM DE LA PAGE EN BAS */}
       <div className="pt-4 mt-6 border-t border-gray-100">
-        <p className="text-[10px] text-gray-400 text-center sm:text-left">
-          Vous êtes ici : <span className="font-medium text-gray-600">Vue d'ensemble</span>
-        </p>
+        <div className="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
+          <p className="text-[10px] text-gray-400 text-center sm:text-left">
+            Vous êtes ici : <span className="font-medium text-gray-600">Vue d&apos;ensemble</span>
+          </p>
+          <BackButton href="/" label="Retour à l'accueil" />
+        </div>
       </div>
     </div>
   );
