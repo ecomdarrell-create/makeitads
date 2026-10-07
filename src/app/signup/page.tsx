@@ -1,13 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
 
-export default function SignupPage() {
+// ============================================
+// COMPOSANT INTERNE (utilise useSearchParams)
+// ============================================
+
+function SignupForm() {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,10 +22,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Récupérer la destination après inscription (passée par le middleware)
   const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,11 +61,19 @@ export default function SignupPage() {
       if (error) {
         setError('Impossible de créer votre compte. Vérifiez vos informations et réessayez.');
         setLoading(false);
-      } else {
-        // ✅ Redirection vers la destination initiale (ou dashboard par défaut)
-        router.push(redirectTo);
-        router.refresh();
+        return;
       }
+
+      // ✅ Attente de la session + rechargement complet
+      // (le rechargement complet est nécessaire pour que le middleware
+      // serveur voie bien les cookies de session Supabase)
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      window.location.href = redirectTo;
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
@@ -107,7 +117,6 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Prénom et Nom */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1.5">Prénom</label>
@@ -135,7 +144,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">Email</label>
               <input 
@@ -149,7 +157,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Mot de passe */}
             <div>
               <AuthPasswordField 
                 id="password" 
@@ -160,7 +167,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Confirmation Mot de passe */}
             <div>
               <AuthPasswordField 
                 id="confirmPassword" 
@@ -171,7 +177,6 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* Devise */}
             <div>
               <label htmlFor="currency" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                 VOTRE DEVISE
@@ -188,7 +193,6 @@ export default function SignupPage() {
               </select>
             </div>
 
-            {/* Bouton de soumission */}
             <button
               type="submit"
               disabled={loading}
@@ -198,7 +202,6 @@ export default function SignupPage() {
             </button>
           </form>
 
-          {/* Lien vers la connexion */}
           <div className="mt-5 text-center">
             <p className="text-sm text-gray-600">
               Vous avez déjà un compte ?{' '}
@@ -210,5 +213,39 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ============================================
+// FALLBACK LOADING (pour Suspense)
+// ============================================
+
+function SignupSkeleton() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-7">
+      <div className="w-full max-w-[440px]">
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-7">
+          <div className="animate-pulse space-y-4">
+            <div className="h-6 w-3/4 rounded bg-slate-100" />
+            <div className="h-3 w-1/2 rounded bg-slate-100" />
+            <div className="h-11 rounded-xl bg-slate-100" />
+            <div className="h-11 rounded-xl bg-slate-100" />
+            <div className="h-11 rounded-xl bg-slate-100" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ============================================
+// EXPORT AVEC SUSPENSE
+// ============================================
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<SignupSkeleton />}>
+      <SignupForm />
+    </Suspense>
   );
 }

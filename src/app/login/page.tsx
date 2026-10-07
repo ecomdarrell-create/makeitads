@@ -1,4 +1,5 @@
 'use client';
+
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -28,9 +29,22 @@ export default function LoginPage() {
       if (error) {
         setError('Email ou mot de passe incorrect. Veuillez réessayer.');
         setLoading(false);
-      } else {
-        router.push('/dashboard');
+        return;
       }
+
+      // ✅ Attendre que la session soit bien définie dans les cookies
+      // puis forcer un rechargement complet pour que le middleware
+      // serveur voie bien la session
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        // Petite attente au cas où la session n'est pas encore propagée
+        await new Promise((resolve) => setTimeout(resolve, 300));
+      }
+
+      // Rechargement complet (pas router.push) pour que les cookies
+      // soient bien envoyés au serveur
+      window.location.href = '/dashboard';
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
@@ -46,18 +60,29 @@ export default function LoginPage() {
             <span className="text-[#111827]">MakeIt</span>
             <span className="text-[#6366F1]">Ads</span>
           </h1>
-          <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-slate-500">La plateforme N°1 pour automatiser votre acquisition client en Afrique.</p>
+          <p className="mx-auto mt-2 max-w-xs text-xs leading-relaxed text-slate-500">
+            La plateforme N°1 pour automatiser votre acquisition client en Afrique.
+          </p>
         </div>
 
         {/* Card */}
         <div className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-7">
           <div className="mb-5">
-            <h2 className="mb-1 text-xl font-semibold text-slate-900">Bienvenue sur MakeItAds</h2>
-            <p className="text-xs text-slate-600">Connectez-vous à votre espace marketing.</p>
+            <h2 className="mb-1 text-xl font-semibold text-slate-900">
+              Bienvenue sur MakeItAds
+            </h2>
+            <p className="text-xs text-slate-600">
+              Connectez-vous à votre espace marketing.
+            </p>
           </div>
 
           <AuthProviderButtons />
-          <div className="my-4 flex items-center gap-3 text-[10px] text-slate-400"><span className="h-px flex-1 bg-slate-100" />OU AVEC VOTRE EMAIL<span className="h-px flex-1 bg-slate-100" /></div>
+
+          <div className="my-4 flex items-center gap-3 text-[10px] text-slate-400">
+            <span className="h-px flex-1 bg-slate-100" />
+            OU AVEC VOTRE EMAIL
+            <span className="h-px flex-1 bg-slate-100" />
+          </div>
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">
@@ -67,7 +92,10 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1.5">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-1.5"
+              >
                 Email
               </label>
               <input
@@ -92,7 +120,10 @@ export default function LoginPage() {
             </div>
 
             <div className="text-right">
-              <Link href="/forgot-password" className="text-xs text-gray-600 hover:text-[#6366F1]">
+              <Link
+                href="/forgot-password"
+                className="text-xs text-gray-600 hover:text-[#6366F1]"
+              >
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -109,7 +140,10 @@ export default function LoginPage() {
           <div className="mt-5 text-center">
             <p className="text-sm text-gray-600">
               Vous n&apos;avez pas encore de compte ?{' '}
-              <Link href="/signup" className="text-[#6366F1] hover:text-[#5558e6] font-medium">
+              <Link
+                href="/signup"
+                className="text-[#6366F1] hover:text-[#5558e6] font-medium"
+              >
                 Créer un compte
               </Link>
             </p>
