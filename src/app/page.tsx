@@ -3,12 +3,7 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  ArrowRight,
-  Check,
-  ChevronDown,
-  ArrowUp,
-} from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ArrowUp } from "lucide-react";
 import { useState, Fragment, useEffect, useRef } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
 
@@ -61,9 +56,6 @@ const pricingPlans = [
   { id: "elite", name: "MakeItAds Élite", price: "100 000 FCFA/an", durationNote: "12 mois d'accès", features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"], popular: false, ctaText: "Choisir le Plan Élite", link: "https://makeitads.mychariow.com/plan-elit", checkColor: "text-amber-500", ctaBg: "bg-amber-500", ctaHover: "hover:bg-amber-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
 ];
 
-// ==========================================
-// STATS AVEC COMPTEUR ANIMÉ
-// ==========================================
 const statsData = [
   { value: 200, suffix: "+", label: "Entrepreneurs formés" },
   { value: 18, suffix: "", label: "Pays africains" },
@@ -86,11 +78,8 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
       setDisplay(Math.floor(eased * value));
-      if (progress < 1) {
-        requestAnimationFrame(tick);
-      } else {
-        setDisplay(value);
-      }
+      if (progress < 1) requestAnimationFrame(tick);
+      else setDisplay(value);
     };
 
     requestAnimationFrame(tick);
@@ -104,14 +93,11 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
   );
 }
 
-// ==========================================
-// BLOCS QUI SOMMES NOUS (stacking scroll)
-// ==========================================
 const aboutBlocks = [
   {
     badge: "01",
     title: "Notre mission",
-    text: "MakeItAds a été fondé avec une conviction profonde : les entrepreneurs africains méritent les mêmes outils d'intelligence marketing que les entreprises des grandes capitales mondiales. Nous construisons une infrastructure technologique adaptée aux réalités locales — WhatsApp, Mobile Money, budgets modestes — pour transformer chaque entrepreneur en stratège armé.",
+    text: "MakeItAds a été fondé avec une conviction profonde. Les entrepreneurs africains méritent les mêmes outils d'intelligence marketing que les entreprises des grandes capitales mondiales. Nous construisons une infrastructure technologique adaptée aux réalités locales : WhatsApp, Mobile Money, budgets modestes. Notre objectif est de transformer chaque entrepreneur en stratège armé.",
   },
   {
     badge: "02",
@@ -125,9 +111,6 @@ const aboutBlocks = [
   },
 ];
 
-// ==========================================
-// CARTE DE PRIX
-// ==========================================
 function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
   const isWide = plan.id === "premium" || plan.id === "elite";
 
@@ -179,9 +162,6 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
   );
 }
 
-// ==========================================
-// PAGE PRINCIPALE
-// ==========================================
 export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeStep, setActiveStep] = useState(0);
@@ -196,8 +176,7 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToTop = () =>
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <main className="min-h-screen bg-white text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20">
@@ -212,9 +191,7 @@ export default function LandingPage() {
 
       <section className="relative z-10 py-6 border-y border-gray-100 bg-[#F8F8FC]">
         <div className="max-w-5xl mx-auto px-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">
-            Compatible avec vos plateformes
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">Compatible avec vos plateformes</p>
           <div className="relative overflow-hidden">
             <div className="flex animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
               {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => (
@@ -228,7 +205,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* COMMENT ÇA MARCHE */}
       <section id="how-it-works" className="relative z-10 bg-white py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
@@ -243,11 +219,7 @@ export default function LandingPage() {
           <div className="flex justify-start mb-6 md:mb-10 overflow-x-auto pb-2">
             <div className="inline-flex bg-[#F8F8FC] p-1.5 rounded-full border border-gray-100">
               {howItWorksSteps.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveStep(index)}
-                  className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${activeStep === index ? "bg-[#6366F1] text-white shadow-md" : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"}`}
-                >
+                <button key={index} onClick={() => setActiveStep(index)} className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${activeStep === index ? "bg-[#6366F1] text-white shadow-md" : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"}`}>
                   Étape {index + 1}
                 </button>
               ))}
@@ -286,26 +258,11 @@ export default function LandingPage() {
       <WhyChooseSection />
 
       {/* ═══════════════════════════════════════════════ */}
-      {/* STATISTIQUES — STYLE VERCEL / STRIPE PREMIUM */}
+      {/* STATISTIQUES — FOND VIOLET CLAIR */}
       {/* ═══════════════════════════════════════════════ */}
-      <section className="relative z-10 py-16 md:py-24 bg-[#0A0A0B] text-white overflow-hidden">
-        {/* Grille de fond */}
-        <div className="absolute inset-0 opacity-20">
-          <div
-            className="absolute inset-0"
-            style={{
-              backgroundImage:
-                "linear-gradient(to right, rgba(99,102,241,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.15) 1px, transparent 1px)",
-              backgroundSize: "48px 48px",
-              maskImage:
-                "radial-gradient(ellipse 70% 60% at 50% 50%, black 40%, transparent 100%)",
-            }}
-          />
-        </div>
-
-        {/* Halos colorés */}
-        <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/30 blur-[120px]" />
-        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/30 blur-[120px]" />
+      <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
+        <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
+        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <motion.div
@@ -317,17 +274,17 @@ export default function LandingPage() {
             <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
               Nos chiffres
             </p>
-            <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-white mb-3 max-w-3xl">
+            <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-3 max-w-3xl">
               Des résultats <span className="text-[#6366F1]">concrets</span>,<br />
               mesurés sur le terrain.
             </h2>
-            <p className="text-xs md:text-sm text-white/60 leading-relaxed max-w-2xl">
+            <p className="text-xs md:text-sm text-[#475569] leading-relaxed max-w-2xl">
               MakeItAds transforme la façon dont les entrepreneurs africains
-              abordent leur marketing — avec méthode, rigueur et impact mesurable.
+              abordent leur marketing, avec méthode, rigueur et impact mesurable.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
             {statsData.map((stat, index) => (
               <motion.div
                 key={index}
@@ -335,14 +292,18 @@ export default function LandingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative bg-[#0A0A0B] p-6 md:p-8 group"
+                className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/70 p-5 md:p-7 backdrop-blur-xl group"
+                style={{
+                  boxShadow:
+                    "0 8px 32px rgba(99,102,241,0.12), 0 1px 0 rgba(255,255,255,0.9) inset",
+                }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-[#6366F1]/0 via-transparent to-[#8B5CF6]/0 transition-all duration-500 group-hover:from-[#6366F1]/10 group-hover:to-[#8B5CF6]/10" />
+                <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br from-[#6366F1]/20 to-transparent blur-2xl" />
                 <div className="relative">
-                  <p className="text-3xl md:text-5xl font-bold text-white leading-none tracking-tight">
+                  <p className="text-3xl md:text-5xl font-bold text-[#18181B] leading-none tracking-tight">
                     <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                   </p>
-                  <p className="mt-3 text-[11px] md:text-xs text-white/50 leading-snug uppercase tracking-wider">
+                  <p className="mt-3 text-[10px] md:text-xs text-[#475569] leading-snug uppercase tracking-wider font-medium">
                     {stat.label}
                   </p>
                 </div>
@@ -364,7 +325,6 @@ export default function LandingPage() {
       {/* QUI SOMMES NOUS — STACKING GLASSMORPHISM 3D */}
       {/* ═══════════════════════════════════════════════ */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-b from-[#F8F8FC] via-white to-[#F8F8FC] overflow-hidden">
-        {/* Halos décoratifs en fond */}
         <div className="absolute top-40 -left-40 h-96 w-96 rounded-full bg-[#6366F1]/10 blur-[130px]" />
         <div className="absolute bottom-40 -right-40 h-96 w-96 rounded-full bg-[#8B5CF6]/10 blur-[130px]" />
 
@@ -388,7 +348,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* STACKING CARDS */}
           <div className="relative">
             {aboutBlocks.map((block, index) => (
               <div
@@ -407,15 +366,25 @@ export default function LandingPage() {
                       "0 8px 32px rgba(99,102,241,0.10), 0 1px 0 rgba(255,255,255,0.8) inset, 0 -1px 0 rgba(99,102,241,0.06) inset",
                   }}
                 >
-                  {/* Effet 3D glassmorphism : reflets */}
+                  {/* Chiffre géant transparent en arrière-plan */}
+                  <span
+                    className="pointer-events-none absolute -top-4 right-2 select-none font-bold leading-none text-[#6366F1]"
+                    style={{
+                      fontSize: "clamp(120px, 22vw, 220px)",
+                      opacity: 0.08,
+                      fontWeight: 900,
+                      letterSpacing: "-0.05em",
+                    }}
+                    aria-hidden="true"
+                  >
+                    {block.badge}
+                  </span>
+
                   <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-gradient-to-br from-white/60 to-transparent blur-2xl" />
                   <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-gradient-to-tr from-[#6366F1]/10 to-transparent blur-2xl" />
-
-                  {/* Bord lumineux */}
                   <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/40 via-transparent to-white/10" />
 
                   <div className="relative">
-                    {/* Badge numéro */}
                     <div className="mb-4 flex items-center gap-3">
                       <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-[11px] font-bold text-white shadow-md shadow-[#6366F1]/30">
                         {block.badge}
@@ -440,7 +409,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PRICING */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
@@ -465,7 +433,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
@@ -500,7 +467,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
@@ -526,7 +492,6 @@ export default function LandingPage() {
       <GlobalFooter />
       <SaaSChatbot />
 
-      {/* SCROLL TO TOP */}
       <AnimatePresence>
         {showScrollTop && (
           <motion.button

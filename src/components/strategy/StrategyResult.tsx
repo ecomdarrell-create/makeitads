@@ -34,6 +34,37 @@ interface StrategyResultProps {
 }
 
 // ============================================
+// RENDERER DE TEXTE RICHE
+// Convertit **bold** en <strong>, gère les sauts de ligne
+// ============================================
+
+function renderRichText(text: string): React.ReactNode {
+  if (!text) return null;
+
+  const lines = text.split('\n');
+
+  return lines.map((line, lineIdx) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+
+    return (
+      <span key={lineIdx}>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={i} className="font-semibold text-[#18181B]">
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return <span key={i}>{part}</span>;
+        })}
+        {lineIdx < lines.length - 1 && <br />}
+      </span>
+    );
+  });
+}
+
+// ============================================
 // COMPOSANT PRINCIPAL
 // ============================================
 
@@ -79,6 +110,15 @@ export function StrategyResult({
 
   return (
     <div className="space-y-4">
+      {/* ─── SALUTATION PERSONNALISÉE ─── */}
+      {data.salutation && (
+        <div className="rounded-xl border border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/60 to-white p-4 md:p-5">
+          <p className="text-sm md:text-base font-medium text-[#18181B] leading-relaxed">
+            {renderRichText(data.salutation)}
+          </p>
+        </div>
+      )}
+
       {/* ─── EXECUTIVE SUMMARY ─── */}
       {data.executive_summary && (
         <ExecutiveSummary summary={data.executive_summary} />
@@ -128,6 +168,7 @@ export function StrategyResult({
               'insights',
               'priorities',
               'action_plan',
+              'salutation',
             ].includes(s.id)
         )
         .map((section) => (
@@ -315,7 +356,7 @@ function SectionContent({
               </span>
             </div>
             <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
-              {kpi.pourquoi}
+              {renderRichText(kpi.pourquoi)}
             </p>
           </div>
         ))}
@@ -346,9 +387,9 @@ function SectionContent({
                 compact
               />
             </div>
-            <p className="whitespace-pre-wrap text-xs leading-relaxed text-[#18181B]">
-              {item}
-            </p>
+            <div className="text-xs leading-relaxed text-[#18181B]">
+              {renderRichText(item)}
+            </div>
           </div>
         ))}
       </div>
@@ -357,9 +398,9 @@ function SectionContent({
 
   if (typeof content === 'string') {
     return (
-      <p className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700">
-        {content}
-      </p>
+      <div className="text-sm leading-relaxed text-slate-700">
+        {renderRichText(content)}
+      </div>
     );
   }
 
