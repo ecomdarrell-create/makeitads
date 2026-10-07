@@ -18,11 +18,17 @@ interface TrustpilotCarouselProps {
 }
 
 function StarRating({ rating }: { rating: number }) {
-  const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+  const starPath =
+    "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
   return (
-    <div className="flex gap-[1px] md:gap-[2px]">
+    <div className="flex gap-0.5 md:gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
-        <svg key={star} viewBox="0 0 24 24" className="w-[14px] h-[14px] md:w-[20px] md:h-[20px]" fill={star <= rating ? "#00B67A" : "#DCDCE6"}>
+        <svg
+          key={star}
+          viewBox="0 0 24 24"
+          className="w-3.5 h-3.5 md:w-4 md:h-4"
+          fill={star <= rating ? "#00B67A" : "#DCDCE6"}
+        >
           <path d={starPath} />
         </svg>
       ))}
@@ -30,29 +36,41 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function TrustpilotCarousel({ reviews, title, footerNote }: TrustpilotCarouselProps) {
+export default function TrustpilotCarousel({
+  reviews,
+  title,
+  footerNote,
+}: TrustpilotCarouselProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
-      const firstCard = scrollContainerRef.current.querySelector<HTMLElement>('.snap-start');
+      const firstCard =
+        scrollContainerRef.current.querySelector<HTMLElement>(".snap-start");
       const styles = window.getComputedStyle(scrollContainerRef.current);
       const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
       const scrollAmount = firstCard ? firstCard.offsetWidth + gap : 396;
       const currentScroll = scrollContainerRef.current.scrollLeft;
-      const targetScroll = direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount;
-      scrollContainerRef.current.scrollTo({ left: targetScroll, behavior: "smooth" });
+      const targetScroll =
+        direction === "left"
+          ? currentScroll - scrollAmount
+          : currentScroll + scrollAmount;
+      scrollContainerRef.current.scrollTo({
+        left: targetScroll,
+        behavior: "smooth",
+      });
     }
   };
 
   return (
-    <section className="relative z-10 w-full py-10 md:py-16 bg-[#FFFFFF]">
+    <section className="relative z-10 w-full py-12 md:py-16 bg-[#FFFFFF]">
       <div className="mx-auto w-full max-w-7xl px-0 sm:px-6">
-        <h2 className="px-4 sm:px-0 text-lg md:text-2xl font-bold text-[#1A1A1A] mb-6 md:mb-8 text-center md:text-left">
+        <h2 className="px-4 sm:px-0 text-xl md:text-3xl font-semibold text-[#18181B] mb-6 md:mb-8 text-center md:text-left leading-tight">
           {title}
         </h2>
 
         <div className="relative group">
+          {/* Bouton gauche */}
           <button
             onClick={() => scroll("left")}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
@@ -61,39 +79,46 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
 
+          {/* Conteneur scroll */}
           <div
             ref={scrollContainerRef}
             className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 px-4 md:gap-4 md:px-0"
             style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
           >
-            <style jsx>{`.scrollbar-hide::-webkit-scrollbar { display: none; }`}</style>
-            
+            <style jsx>{`
+              .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+              }
+            `}</style>
+
             {reviews.map((review, index) => (
               <div
                 key={index}
-                className="flex-shrink-0 w-[calc(100vw-32px)] sm:w-[380px] snap-start bg-white border border-[#E8E8E8] rounded-xl p-4 md:p-6 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
+                className="flex-shrink-0 w-[calc(100vw-32px)] sm:w-[360px] snap-start bg-white border border-[#E8E8E8] rounded-2xl p-4 md:p-5 shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)]"
               >
                 <div className="flex items-center justify-between mb-3">
                   <StarRating rating={review.rating} />
                   <div className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 md:w-4 md:h-4 text-blue-600" />
-                    <span className="text-[10px] md:text-xs font-semibold text-blue-600">Avis certifié</span>
+                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="text-[10px] md:text-xs font-semibold text-blue-600">
+                      Avis certifié
+                    </span>
                   </div>
                 </div>
 
-                <h3 className="text-[13px] md:text-[15px] font-bold text-[#1A1A1A] mb-2 leading-tight">
+                <h3 className="text-xs md:text-sm font-bold text-[#1A1A1A] mb-2 leading-snug">
                   {review.title}
                 </h3>
 
-                <p className="text-[12px] md:text-[14px] text-[#4A4A4A] leading-[1.5] md:leading-[1.6] mb-4">
+                <p className="text-[11px] md:text-sm text-[#4A4A4A] leading-relaxed mb-4">
                   {review.text}
                 </p>
 
                 <div className="border-t border-[#F0F0F0] pt-3">
-                  <p className="text-[11px] md:text-[12px] text-[#6B6B6B] font-medium mb-1">
+                  <p className="text-[11px] md:text-xs text-[#6B6B6B] font-medium mb-1">
                     {review.author}
                   </p>
-                  <p className="text-[10px] md:text-[11px] text-[#9CA3AF]">
+                  <p className="text-[10px] md:text-xs text-[#9CA3AF]">
                     {review.time}
                   </p>
                 </div>
@@ -101,6 +126,7 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
             ))}
           </div>
 
+          {/* Bouton droite */}
           <button
             onClick={() => scroll("right")}
             className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
@@ -110,11 +136,18 @@ export default function TrustpilotCarousel({ reviews, title, footerNote }: Trust
           </button>
         </div>
 
+        {/* Footer note */}
         <div className="mt-8 flex flex-col items-center gap-2 px-4 text-center md:flex-row md:gap-3 md:px-0 md:text-left">
-          <p className="text-xs md:text-sm text-[#4A4A4A] font-medium">{footerNote}</p>
+          <p className="text-xs md:text-sm text-[#4A4A4A] font-medium">
+            {footerNote}
+          </p>
           <span className="text-[#00B67A] font-bold text-base md:text-lg tracking-tight flex items-center gap-1">
-            <svg viewBox="0 0 24 24" className="w-4 h-4 md:w-5 md:h-5" fill="currentColor">
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            <svg
+              viewBox="0 0 24 24"
+              className="w-4 h-4 md:w-5 md:h-5"
+              fill="currentColor"
+            >
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
             </svg>
             Trustpilot
           </span>

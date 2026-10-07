@@ -1,21 +1,16 @@
 'use client';
 
 import { FormEvent, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Bot,
   LoaderCircle,
-  MessageCircle,
   Send,
   X,
-  Sparkles,
   ArrowLeft,
   Zap,
   CreditCard,
-  HelpCircle,
   TrendingUp,
-  Home as HomeIcon,
-  Search,
   Users,
 } from 'lucide-react';
 import { SUGGESTED_QUESTIONS } from '@/config/chatbot-faq.config';
@@ -72,17 +67,30 @@ const QUICK_ACTIONS: QuickAction[] = [
   },
 ];
 
+// ============================================
+// NETTOYAGE DES RÉPONSES (retire les *)
+// ============================================
+
+function cleanResponse(text: string): string {
+  // Retire les ** et * utilisés pour le markdown
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '$1') // **texte** → texte
+    .replace(/\*(.*?)\*/g, '$1')     // *texte* → texte
+    .replace(/\*/g, '');              // * restants → rien
+}
+
 export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
   const [view, setView] = useState<View>('home');
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [imageError, setImageError] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
       content:
-        'Bonjour 👋\n\nJe suis l\'assistant MakeItAds. Je peux t\'aider à :\n\n• Choisir ton plan\n• Comprendre les crédits\n• Générer ta première stratégie\n• Contacter le support\n\nQue veux-tu savoir ?',
+        "Bonjour, je suis Gisèle, votre assistante MakeItAds.\n\nJe peux t'aider à :\n\n• Choisir ton plan\n• Comprendre les crédits\n• Générer ta première stratégie\n• Contacter le support\n\nQue veux-tu savoir ?",
     },
   ]);
   const messageListRef = useRef<HTMLDivElement>(null);
@@ -100,7 +108,10 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
     const trimmed = content.trim();
     if (!trimmed || loading) return;
 
-    const updatedMessages: ChatMessage[] = [...messages, { role: 'user', content: trimmed }];
+    const updatedMessages: ChatMessage[] = [
+      ...messages,
+      { role: 'user', content: trimmed },
+    ];
     setMessages(updatedMessages);
     setInput('');
     setError('');
@@ -122,7 +133,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
 
       setMessages((current) => [
         ...current,
-        { role: 'assistant', content: result.answer },
+        { role: 'assistant', content: cleanResponse(result.answer) },
       ]);
     } catch (sendError: any) {
       console.error('Erreur frontend chat:', sendError);
@@ -142,8 +153,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
     setMessages([
       {
         role: 'assistant',
-        content:
-          'Bonjour 👋\n\nJe suis l\'assistant MakeItAds. Comment puis-je t\'aider ?',
+        content: "Bonjour, je suis Gisèle. Comment puis-je t'aider ?",
       },
     ]);
     setInput('');
@@ -163,22 +173,35 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            aria-label="Assistant MakeItAds"
-            className="mb-3 flex h-[min(75vh,600px)] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.25)]"
+            aria-label="Assistante MakeItAds"
+            className="mb-3 flex h-[min(68vh,540px)] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.25)]"
           >
-            {/* ═══════════════════════════════════════ */}
             {/* HEADER */}
-            {/* ═══════════════════════════════════════ */}
             <header className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] shadow-md shadow-indigo-200">
-                    <Sparkles className="h-5 w-5 text-white" />
+                  {/* Photo Gisèle */}
+                  <div className="relative h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-2 ring-white shadow-sm">
+                    {!imageError ? (
+                      <Image
+                        src="/images/gisele.jpg"
+                        alt="Gisèle"
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                        onError={() => setImageError(true)}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center">
+                        <span className="text-sm font-bold text-white">G</span>
+                      </div>
+                    )}
                   </div>
+                  {/* Pastille en ligne */}
                   <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">Assistant MakeItAds</p>
+                  <p className="text-sm font-semibold text-slate-900">Gisèle</p>
                   <p className="flex items-center gap-1 text-[10px] text-slate-500">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                     En ligne
@@ -195,27 +218,25 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
               </button>
             </header>
 
-            {/* ═══════════════════════════════════════ */}
             {/* VUE HOME */}
-            {/* ═══════════════════════════════════════ */}
             {view === 'home' && (
               <div className="flex-1 overflow-y-auto">
-                {/* Hero coloré */}
+                {/* Hero */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-[#6366F1] via-[#6366F1] to-[#8B5CF6] p-5">
                   <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
                   <div className="absolute -bottom-14 -left-8 h-32 w-32 rounded-full bg-white/5" />
 
                   <div className="relative">
                     <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
-                      MakeItAds Support
+                      Gisèle · Assistante MakeItAds
                     </p>
                     <h2 className="mt-2 text-lg font-bold leading-snug text-white">
                       Bonjour 👋
                       <br />
                       Comment puis-je t&apos;aider ?
                     </h2>
-                    <p className="mt-2 text-[11px] leading-relaxed text-white/80">
-                      Je réponds à tes questions sur les plans, les crédits et la plateforme en quelques secondes.
+                    <p className="mt-2 text-[11px] leading-relaxed text-white/85">
+                      Je t&apos;accompagne sur les plans, les crédits, la génération de stratégies et tout ce qui concerne la plateforme.
                     </p>
                   </div>
                 </div>
@@ -251,7 +272,6 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                     })}
                   </div>
 
-                  {/* Questions populaires */}
                   <p className="mb-2.5 mt-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                     Questions fréquentes
                   </p>
@@ -272,12 +292,9 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
               </div>
             )}
 
-            {/* ═══════════════════════════════════════ */}
             {/* VUE CHAT */}
-            {/* ═══════════════════════════════════════ */}
             {view === 'chat' && (
               <>
-                {/* Barre de retour */}
                 <div className="flex items-center gap-2 border-b border-slate-100 bg-slate-50/60 px-3 py-2">
                   <button
                     type="button"
@@ -288,7 +305,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                     Retour
                   </button>
                   <span className="text-[10px] text-slate-400">
-                    Conversation avec l&apos;assistant
+                    Conversation avec Gisèle
                   </span>
                 </div>
 
@@ -298,22 +315,43 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                   aria-live="polite"
                 >
                   {messages.map((message, index) => (
-                    <div
-                      key={`${index}-${message.role}`}
-                      className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-3 py-2.5 text-xs leading-relaxed ${
-                        message.role === 'user'
-                          ? 'ml-auto rounded-br-md bg-[#6366F1] text-white shadow-sm shadow-indigo-200'
-                          : 'mr-auto rounded-bl-md border border-slate-200 bg-white text-slate-700'
-                      }`}
-                    >
-                      {message.content}
+                    <div key={`${index}-${message.role}`} className="flex items-start gap-2">
+                      {/* Avatar de Gisèle pour ses messages */}
+                      {message.role === 'assistant' && (
+                        <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-1 ring-slate-200">
+                          {!imageError ? (
+                            <Image
+                              src="/images/gisele.jpg"
+                              alt="Gisèle"
+                              fill
+                              className="object-cover"
+                              sizes="28px"
+                              onError={() => setImageError(true)}
+                            />
+                          ) : (
+                            <div className="flex h-full w-full items-center justify-center">
+                              <span className="text-[10px] font-bold text-white">G</span>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div
+                        className={`max-w-[82%] whitespace-pre-wrap rounded-2xl px-3 py-2.5 text-xs leading-relaxed ${
+                          message.role === 'user'
+                            ? 'ml-auto rounded-br-md bg-[#6366F1] text-white shadow-sm shadow-indigo-200'
+                            : 'rounded-bl-md border border-slate-200 bg-white text-slate-700'
+                        }`}
+                      >
+                        {message.content}
+                      </div>
                     </div>
                   ))}
 
                   {loading && (
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <LoaderCircle className="h-3.5 w-3.5 animate-spin text-[#6366F1]" />
-                      Réponse en cours…
+                      Gisèle répond…
                     </div>
                   )}
 
@@ -329,9 +367,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
               </>
             )}
 
-            {/* ═══════════════════════════════════════ */}
             {/* FORMULAIRE */}
-            {/* ═══════════════════════════════════════ */}
             <form
               onSubmit={handleSubmit}
               className="flex items-center gap-2 border-t border-slate-100 bg-white p-3"
@@ -350,22 +386,31 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                 aria-label="Envoyer"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6366F1] text-white transition-colors hover:bg-[#5558e6] disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                <Send className="h-4 w-4" />
+                {/* Flèche simple vers la droite */}
+                <svg
+                  className="h-4 w-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" />
+                </svg>
               </button>
             </form>
           </motion.section>
         )}
       </AnimatePresence>
 
-      {/* ═══════════════════════════════════════ */}
       {/* BOUTON FLOTTANT */}
-      {/* ═══════════════════════════════════════ */}
       <button
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        aria-label={isOpen ? "Fermer l'assistant" : "Ouvrir l'assistant MakeItAds"}
+        aria-label={isOpen ? "Fermer l'assistante" : "Ouvrir l'assistante MakeItAds"}
         aria-expanded={isOpen}
-        className="relative ml-auto flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-indigo-900/25 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6366F1]"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-indigo-900/25 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6366F1]"
       >
         <AnimatePresence mode="wait">
           {isOpen ? (
@@ -385,15 +430,30 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.6, opacity: 0 }}
               transition={{ duration: 0.15 }}
+              className="relative h-full w-full"
             >
-              <MessageCircle className="h-6 w-6" />
+              {/* Photo de Gisèle dans le bouton flottant */}
+              {!imageError ? (
+                <Image
+                  src="/images/gisele.jpg"
+                  alt="Gisèle"
+                  fill
+                  className="object-cover"
+                  sizes="56px"
+                  onError={() => setImageError(true)}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center">
+                  <span className="text-lg font-bold text-white">G</span>
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
 
         {/* Notification rouge */}
         {!isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-[8px] font-bold text-white">
+          <span className="absolute -top-0.5 -right-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-[8px] font-bold text-white">
             1
           </span>
         )}

@@ -4,60 +4,111 @@ import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HeroSection() {
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
-  // ✅ REDIRECTION VERS LA SECTION TARIFS
-  const handleHeroCta = () => {
-    document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   const heroTitle = (
     <>
-      <span className="block">Connaissez votre <span className="text-[#6366F1]">marché.</span></span>
-      <span className="block">Devancez la <span className="text-[#6366F1]">concurrence.</span></span>
-      <span className="block">Croissez en <span className="text-[#6366F1]">confiance.</span></span>
+      <span className="block">
+        Connaissez votre <span className="text-[#6366F1]">marché.</span>
+      </span>
+      <span className="block">
+        Devancez la <span className="text-[#6366F1]">concurrence.</span>
+      </span>
+      <span className="block">
+        Croissez en <span className="text-[#6366F1]">confiance.</span>
+      </span>
     </>
   );
 
   return (
-    <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-24 sm:pt-28 pb-12 sm:pb-16 bg-[#FFFFFF]">
+    <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/5 rounded-full blur-[150px]" />
         <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px]" style={{ maskImage: "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,0,0,0.05) 0%, transparent 100%)" }} />
+        <div
+          className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px]"
+          style={{
+            maskImage:
+              "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,0,0,0.05) 0%, transparent 100%)",
+          }}
+        />
       </div>
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
-          <motion.h1 initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-5">
+          {/* Titre principal */}
+          <motion.h1
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.15] tracking-tight text-[#18181B] mb-4 md:mb-5"
+          >
             {heroTitle}
           </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl text-sm md:text-base text-[#475569] leading-relaxed mb-7">
-            MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l&apos;Afrique.
+          {/* Sous-titre */}
+          <motion.p
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.08 }}
+            className="max-w-2xl text-sm md:text-base text-[#475569] leading-relaxed mb-6 md:mb-8"
+          >
+            MakeItAds analyse votre activité, votre audience et votre marché
+            pour construire la stratégie publicitaire complète derrière votre
+            prochaine campagne. Prête à copier-coller, calibrée pour
+            l&apos;Afrique.
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 40, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }} className="relative w-full mb-10">
+          {/* Image hero */}
+          <motion.div
+            initial={{ opacity: 0, y: 40, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
+            className="relative w-full mb-8 md:mb-10"
+          >
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[70%] bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-transparent blur-[100px] rounded-full -z-10" />
             <div className="relative">
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-20 bg-[#0F172A]/10 blur-[40px] rounded-full" />
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-12 bg-[#6366f1]/10 blur-[30px] rounded-full" />
-              <Image src="/images/couv-X.png" alt="MakeItAds Dashboard" width={1400} height={900} priority className="w-full h-auto object-contain relative z-10" style={{ filter: 'drop-shadow(0 25px 50px rgba(15, 23, 42, 0.15)) drop-shadow(0 10px 20px rgba(99, 102, 241, 0.1))' }} />
+              <Image
+                src="/images/couv-X.png"
+                alt="MakeItAds Dashboard"
+                width={1400}
+                height={900}
+                priority
+                className="w-full h-auto object-contain relative z-10"
+                style={{
+                  filter:
+                    "drop-shadow(0 25px 50px rgba(15, 23, 42, 0.15)) drop-shadow(0 10px 20px rgba(99, 102, 241, 0.1))",
+                }}
+              />
             </div>
           </motion.div>
 
-          <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.24 }} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl">
-            {/* ✅ BOUTON MODIFIÉ */}
-            <button onClick={handleHeroCta} className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02] w-full sm:w-auto">
+          {/* Boutons CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.24 }}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
+          >
+            <Link
+              href="/dashboard"
+              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02] w-full sm:w-auto"
+            >
               Obtenir une démo
               <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
-            </button>
+            </Link>
 
-            <a href="#how-it-works" className="flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-all w-full sm:w-auto">
+            <a
+              href="#how-it-works"
+              className="flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-all w-full sm:w-auto"
+            >
               Découvrez comment ça marche
             </a>
           </motion.div>
