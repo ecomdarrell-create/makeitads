@@ -12,103 +12,103 @@ import { createClient } from '@/lib/supabase/client';
 // ==========================================
 const pricingPlans = [
   {
-    id: "demo",
-    name: "MakeItAds Démo",
-    price: "0 FCFA",
+    id: 'demo',
+    name: 'MakeItAds Démo',
+    price: '0 FCFA',
     features: [
-      "10 crédits de bienvenue",
-      "1 Diagnostic Flash",
-      "Stratégies basiques",
-      "Support communautaire",
+      '10 crédits de bienvenue',
+      '2 Diagnostics Flash',
+      'Aperçu rapide de votre activité',
+      'Support communautaire',
     ],
     popular: false,
-    ctaText: "Commencer",
-    link: "/dashboard",
+    ctaText: 'Commencer',
+    link: '/dashboard',
     isInternal: true,
-    checkColor: "text-emerald-500",
-    bgCheck: "bg-emerald-500/10",
-    ctaBg: "bg-emerald-500",
-    ctaHover: "hover:bg-emerald-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
+    checkColor: 'text-emerald-500',
+    bgCheck: 'bg-emerald-500/10',
+    ctaBg: 'bg-emerald-500',
+    ctaHover: 'hover:bg-emerald-600',
+    ctaTextCol: 'text-white',
+    bgCard: 'bg-white',
   },
   {
-    id: "pro",
-    name: "MakeItAds Pro",
-    price: "10 000 FCFA/an",
+    id: 'pro',
+    name: 'MakeItAds Pro',
+    price: '10 000 FCFA/an',
     durationNote: "12 mois d'accès",
     features: [
-      "50 crédits renouvelés chaque mois",
-      "10 stratégies complètes / mois",
-      "Scripts WhatsApp prêts à l'emploi",
-      "Allocation budgétaire sur 7 jours",
-      "Ciblage précis par ville",
-      "Guide créatif",
-      "KPIs à suivre",
-      "Support email (48h)",
+      '50 crédits renouvelés chaque mois',
+      '5 Stratégies Complètes / mois',
+      '12 sections détaillées par stratégie',
+      'Scripts WhatsApp prêts à l\'emploi',
+      'Allocation budgétaire sur 7 jours',
+      'Ciblage précis par ville',
+      'Guide créatif',
+      'KPIs à suivre',
     ],
     popular: true,
-    ctaText: "Choisir le Plan Pro",
-    link: "https://makeitads.mychariow.com/plan-pro",
+    ctaText: 'Choisir le Plan Pro',
+    link: 'https://makeitads.mychariow.com/plan-pro',
     isInternal: false,
-    checkColor: "text-[#6366F1]",
-    bgCheck: "bg-[#6366F1]/10",
-    ctaBg: "bg-[#6366F1]",
-    ctaHover: "hover:bg-[#5558e6]",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
+    checkColor: 'text-[#6366F1]',
+    bgCheck: 'bg-[#6366F1]/10',
+    ctaBg: 'bg-[#6366F1]',
+    ctaHover: 'hover:bg-[#5558e6]',
+    ctaTextCol: 'text-white',
+    bgCard: 'bg-white',
   },
   {
-    id: "premium",
-    name: "MakeItAds Premium",
-    price: "25 000 FCFA/an",
+    id: 'premium',
+    name: 'MakeItAds Premium',
+    price: '25 000 FCFA/an',
     durationNote: "12 mois d'accès",
     features: [
-      "150 crédits renouvelés chaque mois",
-      "30 stratégies complètes / mois",
-      "Analyse concurrentielle",
-      "5 variantes de hooks",
-      "Analyse d'audience avancée",
-      "Stratégie de croissance 3 mois",
-      "Support prioritaire (12h)",
-      "Rapports avancés",
+      '150 crédits renouvelés chaque mois',
+      '15 Stratégies Complètes / mois',
+      'Analyse concurrentielle',
+      '5 variantes de hooks',
+      'Analyse d\'audience avancée',
+      'Stratégie de croissance 3 mois',
+      'Support prioritaire (12h)',
+      'Rapports avancés',
     ],
     popular: false,
-    ctaText: "Choisir le Plan Premium",
-    link: "https://makeitads.mychariow.com/plan-prem",
+    ctaText: 'Choisir le Plan Premium',
+    link: 'https://makeitads.mychariow.com/plan-prem',
     isInternal: false,
-    checkColor: "text-rose-500",
-    bgCheck: "bg-rose-500/10",
-    ctaBg: "bg-rose-500",
-    ctaHover: "hover:bg-rose-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
+    checkColor: 'text-rose-500',
+    bgCheck: 'bg-rose-500/10',
+    ctaBg: 'bg-rose-500',
+    ctaHover: 'hover:bg-rose-600',
+    ctaTextCol: 'text-white',
+    bgCard: 'bg-white',
   },
   {
-    id: "elite",
-    name: "MakeItAds Élite",
-    price: "100 000 FCFA/an",
+    id: 'elite',
+    name: 'MakeItAds Élite',
+    price: '100 000 FCFA/an',
     durationNote: "12 mois d'accès",
     features: [
-      "500 crédits renouvelés chaque mois",
-      "100 stratégies complètes / mois",
-      "Consulting stratégique mensuel",
-      "Formation personnalisée",
-      "Accompagnement avancé",
-      "Rapports white-label",
-      "Support prioritaire 24/7",
-      "Accès API",
+      '500 crédits renouvelés chaque mois',
+      '50 Stratégies Complètes / mois',
+      'Consulting stratégique mensuel',
+      'Formation personnalisée',
+      'Accompagnement avancé',
+      'Rapports white-label',
+      'Support prioritaire 24/7',
+      'Accès API',
     ],
     popular: false,
-    ctaText: "Choisir le Plan Élite",
-    link: "https://makeitads.mychariow.com/plan-elit",
+    ctaText: 'Choisir le Plan Élite',
+    link: 'https://makeitads.mychariow.com/plan-elit',
     isInternal: false,
-    checkColor: "text-amber-500",
-    bgCheck: "bg-amber-500/10",
-    ctaBg: "bg-amber-500",
-    ctaHover: "hover:bg-amber-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
+    checkColor: 'text-amber-500',
+    bgCheck: 'bg-amber-500/10',
+    ctaBg: 'bg-amber-500',
+    ctaHover: 'hover:bg-amber-600',
+    ctaTextCol: 'text-white',
+    bgCard: 'bg-white',
   },
 ];
 
@@ -117,28 +117,28 @@ const pricingPlans = [
 // ==========================================
 const faqData = [
   {
-    q: "Les crédits non utilisés sont-ils perdus à la fin du mois ?",
-    a: "Ils sont reportés dans la limite du plafond de votre plan pour vous encourager à rester actif chaque mois.",
+    q: 'Les crédits non utilisés sont-ils perdus à la fin du mois ?',
+    a: 'Ils sont reportés dans la limite du plafond de votre plan pour vous encourager à rester actif chaque mois.',
   },
   {
-    q: "Puis-je changer de plan en cours d'année ?",
-    a: "Oui, vous pouvez upgrader à tout moment. La différence de prix sera ajustée au prorata.",
+    q: 'Puis-je changer de plan en cours d\'année ?',
+    a: 'Oui, vous pouvez upgrader à tout moment. La différence de prix sera ajustée au prorata.',
   },
   {
-    q: "Le paiement est-il sécurisé ?",
-    a: "Absolument. Nous utilisons une plateforme sécurisée qui accepte le Mobile Money (Orange, Wave, MTN, Moov) ainsi que les cartes bancaires internationales.",
+    q: 'Le paiement est-il sécurisé ?',
+    a: 'Absolument. Nous utilisons une plateforme sécurisée qui accepte le Mobile Money (Orange, Wave, MTN, Moov) ainsi que les cartes bancaires internationales.',
   },
   {
-    q: "Que se passe-t-il juste après le paiement ?",
-    a: "Vous recevez immédiatement un message de confirmation, vos crédits sont crédités et vous accédez au MakeItAds Business Club.",
+    q: 'Que se passe-t-il juste après le paiement ?',
+    a: 'Vous recevez immédiatement un message de confirmation, vos crédits sont crédités et vous accédez au MakeItAds Business Club.',
   },
   {
-    q: "Les stratégies sont-elles adaptées à mon budget réel ?",
-    a: "Absolument. Chaque stratégie est calibrée de manière réaliste en fonction du budget que vous nous indiquez.",
+    q: 'Les stratégies sont-elles adaptées à mon budget réel ?',
+    a: 'Absolument. Chaque stratégie est calibrée de manière réaliste en fonction du budget que vous nous indiquez.',
   },
   {
-    q: "Puis-je annuler mon abonnement à tout moment ?",
-    a: "Oui, vous pouvez mettre fin à votre abonnement à tout moment sans frais cachés ni pénalité.",
+    q: 'Puis-je annuler mon abonnement à tout moment ?',
+    a: 'Oui, vous pouvez mettre fin à votre abonnement à tout moment sans frais cachés ni pénalité.',
   },
 ];
 
@@ -150,7 +150,6 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
   const router = useRouter();
 
   const handleClick = async (e: React.MouseEvent) => {
-    // Si lien interne → navigation normale
     if (plan.isInternal) {
       router.push(plan.link);
       return;
@@ -164,12 +163,10 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (!user) {
-        // Non connecté → redirection vers signup
         router.push(`/signup?redirect=${encodeURIComponent('/dashboard/pricing')}`);
         return;
       }
 
-      // Connecté → ouvrir Chariow
       window.open(plan.link, '_blank', 'noopener,noreferrer');
     } catch (error) {
       console.error('Erreur vérification auth:', error);
@@ -179,7 +176,7 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
     }
   };
 
-  const isWide = plan.id === "premium" || plan.id === "elite";
+  const isWide = plan.id === 'premium' || plan.id === 'elite';
 
   return (
     <motion.div
@@ -189,9 +186,9 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       transition={{ duration: 0.5 }}
       className={`relative group rounded-[16px] md:rounded-[24px] border p-3 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
         plan.popular
-          ? "border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]"
-          : "border-gray-200 shadow-sm"
-      } ${isWide ? "md:flex-row md:items-center md:gap-6" : ""}`}
+          ? 'border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]'
+          : 'border-gray-200 shadow-sm'
+      } ${isWide ? 'md:flex-row md:items-center md:gap-6' : ''}`}
     >
       {plan.popular && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[8px] md:text-[9px] font-bold text-white uppercase tracking-wider shadow-sm bg-[#6366F1] whitespace-nowrap z-10">
@@ -201,13 +198,13 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
 
       <div
         className={`${
-          isWide ? "md:w-1/3 md:border-r md:border-gray-100 md:pr-4 mb-3 md:mb-0" : "mb-3"
+          isWide ? 'md:w-1/3 md:border-r md:border-gray-100 md:pr-4 mb-3 md:mb-0' : 'mb-3'
         }`}
       >
         <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1 text-left leading-tight break-words">
           {plan.name}
         </h3>
-        
+
         <div className="flex items-baseline gap-1 flex-wrap">
           <span className="text-base md:text-xl font-bold text-[#18181B] leading-none">
             {plan.price}
@@ -237,10 +234,10 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
         </button>
       </div>
 
-      <div className={`flex-1 ${isWide ? "md:w-2/3" : ""}`}>
+      <div className={`flex-1 ${isWide ? 'md:w-2/3' : ''}`}>
         <ul
           className={`grid ${
-            isWide ? "grid-cols-2 md:grid-cols-3" : "grid-cols-2"
+            isWide ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-2'
           } gap-x-1.5 gap-y-1.5`}
         >
           {plan.features.map((feature: string, i: number) => (
@@ -291,7 +288,7 @@ function FaqItem({
         </span>
         <motion.div
           animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
+          transition={{ duration: 0.3, ease: 'easeInOut' }}
         >
           <ChevronDown className="h-4 w-4 md:h-5 md:w-5 text-[#6366F1] flex-shrink-0" />
         </motion.div>
@@ -300,9 +297,9 @@ function FaqItem({
         {isOpen && (
           <motion.div
             initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
+            animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            transition={{ duration: 0.3, ease: 'easeInOut' }}
             className="overflow-hidden"
           >
             <div className="px-3 md:px-5 pb-3 md:pb-5">
@@ -334,7 +331,8 @@ export default function PricingPage() {
             className="text-left mb-6 md:mb-10"
           >
             <h1 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
-              Investissez dans votre <span className="text-[#6366F1]">croissance</span>
+              Investissez dans votre{' '}
+              <span className="text-[#6366F1]">croissance</span>
             </h1>
             <p className="text-sm md:text-base leading-relaxed text-[#71717A] max-w-xl">
               Des formules annuelles avec crédits mensuels, conçues pour scaler.
@@ -348,7 +346,7 @@ export default function PricingPage() {
             <div className="col-span-1">
               <PricingCard plan={pricingPlans[1]} />
             </div>
-            
+
             <div className="col-span-2">
               <PricingCard plan={pricingPlans[2]} />
             </div>
@@ -368,7 +366,8 @@ export default function PricingPage() {
             className="text-left mb-8 md:mb-12"
           >
             <h2 className="text-lg md:text-2xl font-semibold leading-tight text-[#18181B] mb-2">
-              Questions sur les <span className="text-[#6366F1]">formules</span>
+              Questions sur les{' '}
+              <span className="text-[#6366F1]">formules</span>
             </h2>
             <p className="text-sm md:text-base leading-relaxed text-[#71717A]">
               Tout ce que vous devez savoir avant de commencer.

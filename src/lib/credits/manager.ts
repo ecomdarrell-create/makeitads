@@ -1,13 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { CREDIT_COSTS, type CreditAction } from '@/config/pricing.config';
 
-// Ré-export pour compatibilité avec les imports existants
 export { CREDIT_COSTS };
 export type { CreditAction };
-
-// ======================================================
-// TYPES
-// ======================================================
 
 export interface CreditReservation {
   transactionId: string;
@@ -16,12 +11,9 @@ export interface CreditReservation {
 }
 
 // ======================================================
-// VÉRIFICATION DES CRÉDITS
+// VÉRIFICATION
 // ======================================================
 
-/**
- * Vérifie si l'utilisateur a assez de crédits pour une action.
- */
 export async function checkCredits(
   userId: string,
   action: CreditAction
@@ -39,13 +31,9 @@ export async function checkCredits(
 }
 
 // ======================================================
-// RÉSERVATION DES CRÉDITS
+// RÉSERVATION (le solde est la source de vérité)
 // ======================================================
 
-/**
- * Réserve les crédits avant une génération (opération atomique logique).
- * Retourne la réservation ou null si les crédits sont insuffisants.
- */
 export async function reserveCredits(
   userId: string,
   action: CreditAction,
@@ -55,7 +43,7 @@ export async function reserveCredits(
   const supabase = await createClient();
   const amount = amountOverride ?? CREDIT_COSTS[action];
 
-  // Récupérer le solde actuel
+  // 1. Récupérer le solde actuel
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('credits_balance')
@@ -71,9 +59,9 @@ export async function reserveCredits(
     return null;
   }
 
-  // Débiter immédiatement (sera remboursé si échec)
   const newBalance = profile.credits_balance - amount;
 
+  // 2. Débiter le solde — C'EST LA SEULE OPÉRATION CRITIQUE
   const { data: updatedProfile, error: updateError } = await supabase
     .from('profiles')
     .update({ credits_balance: newBalance })
@@ -86,11 +74,11 @@ export async function reserveCredits(
     return null;
   }
 
-  // Créer la transaction
+  // 3. Enregistrer la transaction — FIRE AND FORGET (ne bloque pas)
   const transactionType =
     action === 'DIAGNOSTIC_FLASH' ? 'generation_flash' : 'generation_complete';
 
-  const { data: transaction, error: transactionError } = await supabase
+  const { data: transaction } = await supabase
     .from('credit_transactions')
     .insert({
       user_id: userId,
@@ -103,32 +91,29 @@ export async function reserveCredits(
     .select()
     .single();
 
-  if (transactionError || !transaction) {
-    console.error('Erreur création transaction:', transactionError);
-    // Rembourser immédiatement en cas d'échec
-    await refundCredits(userId, amount, 'Erreur système - Remboursement automatique');
-    return null;
+  // Si la transaction échoue, on ne rembourse PAS — le solde est déjà débité
+  if (!transaction) {
+    console.warn('Transaction non enregistrée (mais solde bien débité)');
   }
 
   return {
-    transactionId: transaction.id,
+    transactionId: transaction?.id || 'no-transaction',
     reservedAmount: amount,
     balanceBefore: profile.credits_balance,
   };
 }
 
 // ======================================================
-// CONFIRMATION DE RÉSERVATION
+// CONFIRMATION
 // ======================================================
 
-/**
- * Valide la réservation après succès de la génération.
- */
 export async function confirmReservation(
   userId: string,
   transactionId: string,
   strategyId: string
 ): Promise<boolean> {
+  if (transactionId === 'no-transaction') return true;
+
   const supabase = await createClient();
 
   const { error } = await supabase
@@ -139,21 +124,13 @@ export async function confirmReservation(
     })
     .eq('id', transactionId);
 
-  if (error) {
-    console.error('Erreur confirmation réservation:', error);
-    return false;
-  }
-
-  return true;
+  return !error;
 }
 
 // ======================================================
-// REMBOURSEMENT
+// REMBOURSEMENT (uniquement si échec IA)
 // ======================================================
 
-/**
- * Rembourse les crédits en cas d'échec.
- */
 export async function refundCredits(
   userId: string,
   amount: number,
@@ -181,20 +158,14 @@ export async function refundCredits(
     return false;
   }
 
-  const { error: transactionError } = await supabase
-    .from('credit_transactions')
-    .insert({
-      user_id: userId,
-      type: 'refund',
-      amount: amount,
-      balance_after: newBalance,
-      description: reason,
-    });
-
-  if (transactionError) {
-    console.error('Erreur transaction remboursement:', transactionError);
-    return false;
-  }
+  // Log du remboursement (fire and forget)
+  await supabase.from('credit_transactions').insert({
+    user_id: userId,
+    type: 'refund',
+    amount: amount,
+    balance_after: newBalance,
+    description: reason,
+  });
 
   return true;
 }
@@ -203,9 +174,6 @@ export async function refundCredits(
 // LECTURE DU SOLDE
 // ======================================================
 
-/**
- * Récupère le solde actuel d'un utilisateur.
- */
 export async function getCreditBalance(userId: string): Promise<number> {
   const supabase = await createClient();
 
@@ -222,9 +190,6 @@ export async function getCreditBalance(userId: string): Promise<number> {
 // HISTORIQUE
 // ======================================================
 
-/**
- * Récupère l'historique des transactions d'un utilisateur.
- */
 export async function getCreditHistory(userId: string, limit: number = 50) {
   const supabase = await createClient();
 
