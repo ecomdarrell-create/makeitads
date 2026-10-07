@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
@@ -13,12 +13,16 @@ export default function SignupPage() {
     lastName: '',
     email: '',
     password: '',
-    currency: 'XOF', // Valeur par défaut
+    currency: 'XOF',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Récupérer la destination après inscription (passée par le middleware)
+  const redirectTo = searchParams.get('redirect') || '/dashboard';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,7 +49,7 @@ export default function SignupPage() {
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
-            currency: formData.currency, // ✅ Sauvegarde de la devise choisie
+            currency: formData.currency,
             plan_type: 'free',
             credits_balance: 10,
           },
@@ -56,7 +60,9 @@ export default function SignupPage() {
         setError('Impossible de créer votre compte. Vérifiez vos informations et réessayez.');
         setLoading(false);
       } else {
-        router.push('/dashboard');
+        // ✅ Redirection vers la destination initiale (ou dashboard par défaut)
+        router.push(redirectTo);
+        router.refresh();
       }
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
@@ -165,7 +171,7 @@ export default function SignupPage() {
               />
             </div>
 
-            {/* ✅ SÉLECTION DE LA DEVISE MODIFIÉE */}
+            {/* Devise */}
             <div>
               <label htmlFor="currency" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-1.5">
                 VOTRE DEVISE

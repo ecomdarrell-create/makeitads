@@ -1,12 +1,14 @@
 'use client';
 
-import { startTransition, useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Wallet } from 'lucide-react';
+import Link from 'next/link';
+import { Wallet, AlertTriangle, AlertCircle, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
 import { PlanId, hasFeature, normalizePlanId } from '@/config/pricing.config';
+import { PRICING_CONFIG } from '@/config/pricing.config';
 import { Step1Company } from '@/components/generate/steps/Step1Company';
 import { Step2Offer } from '@/components/generate/steps/Step2Offer';
 import { Step3Audience } from '@/components/generate/steps/Step3Audience';
@@ -33,17 +35,43 @@ export default function GeneratePage() {
   const totalSteps = 8;
   const completeGenerationAllowed = hasFeature(currentPlan, 'pro');
 
-  // ─── Coût de génération centralisé (aligné sur pricing.config.ts) ───
+  // ─── Coût de génération ───
   const generationCost = strategyType === 'complete' ? 5 : 1;
 
-  // ─── Chargement du solde de crédits ───
+  // ─── Crédits mensuels du plan (plafond) ───
+  const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
+
+  // ─── Pourcentage de crédits restants ───
+  const creditsPercent = planCreditsCap > 0
+    ? Math.min(100, Math.round((creditsBalance / planCreditsCap) * 100))
+    : 0;
+
+  // ─── Niveau d'alerte ───
+  const alertLevel: 'normal' | 'attention' | 'critical' | 'exhausted' =
+    creditsBalance === 0
+      ? 'exhausted'
+      : creditsPercent < 20
+        ? 'critical'
+        : creditsPercent < 50
+          ? 'attention'
+          : 'normal';
+
+  // ─── Couleurs selon le niveau ───
+  const badgeStyle = {
+    normal: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    attention: 'border-amber-200 bg-amber-50 text-amber-700',
+    critical: 'border-red-200 bg-red-50 text-red-700',
+    exhausted: 'border-red-300 bg-red-100 text-red-800',
+  }[alertLevel];
+
+  // ─── Chargement des crédits ───
   const loadCreditsBalance = async () => {
     try {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
       if (authError) {
-        throw new Error(`Authentification Supabase (${authError.code || 'sans code'}): ${authError.message}`);
+        throw new Error(`Authentification Supabase: ${authError.message}`);
       }
 
       if (!user) {
@@ -58,7 +86,7 @@ export default function GeneratePage() {
         .maybeSingle();
 
       if (profileError) {
-        console.error('Erreur de lecture du profil Supabase:', profileError);
+        console.error('Erreur lecture profil:', profileError);
         setSupabaseError(`Lecture du profil impossible: ${profileError.message}`);
         return;
       }
@@ -88,16 +116,15 @@ export default function GeneratePage() {
       setCurrentPlan(normalizePlanId(profile.plan));
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      console.error('Erreur de connexion Supabase:', message);
+      console.error('Erreur connexion Supabase:', message);
       setSupabaseError(
-        message.includes('project\'s URL and API key are required')
+        message.includes("project's URL and API key are required")
           ? 'Configuration Supabase absente au runtime.'
           : `Connexion Supabase impossible : ${message}`
       );
     }
   };
 
-  // ─── Chargement initial + retour draft ───
   useEffect(() => {
     const savedDraft = localStorage.getItem('makeitads_draft');
     if (savedDraft) {
@@ -110,21 +137,18 @@ export default function GeneratePage() {
     loadCreditsBalance();
   }, []);
 
-  // ─── Écoute du retour depuis le Summary ───
   useEffect(() => {
     const handleBack = () => setShowSummary(false);
     window.addEventListener('summary-back', handleBack);
     return () => window.removeEventListener('summary-back', handleBack);
   }, []);
 
-  // ─── Autosave du draft ───
   useEffect(() => {
     if (currentStep <= totalSteps) {
       localStorage.setItem('makeitads_draft', JSON.stringify(formData));
     }
   }, [formData, currentStep]);
 
-  // ─── Validation des étapes ───
   const validateStep = (step: number): boolean => {
     if (step === 1) {
       if (!formData.companyName.trim() || !formData.companyDescription.trim() || !formData.sector) {
@@ -144,18 +168,15 @@ export default function GeneratePage() {
       alert('Indiquez le pays principal de ciblage.');
       return false;
     }
-    if (step === 5) {
-      if (!formData.mainObjective) {
-        alert('Vous devez définir un objectif principal pour continuer.');
-        return false;
-      }
+    if (step === 5 && !formData.mainObjective) {
+      alert('Vous devez définir un objectif principal pour continuer.');
+      return false;
     }
     return true;
   };
 
   const handleNext = () => {
     if (!validateStep(currentStep)) return;
-
     if (currentStep < totalSteps) {
       setCurrentStep(currentStep + 1);
     } else {
@@ -164,14 +185,10 @@ export default function GeneratePage() {
   };
 
   const handlePrevious = () => {
-    if (showSummary) {
-      setShowSummary(false);
-    } else if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+    if (showSummary) setShowSummary(false);
+    else if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
-  // ─── Génération de la stratégie ───
   const handleGenerate = async () => {
     if (strategyType === 'complete' && !completeGenerationAllowed) {
       router.push('/dashboard/pricing');
@@ -189,11 +206,6 @@ export default function GeneratePage() {
         setIsGenerating(false);
         return;
       }
-
-      console.log('[Frontend] Début de la requête de génération...', {
-        userId: user.id,
-        strategyType,
-      });
 
       const cleanFormData = {
         ...formData,
@@ -219,28 +231,23 @@ export default function GeneratePage() {
       });
 
       const data = await response.json();
-      console.log('[Frontend] Réponse de l\'API:', data);
 
       if (response.ok) {
-        console.log('[Frontend] Génération réussie, redirection...');
         localStorage.removeItem('makeitads_draft');
         router.push(`/dashboard/strategies/${data.strategyId}`);
       } else {
-        console.error('[Frontend] Erreur API:', data.error);
-
         let errorMsg = data.error || 'Erreur lors de la génération';
         if (errorMsg.toLowerCase().includes('clé api') || errorMsg.toLowerCase().includes('deepseek')) {
           errorMsg = 'Erreur de configuration de l\'IA. Veuillez contacter le support technique.';
         } else if (errorMsg.toLowerCase().includes('crédits')) {
           errorMsg = 'Crédits insuffisants. Veuillez recharger votre compte.';
         }
-
         alert(errorMsg);
         setIsGenerating(false);
       }
     } catch (error) {
-      console.error('[Frontend] Erreur réseau ou inattendue:', error);
-      alert('Erreur de connexion au serveur. Veuillez vérifier votre connexion et réessayer.');
+      console.error('Erreur:', error);
+      alert('Erreur de connexion au serveur.');
       setIsGenerating(false);
     }
   };
@@ -250,10 +257,7 @@ export default function GeneratePage() {
   };
 
   const renderStep = () => {
-    if (isGenerating) {
-      return <LoadingGeneration strategyType={strategyType} />;
-    }
-
+    if (isGenerating) return <LoadingGeneration strategyType={strategyType} />;
     if (showSummary) {
       return (
         <Summary
@@ -265,26 +269,16 @@ export default function GeneratePage() {
         />
       );
     }
-
     switch (currentStep) {
-      case 1:
-        return <Step1Company formData={formData} updateFormData={updateFormData} />;
-      case 2:
-        return <Step2Offer formData={formData} updateFormData={updateFormData} />;
-      case 3:
-        return <Step3Audience formData={formData} updateFormData={updateFormData} />;
-      case 4:
-        return <Step4Market formData={formData} updateFormData={updateFormData} />;
-      case 5:
-        return <Step5Objective formData={formData} updateFormData={updateFormData} />;
-      case 6:
-        return <Step6Campaign formData={formData} updateFormData={updateFormData} />;
-      case 7:
-        return <Step7Creative formData={formData} updateFormData={updateFormData} />;
-      case 8:
-        return <Step8Context formData={formData} updateFormData={updateFormData} />;
-      default:
-        return null;
+      case 1: return <Step1Company formData={formData} updateFormData={updateFormData} />;
+      case 2: return <Step2Offer formData={formData} updateFormData={updateFormData} />;
+      case 3: return <Step3Audience formData={formData} updateFormData={updateFormData} />;
+      case 4: return <Step4Market formData={formData} updateFormData={updateFormData} />;
+      case 5: return <Step5Objective formData={formData} updateFormData={updateFormData} />;
+      case 6: return <Step6Campaign formData={formData} updateFormData={updateFormData} />;
+      case 7: return <Step7Creative formData={formData} updateFormData={updateFormData} />;
+      case 8: return <Step8Context formData={formData} updateFormData={updateFormData} />;
+      default: return null;
     }
   };
 
@@ -294,7 +288,7 @@ export default function GeneratePage() {
         <BackButton href="/dashboard" label="Retour au dashboard" />
 
         {/* ═══════════════════════════════════════ */}
-        {/* HEADER PREMIUM */}
+        {/* HEADER + BADGE CRÉDITS */}
         {/* ═══════════════════════════════════════ */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
@@ -314,26 +308,73 @@ export default function GeneratePage() {
             </p>
           </div>
 
-          {/* Solde discret */}
-          <div className="flex shrink-0 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5">
-            <Wallet className="h-3.5 w-3.5 text-slate-400" />
-            <span className="text-[11px] font-semibold text-[#18181B]">
-              {creditsBalance}
-            </span>
-            <span className="text-[10px] text-slate-500">
+          {/* Badge crédits coloré */}
+          <div
+            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${badgeStyle}`}
+          >
+            <Wallet className="h-3.5 w-3.5" />
+            <span className="text-[11px] font-bold">{creditsBalance}</span>
+            <span className="text-[10px] opacity-80">
               crédit{creditsBalance > 1 ? 's' : ''}
             </span>
           </div>
         </div>
 
         {/* ═══════════════════════════════════════ */}
-        {/* ERREUR SUPABASE */}
+        {/* BANDEAU D'ALERTE CRÉDITS */}
         {/* ═══════════════════════════════════════ */}
-        {supabaseError && (
+        {!isGenerating && !showSummary && alertLevel !== 'normal' && (
           <div
-            role="alert"
-            className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+            className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
+              alertLevel === 'exhausted'
+                ? 'border-red-300 bg-red-50'
+                : alertLevel === 'critical'
+                  ? 'border-red-200 bg-red-50/70'
+                  : 'border-amber-200 bg-amber-50/70'
+            }`}
           >
+            {alertLevel === 'attention' ? (
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            ) : (
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+            )}
+
+            <div className="min-w-0 flex-1">
+              <p
+                className={`text-xs font-semibold ${
+                  alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'
+                }`}
+              >
+                {alertLevel === 'exhausted' && 'Vous avez épuisé vos crédits ce mois-ci'}
+                {alertLevel === 'critical' && `Il vous reste seulement ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''}`}
+                {alertLevel === 'attention' && `Vous approchez de la fin de vos crédits`}
+              </p>
+              <p
+                className={`mt-0.5 text-[11px] leading-relaxed ${
+                  alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'
+                }`}
+              >
+                {alertLevel === 'exhausted'
+                  ? 'Passez à un plan supérieur pour continuer à générer des stratégies dès maintenant, ou attendez le renouvellement mensuel.'
+                  : `Il vous reste ${creditsPercent}% de vos crédits mensuels. Pensez à passer au plan supérieur pour éviter l'interruption.`}
+              </p>
+
+              {(alertLevel === 'exhausted' || alertLevel === 'critical') && (
+                <Link
+                  href="/dashboard/pricing"
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6]"
+                >
+                  Voir les plans supérieurs
+                  <ArrowRight className="h-3 w-3" />
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Erreur Supabase */}
+        {supabaseError && (
+          <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             {supabaseError}
           </div>
         )}
@@ -341,7 +382,7 @@ export default function GeneratePage() {
         {/* ═══════════════════════════════════════ */}
         {/* SÉLECTION DU TYPE DE STRATÉGIE */}
         {/* ═══════════════════════════════════════ */}
-        {!showSummary && !isGenerating && (
+        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
@@ -388,33 +429,27 @@ export default function GeneratePage() {
             {!completeGenerationAllowed && (
               <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[10px] text-amber-800">
                 La stratégie complète est réservée au plan Pro.{' '}
-                <a href="/dashboard/pricing" className="font-semibold underline">
+                <Link href="/dashboard/pricing" className="font-semibold underline">
                   Passer au plan adapté
-                </a>{' '}
+                </Link>{' '}
                 pour débloquer cette option.
               </div>
             )}
           </div>
         )}
 
-        {/* ═══════════════════════════════════════ */}
-        {/* PROGRESSION */}
-        {/* ═══════════════════════════════════════ */}
-        {!showSummary && !isGenerating && (
+        {/* Progression */}
+        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />
         )}
 
-        {/* ═══════════════════════════════════════ */}
-        {/* CONTENU (étape, résumé, ou loading) */}
-        {/* ═══════════════════════════════════════ */}
+        {/* Contenu */}
         <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           {renderStep()}
         </div>
 
-        {/* ═══════════════════════════════════════ */}
-        {/* NAVIGATION */}
-        {/* ═══════════════════════════════════════ */}
-        {!showSummary && !isGenerating && (
+        {/* Navigation */}
+        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={handlePrevious}

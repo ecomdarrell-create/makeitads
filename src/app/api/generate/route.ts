@@ -14,8 +14,27 @@ import {
   refundCredits,
   CREDIT_COSTS,
 } from '@/lib/credits/manager';
-import { hasFeature, normalizePlanId } from '@/config/pricing.config';
+import {
+  hasFeature,
+  normalizePlanId,
+  PRICING_CONFIG,
+  type PlanId,
+} from '@/config/pricing.config';
 import { ensureUserProfile } from '@/lib/profiles/ensure-profile';
+
+// ============================================
+// LISTE DES ADMINS (multi-emails)
+// ============================================
+
+const ADMIN_EMAILS = [
+  'ecomdarrell@gmail.com',
+  'darrellkamga@gmail.com',
+  // Ajoute d'autres emails admin ici si besoin
+];
+
+// ============================================
+// POST
+// ============================================
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,18 +45,43 @@ export async function POST(req: NextRequest) {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
+      console.warn('[generate] Non authentifié');
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
     }
 
-    // Logique admin : accès total
-    const isAdmin = user.email === 'ecomdarrell@gmail.com';
+    // ─── Détection admin ───
+    const isAdmin = user.email
+      ? ADMIN_EMAILS.includes(user.email.toLowerCase().trim())
+      : false;
+
+    console.log('[generate] User:', user.email, '| Admin:', isAdmin);
 
     const profile = await ensureUserProfile(user);
 
     const effectivePlan: PlanTier = isAdmin
       ? 'enterprise'
       : (normalizePlanId(profile?.plan) as PlanTier);
-    const creditsBalance = isAdmin ? 9999 : profile?.credits_balance || 0;
+
+    let creditsBalance = isAdmin ? 9999 : profile?.credits_balance || 0;
+
+    console.log('[generate] Plan:', effectivePlan, '| Crédits:', creditsBalance);
+
+    // ─── AUTO-REFILL : si plan payant mais 0 crédits, on recharge ───
+    // (protège contre un bug de webhook ou de cron qui aurait vidé les crédits)
+    if (!isAdmin && effectivePlan !== 'free' && creditsBalance === 0) {
+      const planCredits = PRICING_CONFIG[effectivePlan as PlanId]?.monthlyCredits || 0;
+      if (planCredits > 0) {
+        console.log(`[generate] AUTO-REFILL: ${user.email} plan ${effectivePlan} → ${planCredits} crédits`);
+        await supabase
+          .from('profiles')
+          .update({
+            credits_balance: planCredits,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', user.id);
+        creditsBalance = planCredits;
+      }
+    }
 
     const { strategyType, formData } = await req.json();
 
@@ -49,7 +93,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
 
-    // Validation des champs obligatoires
+    // ─── Validation des champs obligatoires ───
     const requiredFields = [
       'companyName',
       'companyDescription',
@@ -76,7 +120,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // La stratégie complète est réservée aux plans Pro et supérieurs
+    // ─── Vérif plan payant pour stratégie complète ───
     if (strategyType === 'complete' && !hasFeature(effectivePlan, 'pro')) {
       return NextResponse.json(
         { error: 'Cette option est réservée au plan Pro ou supérieur.' },
@@ -84,19 +128,27 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ─── Calcul du coût en crédits (centralisé) ───
+    // ─── Calcul du coût ───
     const creditAction =
       strategyType === 'complete' ? 'STRATEGIE_COMPLETE' : 'DIAGNOSTIC_FLASH';
     const creditCost = CREDIT_COSTS[creditAction];
 
+    console.log('[generate] Type:', strategyType, '| Coût:', creditCost, '| Solde:', creditsBalance);
+
     if (!isAdmin && creditsBalance < creditCost) {
+      console.warn(`[generate] Crédits insuffisants : ${creditsBalance} < ${creditCost}`);
       return NextResponse.json(
-        { error: 'Crédits insuffisants. Passez au Plan Pro pour continuer.' },
+        {
+          error: `Crédits insuffisants. Il vous reste ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''} mais cette génération en coûte ${creditCost}.`,
+          creditsBalance,
+          creditCost,
+          code: 'INSUFFICIENT_CREDITS',
+        },
         { status: 402 }
       );
     }
 
-    // Contexte des stratégies antérieures pour éviter la répétition
+    // ─── Contexte des stratégies antérieures ───
     const { data: previousStrategies } = await supabase
       .from('strategies')
       .select('title, type, platform, data')
@@ -115,7 +167,7 @@ export async function POST(req: NextRequest) {
 
     const generationId = randomUUID();
 
-    // Réservation des crédits (sauf admin)
+    // ─── Réservation des crédits ───
     let reservation = null;
     if (!isAdmin) {
       reservation = await reserveCredits(
@@ -125,18 +177,19 @@ export async function POST(req: NextRequest) {
         creditCost
       );
       if (!reservation) {
+        console.error('[generate] Erreur réservation crédits');
         return NextResponse.json(
           { error: 'Erreur de réservation des crédits' },
           { status: 500 }
         );
       }
+      console.log('[generate] Crédits réservés:', reservation);
     }
 
     try {
-      // ─── Construction du system prompt selon le type ET le plan ───
+      // ─── Prompts ───
       const basePrompt = getSystemPrompt(strategyType, effectivePlan);
 
-      // ─── Contexte additionnel selon le plan ───
       const planContext =
         effectivePlan === 'free'
           ? "\n\nNIVEAU D'OFFRE : Démo. Fournis uniquement un diagnostic concis et actionnable. N'inclus aucun contenu réservé aux plans payants."
@@ -165,10 +218,9 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
           'Construis une recommandation spécifique à ces informations et distincte des stratégies antérieures.',
       };
 
-      // ─── Sélection du schéma selon le type ET le plan ───
       const schema = getSchema(strategyType, effectivePlan);
 
-      console.log(`Génération ${strategyType} pour plan ${effectivePlan}`);
+      console.log(`[generate] Appel DeepSeek — type=${strategyType}, plan=${effectivePlan}`);
 
       const aiResult = await generateStrategy(
         DEFAULT_AI_CONFIG,
@@ -177,7 +229,9 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
         schema
       );
 
-      // Nettoyage de la plateforme (évite l'erreur 22P02 Supabase)
+      console.log('[generate] Réponse IA OK');
+
+      // ─── Sauvegarde Supabase ───
       const safePlatform =
         formData.platform &&
         typeof formData.platform === 'string' &&
@@ -200,7 +254,7 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
         .single();
 
       if (strategyError || !strategy) {
-        console.error('Erreur Supabase (Insert Strategy):', strategyError);
+        console.error('[generate] Erreur Supabase:', strategyError);
         throw new Error(
           `Erreur sauvegarde stratégie: ${
             strategyError?.message || 'aucune stratégie retournée'
@@ -218,6 +272,8 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
 
       const finalBalance = isAdmin ? 9999 : creditsBalance - creditCost;
 
+      console.log('[generate] SUCCESS — strategyId:', strategy.id, '| Balance:', finalBalance);
+
       return NextResponse.json({
         success: true,
         data: aiResult,
@@ -226,7 +282,7 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
       });
     } catch (aiError) {
       const message = aiError instanceof Error ? aiError.message : 'Erreur inconnue';
-      console.error('Erreur IA:', message);
+      console.error('[generate] Erreur IA:', message);
 
       if (!isAdmin && reservation) {
         await refundCredits(
@@ -247,7 +303,7 @@ ${priorStrategyContext || 'Aucune stratégie antérieure.'}`;
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
-    console.error('Erreur API globale:', message);
+    console.error('[generate] Erreur globale:', message);
     return NextResponse.json(
       { error: 'Erreur serveur. Veuillez réessayer.' },
       { status: 500 }

@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
 // ============================================
-// CRÉATION DU CLIENT SUPABASE (à l'appel)
+// CLIENT SUPABASE ADMIN
 // ============================================
 
 function getSupabaseAdmin() {
@@ -12,7 +12,7 @@ function getSupabaseAdmin() {
 
   if (!url || !key) {
     throw new Error(
-      'Variables Supabase manquantes : NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY sont requises.'
+      'Variables Supabase manquantes : NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY requises.'
     );
   }
 
@@ -22,7 +22,7 @@ function getSupabaseAdmin() {
 }
 
 // ============================================
-// EXTRACTION ROBUSTE DES CHAMPS
+// EXTRACTION DES CHAMPS
 // ============================================
 
 function extractEmail(payload: any): string | null {
@@ -44,6 +44,24 @@ function extractEmail(payload: any): string | null {
   for (const candidate of candidates) {
     if (typeof candidate === 'string' && candidate.includes('@')) {
       return candidate.toLowerCase().trim();
+    }
+  }
+  return null;
+}
+
+function extractCustomerName(payload: any): string | null {
+  const candidates = [
+    payload?.customer_name,
+    payload?.customer?.name,
+    payload?.buyer?.name,
+    payload?.data?.customer_name,
+    payload?.data?.customer?.name,
+    payload?.data?.buyer?.name,
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) {
+      return candidate.trim();
     }
   }
   return null;
@@ -117,62 +135,6 @@ function detectPlan(payload: any): PlanId | null {
 }
 
 // ============================================
-// RECHERCHE UTILISATEUR (via profiles)
-// ============================================
-
-async function findUserByEmail(
-  supabaseAdmin: ReturnType<typeof getSupabaseAdmin>,
-  email: string
-): Promise<{ id: string; email: string } | null> {
-  // Tentative 1 : chercher dans la table profiles
-  try {
-    const { data: profile } = await supabaseAdmin
-      .from('profiles')
-      .select('id, email')
-      .ilike('email', email)
-      .maybeSingle();
-
-    if (profile?.id) {
-      return { id: profile.id, email: profile.email || email };
-    }
-  } catch (e) {
-    console.warn('Recherche via profiles echouee, fallback listUsers:', e);
-  }
-
-  // Tentative 2 : pagination complète sur auth.users
-  try {
-    let page = 1;
-    const perPage = 1000;
-    const maxPages = 20; // sécurité : 20 000 utilisateurs max
-
-    while (page <= maxPages) {
-      const { data, error } = await supabaseAdmin.auth.admin.listUsers({
-        page,
-        perPage,
-      });
-
-      if (error) {
-        console.error('Erreur listUsers page', page, error);
-        break;
-      }
-
-      const users = data?.users || [];
-      const match = users.find((u) => u.email?.toLowerCase() === email);
-      if (match) {
-        return { id: match.id, email: match.email || email };
-      }
-
-      if (users.length < perPage) break;
-      page++;
-    }
-  } catch (e) {
-    console.error('Erreur fallback listUsers:', e);
-  }
-
-  return null;
-}
-
-// ============================================
 // POST /api/webhooks/chariow
 // ============================================
 
@@ -180,7 +142,6 @@ export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
     console.log('=== WEBHOOK CHARIOW RECU ===');
-    console.log('Body brut:', rawBody.slice(0, 2000));
 
     let payload: any;
     try {
@@ -192,11 +153,8 @@ export async function POST(req: NextRequest) {
 
     const email = extractEmail(payload);
     if (!email) {
-      console.error('Pas d email trouve. Cles du payload:', Object.keys(payload));
-      return NextResponse.json(
-        { error: 'No email found', keys: Object.keys(payload) },
-        { status: 400 }
-      );
+      console.error('Pas d email trouve');
+      return NextResponse.json({ error: 'No email found' }, { status: 400 });
     }
 
     const plan = detectPlan(payload);
@@ -209,43 +167,114 @@ export async function POST(req: NextRequest) {
     }
 
     const orderId = extractOrderId(payload);
-    console.log(`Vente detectee : ${email} -> Plan ${plan} (order: ${orderId})`);
+    const customerName = extractCustomerName(payload) || 'Client';
+    console.log(`Vente detectee : ${email} -> Plan ${plan}`);
 
     const planConfig = PRICING_CONFIG[plan];
     const monthlyCredits = planConfig.monthlyCredits;
 
     const supabaseAdmin = getSupabaseAdmin();
 
-    const user = await findUserByEmail(supabaseAdmin, email);
+    // ============================================
+    // 1. RECHERCHER L'UTILISATEUR
+    // ============================================
 
-    if (!user) {
-      console.warn(`Aucun utilisateur Supabase pour ${email}`);
-      return NextResponse.json({
-        success: true,
-        warning: 'No matching user',
-        email,
-        plan,
-      });
-    }
+    let userId: string | null = null;
+    let isNewUser = false;
 
-    // Mise à jour du profil
-    const { error: updateError } = await supabaseAdmin
+    const { data: existingProfile } = await supabaseAdmin
       .from('profiles')
-      .update({
-        plan: plan,
-        credits_balance: monthlyCredits,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', user.id);
+      .select('id, email')
+      .ilike('email', email)
+      .maybeSingle();
 
-    if (updateError) {
-      console.error('Erreur update profil:', updateError);
-      return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+    if (existingProfile?.id) {
+      userId = existingProfile.id;
+      console.log(`Utilisateur trouve dans profiles : ${userId}`);
     }
 
-    // Enregistrement de la transaction
+    if (!userId) {
+      const { data: usersList } = await supabaseAdmin.auth.admin.listUsers();
+      const match = usersList?.users?.find(
+        (u) => u.email?.toLowerCase() === email
+      );
+      if (match) {
+        userId = match.id;
+        console.log(`Utilisateur trouve dans auth.users : ${userId}`);
+      }
+    }
+
+    // ============================================
+    // 2. SI PAS D'UTILISATEUR → LE CRÉER SANS EMAIL
+    // ============================================
+    // L'utilisateur pourra utiliser "Mot de passe oublié" pour accéder à son compte
+
+    if (!userId) {
+      console.log(`Creation automatique de l'utilisateur : ${email}`);
+      isNewUser = true;
+
+      const { data: newUser, error: createError } =
+        await supabaseAdmin.auth.admin.createUser({
+          email,
+          email_confirm: true,
+          user_metadata: {
+            full_name: customerName,
+            created_from: 'chariow_purchase',
+          },
+        });
+
+      if (createError || !newUser?.user) {
+        console.error('Erreur creation utilisateur:', createError);
+        return NextResponse.json(
+          { error: 'User creation failed', details: createError?.message },
+          { status: 500 }
+        );
+      }
+
+      userId = newUser.user.id;
+      console.log(`Utilisateur cree : ${userId}`);
+
+      // Créer son profil
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .insert({
+          id: userId,
+          email: email,
+          plan: plan,
+          credits_balance: monthlyCredits,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        });
+
+      if (profileError) {
+        console.error('Erreur creation profil:', profileError);
+      }
+    } else {
+      // ============================================
+      // 3. UTILISATEUR EXISTANT → METTRE À JOUR
+      // ============================================
+
+      const { error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          plan: plan,
+          credits_balance: monthlyCredits,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', userId);
+
+      if (updateError) {
+        console.error('Erreur update profil:', updateError);
+        return NextResponse.json({ error: 'Update failed' }, { status: 500 });
+      }
+    }
+
+    // ============================================
+    // 4. ENREGISTRER LA TRANSACTION
+    // ============================================
+
     await supabaseAdmin.from('credit_transactions').insert({
-      user_id: user.id,
+      user_id: userId,
       type: 'purchase',
       amount: monthlyCredits,
       balance_after: monthlyCredits,
@@ -256,9 +285,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      userId: user.id,
+      userId,
       plan,
       creditsAdded: monthlyCredits,
+      isNewUser,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';

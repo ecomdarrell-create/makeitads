@@ -1,12 +1,14 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import Link from "next/link";
-import { motion, AnimatePresence } from "framer-motion";
-import { Check, ChevronDown } from "lucide-react";
+import { useState } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, ChevronDown, Loader2 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 
 // ==========================================
-// 1. DONNÉES DES PLANS (CONTENU EXACT)
+// 1. DONNÉES DES PLANS
 // ==========================================
 const pricingPlans = [
   {
@@ -22,6 +24,7 @@ const pricingPlans = [
     popular: false,
     ctaText: "Commencer",
     link: "/dashboard",
+    isInternal: true,
     checkColor: "text-emerald-500",
     bgCheck: "bg-emerald-500/10",
     ctaBg: "bg-emerald-500",
@@ -35,18 +38,19 @@ const pricingPlans = [
     price: "10 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: [
-      "15 crédits renouvelés chaque mois",
-      "2 stratégies complètes / mois",
-      "6 variantes de textes",
-      "Ciblage précis",
-      "Recommandations plateforme",
+      "50 crédits renouvelés chaque mois",
+      "10 stratégies complètes / mois",
+      "Scripts WhatsApp prêts à l'emploi",
+      "Allocation budgétaire sur 7 jours",
+      "Ciblage précis par ville",
       "Guide créatif",
-      "Accès communauté",
-      "Adapté marché local",
+      "KPIs à suivre",
+      "Support email (48h)",
     ],
     popular: true,
     ctaText: "Choisir le Plan Pro",
     link: "https://makeitads.mychariow.com/plan-pro",
+    isInternal: false,
     checkColor: "text-[#6366F1]",
     bgCheck: "bg-[#6366F1]/10",
     ctaBg: "bg-[#6366F1]",
@@ -60,18 +64,19 @@ const pricingPlans = [
     price: "25 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: [
-      "30 crédits renouvelés chaque mois",
-      "5 stratégies complètes / mois",
-      "15 variantes de textes",
+      "150 crédits renouvelés chaque mois",
+      "30 stratégies complètes / mois",
       "Analyse concurrentielle",
-      "Publication / visibilité",
-      "Support prioritaire",
-      "Canal Telegram VIP",
-      "Stratégie de croissance",
+      "5 variantes de hooks",
+      "Analyse d'audience avancée",
+      "Stratégie de croissance 3 mois",
+      "Support prioritaire (12h)",
+      "Rapports avancés",
     ],
     popular: false,
     ctaText: "Choisir le Plan Premium",
     link: "https://makeitads.mychariow.com/plan-prem",
+    isInternal: false,
     checkColor: "text-rose-500",
     bgCheck: "bg-rose-500/10",
     ctaBg: "bg-rose-500",
@@ -85,18 +90,19 @@ const pricingPlans = [
     price: "100 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: [
-      "80 crédits renouvelés chaque mois",
-      "15 stratégies complètes / mois",
-      "Analyse concurrentielle mensuelle",
-      "Accompagnement sur mesure",
-      "4 publications / mois",
-      "Consulting stratégique 30min",
-      "Support < 1 heure",
+      "500 crédits renouvelés chaque mois",
+      "100 stratégies complètes / mois",
+      "Consulting stratégique mensuel",
+      "Formation personnalisée",
       "Accompagnement avancé",
+      "Rapports white-label",
+      "Support prioritaire 24/7",
+      "Accès API",
     ],
     popular: false,
     ctaText: "Choisir le Plan Élite",
     link: "https://makeitads.mychariow.com/plan-elit",
+    isInternal: false,
     checkColor: "text-amber-500",
     bgCheck: "bg-amber-500/10",
     ctaBg: "bg-amber-500",
@@ -107,7 +113,7 @@ const pricingPlans = [
 ];
 
 // ==========================================
-// 2. DONNÉES FAQ (CONTENU EXACT)
+// 2. FAQ
 // ==========================================
 const faqData = [
   {
@@ -137,9 +143,42 @@ const faqData = [
 ];
 
 // ==========================================
-// 3. COMPOSANT CARTE DE PRIX (ANTI-DÉBORDEMENT STRICT)
+// 3. CARTE DE PRIX
 // ==========================================
 function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  const handleClick = async (e: React.MouseEvent) => {
+    // Si lien interne → navigation normale
+    if (plan.isInternal) {
+      router.push(plan.link);
+      return;
+    }
+
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (!user) {
+        // Non connecté → redirection vers signup
+        router.push(`/signup?redirect=${encodeURIComponent('/dashboard/pricing')}`);
+        return;
+      }
+
+      // Connecté → ouvrir Chariow
+      window.open(plan.link, '_blank', 'noopener,noreferrer');
+    } catch (error) {
+      console.error('Erreur vérification auth:', error);
+      router.push(`/signup?redirect=${encodeURIComponent('/dashboard/pricing')}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const isWide = plan.id === "premium" || plan.id === "elite";
 
   return (
@@ -154,7 +193,6 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
           : "border-gray-200 shadow-sm"
       } ${isWide ? "md:flex-row md:items-center md:gap-6" : ""}`}
     >
-      {/* 1. Badge "Le plus choisi" */}
       {plan.popular && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[8px] md:text-[9px] font-bold text-white uppercase tracking-wider shadow-sm bg-[#6366F1] whitespace-nowrap z-10">
           Le plus choisi
@@ -166,37 +204,39 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
           isWide ? "md:w-1/3 md:border-r md:border-gray-100 md:pr-4 mb-3 md:mb-0" : "mb-3"
         }`}
       >
-        {/* 2. Nom du plan */}
         <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1 text-left leading-tight break-words">
           {plan.name}
         </h3>
         
-        {/* 3. Prix */}
         <div className="flex items-baseline gap-1 flex-wrap">
           <span className="text-base md:text-xl font-bold text-[#18181B] leading-none">
             {plan.price}
           </span>
         </div>
 
-        {/* 4. Pastille "12 mois d'accès" (INTERDIT pour Démo) */}
         {plan.durationNote && (
           <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold text-white bg-gray-800 whitespace-nowrap overflow-hidden text-ellipsis">
             {plan.durationNote}
           </span>
         )}
 
-        {/* 5. Bouton CTA */}
-        <Link
-          href={plan.link}
-          target={plan.id === "demo" ? undefined : "_blank"}
-          rel={plan.id === "demo" ? undefined : "noopener noreferrer"}
-          className={`block w-full mt-3 rounded-full py-1.5 text-center text-[10px] md:text-xs font-bold transition-all duration-200 break-words px-2 ${plan.ctaBg} ${plan.ctaHover} ${plan.ctaTextCol} shadow-sm flex items-center justify-center min-h-[32px] leading-tight whitespace-nowrap overflow-hidden text-ellipsis`}
+        <button
+          type="button"
+          onClick={handleClick}
+          disabled={loading}
+          className={`block w-full mt-3 rounded-full py-1.5 text-center text-[10px] md:text-xs font-bold transition-all duration-200 break-words px-2 ${plan.ctaBg} ${plan.ctaHover} ${plan.ctaTextCol} shadow-sm flex items-center justify-center min-h-[32px] leading-tight whitespace-nowrap overflow-hidden text-ellipsis disabled:opacity-70 disabled:cursor-not-allowed`}
         >
-          {plan.ctaText}
-        </Link>
+          {loading ? (
+            <>
+              <Loader2 className="h-3 w-3 animate-spin mr-1" />
+              Chargement
+            </>
+          ) : (
+            plan.ctaText
+          )}
+        </button>
       </div>
 
-      {/* 6. Liste des avantages */}
       <div className={`flex-1 ${isWide ? "md:w-2/3" : ""}`}>
         <ul
           className={`grid ${
@@ -222,7 +262,7 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
 }
 
 // ==========================================
-// 4. COMPOSANT ACCORDÉON FAQ
+// 4. FAQ ITEM
 // ==========================================
 function FaqItem({
   question,
@@ -285,7 +325,6 @@ export default function PricingPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F8FC]">
-      {/* SECTION TARIFS */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div
@@ -302,9 +341,7 @@ export default function PricingPage() {
             </p>
           </motion.div>
 
-          {/* BENTO GRID ASYMÉTRIQUE STRICTE */}
           <div className="grid grid-cols-2 gap-3 md:gap-5 w-full">
-            {/* Row 1 : 50% + 50% */}
             <div className="col-span-1">
               <PricingCard plan={pricingPlans[0]} />
             </div>
@@ -312,7 +349,6 @@ export default function PricingPage() {
               <PricingCard plan={pricingPlans[1]} />
             </div>
             
-            {/* Row 2 & 3 : 100% */}
             <div className="col-span-2">
               <PricingCard plan={pricingPlans[2]} />
             </div>
@@ -323,7 +359,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* SECTION FAQ (Fond blanc pour contraster) */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto">
           <motion.div
