@@ -1,10 +1,15 @@
 "use client";
 
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronDown, ArrowUp, Target, Users, Globe, Zap, TrendingUp } from "lucide-react";
-import { useState, Fragment, useEffect } from "react";
+import {
+  ArrowRight,
+  Check,
+  ChevronDown,
+  ArrowUp,
+} from "lucide-react";
+import { useState, Fragment, useEffect, useRef } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
@@ -49,83 +54,75 @@ const faqData = [
   { question: "Est-ce adapté au marché africain ?", answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux." },
 ];
 
-// ==========================================
-// NOUVELLE CONFIGURATION DES PLANS
-// ==========================================
 const pricingPlans = [
-  {
-    id: "demo",
-    name: "MakeItAds Démo",
-    price: "0 FCFA",
-    features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"],
-    popular: false,
-    ctaText: "Commencer",
-    link: "/dashboard",
-    checkColor: "text-emerald-500",
-    ctaBg: "bg-emerald-500",
-    ctaHover: "hover:bg-emerald-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
-    isExternal: false,
-  },
-  {
-    id: "pro",
-    name: "MakeItAds Pro",
-    price: "10 000 FCFA/an",
-    durationNote: "12 mois d'accès",
-    features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"],
-    popular: true,
-    ctaText: "Choisir le Plan Pro",
-    link: "https://makeitads.mychariow.com/plan-pro",
-    checkColor: "text-[#6366F1]",
-    ctaBg: "bg-[#6366F1]",
-    ctaHover: "hover:bg-[#5558e6]",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
-    isExternal: true,
-  },
-  {
-    id: "premium",
-    name: "MakeItAds Premium",
-    price: "25 000 FCFA/an",
-    durationNote: "12 mois d'accès",
-    features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"],
-    popular: false,
-    ctaText: "Choisir le Plan Premium",
-    link: "https://makeitads.mychariow.com/plan-prem",
-    checkColor: "text-rose-500",
-    ctaBg: "bg-rose-500",
-    ctaHover: "hover:bg-rose-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
-    isExternal: true,
-  },
-  {
-    id: "elite",
-    name: "MakeItAds Élite",
-    price: "100 000 FCFA/an",
-    durationNote: "12 mois d'accès",
-    features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"],
-    popular: false,
-    ctaText: "Choisir le Plan Élite",
-    link: "https://makeitads.mychariow.com/plan-elit",
-    checkColor: "text-amber-500",
-    ctaBg: "bg-amber-500",
-    ctaHover: "hover:bg-amber-600",
-    ctaTextCol: "text-white",
-    bgCard: "bg-white",
-    isExternal: true,
-  },
+  { id: "demo", name: "MakeItAds Démo", price: "0 FCFA", features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"], popular: false, ctaText: "Commencer", link: "/dashboard", checkColor: "text-emerald-500", ctaBg: "bg-emerald-500", ctaHover: "hover:bg-emerald-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: false },
+  { id: "pro", name: "MakeItAds Pro", price: "10 000 FCFA/an", durationNote: "12 mois d'accès", features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"], popular: true, ctaText: "Choisir le Plan Pro", link: "https://makeitads.mychariow.com/plan-pro", checkColor: "text-[#6366F1]", ctaBg: "bg-[#6366F1]", ctaHover: "hover:bg-[#5558e6]", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
+  { id: "premium", name: "MakeItAds Premium", price: "25 000 FCFA/an", durationNote: "12 mois d'accès", features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"], popular: false, ctaText: "Choisir le Plan Premium", link: "https://makeitads.mychariow.com/plan-prem", checkColor: "text-rose-500", ctaBg: "bg-rose-500", ctaHover: "hover:bg-rose-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
+  { id: "elite", name: "MakeItAds Élite", price: "100 000 FCFA/an", durationNote: "12 mois d'accès", features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"], popular: false, ctaText: "Choisir le Plan Élite", link: "https://makeitads.mychariow.com/plan-elit", checkColor: "text-amber-500", ctaBg: "bg-amber-500", ctaHover: "hover:bg-amber-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
 ];
 
 // ==========================================
-// STATISTIQUES
+// STATS AVEC COMPTEUR ANIMÉ
 // ==========================================
-const stats = [
-  { value: "200+", label: "Entrepreneurs formés", icon: Users },
-  { value: "18", label: "Pays africains", icon: Globe },
-  { value: "10 000+", label: "Stratégies générées", icon: Zap },
-  { value: "92%", label: "Taux de satisfaction", icon: TrendingUp },
+const statsData = [
+  { value: 200, suffix: "+", label: "Entrepreneurs formés" },
+  { value: 18, suffix: "", label: "Pays africains" },
+  { value: 10000, suffix: "+", label: "Stratégies générées" },
+  { value: 92, suffix: "%", label: "Taux de satisfaction" },
+];
+
+function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.5 });
+  const [display, setDisplay] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    const duration = 2000;
+    const startTime = Date.now();
+
+    const tick = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      setDisplay(Math.floor(eased * value));
+      if (progress < 1) {
+        requestAnimationFrame(tick);
+      } else {
+        setDisplay(value);
+      }
+    };
+
+    requestAnimationFrame(tick);
+  }, [isInView, value]);
+
+  return (
+    <span ref={ref}>
+      {display.toLocaleString("fr-FR")}
+      {suffix}
+    </span>
+  );
+}
+
+// ==========================================
+// BLOCS QUI SOMMES NOUS (stacking scroll)
+// ==========================================
+const aboutBlocks = [
+  {
+    badge: "01",
+    title: "Notre mission",
+    text: "MakeItAds a été fondé avec une conviction profonde : les entrepreneurs africains méritent les mêmes outils d'intelligence marketing que les entreprises des grandes capitales mondiales. Nous construisons une infrastructure technologique adaptée aux réalités locales — WhatsApp, Mobile Money, budgets modestes — pour transformer chaque entrepreneur en stratège armé.",
+  },
+  {
+    badge: "02",
+    title: "Notre vision",
+    text: "Devenir la plateforme de référence en acquisition client pour l'Afrique francophone. Nous croyons que la croissance d'une entreprise ne doit pas dépendre du génie d'un seul individu, mais de la fiabilité d'un système reproductible. C'est cette rigueur méthodologique que nous mettons à la portée de chaque entrepreneur, du Sénégal au Cameroun, de la Côte d'Ivoire à la RDC.",
+  },
+  {
+    badge: "03",
+    title: "Notre engagement",
+    text: "Nous ne vendons pas de la publicité. Nous construisons l'infrastructure qui permet à chaque entrepreneur africain de prendre des décisions éclairées, armé de données, de méthode et d'intelligence. Chaque stratégie que nous générons est calibrée pour un objectif unique : transformer les efforts marketing en résultats mesurables.",
+  },
 ];
 
 // ==========================================
@@ -140,9 +137,7 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className={`relative group rounded-2xl border p-4 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
-        plan.popular ? "border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]" : "border-gray-200 shadow-sm"
-      } ${isWide ? "md:flex-row md:items-center md:gap-6" : ""}`}
+      className={`relative group rounded-2xl border p-4 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${plan.popular ? "border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]" : "border-gray-200 shadow-sm"} ${isWide ? "md:flex-row md:items-center md:gap-6" : ""}`}
     >
       {plan.popular && (
         <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider shadow-sm bg-[#6366F1] whitespace-nowrap z-10">
@@ -192,7 +187,8 @@ export default function LandingPage() {
   const [activeStep, setActiveStep] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  const scrollToPricing = () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
+  const scrollToPricing = () =>
+    document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
 
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 600);
@@ -200,7 +196,8 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollToTop = () =>
+    window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <main className="min-h-screen bg-white text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20">
@@ -213,10 +210,11 @@ export default function LandingPage() {
         footerNote="Note de 4.8/5 sur 312 avis."
       />
 
-      {/* Partenaires */}
       <section className="relative z-10 py-6 border-y border-gray-100 bg-[#F8F8FC]">
         <div className="max-w-5xl mx-auto px-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">Compatible avec vos plateformes</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">
+            Compatible avec vos plateformes
+          </p>
           <div className="relative overflow-hidden">
             <div className="flex animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
               {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => (
@@ -245,7 +243,11 @@ export default function LandingPage() {
           <div className="flex justify-start mb-6 md:mb-10 overflow-x-auto pb-2">
             <div className="inline-flex bg-[#F8F8FC] p-1.5 rounded-full border border-gray-100">
               {howItWorksSteps.map((_, index) => (
-                <button key={index} onClick={() => setActiveStep(index)} className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${activeStep === index ? "bg-[#6366F1] text-white shadow-md" : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"}`}>
+                <button
+                  key={index}
+                  onClick={() => setActiveStep(index)}
+                  className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${activeStep === index ? "bg-[#6366F1] text-white shadow-md" : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"}`}
+                >
                   Étape {index + 1}
                 </button>
               ))}
@@ -283,43 +285,69 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
-      {/* STATISTIQUES — remplace le tableau de comparaison */}
-      <section className="relative z-10 py-12 md:py-20 bg-white border-y border-gray-100">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 md:mb-14">
-            <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
-              Des résultats <span className="text-[#6366F1]">concrets</span>
+      {/* ═══════════════════════════════════════════════ */}
+      {/* STATISTIQUES — STYLE VERCEL / STRIPE PREMIUM */}
+      {/* ═══════════════════════════════════════════════ */}
+      <section className="relative z-10 py-16 md:py-24 bg-[#0A0A0B] text-white overflow-hidden">
+        {/* Grille de fond */}
+        <div className="absolute inset-0 opacity-20">
+          <div
+            className="absolute inset-0"
+            style={{
+              backgroundImage:
+                "linear-gradient(to right, rgba(99,102,241,0.15) 1px, transparent 1px), linear-gradient(to bottom, rgba(99,102,241,0.15) 1px, transparent 1px)",
+              backgroundSize: "48px 48px",
+              maskImage:
+                "radial-gradient(ellipse 70% 60% at 50% 50%, black 40%, transparent 100%)",
+            }}
+          />
+        </div>
+
+        {/* Halos colorés */}
+        <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/30 blur-[120px]" />
+        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/30 blur-[120px]" />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-left mb-10 md:mb-16"
+          >
+            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
+              Nos chiffres
+            </p>
+            <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-white mb-3 max-w-3xl">
+              Des résultats <span className="text-[#6366F1]">concrets</span>,<br />
+              mesurés sur le terrain.
             </h2>
-            <p className="text-xs md:text-sm leading-relaxed text-[#71717A] max-w-xl mx-auto">
-              MakeItAds transforme la façon dont les entrepreneurs africains abordent leur marketing.
+            <p className="text-xs md:text-sm text-white/60 leading-relaxed max-w-2xl">
+              MakeItAds transforme la façon dont les entrepreneurs africains
+              abordent leur marketing — avec méthode, rigueur et impact mesurable.
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {stats.map((stat, index) => {
-              const Icon = stat.icon;
-              return (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.4, delay: index * 0.1 }}
-                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 md:p-6 text-center transition-all hover:-translate-y-1 hover:border-[#6366F1]/30 hover:shadow-lg"
-                >
-                  <div className="mx-auto mb-3 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
-                    <Icon className="h-5 w-5 md:h-6 md:w-6" />
-                  </div>
-                  <p className="text-2xl md:text-4xl font-bold text-[#18181B] leading-none mb-1.5">
-                    {stat.value}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/10 rounded-2xl overflow-hidden border border-white/10">
+            {statsData.map((stat, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="relative bg-[#0A0A0B] p-6 md:p-8 group"
+              >
+                <div className="absolute inset-0 bg-gradient-to-br from-[#6366F1]/0 via-transparent to-[#8B5CF6]/0 transition-all duration-500 group-hover:from-[#6366F1]/10 group-hover:to-[#8B5CF6]/10" />
+                <div className="relative">
+                  <p className="text-3xl md:text-5xl font-bold text-white leading-none tracking-tight">
+                    <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                   </p>
-                  <p className="text-[10px] md:text-xs text-slate-500 leading-snug">
+                  <p className="mt-3 text-[11px] md:text-xs text-white/50 leading-snug uppercase tracking-wider">
                     {stat.label}
                   </p>
-                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] opacity-0 transition-opacity group-hover:opacity-100" />
-                </motion.div>
-              );
-            })}
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
@@ -332,69 +360,83 @@ export default function LandingPage() {
         footerNote="Note de 4.7/5 sur 289 avis."
       />
 
-      {/* QUI SOMMES NOUS */}
-      <section className="relative z-10 py-12 md:py-20 bg-[#F8F8FC] border-t border-gray-100">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 md:mb-12">
-            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] text-[#6366F1] mb-2 md:mb-3">
-              Qui sommes-nous
-            </p>
-            <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-3">
-              Construire l&apos;infrastructure de <span className="text-[#6366F1]">croissance de l&apos;Afrique</span>
-            </h2>
-          </motion.div>
+      {/* ═══════════════════════════════════════════════ */}
+      {/* QUI SOMMES NOUS — STACKING GLASSMORPHISM 3D */}
+      {/* ═══════════════════════════════════════════════ */}
+      <section className="relative z-10 py-16 md:py-24 bg-gradient-to-b from-[#F8F8FC] via-white to-[#F8F8FC] overflow-hidden">
+        {/* Halos décoratifs en fond */}
+        <div className="absolute top-40 -left-40 h-96 w-96 rounded-full bg-[#6366F1]/10 blur-[130px]" />
+        <div className="absolute bottom-40 -right-40 h-96 w-96 rounded-full bg-[#8B5CF6]/10 blur-[130px]" />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              className="rounded-2xl border border-slate-200 bg-white p-5 md:p-7"
-            >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
-                <Target className="h-5 w-5" />
-              </div>
-              <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
-                Notre mission
-              </h3>
-              <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
-                MakeItAds a été fondé avec une conviction profonde : les entrepreneurs africains méritent les mêmes outils d&apos;intelligence marketing que les entreprises des grandes capitales mondiales. Nous construisons une infrastructure technologique adaptée aux réalités locales — WhatsApp, Mobile Money, budgets modestes — pour transformer chaque entrepreneur en stratège armé.
-              </p>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
-              className="rounded-2xl border border-slate-200 bg-white p-5 md:p-7"
-            >
-              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
-                <Globe className="h-5 w-5" />
-              </div>
-              <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
-                Notre vision
-              </h3>
-              <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
-                Devenir la plateforme de référence en acquisition client pour l&apos;Afrique francophone. Nous croyons que la croissance d&apos;une entreprise ne doit pas dépendre du génie d&apos;un seul individu, mais de la fiabilité d&apos;un système reproductible. C&apos;est cette rigueur méthodologique que nous mettons à la portée de chaque entrepreneur, du Sénégal au Cameroun, de la Côte d&apos;Ivoire à la RDC.
-              </p>
-            </motion.div>
-          </div>
-
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="mt-4 md:mt-6 rounded-2xl border border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/60 to-white p-5 md:p-7"
+            className="text-left mb-12 md:mb-20"
           >
-            <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
-              Notre engagement
-            </h3>
-            <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
-              Nous ne vendons pas de la publicité. Nous construisons l&apos;infrastructure qui permet à chaque entrepreneur africain de prendre des décisions éclairées, armé de données, de méthode et d&apos;intelligence. Chaque stratégie que nous générons est calibrée pour un objectif unique : transformer les efforts marketing en résultats mesurables.
+            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
+              Qui sommes-nous
+            </p>
+            <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-3 max-w-3xl">
+              Construire l&apos;infrastructure de<br />
+              <span className="text-[#6366F1]">croissance de l&apos;Afrique</span>
+            </h2>
+            <p className="text-xs md:text-sm text-[#71717A] leading-relaxed max-w-2xl">
+              Découvrez notre mission, notre vision et l&apos;engagement qui guide
+              chaque ligne de code que nous écrivons.
             </p>
           </motion.div>
+
+          {/* STACKING CARDS */}
+          <div className="relative">
+            {aboutBlocks.map((block, index) => (
+              <div
+                key={index}
+                className="sticky"
+                style={{ top: `${100 + index * 24}px` }}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 60 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: false, amount: 0.3 }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="relative mb-8 overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-6 md:p-10 backdrop-blur-2xl"
+                  style={{
+                    boxShadow:
+                      "0 8px 32px rgba(99,102,241,0.10), 0 1px 0 rgba(255,255,255,0.8) inset, 0 -1px 0 rgba(99,102,241,0.06) inset",
+                  }}
+                >
+                  {/* Effet 3D glassmorphism : reflets */}
+                  <div className="pointer-events-none absolute -top-20 -right-20 h-60 w-60 rounded-full bg-gradient-to-br from-white/60 to-transparent blur-2xl" />
+                  <div className="pointer-events-none absolute -bottom-20 -left-20 h-60 w-60 rounded-full bg-gradient-to-tr from-[#6366F1]/10 to-transparent blur-2xl" />
+
+                  {/* Bord lumineux */}
+                  <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/40 via-transparent to-white/10" />
+
+                  <div className="relative">
+                    {/* Badge numéro */}
+                    <div className="mb-4 flex items-center gap-3">
+                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-[11px] font-bold text-white shadow-md shadow-[#6366F1]/30">
+                        {block.badge}
+                      </span>
+                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6366F1]">
+                        MakeItAds
+                      </span>
+                    </div>
+
+                    <h3 className="mb-3 text-lg md:text-2xl font-semibold text-[#18181B] leading-tight">
+                      {block.title}
+                    </h3>
+
+                    <p className="text-xs md:text-sm leading-relaxed text-[#475569] max-w-3xl">
+                      {block.text}
+                    </p>
+                  </div>
+                </motion.div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
