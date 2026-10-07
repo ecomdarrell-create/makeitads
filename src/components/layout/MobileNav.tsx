@@ -2,7 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, PlusCircle, Layers, Coins, User, BadgeDollarSign } from 'lucide-react';
+import {
+  LayoutDashboard,
+  PlusCircle,
+  Layers,
+  Coins,
+  User,
+  BadgeDollarSign,
+} from 'lucide-react';
 
 const mobileNavItems = [
   { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
@@ -17,23 +24,54 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 z-40">
-      <div className="flex items-center justify-around h-14">
-        {mobileNavItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex flex-col items-center justify-center w-full h-full gap-0.5 transition-colors ${
-                isActive ? 'text-[#6366F1]' : 'text-gray-400'
-              }`}
-            >
-              <item.icon className={`w-4 h-4 ${isActive ? 'stroke-[2.5px]' : 'stroke-2'}`} />
-              <span className="text-[9px] font-medium">{item.name}</span>
-            </Link>
-          );
-        })}
+    <nav
+      className="md:hidden fixed left-3 right-3 z-40"
+      style={{
+        bottom: 'max(12px, env(safe-area-inset-bottom))',
+      }}
+      aria-label="Navigation principale"
+    >
+      <div className="rounded-full border border-gray-100 bg-white/95 px-2 py-1.5 shadow-[0_8px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl">
+        <div className="flex items-center justify-around">
+          {mobileNavItems.map((item) => {
+            const isActive =
+              pathname === item.href ||
+              (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
+            const Icon = item.icon;
+
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                aria-label={item.name}
+                className={`relative flex flex-col items-center justify-center gap-0.5 rounded-full px-2.5 py-1.5 transition-all duration-200 ${
+                  isActive
+                    ? 'text-[#6366F1]'
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                <Icon
+                  className={`h-4 w-4 transition-all ${
+                    isActive ? 'stroke-[2.5px]' : 'stroke-2'
+                  }`}
+                />
+                <span
+                  className={`text-[9px] leading-none ${
+                    isActive ? 'font-semibold' : 'font-medium'
+                  }`}
+                >
+                  {item.name}
+                </span>
+
+                {/* Point actif sous l'icône */}
+                {isActive && (
+                  <span className="absolute -bottom-0.5 h-0.5 w-4 rounded-full bg-[#6366F1]" />
+                )}
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </nav>
   );

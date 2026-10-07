@@ -2,9 +2,6 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
-// ═══════════════════════════════════════════════════════════
-// ✅ FONTS - Inter avec optimisations
-// ═══════════════════════════════════════════════════════════
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -13,9 +10,6 @@ const inter = Inter({
   preload: true,
 });
 
-// ═══════════════════════════════════════════════════════════
-// ✅ METADATA SEO & OPEN GRAPH (Adapté pour l'Afrique Francophone)
-// ═══════════════════════════════════════════════════════════
 export const metadata: Metadata = {
   title: {
     default: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
@@ -39,7 +33,7 @@ export const metadata: Metadata = {
     description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain. Sans abonnement.",
     images: [
       {
-        url: "/images/og-image.png", 
+        url: "/images/og-image.png",
         width: 1200,
         height: 630,
         alt: "MakeItAds Dashboard - Stratégie Marketing IA",
@@ -94,21 +88,19 @@ export const metadata: Metadata = {
 };
 
 // ═══════════════════════════════════════════════════════════
-// ✅ VIEWPORT - Optimisations Mobile-First (Thème Clair Forcé)
+// VIEWPORT — Renforcé pour mobile
 // ═══════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  minimumScale: 1,
   maximumScale: 5,
   userScalable: true,
   viewportFit: "cover",
-  themeColor: "#FFFFFF", // ✅ Blanc pur pour la barre d'adresse mobile
-  colorScheme: "light", // ✅ FORCE le mode clair au niveau du navigateur
+  themeColor: "#FFFFFF",
+  colorScheme: "light",
 };
 
-// ═══════════════════════════════════════════════════════════
-// ✅ STRUCTURED DATA (JSON-LD)
-// ═══════════════════════════════════════════════════════════
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
@@ -117,9 +109,7 @@ const jsonLd = {
       "name": "MakeItAds",
       "url": "https://makeitads.pro",
       "logo": "https://makeitads.pro/favicon.ico",
-      "sameAs": [
-        "https://t.me/MakeitAds_CEO"
-      ]
+      "sameAs": ["https://t.me/MakeItAds_CEO"]
     },
     {
       "@type": "SoftwareApplication",
@@ -144,26 +134,21 @@ const jsonLd = {
         "name": "MakeItAds"
       },
       "url": "https://www.linkedin.com/in/darrell-kamga-547b24275",
-      "sameAs": [
-        "https://www.linkedin.com/in/darrell-kamga-547b24275"
-      ]
+      "sameAs": ["https://www.linkedin.com/in/darrell-kamga-547b24275"]
     }
   ]
 };
 
-// ═══════════════════════════════════════════════════════════
-// ✅ ROOT LAYOUT
-// ═══════════════════════════════════════════════════════════
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   return (
-    <html 
-      lang="fr" 
+    <html
+      lang="fr"
       className={`${inter.variable} antialiased`}
-      style={{ colorScheme: "light" }} // ✅ Force le mode clair au niveau HTML
+      style={{ colorScheme: "light" }}
       suppressHydrationWarning
     >
       <head>
@@ -175,17 +160,20 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
-      
-      <body 
-        className={`${inter.className} bg-white dark:bg-white text-[#111827] min-h-screen overflow-x-hidden`}
+
+      <body
+        className={`${inter.className} bg-white text-[#111827] min-h-screen overflow-x-hidden antialiased`}
         suppressHydrationWarning
       >
-        <div id="app-root" className="relative min-h-screen bg-white dark:bg-white">
+        <div
+          id="app-root"
+          className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-white"
+        >
           {children}
         </div>
 
-        <div 
-          id="portal-root" 
+        <div
+          id="portal-root"
           className="fixed inset-0 z-[9999] pointer-events-none"
           aria-hidden="true"
         />

@@ -28,7 +28,9 @@ export default function GeneratePage() {
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [showSummary, setShowSummary] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [creditsBalance, setCreditsBalance] = useState(0);
+
+  // ⚠️ null = pas encore chargé (évite le flash "0 crédits")
+  const [creditsBalance, setCreditsBalance] = useState<number | null>(null);
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('flash');
   const [supabaseError, setSupabaseError] = useState('');
@@ -41,13 +43,17 @@ export default function GeneratePage() {
   const generationCost = strategyType === 'complete' ? 5 : 1;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
 
+  // ─── Le solde réel est-il chargé ? ───
+  const creditsLoaded = creditsBalance !== null;
+  const safeBalance = creditsBalance ?? 0;
+
   const creditsPercent =
     planCreditsCap > 0
-      ? Math.min(100, Math.round((creditsBalance / planCreditsCap) * 100))
+      ? Math.min(100, Math.round((safeBalance / planCreditsCap) * 100))
       : 0;
 
   const alertLevel: 'normal' | 'attention' | 'critical' | 'exhausted' =
-    creditsBalance === 0
+    safeBalance === 0
       ? 'exhausted'
       : creditsPercent < 20
         ? 'critical'
@@ -91,11 +97,14 @@ export default function GeneratePage() {
       if (!profile) {
         const bootstrapResponse = await fetch('/api/profile/bootstrap', { method: 'POST' });
         if (!bootstrapResponse.ok) throw new Error('Initialisation du profil impossible.');
+        // Relancer récursivement
+        setRefreshingCredits(false);
         await loadCreditsBalance();
         return;
       }
 
-      setCreditsBalance(profile.credits_balance || 0);
+      // ✅ On met le solde à jour en une seule fois
+      setCreditsBalance(profile.credits_balance ?? 0);
       setCurrentPlan(normalizePlanId(profile.plan));
       setSupabaseError('');
     } catch (error) {
@@ -232,19 +241,16 @@ export default function GeneratePage() {
       const data = await response.json();
 
       if (response.ok) {
-        // ✅ Succès : on vide le draft et on redirige
         localStorage.removeItem(DRAFT_KEY);
         setHasDraft(false);
         router.push(`/dashboard/strategies/${data.strategyId}`);
       } else {
-        // ✅ On affiche le VRAI message du backend (pas un message générique)
         let errorMsg = data.error || 'Erreur lors de la génération';
 
         if (errorMsg.toLowerCase().includes('clé api') || errorMsg.toLowerCase().includes('deepseek')) {
           errorMsg = 'Erreur de configuration de l\'IA. Veuillez contacter le support technique.';
         }
 
-        // Ajoute les valeurs de crédits pour comprendre
         if (data.creditsBalance !== undefined && data.creditCost !== undefined) {
           errorMsg += `\n\nSolde actuel : ${data.creditsBalance} crédits\nCoût : ${data.creditCost} crédits`;
         }
@@ -252,7 +258,6 @@ export default function GeneratePage() {
         alert(errorMsg);
         setIsGenerating(false);
 
-        // ✅ Recharger le vrai solde après l'erreur
         await loadCreditsBalance();
       }
     } catch (error) {
@@ -272,7 +277,7 @@ export default function GeneratePage() {
       return (
         <Summary
           formData={formData}
-          creditsBalance={creditsBalance}
+          creditsBalance={safeBalance}
           generationCost={generationCost}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
@@ -316,7 +321,11 @@ export default function GeneratePage() {
             type="button"
             onClick={loadCreditsBalance}
             disabled={refreshingCredits}
-            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${badgeStyle} ${refreshingCredits ? 'opacity-60' : 'hover:opacity-90'}`}
+            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${
+              creditsLoaded
+                ? badgeStyle
+                : 'border-slate-200 bg-slate-50 text-slate-500'
+            } ${refreshingCredits ? 'opacity-60' : 'hover:opacity-90'}`}
             title="Cliquer pour rafraîchir le solde"
           >
             {refreshingCredits ? (
@@ -324,15 +333,17 @@ export default function GeneratePage() {
             ) : (
               <Wallet className="h-3.5 w-3.5" />
             )}
-            <span className="text-[11px] font-bold">{creditsBalance}</span>
+            <span className="text-[11px] font-bold">
+              {creditsLoaded ? safeBalance : '—'}
+            </span>
             <span className="text-[10px] opacity-80">
-              crédit{creditsBalance > 1 ? 's' : ''}
+              {creditsLoaded && safeBalance > 1 ? 'crédits' : 'crédit'}
             </span>
           </button>
         </div>
 
-        {/* BANDEAU D'ALERTE CRÉDITS */}
-        {!isGenerating && !showSummary && alertLevel !== 'normal' && (
+        {/* BANDEAU D'ALERTE CRÉDITS — uniquement si chargé ET solde bas */}
+        {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
           <div
             className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
               alertLevel === 'exhausted'
@@ -356,7 +367,7 @@ export default function GeneratePage() {
               >
                 {alertLevel === 'exhausted' && 'Vous avez épuisé vos crédits ce mois-ci'}
                 {alertLevel === 'critical' &&
-                  `Il vous reste seulement ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''}`}
+                  `Il vous reste seulement ${safeBalance} crédit${safeBalance > 1 ? 's' : ''}`}
                 {alertLevel === 'attention' && 'Vous approchez de la fin de vos crédits'}
               </p>
               <p
@@ -406,7 +417,7 @@ export default function GeneratePage() {
         )}
 
         {/* SÉLECTION DU TYPE DE STRATÉGIE */}
-        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
+        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
@@ -459,7 +470,7 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
+        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />
         )}
 
@@ -467,7 +478,7 @@ export default function GeneratePage() {
           {renderStep()}
         </div>
 
-        {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
+        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="flex items-center justify-between gap-3">
             <button
               onClick={handlePrevious}

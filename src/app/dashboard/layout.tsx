@@ -19,12 +19,13 @@ export default async function DashboardLayout({
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
       <Navbar />
+
       {/* Sidebar Desktop */}
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="md:pl-64 pt-16 pb-20 md:pb-0 min-h-screen">
-        {/* pb-20 sur mobile pour ne pas cacher le contenu derrière la MobileNav */}
+      {/* pb-28 sur mobile pour laisser respirer la MobileNav flottante */}
+      <main className="md:pl-64 pt-16 pb-28 md:pb-0 min-h-screen">
         {children}
         <div className="md:pl-0">
           <GlobalFooter />
@@ -33,7 +34,8 @@ export default async function DashboardLayout({
 
       {/* Mobile Bottom Navigation */}
       <MobileNav />
+
       <SaaSChatbot dashboard />
     </div>
-);
+  );
 }
