@@ -2,13 +2,25 @@
 
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
-import { useEffect } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 
 export default function HeroSection() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [videoLoaded, setVideoLoaded] = useState(false);
+
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
+
+  // Force la lecture de la vidéo après montage (contournement iOS)
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    video.play().catch(() => {
+      // Si l'autoplay est bloqué, le poster reste affiché
+    });
   }, []);
 
   const heroTitle = (
@@ -27,6 +39,7 @@ export default function HeroSection() {
 
   return (
     <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
+      {/* Fond décoratif */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/5 rounded-full blur-[150px]" />
         <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
@@ -64,33 +77,71 @@ export default function HeroSection() {
             l&apos;Afrique.
           </motion.p>
 
-          {/* Image hero */}
+          {/* Vidéo hero avec crop du haut */}
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
             className="relative w-full mb-8 md:mb-10"
           >
+            {/* Halos décoratifs */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[70%] bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-transparent blur-[100px] rounded-full -z-10" />
+
             <div className="relative">
+              {/* Ombres sous la vidéo */}
               <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-20 bg-[#0F172A]/10 blur-[40px] rounded-full" />
               <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-12 bg-[#6366f1]/10 blur-[30px] rounded-full" />
-              <Image
-                src="/images/couv-X.png"
-                alt="MakeItAds Dashboard"
-                width={1400}
-                height={900}
-                priority
-                className="w-full h-auto object-contain relative z-10"
+
+              {/* Conteneur vidéo avec aspect ratio (crop du haut) */}
+              <div
+                className="relative z-10 overflow-hidden rounded-2xl md:rounded-3xl bg-[#0A0A0B]"
                 style={{
-                  filter:
-                    "drop-shadow(0 25px 50px rgba(15, 23, 42, 0.15)) drop-shadow(0 10px 20px rgba(99, 102, 241, 0.1))",
+                  aspectRatio: "1920 / 940",
+                  boxShadow:
+                    "0 25px 50px rgba(15, 23, 42, 0.15), 0 10px 20px rgba(99, 102, 241, 0.1)",
                 }}
-              />
+              >
+                {/* Poster (avant chargement de la vidéo) */}
+                {!videoLoaded && (
+                  <img
+                    src="/images/couv-X.png"
+                    alt="MakeItAds Dashboard"
+                    className="absolute inset-0 w-full h-full object-cover object-bottom"
+                  />
+                )}
+
+                {/* Vidéo */}
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  poster="/images/couv-X.png"
+                  onLoadedData={() => setVideoLoaded(true)}
+                  className={`absolute inset-0 w-full h-full object-cover object-bottom transition-opacity duration-500 ${
+                    videoLoaded ? "opacity-100" : "opacity-0"
+                  }`}
+                >
+                  <source src="/images/video/hero-demo.mp4" type="video/mp4" />
+                </video>
+
+                {/* Badge "Démo en direct" */}
+                <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 backdrop-blur-md">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-75" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500" />
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-wider text-white">
+                    Démo en direct
+                  </span>
+                </div>
+              </div>
             </div>
           </motion.div>
 
-          {/* Boutons CTA — version fine et épurée */}
+          {/* Boutons CTA */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
