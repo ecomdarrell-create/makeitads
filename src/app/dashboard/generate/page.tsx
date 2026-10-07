@@ -3,12 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Wallet, AlertTriangle, AlertCircle, ArrowRight } from 'lucide-react';
+import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
-import { PlanId, hasFeature, normalizePlanId } from '@/config/pricing.config';
-import { PRICING_CONFIG } from '@/config/pricing.config';
+import { PlanId, hasFeature, normalizePlanId, PRICING_CONFIG } from '@/config/pricing.config';
 import { Step1Company } from '@/components/generate/steps/Step1Company';
 import { Step2Offer } from '@/components/generate/steps/Step2Offer';
 import { Step3Audience } from '@/components/generate/steps/Step3Audience';
@@ -21,6 +20,8 @@ import { Summary } from '@/components/generate/Summary';
 import { LoadingGeneration } from '@/components/generate/LoadingGeneration';
 import { BackButton } from '@/components/ui/BackButton';
 
+const DRAFT_KEY = 'makeitads_draft';
+
 export default function GeneratePage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -31,22 +32,20 @@ export default function GeneratePage() {
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('flash');
   const [supabaseError, setSupabaseError] = useState('');
+  const [hasDraft, setHasDraft] = useState(false);
+  const [refreshingCredits, setRefreshingCredits] = useState(false);
 
   const totalSteps = 8;
   const completeGenerationAllowed = hasFeature(currentPlan, 'pro');
 
-  // ─── Coût de génération ───
   const generationCost = strategyType === 'complete' ? 5 : 1;
-
-  // ─── Crédits mensuels du plan (plafond) ───
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
 
-  // ─── Pourcentage de crédits restants ───
-  const creditsPercent = planCreditsCap > 0
-    ? Math.min(100, Math.round((creditsBalance / planCreditsCap) * 100))
-    : 0;
+  const creditsPercent =
+    planCreditsCap > 0
+      ? Math.min(100, Math.round((creditsBalance / planCreditsCap) * 100))
+      : 0;
 
-  // ─── Niveau d'alerte ───
   const alertLevel: 'normal' | 'attention' | 'critical' | 'exhausted' =
     creditsBalance === 0
       ? 'exhausted'
@@ -56,7 +55,6 @@ export default function GeneratePage() {
           ? 'attention'
           : 'normal';
 
-  // ─── Couleurs selon le niveau ───
   const badgeStyle = {
     normal: 'border-emerald-200 bg-emerald-50 text-emerald-700',
     attention: 'border-amber-200 bg-amber-50 text-amber-700',
@@ -64,15 +62,14 @@ export default function GeneratePage() {
     exhausted: 'border-red-300 bg-red-100 text-red-800',
   }[alertLevel];
 
-  // ─── Chargement des crédits ───
+  // ─── Charger les crédits ───
   const loadCreditsBalance = async () => {
+    setRefreshingCredits(true);
     try {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-      if (authError) {
-        throw new Error(`Authentification Supabase: ${authError.message}`);
-      }
+      if (authError) throw new Error(`Authentification Supabase: ${authError.message}`);
 
       if (!user) {
         setSupabaseError('Aucune session utilisateur active. Reconnectez-vous puis réessayez.');
@@ -93,27 +90,14 @@ export default function GeneratePage() {
 
       if (!profile) {
         const bootstrapResponse = await fetch('/api/profile/bootstrap', { method: 'POST' });
-        if (!bootstrapResponse.ok) {
-          throw new Error('Initialisation du profil impossible.');
-        }
-
-        const { data: createdProfile, error: createdProfileError } = await supabase
-          .from('profiles')
-          .select('credits_balance, plan')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (createdProfileError || !createdProfile) {
-          throw new Error(createdProfileError?.message || 'Le profil n’a pas pu être initialisé.');
-        }
-
-        setCreditsBalance(createdProfile.credits_balance || 0);
-        setCurrentPlan(normalizePlanId(createdProfile.plan));
+        if (!bootstrapResponse.ok) throw new Error('Initialisation du profil impossible.');
+        await loadCreditsBalance();
         return;
       }
 
       setCreditsBalance(profile.credits_balance || 0);
       setCurrentPlan(normalizePlanId(profile.plan));
+      setSupabaseError('');
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Erreur connexion Supabase:', message);
@@ -122,16 +106,27 @@ export default function GeneratePage() {
           ? 'Configuration Supabase absente au runtime.'
           : `Connexion Supabase impossible : ${message}`
       );
+    } finally {
+      setRefreshingCredits(false);
     }
   };
 
+  // ─── Chargement initial ───
   useEffect(() => {
-    const savedDraft = localStorage.getItem('makeitads_draft');
+    const savedDraft = localStorage.getItem(DRAFT_KEY);
     if (savedDraft) {
       try {
-        setFormData(JSON.parse(savedDraft));
+        const parsed = JSON.parse(savedDraft);
+        const hasContent = Object.values(parsed).some((v) => v && v !== '' && v !== 0);
+        if (hasContent) {
+          setFormData(parsed);
+          setHasDraft(true);
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
       } catch (error) {
         console.error('Erreur chargement brouillon:', error);
+        localStorage.removeItem(DRAFT_KEY);
       }
     }
     loadCreditsBalance();
@@ -143,11 +138,22 @@ export default function GeneratePage() {
     return () => window.removeEventListener('summary-back', handleBack);
   }, []);
 
+  // ─── Autosave du draft ───
   useEffect(() => {
     if (currentStep <= totalSteps) {
-      localStorage.setItem('makeitads_draft', JSON.stringify(formData));
+      localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
     }
   }, [formData, currentStep]);
+
+  // ─── Réinitialiser le brouillon ───
+  const resetDraft = () => {
+    if (!confirm('Effacer toutes les informations déjà saisies ?')) return;
+    localStorage.removeItem(DRAFT_KEY);
+    setFormData(initialFormData);
+    setCurrentStep(1);
+    setShowSummary(false);
+    setHasDraft(false);
+  };
 
   const validateStep = (step: number): boolean => {
     if (step === 1) {
@@ -177,11 +183,8 @@ export default function GeneratePage() {
 
   const handleNext = () => {
     if (!validateStep(currentStep)) return;
-    if (currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setShowSummary(true);
-    }
+    if (currentStep < totalSteps) setCurrentStep(currentStep + 1);
+    else setShowSummary(true);
   };
 
   const handlePrevious = () => {
@@ -223,27 +226,34 @@ export default function GeneratePage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: user.id,
-          strategyType,
-          formData: cleanFormData,
-        }),
+        body: JSON.stringify({ userId: user.id, strategyType, formData: cleanFormData }),
       });
 
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.removeItem('makeitads_draft');
+        // ✅ Succès : on vide le draft et on redirige
+        localStorage.removeItem(DRAFT_KEY);
+        setHasDraft(false);
         router.push(`/dashboard/strategies/${data.strategyId}`);
       } else {
+        // ✅ On affiche le VRAI message du backend (pas un message générique)
         let errorMsg = data.error || 'Erreur lors de la génération';
+
         if (errorMsg.toLowerCase().includes('clé api') || errorMsg.toLowerCase().includes('deepseek')) {
           errorMsg = 'Erreur de configuration de l\'IA. Veuillez contacter le support technique.';
-        } else if (errorMsg.toLowerCase().includes('crédits')) {
-          errorMsg = 'Crédits insuffisants. Veuillez recharger votre compte.';
         }
+
+        // Ajoute les valeurs de crédits pour comprendre
+        if (data.creditsBalance !== undefined && data.creditCost !== undefined) {
+          errorMsg += `\n\nSolde actuel : ${data.creditsBalance} crédits\nCoût : ${data.creditCost} crédits`;
+        }
+
         alert(errorMsg);
         setIsGenerating(false);
+
+        // ✅ Recharger le vrai solde après l'erreur
+        await loadCreditsBalance();
       }
     } catch (error) {
       console.error('Erreur:', error);
@@ -287,42 +297,41 @@ export default function GeneratePage() {
       <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 sm:py-6">
         <BackButton href="/dashboard" label="Retour au dashboard" />
 
-        {/* ═══════════════════════════════════════ */}
         {/* HEADER + BADGE CRÉDITS */}
-        {/* ═══════════════════════════════════════ */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-semibold text-[#111827] sm:text-xl">
-              {isGenerating
-                ? 'Génération en cours'
-                : showSummary
-                  ? 'Résumé de votre stratégie'
-                  : 'Nouvelle stratégie'}
+              {isGenerating ? 'Génération en cours' : showSummary ? 'Résumé' : 'Nouvelle stratégie'}
             </h1>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
               {isGenerating
                 ? 'Veuillez patienter pendant que notre moteur analyse vos données.'
                 : showSummary
                   ? 'Vérifiez les informations avant de lancer la génération.'
-                  : 'Construisez une stratégie publicitaire adaptée à votre entreprise, votre marché et vos objectifs.'}
+                  : 'Construisez une stratégie adaptée à votre entreprise, votre marché et vos objectifs.'}
             </p>
           </div>
 
-          {/* Badge crédits coloré */}
-          <div
-            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${badgeStyle}`}
+          <button
+            type="button"
+            onClick={loadCreditsBalance}
+            disabled={refreshingCredits}
+            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${badgeStyle} ${refreshingCredits ? 'opacity-60' : 'hover:opacity-90'}`}
+            title="Cliquer pour rafraîchir le solde"
           >
-            <Wallet className="h-3.5 w-3.5" />
+            {refreshingCredits ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Wallet className="h-3.5 w-3.5" />
+            )}
             <span className="text-[11px] font-bold">{creditsBalance}</span>
             <span className="text-[10px] opacity-80">
               crédit{creditsBalance > 1 ? 's' : ''}
             </span>
-          </div>
+          </button>
         </div>
 
-        {/* ═══════════════════════════════════════ */}
         {/* BANDEAU D'ALERTE CRÉDITS */}
-        {/* ═══════════════════════════════════════ */}
         {!isGenerating && !showSummary && alertLevel !== 'normal' && (
           <div
             className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
@@ -346,8 +355,9 @@ export default function GeneratePage() {
                 }`}
               >
                 {alertLevel === 'exhausted' && 'Vous avez épuisé vos crédits ce mois-ci'}
-                {alertLevel === 'critical' && `Il vous reste seulement ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''}`}
-                {alertLevel === 'attention' && `Vous approchez de la fin de vos crédits`}
+                {alertLevel === 'critical' &&
+                  `Il vous reste seulement ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''}`}
+                {alertLevel === 'attention' && 'Vous approchez de la fin de vos crédits'}
               </p>
               <p
                 className={`mt-0.5 text-[11px] leading-relaxed ${
@@ -355,8 +365,8 @@ export default function GeneratePage() {
                 }`}
               >
                 {alertLevel === 'exhausted'
-                  ? 'Passez à un plan supérieur pour continuer à générer des stratégies dès maintenant, ou attendez le renouvellement mensuel.'
-                  : `Il vous reste ${creditsPercent}% de vos crédits mensuels. Pensez à passer au plan supérieur pour éviter l'interruption.`}
+                  ? 'Passez à un plan supérieur ou attendez le renouvellement mensuel.'
+                  : `Il vous reste ${creditsPercent}% de vos crédits mensuels.`}
               </p>
 
               {(alertLevel === 'exhausted' || alertLevel === 'critical') && (
@@ -372,16 +382,30 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* Erreur Supabase */}
+        {/* BANDEAU BROUILLON */}
+        {hasDraft && !showSummary && !isGenerating && (
+          <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5">
+            <p className="text-[11px] text-indigo-900">
+              Vous avez un brouillon en cours. Voulez-vous repartir de zéro ?
+            </p>
+            <button
+              type="button"
+              onClick={resetDraft}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-50"
+            >
+              <RotateCcw className="h-3 w-3" />
+              Réinitialiser
+            </button>
+          </div>
+        )}
+
         {supabaseError && (
           <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
             {supabaseError}
           </div>
         )}
 
-        {/* ═══════════════════════════════════════ */}
         {/* SÉLECTION DU TYPE DE STRATÉGIE */}
-        {/* ═══════════════════════════════════════ */}
         {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -389,9 +413,7 @@ export default function GeneratePage() {
                 <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
                   Type de stratégie
                 </p>
-                <h2 className="text-sm font-semibold text-[#111827]">
-                  Choisissez votre mode de génération
-                </h2>
+                <h2 className="text-sm font-semibold text-[#111827]">Mode de génération</h2>
               </div>
               <span className="rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-[#6366F1]">
                 {currentPlan}
@@ -431,24 +453,20 @@ export default function GeneratePage() {
                 La stratégie complète est réservée au plan Pro.{' '}
                 <Link href="/dashboard/pricing" className="font-semibold underline">
                   Passer au plan adapté
-                </Link>{' '}
-                pour débloquer cette option.
+                </Link>
               </div>
             )}
           </div>
         )}
 
-        {/* Progression */}
         {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />
         )}
 
-        {/* Contenu */}
         <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
           {renderStep()}
         </div>
 
-        {/* Navigation */}
         {!showSummary && !isGenerating && alertLevel !== 'exhausted' && (
           <div className="flex items-center justify-between gap-3">
             <button
