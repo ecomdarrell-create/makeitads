@@ -3,10 +3,9 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronDown, ArrowUp } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, ArrowUp, Target, Users, Globe, Zap, TrendingUp } from "lucide-react";
 import { useState, Fragment, useEffect } from "react";
 import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
-import { formatPlanPrice, type Currency } from "@/lib/currency";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
@@ -35,80 +34,34 @@ const partnerLogos = [
 ];
 
 const howItWorksSteps = [
-  {
-    number: "01",
-    title: "Créez votre compte",
-    description: "Inscrivez-vous gratuitement et accédez immédiatement à votre espace personnel sécurisé.",
-    image: "/images/process/step-1-signup.jpg",
-  },
-  {
-    number: "02",
-    title: "Décrivez votre business",
-    description: "Notre wizard intelligent vous guide à travers 8 questions clés sur votre entreprise.",
-    image: "/images/process/step-2-wizard.jpg",
-  },
-  {
-    number: "03",
-    title: "Recevez votre stratégie",
-    description: "Obtenez une stratégie détaillée avec scripts WhatsApp et allocation budgétaire.",
-    image: "/images/process/step-4-growth.jpg",
-  },
-  {
-    number: "04",
-    title: "Lancez et scalez",
-    description: "Appliquez les recommandations et regardez votre business se développer.",
-    image: "/images/process/step-3-strategy.jpg",
-  },
+  { number: "01", title: "Créez votre compte", description: "Inscrivez-vous gratuitement et accédez immédiatement à votre espace personnel sécurisé.", image: "/images/process/step-1-signup.jpg" },
+  { number: "02", title: "Décrivez votre business", description: "Notre wizard intelligent vous guide à travers 8 questions clés sur votre entreprise.", image: "/images/process/step-2-wizard.jpg" },
+  { number: "03", title: "Recevez votre stratégie", description: "Obtenez une stratégie détaillée avec scripts WhatsApp et allocation budgétaire.", image: "/images/process/step-4-growth.jpg" },
+  { number: "04", title: "Lancez et scalez", description: "Appliquez les recommandations et regardez votre business se développer.", image: "/images/process/step-3-strategy.jpg" },
 ];
 
 const faqData = [
-  {
-    question: "Comment obtenir mon analyse ?",
-    answer: "Cliquez sur 'Voir les tarifs' pour accéder au Dashboard. Un expert analysera votre cas sous 24 à 48h.",
-  },
-  {
-    question: "La stratégie gratuite est-elle vraiment gratuite ?",
-    answer: "Oui, à 100%. C'est notre façon de vous prouver notre qualité avant tout investissement.",
-  },
-  {
-    question: "Que se passe-t-il si mes crédits sont épuisés ?",
-    answer: "Vous pouvez soit attendre le renouvellement mensuel, soit recharger via des packs de crédits supplémentaires.",
-  },
-  {
-    question: "Le paiement est-il sécurisé ?",
-    answer: "Absolument. Nous acceptons le Mobile Money (Orange, Wave, MTN, Moov) et les cartes bancaires.",
-  },
-  {
-    question: "Puis-je annuler mon abonnement ?",
-    answer: "Oui, à tout moment sans frais cachés. Nous croyons en la rétention par la qualité.",
-  },
-  {
-    question: "Est-ce adapté au marché africain ?",
-    answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux.",
-  },
+  { question: "Comment obtenir mon analyse ?", answer: "Cliquez sur 'Voir les tarifs' pour accéder au Dashboard. Un expert analysera votre cas sous 24 à 48h." },
+  { question: "La stratégie gratuite est-elle vraiment gratuite ?", answer: "Oui, à 100%. C'est notre façon de vous prouver notre qualité avant tout investissement." },
+  { question: "Que se passe-t-il si mes crédits sont épuisés ?", answer: "Vous pouvez soit attendre le renouvellement mensuel, soit recharger via des packs de crédits supplémentaires." },
+  { question: "Le paiement est-il sécurisé ?", answer: "Absolument. Nous acceptons le Mobile Money (Orange, Wave, MTN, Moov) et les cartes bancaires." },
+  { question: "Puis-je annuler mon abonnement ?", answer: "Oui, à tout moment sans frais cachés. Nous croyons en la rétention par la qualité." },
+  { question: "Est-ce adapté au marché africain ?", answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux." },
 ];
 
-const defaultCurrency: Currency = "XOF";
-
 // ==========================================
-// NOUVELLE CONFIGURATION DES PLANS (alignée)
+// NOUVELLE CONFIGURATION DES PLANS
 // ==========================================
 const pricingPlans = [
   {
     id: "demo",
     name: "MakeItAds Démo",
     price: "0 FCFA",
-    features: [
-      "10 crédits de bienvenue (offre unique)",
-      "2 Diagnostics Flash",
-      "Aperçu rapide de votre activité",
-      "Support communautaire",
-    ],
+    features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"],
     popular: false,
     ctaText: "Commencer",
     link: "/dashboard",
     checkColor: "text-emerald-500",
-    bgCheck: "bg-emerald-500/10",
     ctaBg: "bg-emerald-500",
     ctaHover: "hover:bg-emerald-600",
     ctaTextCol: "text-white",
@@ -120,21 +73,11 @@ const pricingPlans = [
     name: "MakeItAds Pro",
     price: "10 000 FCFA/an",
     durationNote: "12 mois d'accès",
-    features: [
-      "50 crédits renouvelés chaque mois",
-      "5 Stratégies Complètes / mois",
-      "12 sections détaillées",
-      "Scripts WhatsApp prêts à l'emploi",
-      "Allocation budgétaire sur 7 jours",
-      "Ciblage précis par ville",
-      "Guide créatif",
-      "Support email (48h)",
-    ],
+    features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"],
     popular: true,
     ctaText: "Choisir le Plan Pro",
     link: "https://makeitads.mychariow.com/plan-pro",
     checkColor: "text-[#6366F1]",
-    bgCheck: "bg-[#6366F1]/10",
     ctaBg: "bg-[#6366F1]",
     ctaHover: "hover:bg-[#5558e6]",
     ctaTextCol: "text-white",
@@ -146,21 +89,11 @@ const pricingPlans = [
     name: "MakeItAds Premium",
     price: "25 000 FCFA/an",
     durationNote: "12 mois d'accès",
-    features: [
-      "150 crédits renouvelés chaque mois",
-      "15 Stratégies Complètes / mois",
-      "Analyse concurrentielle",
-      "5 variantes de hooks",
-      "Analyse d'audience avancée",
-      "Stratégie de croissance 3 mois",
-      "Support prioritaire (12h)",
-      "Rapports avancés",
-    ],
+    features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"],
     popular: false,
     ctaText: "Choisir le Plan Premium",
     link: "https://makeitads.mychariow.com/plan-prem",
     checkColor: "text-rose-500",
-    bgCheck: "bg-rose-500/10",
     ctaBg: "bg-rose-500",
     ctaHover: "hover:bg-rose-600",
     ctaTextCol: "text-white",
@@ -172,21 +105,11 @@ const pricingPlans = [
     name: "MakeItAds Élite",
     price: "100 000 FCFA/an",
     durationNote: "12 mois d'accès",
-    features: [
-      "500 crédits renouvelés chaque mois",
-      "50 Stratégies Complètes / mois",
-      "Consulting stratégique mensuel",
-      "Formation personnalisée",
-      "Accompagnement avancé",
-      "Rapports white-label",
-      "Support prioritaire 24/7",
-      "Accès API",
-    ],
+    features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"],
     popular: false,
     ctaText: "Choisir le Plan Élite",
     link: "https://makeitads.mychariow.com/plan-elit",
     checkColor: "text-amber-500",
-    bgCheck: "bg-amber-500/10",
     ctaBg: "bg-amber-500",
     ctaHover: "hover:bg-amber-600",
     ctaTextCol: "text-white",
@@ -196,20 +119,13 @@ const pricingPlans = [
 ];
 
 // ==========================================
-// TABLEAU DE COMPARAISON (données alignées)
+// STATISTIQUES
 // ==========================================
-const comparisonRows = [
-  { feature: "Crédits / mois", pro: "50", premium: "150", enterprise: "500" },
-  { feature: "Stratégies complètes / mois", pro: "5", premium: "15", enterprise: "50" },
-  { feature: "Diagnostics Flash", pro: "—", premium: "—", enterprise: "—" },
-  { feature: "Analyse concurrentielle", pro: false, premium: true, enterprise: true },
-  { feature: "Variantes de hooks", pro: false, premium: "5", enterprise: "5" },
-  { feature: "Analyse d'audience avancée", pro: false, premium: true, enterprise: true },
-  { feature: "Stratégie de croissance 3 mois", pro: false, premium: true, enterprise: true },
-  { feature: "Support prioritaire", pro: "48h", premium: "12h", enterprise: "< 1h" },
-  { feature: "Rapports avancés", pro: false, premium: true, enterprise: true },
-  { feature: "Rapports white-label", pro: false, premium: false, enterprise: true },
-  { feature: "Accès API", pro: false, premium: false, enterprise: true },
+const stats = [
+  { value: "200+", label: "Entrepreneurs formés", icon: Users },
+  { value: "18", label: "Pays africains", icon: Globe },
+  { value: "10 000+", label: "Stratégies générées", icon: Zap },
+  { value: "92%", label: "Taux de satisfaction", icon: TrendingUp },
 ];
 
 // ==========================================
@@ -225,9 +141,7 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
       className={`relative group rounded-2xl border p-4 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
-        plan.popular
-          ? "border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]"
-          : "border-gray-200 shadow-sm"
+        plan.popular ? "border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]" : "border-gray-200 shadow-sm"
       } ${isWide ? "md:flex-row md:items-center md:gap-6" : ""}`}
     >
       {plan.popular && (
@@ -237,22 +151,15 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       )}
 
       <div className={`${isWide ? "md:w-1/3 md:border-r md:border-gray-100 md:pr-5 mb-3 md:mb-0" : "mb-3"}`}>
-        <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">
-          {plan.name}
-        </h3>
-
+        <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">{plan.name}</h3>
         <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">
-            {plan.price}
-          </span>
+          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{plan.price}</span>
         </div>
-
         {plan.durationNote && (
           <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
             {plan.durationNote}
           </span>
         )}
-
         <Link
           href={plan.link}
           target={plan.isExternal ? "_blank" : undefined}
@@ -287,16 +194,13 @@ export default function LandingPage() {
 
   const scrollToPricing = () => document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
 
-  // Scroll-to-top : visible après 600px
   useEffect(() => {
     const handleScroll = () => setShowScrollTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <main className="min-h-screen bg-white text-[#18181B] overflow-x-hidden selection:bg-[#6366f1]/20">
@@ -305,19 +209,14 @@ export default function LandingPage() {
 
       <TrustpilotCarousel
         reviews={section1Reviews}
-        title={
-          <span className="block text-left text-xl md:text-3xl font-semibold leading-tight">
-            Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span>
-          </span>
-        }
+        title={<span className="block text-left text-xl md:text-3xl font-semibold leading-tight">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span></span>}
         footerNote="Note de 4.8/5 sur 312 avis."
       />
 
+      {/* Partenaires */}
       <section className="relative z-10 py-6 border-y border-gray-100 bg-[#F8F8FC]">
         <div className="max-w-5xl mx-auto px-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">
-            Compatible avec vos plateformes
-          </p>
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">Compatible avec vos plateformes</p>
           <div className="relative overflow-hidden">
             <div className="flex animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
               {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => (
@@ -334,12 +233,7 @@ export default function LandingPage() {
       {/* COMMENT ÇA MARCHE */}
       <section id="how-it-works" className="relative z-10 bg-white py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-8 md:mb-12"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Comment ça <span className="text-[#6366F1]">marche</span> ?
             </h2>
@@ -351,68 +245,34 @@ export default function LandingPage() {
           <div className="flex justify-start mb-6 md:mb-10 overflow-x-auto pb-2">
             <div className="inline-flex bg-[#F8F8FC] p-1.5 rounded-full border border-gray-100">
               {howItWorksSteps.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setActiveStep(index)}
-                  className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${
-                    activeStep === index
-                      ? "bg-[#6366F1] text-white shadow-md"
-                      : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"
-                  }`}
-                >
+                <button key={index} onClick={() => setActiveStep(index)} className={`px-3 md:px-5 py-1.5 rounded-full text-[10px] md:text-xs font-medium transition-all duration-300 whitespace-nowrap ${activeStep === index ? "bg-[#6366F1] text-white shadow-md" : "text-[#71717A] hover:text-[#18181B] hover:bg-gray-200/50"}`}>
                   Étape {index + 1}
                 </button>
               ))}
             </div>
           </div>
 
-          <motion.div
-            key={activeStep}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="flex flex-col gap-3"
-          >
+          <motion.div key={activeStep} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex flex-col gap-3">
             <div className="relative w-full aspect-[16/9] md:aspect-[21/9] bg-gray-50 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100">
-              <Image
-                src={howItWorksSteps[activeStep].image}
-                alt={howItWorksSteps[activeStep].title}
-                fill
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 1200px"
-                priority={activeStep === 0}
-              />
+              <Image src={howItWorksSteps[activeStep].image} alt={howItWorksSteps[activeStep].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" priority={activeStep === 0} />
             </div>
             <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm p-4 md:p-6">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-8 mb-4">
                 <div className="flex-1 md:order-1 order-2">
-                  <p className="text-xs md:text-sm text-[#71717A] leading-relaxed text-left">
-                    {howItWorksSteps[activeStep].description}
-                  </p>
+                  <p className="text-xs md:text-sm text-[#71717A] leading-relaxed text-left">{howItWorksSteps[activeStep].description}</p>
                 </div>
                 <div className="flex-shrink-0 md:text-right md:order-2 order-1">
-                  <h3 className="text-sm md:text-lg font-bold text-[#18181B] text-left md:text-right">
-                    {howItWorksSteps[activeStep].title}
-                  </h3>
+                  <h3 className="text-sm md:text-lg font-bold text-[#18181B] text-left md:text-right">{howItWorksSteps[activeStep].title}</h3>
                 </div>
               </div>
               <div className="flex justify-end pt-3 border-t border-gray-100">
                 {activeStep < 3 ? (
-                  <button
-                    onClick={() => setActiveStep(activeStep + 1)}
-                    className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#18181B] text-white text-xs font-semibold hover:bg-[#333] transition-all"
-                  >
-                    Étape suivante
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  <button onClick={() => setActiveStep(activeStep + 1)} className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#18181B] text-white text-xs font-semibold hover:bg-[#333] transition-all">
+                    Étape suivante <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </button>
                 ) : (
-                  <button
-                    onClick={scrollToPricing}
-                    className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#6366F1] text-white text-xs font-semibold hover:bg-[#5558e6] transition-all shadow-lg shadow-[#6366F1]/25"
-                  >
-                    Commencez maintenant
-                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  <button onClick={scrollToPricing} className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#6366F1] text-white text-xs font-semibold hover:bg-[#5558e6] transition-all shadow-lg shadow-[#6366F1]/25">
+                    Commencez maintenant <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
                   </button>
                 )}
               </div>
@@ -422,32 +282,126 @@ export default function LandingPage() {
       </section>
 
       <WhyChooseSection />
+
+      {/* STATISTIQUES — remplace le tableau de comparaison */}
+      <section className="relative z-10 py-12 md:py-20 bg-white border-y border-gray-100">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 md:mb-14">
+            <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
+              Des résultats <span className="text-[#6366F1]">concrets</span>
+            </h2>
+            <p className="text-xs md:text-sm leading-relaxed text-[#71717A] max-w-xl mx-auto">
+              MakeItAds transforme la façon dont les entrepreneurs africains abordent leur marketing.
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {stats.map((stat, index) => {
+              const Icon = stat.icon;
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: index * 0.1 }}
+                  className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-4 md:p-6 text-center transition-all hover:-translate-y-1 hover:border-[#6366F1]/30 hover:shadow-lg"
+                >
+                  <div className="mx-auto mb-3 flex h-10 w-10 md:h-12 md:w-12 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
+                    <Icon className="h-5 w-5 md:h-6 md:w-6" />
+                  </div>
+                  <p className="text-2xl md:text-4xl font-bold text-[#18181B] leading-none mb-1.5">
+                    {stat.value}
+                  </p>
+                  <p className="text-[10px] md:text-xs text-slate-500 leading-snug">
+                    {stat.label}
+                  </p>
+                  <div className="absolute inset-x-0 bottom-0 h-0.5 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] opacity-0 transition-opacity group-hover:opacity-100" />
+                </motion.div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       <EntrepreneursCarousel />
 
-      {/* AVIS 2 */}
-      <section id="avis" className="relative z-10 py-12 md:py-20 px-0 sm:px-6 bg-[#F8F8FC]">
-        <div className="w-full">
-          <TrustpilotCarousel
-            reviews={section2Reviews}
-            title={
-              <span className="block text-left text-xl md:text-3xl font-semibold leading-tight">
-                Des résultats qui parlent <span className="text-[#6366F1]">d&apos;eux-mêmes</span>
-              </span>
-            }
-            footerNote="Note de 4.7/5 sur 289 avis."
-          />
+      <TrustpilotCarousel
+        reviews={section2Reviews}
+        title={<span className="block text-left text-xl md:text-3xl font-semibold leading-tight">Des résultats qui parlent <span className="text-[#6366F1]">d&apos;eux-mêmes</span></span>}
+        footerNote="Note de 4.7/5 sur 289 avis."
+      />
+
+      {/* QUI SOMMES NOUS */}
+      <section className="relative z-10 py-12 md:py-20 bg-[#F8F8FC] border-t border-gray-100">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-center mb-8 md:mb-12">
+            <p className="text-[10px] md:text-xs font-semibold uppercase tracking-[0.2em] text-[#6366F1] mb-2 md:mb-3">
+              Qui sommes-nous
+            </p>
+            <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-3">
+              Construire l&apos;infrastructure de <span className="text-[#6366F1]">croissance de l&apos;Afrique</span>
+            </h2>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 md:p-7"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
+                <Target className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
+                Notre mission
+              </h3>
+              <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
+                MakeItAds a été fondé avec une conviction profonde : les entrepreneurs africains méritent les mêmes outils d&apos;intelligence marketing que les entreprises des grandes capitales mondiales. Nous construisons une infrastructure technologique adaptée aux réalités locales — WhatsApp, Mobile Money, budgets modestes — pour transformer chaque entrepreneur en stratège armé.
+              </p>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              className="rounded-2xl border border-slate-200 bg-white p-5 md:p-7"
+            >
+              <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-xl bg-[#6366F1]/10 text-[#6366F1]">
+                <Globe className="h-5 w-5" />
+              </div>
+              <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
+                Notre vision
+              </h3>
+              <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
+                Devenir la plateforme de référence en acquisition client pour l&apos;Afrique francophone. Nous croyons que la croissance d&apos;une entreprise ne doit pas dépendre du génie d&apos;un seul individu, mais de la fiabilité d&apos;un système reproductible. C&apos;est cette rigueur méthodologique que nous mettons à la portée de chaque entrepreneur, du Sénégal au Cameroun, de la Côte d&apos;Ivoire à la RDC.
+              </p>
+            </motion.div>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            className="mt-4 md:mt-6 rounded-2xl border border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/60 to-white p-5 md:p-7"
+          >
+            <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-2">
+              Notre engagement
+            </h3>
+            <p className="text-xs md:text-sm leading-relaxed text-[#475569]">
+              Nous ne vendons pas de la publicité. Nous construisons l&apos;infrastructure qui permet à chaque entrepreneur africain de prendre des décisions éclairées, armé de données, de méthode et d&apos;intelligence. Chaque stratégie que nous générons est calibrée pour un objectif unique : transformer les efforts marketing en résultats mesurables.
+            </p>
+          </motion.div>
         </div>
       </section>
 
       {/* PRICING */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-6 md:mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Investissez dans votre <span className="text-[#6366F1]">croissance</span>
             </h2>
@@ -469,98 +423,10 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* TABLEAU DE COMPARAISON */}
-      <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
-        <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-6 md:mb-10"
-          >
-            <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
-              Comparez les <span className="text-[#6366F1]">formules</span>
-            </h2>
-            <p className="text-xs md:text-sm leading-relaxed text-[#71717A]">
-              Comprenez rapidement ce que chaque niveau débloque.
-            </p>
-          </motion.div>
-
-          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-            <div className="min-w-[640px] md:min-w-0 rounded-2xl md:rounded-3xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-              {/* En-tête */}
-              <div className="grid grid-cols-4 bg-gray-50 border-b border-gray-200">
-                <div className="p-4 md:p-5 border-r border-gray-100">
-                  <span className="text-xs md:text-sm font-bold text-[#18181B]">Fonctionnalités</span>
-                </div>
-                <div className="p-4 md:p-5 border-r border-gray-100 text-center">
-                  <span className="text-xs md:text-sm font-bold text-gray-600">Pro</span>
-                </div>
-                <div className="p-4 md:p-5 border-r border-gray-100 bg-[#6366F1]/5 text-center">
-                  <span className="text-xs md:text-sm font-bold text-[#6366F1]">Premium</span>
-                </div>
-                <div className="p-4 md:p-5 text-center">
-                  <span className="text-xs md:text-sm font-bold text-amber-500">Élite</span>
-                </div>
-              </div>
-
-              {/* Lignes */}
-              {comparisonRows.map((row, i) => (
-                <Fragment key={i}>
-                  <div className={`grid grid-cols-4 ${i < comparisonRows.length - 1 ? "border-b border-gray-100" : ""}`}>
-                    <div className="p-4 md:p-5 border-r border-gray-100 flex items-center">
-                      <span className="text-xs md:text-sm font-medium text-[#18181B]">{row.feature}</span>
-                    </div>
-                    <div className="p-4 md:p-5 border-r border-gray-100 flex items-center justify-center">
-                      {typeof row.pro === "boolean" ? (
-                        row.pro ? (
-                          <Check className="w-4 h-4 text-[#6366F1]" />
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )
-                      ) : (
-                        <span className="text-xs md:text-sm text-[#475569] font-medium text-center">{row.pro}</span>
-                      )}
-                    </div>
-                    <div className="p-4 md:p-5 border-r border-[#6366F1]/10 bg-[#6366F1]/5 flex items-center justify-center">
-                      {typeof row.premium === "boolean" ? (
-                        row.premium ? (
-                          <Check className="w-4 h-4 text-[#6366F1]" />
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )
-                      ) : (
-                        <span className="text-xs md:text-sm font-semibold text-[#6366F1] text-center">{row.premium}</span>
-                      )}
-                    </div>
-                    <div className="p-4 md:p-5 flex items-center justify-center">
-                      {typeof row.enterprise === "boolean" ? (
-                        row.enterprise ? (
-                          <Check className="w-4 h-4 text-amber-500" />
-                        ) : (
-                          <span className="text-gray-300">—</span>
-                        )
-                      ) : (
-                        <span className="text-xs md:text-sm font-semibold text-amber-600 text-center">{row.enterprise}</span>
-                      )}
-                    </div>
-                  </div>
-                </Fragment>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* FAQ */}
-      <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
+      <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-8 md:mb-12"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Questions <span className="text-[#6366F1]">fréquentes</span>
             </h2>
@@ -570,36 +436,16 @@ export default function LandingPage() {
           </motion.div>
           <div className="space-y-3">
             {faqData.map((faq, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="rounded-2xl border border-gray-100 bg-[#F8F8FC] overflow-hidden"
-              >
-                <button
-                  onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-gray-50/50 transition-colors"
-                >
-                  <span className="text-xs md:text-sm font-semibold text-[#18181B] pr-4 leading-snug">
-                    {faq.question}
-                  </span>
-                  <motion.div
-                    animate={{ rotate: openFaq === index ? 180 : 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
+              <motion.div key={index} initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-gray-100 bg-white overflow-hidden">
+                <button onClick={() => setOpenFaq(openFaq === index ? null : index)} className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-gray-50/50 transition-colors">
+                  <span className="text-xs md:text-sm font-semibold text-[#18181B] pr-4 leading-snug">{faq.question}</span>
+                  <motion.div animate={{ rotate: openFaq === index ? 180 : 0 }} transition={{ duration: 0.3, ease: "easeInOut" }}>
                     <ChevronDown className="h-4 w-4 md:h-5 md:w-5 text-[#6366F1] flex-shrink-0" />
                   </motion.div>
                 </button>
                 <AnimatePresence initial={false}>
                   {openFaq === index && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: "auto", opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                      className="overflow-hidden"
-                    >
+                    <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: "easeInOut" }} className="overflow-hidden">
                       <div className="px-4 md:px-5 pb-4 md:pb-5">
                         <p className="text-xs md:text-sm text-[#71717A] leading-relaxed">{faq.answer}</p>
                       </div>
@@ -615,12 +461,7 @@ export default function LandingPage() {
       {/* CTA FINAL */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-left">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
             <h2 className="text-xl md:text-3xl font-semibold leading-tight mb-3 text-[#18181B]">
               Prêt à préparer votre <span className="text-[#6366F1]">prochaine campagne ?</span>
             </h2>
@@ -628,17 +469,11 @@ export default function LandingPage() {
               Votre stratégie commence ici. Obtenez une intelligence marché et un plan d&apos;exécution complet.
             </p>
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={scrollToPricing}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 text-xs md:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]"
-              >
+              <button onClick={scrollToPricing} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-5 py-2.5 text-xs md:text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02]">
                 Voir les tarifs
                 <ArrowRight className="h-3.5 w-3.5 md:h-4 md:w-4" />
               </button>
-              <Link
-                href="/dashboard"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white border border-gray-200 px-5 py-2.5 text-xs md:text-sm font-medium text-[#18181B] hover:bg-gray-50 transition-all"
-              >
+              <Link href="/dashboard" className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-white border border-gray-200 px-5 py-2.5 text-xs md:text-sm font-medium text-[#18181B] hover:bg-gray-50 transition-all">
                 Accéder au Dashboard
               </Link>
             </div>

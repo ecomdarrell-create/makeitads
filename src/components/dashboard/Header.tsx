@@ -2,7 +2,7 @@ interface HeaderProps {
   firstName: string | null;
   credits: number;
   plan: string | null;
-  currency?: string; // ✅ Ajout de la propriété currency (optionnelle)
+  currency?: string;
 }
 
 const businessQuotes = [
@@ -14,7 +14,6 @@ const businessQuotes = [
 ];
 
 export function Header({ firstName, credits, plan, currency }: HeaderProps) {
-  // On prend une citation de manière pseudo-aléatoire basée sur la longueur du prénom pour qu'elle reste stable lors du rechargement
   const quoteIndex = (firstName?.length || 0) % businessQuotes.length;
   const subtitle = businessQuotes[quoteIndex];
 
@@ -22,7 +21,7 @@ export function Header({ firstName, credits, plan, currency }: HeaderProps) {
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-      <div>
+      <div data-tour="header-greeting">
         <h1 className="text-base sm:text-lg font-semibold text-[#111827]">
           Bonjour, {firstName || 'Utilisateur'}
         </h1>
@@ -30,7 +29,10 @@ export function Header({ firstName, credits, plan, currency }: HeaderProps) {
           &ldquo;{subtitle}&rdquo;
         </p>
       </div>
-      <div className="flex items-center gap-2 sm:gap-3 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-sm">
+      <div
+        data-tour="header-badge"
+        className="flex items-center gap-2 sm:gap-3 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-sm"
+      >
         <span className="text-[10px] sm:text-xs font-medium text-gray-600 capitalize">
           {displayPlan}
         </span>

@@ -29,7 +29,10 @@ export function CreditCenter({
   const isEmpty = balance === 0;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div
+      data-tour="credit-center"
+      className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
+    >
       {/* Header */}
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -52,7 +55,7 @@ export function CreditCenter({
       </div>
 
       {/* Solde principal */}
-      <div className="mb-3">
+      <div data-tour="credit-balance" className="mb-3">
         <div className="flex items-baseline gap-1">
           <span
             className={`text-2xl font-bold ${
@@ -108,6 +111,7 @@ export function CreditCenter({
       {isLow && (
         <Link
           href="/dashboard/credits"
+          data-tour="credit-recharge-cta"
           className={`flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-white transition-colors ${
             isEmpty
               ? 'bg-red-600 hover:bg-red-700'
@@ -123,6 +127,7 @@ export function CreditCenter({
       {!isLow && (
         <Link
           href="/dashboard/credits"
+          data-tour="credit-manage-cta"
           className="flex w-full items-center justify-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
         >
           <Zap className="h-3.5 w-3.5" />

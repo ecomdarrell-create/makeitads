@@ -41,7 +41,7 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
-          {/* Titre principal */}
+          {/* Titre */}
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -90,24 +90,24 @@ export default function HeroSection() {
             </div>
           </motion.div>
 
-          {/* Boutons CTA */}
+          {/* Boutons CTA — version fine et épurée */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.24 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 w-full max-w-xl"
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full max-w-md"
           >
             <Link
               href="/dashboard"
-              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366f1] px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-bold text-white shadow-lg shadow-[#6366f1]/25 hover:bg-[#5558e6] transition-all hover:scale-[1.02] w-full sm:w-auto"
+              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-5 py-2.5 text-xs md:text-sm font-semibold text-white shadow-md shadow-[#6366F1]/25 hover:bg-[#5558e6] transition-colors w-full sm:w-auto"
             >
               Obtenir une démo
-              <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
             </Link>
 
             <a
               href="#how-it-works"
-              className="flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-6 sm:px-8 py-3 sm:py-3.5 text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-all w-full sm:w-auto"
+              className="flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-xs md:text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-colors w-full sm:w-auto"
             >
               Découvrez comment ça marche
             </a>

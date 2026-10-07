@@ -5,7 +5,6 @@ import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LoaderCircle,
-  Send,
   X,
   ArrowLeft,
   Zap,
@@ -13,6 +12,7 @@ import {
   TrendingUp,
   Users,
 } from 'lucide-react';
+import { createClient } from '@/lib/supabase/client';
 import { SUGGESTED_QUESTIONS } from '@/config/chatbot-faq.config';
 
 type ChatMessage = { role: 'user' | 'assistant'; content: string };
@@ -67,16 +67,11 @@ const QUICK_ACTIONS: QuickAction[] = [
   },
 ];
 
-// ============================================
-// NETTOYAGE DES RÉPONSES (retire les *)
-// ============================================
-
 function cleanResponse(text: string): string {
-  // Retire les ** et * utilisés pour le markdown
   return text
-    .replace(/\*\*(.*?)\*\*/g, '$1') // **texte** → texte
-    .replace(/\*(.*?)\*/g, '$1')     // *texte* → texte
-    .replace(/\*/g, '');              // * restants → rien
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/\*(.*?)\*/g, '$1')
+    .replace(/\*/g, '');
 }
 
 export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean }) {
@@ -86,6 +81,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [imageError, setImageError] = useState(false);
+  const [firstName, setFirstName] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       role: 'assistant',
@@ -94,6 +90,37 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
     },
   ]);
   const messageListRef = useRef<HTMLDivElement>(null);
+
+  // Charger le prénom de l'utilisateur
+  useEffect(() => {
+    const loadName = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('first_name')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        const name = profile?.first_name || user.email?.split('@')[0] || null;
+        if (name) {
+          setFirstName(name);
+          setMessages([
+            {
+              role: 'assistant',
+              content: `Bonjour ${name}, je suis Gisèle, ton assistante MakeItAds.\n\nJe peux t'aider à :\n\n• Choisir ton plan\n• Comprendre les crédits\n• Générer ta première stratégie\n• Contacter le support\n\nQue veux-tu savoir ?`,
+            },
+          ]);
+        }
+      } catch (e) {
+        console.warn('Impossible de charger le prénom:', e);
+      }
+    };
+    loadName();
+  }, []);
 
   useEffect(() => {
     if (isOpen && view === 'chat' && messageListRef.current) {
@@ -122,7 +149,10 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: updatedMessages.slice(-8) }),
+        body: JSON.stringify({
+          messages: updatedMessages.slice(-8),
+          firstName,
+        }),
       });
 
       const result = await response.json();
@@ -153,7 +183,9 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
     setMessages([
       {
         role: 'assistant',
-        content: "Bonjour, je suis Gisèle. Comment puis-je t'aider ?",
+        content: firstName
+          ? `Bonjour ${firstName}. Comment puis-je t'aider ?`
+          : "Bonjour, je suis Gisèle. Comment puis-je t'aider ?",
       },
     ]);
     setInput('');
@@ -180,7 +212,6 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
             <header className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
               <div className="flex items-center gap-2.5">
                 <div className="relative">
-                  {/* Photo Gisèle */}
                   <div className="relative h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-2 ring-white shadow-sm">
                     {!imageError ? (
                       <Image
@@ -197,7 +228,6 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                       </div>
                     )}
                   </div>
-                  {/* Pastille en ligne */}
                   <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
                 </div>
                 <div>
@@ -221,21 +251,21 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
             {/* VUE HOME */}
             {view === 'home' && (
               <div className="flex-1 overflow-y-auto">
-                {/* Hero */}
+                {/* Hero en violet avec texte blanc */}
                 <div className="relative overflow-hidden bg-gradient-to-br from-[#6366F1] via-[#6366F1] to-[#8B5CF6] p-5">
                   <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-white/10" />
                   <div className="absolute -bottom-14 -left-8 h-32 w-32 rounded-full bg-white/5" />
 
                   <div className="relative">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-white/90">
                       Gisèle · Assistante MakeItAds
                     </p>
                     <h2 className="mt-2 text-lg font-bold leading-snug text-white">
-                      Bonjour 👋
+                      Bonjour {firstName || ''} 👋
                       <br />
                       Comment puis-je t&apos;aider ?
                     </h2>
-                    <p className="mt-2 text-[11px] leading-relaxed text-white/85">
+                    <p className="mt-2 text-[11px] leading-relaxed text-white/95">
                       Je t&apos;accompagne sur les plans, les crédits, la génération de stratégies et tout ce qui concerne la plateforme.
                     </p>
                   </div>
@@ -316,7 +346,6 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                 >
                   {messages.map((message, index) => (
                     <div key={`${index}-${message.role}`} className="flex items-start gap-2">
-                      {/* Avatar de Gisèle pour ses messages */}
                       {message.role === 'assistant' && (
                         <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-1 ring-slate-200">
                           {!imageError ? (
@@ -386,16 +415,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                 aria-label="Envoyer"
                 className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#6366F1] text-white transition-colors hover:bg-[#5558e6] disabled:cursor-not-allowed disabled:bg-slate-300"
               >
-                {/* Flèche simple vers la droite */}
-                <svg
-                  className="h-4 w-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M5 12h14M13 6l6 6-6 6" />
                 </svg>
               </button>
@@ -410,51 +430,55 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
         onClick={() => setIsOpen((open) => !open)}
         aria-label={isOpen ? "Fermer l'assistante" : "Ouvrir l'assistante MakeItAds"}
         aria-expanded={isOpen}
-        className="relative ml-auto flex h-14 w-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-indigo-900/25 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6366F1]"
+        className="relative ml-auto flex h-14 w-14 items-center justify-center overflow-visible rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-lg shadow-indigo-900/25 transition-transform hover:scale-105 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#6366F1]"
       >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div
-              key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <X className="h-6 w-6" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="chat"
-              initial={{ scale: 0.6, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.6, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="relative h-full w-full"
-            >
-              {/* Photo de Gisèle dans le bouton flottant */}
-              {!imageError ? (
-                <Image
-                  src="/images/gisele.jpg"
-                  alt="Gisèle"
-                  fill
-                  className="object-cover"
-                  sizes="56px"
-                  onError={() => setImageError(true)}
-                />
-              ) : (
-                <div className="flex h-full w-full items-center justify-center">
-                  <span className="text-lg font-bold text-white">G</span>
-                </div>
-              )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Photo Gisèle */}
+        <span className="relative block h-full w-full overflow-hidden rounded-full">
+          <AnimatePresence mode="wait">
+            {isOpen ? (
+              <motion.div
+                key="close"
+                initial={{ rotate: -90, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                exit={{ rotate: 90, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="flex h-full w-full items-center justify-center"
+              >
+                <X className="h-6 w-6" />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="chat"
+                initial={{ scale: 0.6, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.6, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+                className="relative h-full w-full"
+              >
+                {!imageError ? (
+                  <Image
+                    src="/images/gisele.jpg"
+                    alt="Gisèle"
+                    fill
+                    className="object-cover"
+                    sizes="56px"
+                    onError={() => setImageError(true)}
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center">
+                    <span className="text-lg font-bold text-white">G</span>
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </span>
 
-        {/* Notification rouge */}
+        {/* Badge rouge — BEAUCOUP plus visible */}
         {!isOpen && (
-          <span className="absolute -top-0.5 -right-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full border-2 border-white bg-rose-500 text-[8px] font-bold text-white">
-            1
+          <span className="absolute -top-1 -right-1 z-20 flex h-6 w-6 items-center justify-center rounded-full border-[3px] border-white bg-rose-500 text-[11px] font-bold text-white shadow-lg shadow-rose-500/40">
+            <span className="absolute inset-0 animate-ping rounded-full bg-rose-500 opacity-60" />
+            <span className="relative">1</span>
           </span>
         )}
       </button>
