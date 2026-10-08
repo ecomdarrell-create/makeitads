@@ -13,34 +13,62 @@ export default function HeroSection() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
+  // Force la lecture automatique de la vidéo
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    const markReady = () => {
-      setVideoReady(true);
-      video.play().catch(() => {});
+    video.muted = true;
+    video.defaultMuted = true;
+    video.playsInline = true;
+    video.setAttribute("muted", "");
+    video.setAttribute("playsinline", "");
+
+    const tryPlay = () => {
+      video.play().catch(() => {
+        setTimeout(() => video.play().catch(() => {}), 300);
+      });
     };
 
-    if (video.readyState >= 3) {
-      markReady();
-      return;
-    }
+    const markReady = () => {
+      setVideoReady(true);
+      tryPlay();
+    };
+
+    if (video.readyState >= 2) markReady();
 
     video.addEventListener("loadeddata", markReady);
     video.addEventListener("canplay", markReady);
-    video.addEventListener("playing", markReady);
+    video.addEventListener("playing", () => setVideoReady(true));
 
+    tryPlay();
     video.load();
-    video.play().catch(() => {});
 
-    const timeout = setTimeout(markReady, 2000);
+    // Fallback : relance la lecture au premier clic/touch/scroll (contrainte iOS)
+    const handleInteraction = () => {
+      tryPlay();
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("scroll", handleInteraction);
+    };
+
+    document.addEventListener("touchstart", handleInteraction, { once: true });
+    document.addEventListener("click", handleInteraction, { once: true });
+    document.addEventListener("scroll", handleInteraction, { once: true });
+
+    const intervals = [
+      setTimeout(markReady, 500),
+      setTimeout(markReady, 1500),
+      setTimeout(markReady, 3000),
+    ];
 
     return () => {
       video.removeEventListener("loadeddata", markReady);
       video.removeEventListener("canplay", markReady);
-      video.removeEventListener("playing", markReady);
-      clearTimeout(timeout);
+      document.removeEventListener("touchstart", handleInteraction);
+      document.removeEventListener("click", handleInteraction);
+      document.removeEventListener("scroll", handleInteraction);
+      intervals.forEach(clearTimeout);
     };
   }, []);
 
@@ -113,6 +141,7 @@ export default function HeroSection() {
                   className="relative overflow-hidden rounded-3xl bg-[#0A0A0B]"
                   style={{ aspectRatio: "1920 / 780" }}
                 >
+                  {/* VIDÉO autoplay muet en boucle */}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -120,12 +149,16 @@ export default function HeroSection() {
                     loop
                     playsInline
                     preload="auto"
+                    controls={false}
+                    disablePictureInPicture
+                    controlsList="nodownload nofullscreen noremoteplayback"
                     className="absolute inset-0 w-full h-full object-cover"
                     style={{ objectPosition: "center bottom" }}
                   >
                     <source src="/images/video/hero-demo.mp4" type="video/mp4" />
                   </video>
 
+                  {/* Poster affiché avant que la vidéo soit prête */}
                   <img
                     src="/images/couv-X.png"
                     alt="MakeItAds Dashboard"
@@ -134,119 +167,8 @@ export default function HeroSection() {
                     }`}
                   />
 
+                  {/* Reflet subtil sur le dessus (glassmorphism) */}
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 via-transparent to-transparent" />
-
-                  {/* ═══════════════════════════════════════ */}
-                  {/* CURSEUR ROUNDED SQUARE + GLOW NÉON BLEU */}
-                  {/* ═══════════════════════════════════════ */}
-                  <motion.div
-                    className="pointer-events-none absolute z-30"
-                    initial={{ top: "65%", left: "30%", opacity: 0 }}
-                    animate={{
-                      top: ["65%", "55%", "40%", "38%", "55%", "65%"],
-                      left: ["30%", "45%", "55%", "70%", "75%", "30%"],
-                      opacity: [0, 1, 1, 1, 1, 0],
-                    }}
-                    transition={{
-                      duration: 14,
-                      repeat: Infinity,
-                      ease: "easeInOut",
-                      times: [0, 0.15, 0.35, 0.55, 0.8, 1],
-                    }}
-                  >
-                    {/* Conteneur du curseur avec translation pour centrer le point chaud */}
-                    <div className="relative -translate-x-2 -translate-y-2">
-                      {/* Glow néon bleu externe (couche 1, large) */}
-                      <div
-                        className="absolute inset-0 rounded-[10px]"
-                        style={{
-                          boxShadow:
-                            "0 0 24px 4px rgba(99,102,241,0.65), 0 0 48px 8px rgba(99,102,241,0.35)",
-                          transform: "scale(1.15)",
-                        }}
-                      />
-
-                      {/* Rounded square blanc glossy */}
-                      <div
-                        className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/90"
-                        style={{
-                          background:
-                            "linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 50%, #E0E7FF 100%)",
-                          boxShadow:
-                            "0 0 0 1px rgba(255,255,255,0.9) inset, 0 1px 2px rgba(255,255,255,0.8) inset, 0 8px 20px rgba(99,102,241,0.35), 0 4px 8px rgba(15,23,42,0.15)",
-                        }}
-                      >
-                        {/* Reflet glossy en haut */}
-                        <div
-                          className="pointer-events-none absolute inset-x-1 top-0.5 h-3 rounded-t-[8px]"
-                          style={{
-                            background:
-                              "linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0))",
-                          }}
-                        />
-
-                        {/* Flèche navy centrée */}
-                        <svg
-                          width="16"
-                          height="18"
-                          viewBox="0 0 16 18"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="relative z-10"
-                        >
-                          <path
-                            d="M2 1.5L2 15L5.5 11.5L8.5 17L10.5 16L7.5 10.5H13L2 1.5Z"
-                            fill="#0F172A"
-                            stroke="#0F172A"
-                            strokeWidth="1"
-                            strokeLinejoin="round"
-                            strokeLinecap="round"
-                          />
-                        </svg>
-                      </div>
-
-                      {/* Halo pulsant qui tourne autour */}
-                      <motion.div
-                        className="absolute inset-0 rounded-[10px] border-2 border-[#6366F1]/50"
-                        animate={{
-                          scale: [1, 1.3, 1],
-                          opacity: [0.5, 0, 0.5],
-                        }}
-                        transition={{
-                          duration: 2.2,
-                          repeat: Infinity,
-                          ease: "easeOut",
-                        }}
-                      />
-                    </div>
-                  </motion.div>
-
-                  {/* Effets "click" violets */}
-                  <motion.div
-                    className="pointer-events-none absolute z-20 h-14 w-14 rounded-full border-2 border-[#6366F1]"
-                    initial={{ top: "38%", left: "70%", opacity: 0, scale: 0.3 }}
-                    animate={{ opacity: [0, 0.9, 0], scale: [0.3, 1.5, 2] }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      repeatDelay: 6.5,
-                      ease: "easeOut",
-                    }}
-                    style={{ transform: "translate(-50%, -50%)" }}
-                  />
-                  <motion.div
-                    className="pointer-events-none absolute z-20 h-14 w-14 rounded-full border-2 border-[#8B5CF6]"
-                    initial={{ top: "55%", left: "45%", opacity: 0, scale: 0.3 }}
-                    animate={{ opacity: [0, 0.7, 0], scale: [0.3, 1.5, 2] }}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      repeatDelay: 14,
-                      delay: 3,
-                      ease: "easeOut",
-                    }}
-                    style={{ transform: "translate(-50%, -50%)" }}
-                  />
                 </div>
               </div>
 
