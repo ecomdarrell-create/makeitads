@@ -72,7 +72,6 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
     if (!isInView) return;
     const duration = 2000;
     const startTime = Date.now();
-
     const tick = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / duration, 1);
@@ -81,7 +80,6 @@ function AnimatedCounter({ value, suffix }: { value: number; suffix: string }) {
       if (progress < 1) requestAnimationFrame(tick);
       else setDisplay(value);
     };
-
     requestAnimationFrame(tick);
   }, [isInView, value]);
 
@@ -257,30 +255,20 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
-      {/* ═══════════════════════════════════════════════ */}
-      {/* STATISTIQUES — FOND VIOLET CLAIR */}
-      {/* ═══════════════════════════════════════════════ */}
+      {/* STATISTIQUES */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
         <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
         <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-10 md:mb-16"
-          >
-            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
-              Nos chiffres
-            </p>
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-10 md:mb-16">
+            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">Nos chiffres</p>
             <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-3 max-w-3xl">
               Des résultats <span className="text-[#6366F1]">concrets</span>,<br />
               mesurés sur le terrain.
             </h2>
             <p className="text-xs md:text-sm text-[#475569] leading-relaxed max-w-2xl">
-              MakeItAds transforme la façon dont les entrepreneurs africains
-              abordent leur marketing, avec méthode, rigueur et impact mesurable.
+              MakeItAds transforme la façon dont les entrepreneurs africains abordent leur marketing, avec méthode, rigueur et impact mesurable.
             </p>
           </motion.div>
 
@@ -321,9 +309,7 @@ export default function LandingPage() {
         footerNote="Note de 4.7/5 sur 289 avis."
       />
 
-      {/* ═══════════════════════════════════════════════ */}
-      {/* QUI SOMMES NOUS — STACKING GLASSMORPHISM 3D */}
-      {/* ═══════════════════════════════════════════════ */}
+      {/* QUI SOMMES NOUS */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-b from-[#F8F8FC] via-white to-[#F8F8FC] overflow-hidden">
         <div className="absolute top-40 -left-40 h-96 w-96 rounded-full bg-[#6366F1]/10 blur-[130px]" />
         <div className="absolute bottom-40 -right-40 h-96 w-96 rounded-full bg-[#8B5CF6]/10 blur-[130px]" />
@@ -343,8 +329,7 @@ export default function LandingPage() {
               <span className="text-[#6366F1]">croissance de l&apos;Afrique</span>
             </h2>
             <p className="text-xs md:text-sm text-[#71717A] leading-relaxed max-w-2xl">
-              Découvrez notre mission, notre vision et l&apos;engagement qui guide
-              chaque ligne de code que nous écrivons.
+              Découvrez notre mission, notre vision et l&apos;engagement qui guide chaque ligne de code que nous écrivons.
             </p>
           </motion.div>
 
@@ -385,15 +370,6 @@ export default function LandingPage() {
                   <div className="pointer-events-none absolute inset-0 rounded-3xl bg-gradient-to-b from-white/40 via-transparent to-white/10" />
 
                   <div className="relative">
-                    <div className="mb-4 flex items-center gap-3">
-                      <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-[11px] font-bold text-white shadow-md shadow-[#6366F1]/30">
-                        {block.badge}
-                      </span>
-                      <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#6366F1]">
-                        MakeItAds
-                      </span>
-                    </div>
-
                     <h3 className="mb-3 text-lg md:text-2xl font-semibold text-[#18181B] leading-tight">
                       {block.title}
                     </h3>
@@ -409,6 +385,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PRICING */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
@@ -433,6 +410,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* FAQ */}
       <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
@@ -467,6 +445,7 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* CTA FINAL */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>

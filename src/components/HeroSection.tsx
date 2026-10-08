@@ -7,20 +7,41 @@ import Link from "next/link";
 
 export default function HeroSection() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
-  // Force la lecture de la vidéo après montage (contournement iOS)
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
 
-    video.play().catch(() => {
-      // Si l'autoplay est bloqué, le poster reste affiché
-    });
+    const markReady = () => {
+      setVideoReady(true);
+      video.play().catch(() => {});
+    };
+
+    if (video.readyState >= 3) {
+      markReady();
+      return;
+    }
+
+    video.addEventListener("loadeddata", markReady);
+    video.addEventListener("canplay", markReady);
+    video.addEventListener("playing", markReady);
+
+    video.load();
+    video.play().catch(() => {});
+
+    const timeout = setTimeout(markReady, 2000);
+
+    return () => {
+      video.removeEventListener("loadeddata", markReady);
+      video.removeEventListener("canplay", markReady);
+      video.removeEventListener("playing", markReady);
+      clearTimeout(timeout);
+    };
   }, []);
 
   const heroTitle = (
@@ -39,7 +60,6 @@ export default function HeroSection() {
 
   return (
     <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
-      {/* Fond décoratif */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/5 rounded-full blur-[150px]" />
         <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
@@ -54,7 +74,6 @@ export default function HeroSection() {
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-4xl text-left">
-          {/* Titre */}
           <motion.h1
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -64,7 +83,6 @@ export default function HeroSection() {
             {heroTitle}
           </motion.h1>
 
-          {/* Sous-titre */}
           <motion.p
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
@@ -77,71 +95,165 @@ export default function HeroSection() {
             l&apos;Afrique.
           </motion.p>
 
-          {/* Vidéo hero avec crop du haut */}
+          {/* VIDÉO HERO */}
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
             className="relative w-full mb-8 md:mb-10"
           >
-            {/* Halos décoratifs */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[110%] h-[70%] bg-gradient-to-br from-[#6366f1]/10 via-[#8b5cf6]/5 to-transparent blur-[100px] rounded-full -z-10" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-gradient-to-br from-[#6366f1]/15 via-[#8b5cf6]/10 to-transparent blur-[120px] rounded-full -z-10" />
 
             <div className="relative">
-              {/* Ombres sous la vidéo */}
-              <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 w-[90%] h-20 bg-[#0F172A]/10 blur-[40px] rounded-full" />
-              <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-[80%] h-12 bg-[#6366f1]/10 blur-[30px] rounded-full" />
+              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-[95%] h-24 bg-[#0F172A]/15 blur-[60px] rounded-full" />
+              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[85%] h-16 bg-[#6366f1]/15 blur-[40px] rounded-full" />
 
-              {/* Conteneur vidéo avec aspect ratio (crop du haut) */}
-              <div
-                className="relative z-10 overflow-hidden rounded-2xl md:rounded-3xl bg-[#0A0A0B]"
-                style={{
-                  aspectRatio: "1920 / 940",
-                  boxShadow:
-                    "0 25px 50px rgba(15, 23, 42, 0.15), 0 10px 20px rgba(99, 102, 241, 0.1)",
-                }}
-              >
-                {/* Poster (avant chargement de la vidéo) */}
-                {!videoLoaded && (
+              <div className="relative z-10 rounded-3xl p-[1.5px] bg-gradient-to-br from-white/90 via-[#6366F1]/30 to-[#8B5CF6]/40 shadow-2xl">
+                <div
+                  className="relative overflow-hidden rounded-3xl bg-[#0A0A0B]"
+                  style={{ aspectRatio: "1920 / 780" }}
+                >
+                  <video
+                    ref={videoRef}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="auto"
+                    className="absolute inset-0 w-full h-full object-cover"
+                    style={{ objectPosition: "center bottom" }}
+                  >
+                    <source src="/images/video/hero-demo.mp4" type="video/mp4" />
+                  </video>
+
                   <img
                     src="/images/couv-X.png"
                     alt="MakeItAds Dashboard"
-                    className="absolute inset-0 w-full h-full object-cover object-bottom"
+                    className={`absolute inset-0 w-full h-full object-cover object-bottom transition-opacity duration-700 ${
+                      videoReady ? "opacity-0 pointer-events-none" : "opacity-100"
+                    }`}
                   />
-                )}
 
-                {/* Vidéo */}
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  poster="/images/couv-X.png"
-                  onLoadedData={() => setVideoLoaded(true)}
-                  className={`absolute inset-0 w-full h-full object-cover object-bottom transition-opacity duration-500 ${
-                    videoLoaded ? "opacity-100" : "opacity-0"
-                  }`}
-                >
-                  <source src="/images/video/hero-demo.mp4" type="video/mp4" />
-                </video>
+                  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 via-transparent to-transparent" />
 
-                {/* Badge "Démo en direct" */}
-                <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-full border border-white/20 bg-black/60 px-2.5 py-1 backdrop-blur-md">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-rose-500 opacity-75" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-rose-500" />
-                  </span>
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-white">
-                    Démo en direct
-                  </span>
+                  {/* ═══════════════════════════════════════ */}
+                  {/* CURSEUR ROUNDED SQUARE + GLOW NÉON BLEU */}
+                  {/* ═══════════════════════════════════════ */}
+                  <motion.div
+                    className="pointer-events-none absolute z-30"
+                    initial={{ top: "65%", left: "30%", opacity: 0 }}
+                    animate={{
+                      top: ["65%", "55%", "40%", "38%", "55%", "65%"],
+                      left: ["30%", "45%", "55%", "70%", "75%", "30%"],
+                      opacity: [0, 1, 1, 1, 1, 0],
+                    }}
+                    transition={{
+                      duration: 14,
+                      repeat: Infinity,
+                      ease: "easeInOut",
+                      times: [0, 0.15, 0.35, 0.55, 0.8, 1],
+                    }}
+                  >
+                    {/* Conteneur du curseur avec translation pour centrer le point chaud */}
+                    <div className="relative -translate-x-2 -translate-y-2">
+                      {/* Glow néon bleu externe (couche 1, large) */}
+                      <div
+                        className="absolute inset-0 rounded-[10px]"
+                        style={{
+                          boxShadow:
+                            "0 0 24px 4px rgba(99,102,241,0.65), 0 0 48px 8px rgba(99,102,241,0.35)",
+                          transform: "scale(1.15)",
+                        }}
+                      />
+
+                      {/* Rounded square blanc glossy */}
+                      <div
+                        className="relative flex h-9 w-9 items-center justify-center rounded-[10px] border border-white/90"
+                        style={{
+                          background:
+                            "linear-gradient(145deg, #FFFFFF 0%, #F1F5F9 50%, #E0E7FF 100%)",
+                          boxShadow:
+                            "0 0 0 1px rgba(255,255,255,0.9) inset, 0 1px 2px rgba(255,255,255,0.8) inset, 0 8px 20px rgba(99,102,241,0.35), 0 4px 8px rgba(15,23,42,0.15)",
+                        }}
+                      >
+                        {/* Reflet glossy en haut */}
+                        <div
+                          className="pointer-events-none absolute inset-x-1 top-0.5 h-3 rounded-t-[8px]"
+                          style={{
+                            background:
+                              "linear-gradient(to bottom, rgba(255,255,255,0.95), rgba(255,255,255,0))",
+                          }}
+                        />
+
+                        {/* Flèche navy centrée */}
+                        <svg
+                          width="16"
+                          height="18"
+                          viewBox="0 0 16 18"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="relative z-10"
+                        >
+                          <path
+                            d="M2 1.5L2 15L5.5 11.5L8.5 17L10.5 16L7.5 10.5H13L2 1.5Z"
+                            fill="#0F172A"
+                            stroke="#0F172A"
+                            strokeWidth="1"
+                            strokeLinejoin="round"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      </div>
+
+                      {/* Halo pulsant qui tourne autour */}
+                      <motion.div
+                        className="absolute inset-0 rounded-[10px] border-2 border-[#6366F1]/50"
+                        animate={{
+                          scale: [1, 1.3, 1],
+                          opacity: [0.5, 0, 0.5],
+                        }}
+                        transition={{
+                          duration: 2.2,
+                          repeat: Infinity,
+                          ease: "easeOut",
+                        }}
+                      />
+                    </div>
+                  </motion.div>
+
+                  {/* Effets "click" violets */}
+                  <motion.div
+                    className="pointer-events-none absolute z-20 h-14 w-14 rounded-full border-2 border-[#6366F1]"
+                    initial={{ top: "38%", left: "70%", opacity: 0, scale: 0.3 }}
+                    animate={{ opacity: [0, 0.9, 0], scale: [0.3, 1.5, 2] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 6.5,
+                      ease: "easeOut",
+                    }}
+                    style={{ transform: "translate(-50%, -50%)" }}
+                  />
+                  <motion.div
+                    className="pointer-events-none absolute z-20 h-14 w-14 rounded-full border-2 border-[#8B5CF6]"
+                    initial={{ top: "55%", left: "45%", opacity: 0, scale: 0.3 }}
+                    animate={{ opacity: [0, 0.7, 0], scale: [0.3, 1.5, 2] }}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      repeatDelay: 14,
+                      delay: 3,
+                      ease: "easeOut",
+                    }}
+                    style={{ transform: "translate(-50%, -50%)" }}
+                  />
                 </div>
               </div>
+
+              <div className="pointer-events-none absolute inset-x-12 top-full h-16 bg-gradient-to-b from-[#6366F1]/10 to-transparent blur-2xl" />
             </div>
           </motion.div>
 
-          {/* Boutons CTA */}
           <motion.div
             initial={{ opacity: 0, y: 18 }}
             animate={{ opacity: 1, y: 0 }}
