@@ -1,5 +1,5 @@
 /** @type {import('tailwindcss').Config} */
-module.exports = {
+export default {
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -35,24 +35,21 @@ module.exports = {
     },
     extend: {
       colors: {
-        // Fonds clairs (White Premium Theme)
         background: {
           DEFAULT: "#FFFFFF",
           secondary: "#F8FAFC",
           soft: "#F4F4F6",
-          dashboard: "#0f0f1a", // Conservé pour le dashboard
+          dashboard: "#0f0f1a",
           card: "#FFFFFF",
           elevated: "#F8FAFC",
           hover: "#F1F5F9",
         },
-        // Textes sombres sur fond clair
         foreground: {
-          DEFAULT: "#0F172A", // Noir premium
-          secondary: "#475569", // Gris doux
-          muted: "#64748B", // Gris moyen
+          DEFAULT: "#0F172A",
+          secondary: "#475569",
+          muted: "#64748B",
           disabled: "#94A3B8",
         },
-        // Marque (violet/indigo conservé)
         brand: {
           DEFAULT: "#6366F1",
           accent: "#8B5CF6",
@@ -61,13 +58,11 @@ module.exports = {
           hover: "#5558E6",
           active: "#4338CA",
         },
-        // Bordures subtiles
         border: {
           DEFAULT: "#E2E8F0",
           light: "#F1F5F9",
           strong: "#CBD5E1",
         },
-        // Sémantique
         success: "#10B981",
         warning: "#F59E0B",
         danger: "#EF4444",

@@ -9,9 +9,9 @@ import { createClient } from '@/lib/supabase/client';
 
 const pricingPlans = [
   { id: 'demo', name: 'MakeItAds Démo', price: '0 FCFA', features: ['10 crédits de bienvenue (offre unique)', '2 Diagnostics Flash', 'Aperçu rapide de votre activité', 'Support communautaire'], popular: false, ctaText: 'Commencer', link: '/dashboard', isInternal: true, checkColor: 'text-emerald-500', ctaBg: 'bg-emerald-500', ctaHover: 'hover:bg-emerald-600', ctaTextCol: 'text-white', bgCard: 'bg-white' },
-  { id: 'pro', name: 'MakeItAds Pro', price: '10 000 FCFA/an', durationNote: "12 mois d'accès", features: ['50 crédits renouvelés chaque mois', '5 Stratégies Complètes / mois', '12 sections détaillées', 'Scripts WhatsApp prêts à l\'emploi', 'Allocation budgétaire sur 7 jours', 'Ciblage précis par ville', 'Guide créatif', 'Support email (48h)'], popular: true, ctaText: 'Choisir le Plan Pro', link: 'https://makeitads.mychariow.com/plan-pro', isInternal: false, checkColor: 'text-[#6366F1]', ctaBg: 'bg-[#6366F1]', ctaHover: 'hover:bg-[#5558e6]', ctaTextCol: 'text-white', bgCard: 'bg-white' },
-  { id: 'premium', name: 'MakeItAds Premium', price: '25 000 FCFA/an', durationNote: "12 mois d'accès", features: ['150 crédits renouvelés chaque mois', '15 Stratégies Complètes / mois', 'Analyse concurrentielle', '5 variantes de hooks', 'Analyse d\'audience avancée', 'Stratégie de croissance 3 mois', 'Support prioritaire (12h)', 'Rapports avancés'], popular: false, ctaText: 'Choisir le Plan Premium', link: 'https://makeitads.mychariow.com/plan-prem', isInternal: false, checkColor: 'text-rose-500', ctaBg: 'bg-rose-500', ctaHover: 'hover:bg-rose-600', ctaTextCol: 'text-white', bgCard: 'bg-white' },
-  { id: 'elite', name: 'MakeItAds Élite', price: '100 000 FCFA/an', durationNote: "12 mois d'accès", features: ['500 crédits renouvelés chaque mois', '50 Stratégies Complètes / mois', 'Consulting stratégique mensuel', 'Formation personnalisée', 'Accompagnement avancé', 'Rapports white-label', 'Support prioritaire 24/7', 'Accès API'], popular: false, ctaText: 'Choisir le Plan Élite', link: 'https://makeitads.mychariow.com/plan-elit', isInternal: false, checkColor: 'text-amber-500', ctaBg: 'bg-amber-500', ctaHover: 'hover:bg-amber-600', ctaTextCol: 'text-white', bgCard: 'bg-white' },
+  { id: 'pro', name: 'MakeItAds Pro', price: '10 000 FCFA/an', durationNote: "12 mois d'accès", features: ['50 crédits renouvelés chaque mois', '5 Stratégies Complètes / mois', '12 sections détaillées', 'Scripts WhatsApp prêts à l\'emploi', 'Allocation budgétaire sur 7 jours', 'Ciblage précis par ville', 'Guide créatif', 'Support email (48h)'], popular: true, ctaText: 'Choisir le Plan Pro', link: 'https://makeitads.mychariow.com/plan-pro/checkout', isInternal: false, checkColor: 'text-[#6366F1]', ctaBg: 'bg-[#6366F1]', ctaHover: 'hover:bg-[#5558e6]', ctaTextCol: 'text-white', bgCard: 'bg-white' },
+  { id: 'premium', name: 'MakeItAds Premium', price: '25 000 FCFA/an', durationNote: "12 mois d'accès", features: ['150 crédits renouvelés chaque mois', '15 Stratégies Complètes / mois', 'Analyse concurrentielle', '5 variantes de hooks', 'Analyse d\'audience avancée', 'Stratégie de croissance 3 mois', 'Support prioritaire (12h)', 'Rapports avancés'], popular: false, ctaText: 'Choisir le Plan Premium', link: 'https://makeitads.mychariow.com/plan-prem/checkout', isInternal: false, checkColor: 'text-rose-500', ctaBg: 'bg-rose-500', ctaHover: 'hover:bg-rose-600', ctaTextCol: 'text-white', bgCard: 'bg-white' },
+  { id: 'elite', name: 'MakeItAds Élite', price: '100 000 FCFA/an', durationNote: "12 mois d'accès", features: ['500 crédits renouvelés chaque mois', '50 Stratégies Complètes / mois', 'Consulting stratégique mensuel', 'Formation personnalisée', 'Accompagnement avancé', 'Rapports white-label', 'Support prioritaire 24/7', 'Accès API'], popular: false, ctaText: 'Choisir le Plan Élite', link: 'https://makeitads.mychariow.com/plan-elit/checkout', isInternal: false, checkColor: 'text-amber-500', ctaBg: 'bg-amber-500', ctaHover: 'hover:bg-amber-600', ctaTextCol: 'text-white', bgCard: 'bg-white' },
 ];
 
 const comparisonRows = [
@@ -105,7 +105,6 @@ export default function PricingPage() {
 
   return (
     <main className="min-h-screen bg-[#F8F8FC]">
-      {/* PRICING */}
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-left mb-6 md:mb-10">
@@ -122,7 +121,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* TABLEAU DE COMPARAISON */}
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
@@ -159,7 +157,6 @@ export default function PricingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">

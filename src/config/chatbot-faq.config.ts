@@ -1,6 +1,9 @@
 // ============================================
 // CONFIGURATION FAQ CHATBOT
+// Aucun appel API. Tout est local.
 // ============================================
+
+export const TELEGRAM_URL = 'https://t.me/MakeitAds_CEO';
 
 export interface FAQEntry {
   keywords: string[];
@@ -9,172 +12,136 @@ export interface FAQEntry {
   category: 'pricing' | 'credits' | 'usage' | 'support' | 'plans';
 }
 
-export const FAQ_DATABASE: FAQEntry[] = [
-  // ─── PRIX ───
-  {
-    keywords: ['prix', 'tarif', 'coût', 'combien', 'coute', 'coute', 'paye'],
-    question: 'Combien coûte MakeItAds ?',
-    answer: `MakeItAds propose 4 plans :
-• **Démo** : 0 FCFA — 10 crédits offerts (2 Diagnostics Flash)
-• **Pro** : 10 000 FCFA/an — 50 crédits/mois (5 stratégies complètes)
-• **Premium** : 25 000 FCFA/an — 150 crédits/mois (15 stratégies complètes)
-• **Élite** : 100 000 FCFA/an — 500 crédits/mois (50 stratégies complètes)
+// ============================================
+// BASE DE CONNAISSANCES
+// ============================================
 
-Tous les plans annuels incluent le renouvellement automatique des crédits chaque mois.`,
+export const FAQ_DATABASE: FAQEntry[] = [
+  {
+    keywords: ['prix', 'tarif', 'coût', 'coute', 'combien', 'cher', 'paye', 'payer', 'facture'],
+    question: 'Combien coûte MakeItAds ?',
+    answer: `Voici les 4 formules MakeItAds :
+
+🎯 Démo : 0 FCFA (10 crédits offerts)
+🎯 Pro : 10 000 FCFA/an (50 crédits/mois, 5 stratégies complètes)
+🎯 Premium : 25 000 FCFA/an (150 crédits/mois, 15 stratégies complètes)
+🎯 Élite : 100 000 FCFA/an (500 crédits/mois, 50 stratégies complètes)
+
+Tous les plans payants incluent le renouvellement automatique des crédits chaque mois.`,
     category: 'pricing',
   },
-
-  // ─── CRÉDITS ───
   {
-    keywords: ['crédit', 'credit', 'combien de crédit', 'consommation', 'dépense'],
+    keywords: ['quel plan', 'choisir', 'recommandé', 'conseil', 'meilleur plan', 'adapté'],
+    question: 'Quel plan choisir pour mon business ?',
+    answer: `Ça dépend de ta situation :
+
+🆓 Tu découvres MakeItAds → commence par le Démo (gratuit)
+🚀 Tu lances tes premières campagnes → Pro (10 000 F/an)
+📈 Tu veux dominer ta niche → Premium (25 000 F/an)
+👑 Tu es une agence ou une équipe → Élite (100 000 F/an)
+
+La majorité des entrepreneurs commencent par le Pro, puis passent au Premium après 3 à 6 mois.`,
+    category: 'plans',
+  },
+  {
+    keywords: ['crédit', 'credit', 'consommation', 'dépense', 'combien de crédit', 'fonctionne'],
     question: 'Comment fonctionnent les crédits ?',
-    answer: `Chaque génération consomme des crédits :
-• **Diagnostic Flash** = 5 crédits (aperçu rapide, réservé au plan Démo)
-• **Stratégie Complète** = 10 crédits (12 sections détaillées, à partir du plan Pro)
+    answer: `Les crédits sont le carburant de MakeItAds :
 
-Vos crédits sont **renouvelés automatiquement chaque mois** selon votre plan. Les crédits non utilisés ne sont pas reportés, donc générez régulièrement !`,
+🔹 Diagnostic Flash = 5 crédits (réservé au plan Démo)
+🔹 Stratégie Complète = 10 crédits (à partir du plan Pro)
+
+Tes crédits sont renouvelés automatiquement chaque mois selon ton plan. Les crédits non utilisés ne se reportent pas, donc pense à générer régulièrement.`,
     category: 'credits',
   },
-
   {
-    keywords: ['recharge', 'recharger', 'acheter des crédits', 'plus de crédits'],
+    keywords: ['recharge', 'recharger', 'acheter', 'pack', 'plus de crédit', 'épuisé', 'fini'],
     question: 'Comment recharger mes crédits ?',
-    answer: `Si vous épuisez vos crédits du mois, vous avez 2 options :
+    answer: `3 packs de recharge disponibles :
 
-1. **Recharge ponctuelle** (dès maintenant) :
-   • +10 crédits = 1 500 FCFA
-   • +30 crédits = 4 000 FCFA
-   • +80 crédits = 9 000 FCFA
+🔸 +10 crédits = 1 500 FCFA (1 stratégie)
+🔸 +30 crédits = 4 000 FCFA (3 stratégies, le plus populaire)
+🔸 +80 crédits = 9 000 FCFA (8 stratégies, meilleur rapport)
 
-2. **Passer au plan supérieur** pour plus de crédits mensuels.
-
-Rendez-vous sur **Dashboard → Crédits** pour recharger.`,
+Tu peux recharger à tout moment depuis ton dashboard, section Crédits.`,
     category: 'credits',
   },
-
-  // ─── FONCTIONNEMENT ───
   {
-    keywords: ['comment ça marche', 'comment fonctionne', 'utiliser', 'générer', 'stratégie'],
-    question: 'Comment générer une stratégie ?',
-    answer: `C'est simple :
+    keywords: ['comment générer', 'comment utiliser', 'wizard', 'marche', 'commencer', 'démarrer'],
+    question: 'Comment générer ma première stratégie ?',
+    answer: `C'est très simple :
 
-1. Cliquez sur **"Nouvelle stratégie"** dans le menu
-2. Remplissez le brief en 8 étapes (entreprise, offre, audience, budget...)
-3. Notre IA analyse votre business
-4. Vous recevez une stratégie complète avec :
-   • Ciblage précis
-   • Scripts WhatsApp prêts à copier
-   • Allocation budgétaire
-   • KPIs à suivre
-   • Plan d'action sur 7 jours
+1️⃣ Clique sur "Nouvelle stratégie"
+2️⃣ Réponds au wizard en 8 étapes (5 minutes)
+3️⃣ Notre IA analyse ton business
+4️⃣ Tu reçois une stratégie complète
 
-⏱️ Temps total : environ 5 minutes.`,
+Tu obtiens : ciblage précis, scripts WhatsApp prêts à copier, budget détaillé, KPIs à suivre et plan d'action sur 7 jours.`,
     category: 'usage',
   },
-
   {
-    keywords: ['différence flash', 'complète', 'flash vs'],
+    keywords: ['différence', 'flash', 'complète', 'complete', 'versus', 'vs'],
     question: 'Quelle est la différence entre Flash et Complète ?',
-    answer: `**Diagnostic Flash** (plan Démo uniquement) :
-• 3 sections : Diagnostic, Avatar client, Angle publicitaire
-• Aperçu rapide de votre potentiel
-• Coût : 5 crédits
+    answer: `Deux niveaux de stratégie :
 
-**Stratégie Complète** (plans Pro, Premium, Élite) :
-• 12 sections détaillées (ciblage, scripts, budget, KPIs, plan d'action...)
-• Recommandations opérationnelles
-• Coût : 10 crédits
+🎯 Diagnostic Flash (5 crédits) : aperçu en 3 sections (diagnostic, avatar client, angle). Réservé au plan Démo.
 
-Le Flash est conçu pour **découvrir la qualité** de MakeItAds. Les plans payants donnent accès aux stratégies réellement actionnables.`,
+🎯 Stratégie Complète (10 crédits) : 12 sections détaillées avec scripts WhatsApp, allocation budgétaire, KPIs et plan d'action. À partir du plan Pro.
+
+Le Flash te permet de découvrir la qualité. Les stratégies complètes sont réellement actionnables.`,
     category: 'usage',
   },
-
-  // ─── CONTACT / SUPPORT ───
   {
-    keywords: ['contact', 'parler', 'humain', 'support', 'aide'],
-    question: 'Comment contacter le support ?',
-    answer: `Vous pouvez nous joindre via :
-
-• **Telegram** : @MakeitAds_CEO
-• **Email** : reply@makeitads.pro
-
-Réponse sous 24-48h pour le plan Pro, sous 12h pour Premium, sous 1h pour Élite.`,
-    category: 'support',
-  },
-
-  // ─── PAIEMENT ───
-  {
-    keywords: ['paiement', 'payer', 'mobile money', 'wave', 'orange money', 'mtn'],
+    keywords: ['paiement', 'wave', 'orange', 'mtn', 'moov', 'mobile money', 'carte', 'bancaire'],
     question: 'Quels moyens de paiement acceptez-vous ?',
     answer: `Nous acceptons :
 
-• **Mobile Money** : Wave, Orange Money, MTN MoMo, Moov Money
-• **Cartes bancaires** : Visa, Mastercard
-• **Virement bancaire** (sur demande pour Élite)
+💳 Mobile Money : Wave, Orange Money, MTN MoMo, Moov Money
+💳 Cartes bancaires : Visa, Mastercard
 
-Tous les paiements sont sécurisés via Chariow.`,
+Tous les paiements passent par Chariow, une plateforme sécurisée utilisée par des milliers de vendeurs en Afrique.`,
     category: 'support',
   },
-
-  // ─── SÉCURITÉ ───
   {
-    keywords: ['sécurisé', 'confiance', 'remboursement', 'garantie'],
-    question: 'Mes paiements sont-ils sécurisés ?',
-    answer: `Absolument. Tous les paiements passent par **Chariow**, une plateforme de paiement sécurisée utilisée par des milliers de vendeurs en Afrique.
-
-Nous acceptons les paiements Mobile Money et cartes bancaires. Vos données bancaires ne transitent jamais par nos serveurs.`,
+    keywords: ['support', 'contact', 'aide', 'humain', 'parler', 'joindre'],
+    question: 'Comment contacter le support ?',
+    answer: `Tu peux joindre notre équipe directement sur Telegram. Nous répondons personnellement à toutes les questions, généralement en moins d'une heure.`,
     category: 'support',
   },
-
-  // ─── PLAN À CHOISIR ───
   {
-    keywords: ['quel plan', 'choisir', 'recommandé', 'conseil plan'],
-    question: 'Quel plan choisir ?',
-    answer: `Ça dépend de votre situation :
-
-• **Vous découvrez MakeItAds** → Commencez par le **Démo** (gratuit)
-• **Vous lancez vos premières campagnes** → **Pro** (10 000 F/an)
-• **Vous voulez dominer votre niche** → **Premium** (25 000 F/an)
-• **Vous êtes une agence ou équipe** → **Élite** (100 000 F/an)
-
-La plupart des entrepreneurs commencent par le Pro, puis passent au Premium après 3-6 mois.`,
-    category: 'plans',
+    keywords: ['bug', 'problème', 'marche pas', 'erreur', 'connexion', 'bloqué', 'panne', 'technique'],
+    question: 'J\'ai un problème technique',
+    answer: `Désolé pour ce désagrément. Pour qu'on règle ça au plus vite, décris-nous le problème exact (capture d'écran si possible) sur Telegram.`,
+    category: 'support',
   },
-
-  // ─── RENOUVELLEMENT ───
   {
-    keywords: ['renouvellement', 'expire', 'expiration', 'renouveler', 'abonnement'],
+    keywords: ['renouvellement', 'expire', 'expiration', 'abonnement', 'résilier', 'annuler'],
     question: 'Que se passe-t-il à la fin de mon abonnement ?',
-    answer: `Votre abonnement est valable **12 mois** à partir de la date d'achat.
+    answer: `Ton abonnement est valable 12 mois. À la fin de cette période :
 
-À la fin de cette période :
-• Votre plan passe automatiquement au **Démo**
-• Vos crédits du mois sont remis à zéro
-• Vous pouvez renouveler à tout moment
+📅 Ton plan repasse automatiquement au Démo
+📅 Tes crédits du mois sont remis à zéro
+📅 Tu peux renouveler à tout moment
 
-Nous vous envoyons un **rappel 30 jours avant** l'expiration pour que vous puissiez renouveler.`,
+Nous t'envoyons un rappel 30 jours avant l'échéance.`,
     category: 'plans',
   },
-
-  // ─── AFRIQUE ───
   {
-    keywords: ['afrique', 'africain', 'local', 'adapté'],
+    keywords: ['afrique', 'africain', 'local', 'adapté', 'marché'],
     question: 'MakeItAds est-il adapté au marché africain ?',
-    answer: `C'est notre **ADN**.
+    answer: `C'est notre ADN.
 
 Nos stratégies sont calibrées pour :
-• **WhatsApp** comme canal de conversion principal
-• **Mobile Money** (Wave, Orange Money, MTN)
-• Les **codes de confiance locaux**
-• Les **budgets en FCFA** réalistes
+• WhatsApp comme canal de conversion principal
+• Mobile Money (Wave, Orange Money, MTN)
+• Les codes de confiance locaux
+• Les budgets en FCFA réalistes
 
-Nous ne traduisons pas des stratégies américaines. Nous les adaptons à la réalité africaine.`,
+Aucune stratégie n'est copiée de l'étranger. Tout est pensé pour notre marché.`,
     category: 'usage',
   },
-
-  // ─── RÉSULTATS ───
   {
-    keywords: ['résultat', 'vente', 'marcher', 'efficace', 'roi'],
+    keywords: ['résultat', 'vente', 'efficace', 'roi', 'rentable', 'marcher vraiment', 'ça marche'],
     question: 'Est-ce que ça marche vraiment ?',
     answer: `Nos utilisateurs actifs voient des résultats concrets :
 
@@ -182,13 +149,42 @@ Nous ne traduisons pas des stratégies américaines. Nous les adaptons à la ré
 • Ciblages précis qui baissent le coût par clic
 • Plans d'action clairs qui évitent le hasard
 
-⚠️ **Important** : MakeItAds vous donne la stratégie. Les résultats dépendent de votre **exécution**. Un plan appliqué sérieusement vaut mieux qu'un plan parfait ignoré.`,
+⚠️ Important : MakeItAds te donne la stratégie. Les résultats dépendent de ton exécution. Un plan appliqué sérieusement vaut mieux qu'un plan parfait ignoré.`,
     category: 'usage',
+  },
+  {
+    keywords: ['démo', 'demo', 'gratuit', 'essayer', 'tester', 'essai'],
+    question: 'Puis-je tester MakeItAds gratuitement ?',
+    answer: `Oui, tu peux tester MakeItAds gratuitement :
+
+🎁 10 crédits offerts à l'inscription
+🎁 De quoi faire 2 Diagnostics Flash
+🎁 Aucune carte bancaire requise
+
+Crée ton compte en 2 minutes et découvre la qualité de nos stratégies.`,
+    category: 'pricing',
+  },
+  {
+    keywords: ['sécurisé', 'sécurité', 'confiance', 'arnaque', 'fiable'],
+    question: 'Mes paiements sont-ils sécurisés ?',
+    answer: `Absolument. Tous les paiements passent par Chariow, une plateforme de paiement sécurisée utilisée par des milliers de vendeurs en Afrique.
+
+Tes données bancaires ne transitent jamais par nos serveurs. Nous acceptons Mobile Money et cartes bancaires.`,
+    category: 'support',
+  },
+  {
+    keywords: ['mot de passe', 'password', 'compte', 'connexion', 'inscription', 'connecter'],
+    question: 'Problème de connexion ou mot de passe',
+    answer: `Pour ton compte :
+
+🔑 Utilise "Mot de passe oublié" sur la page de connexion pour réinitialiser ton mot de passe
+🔑 Pour tout autre problème (compte bloqué, email erroné), contacte notre équipe sur Telegram`,
+    category: 'support',
   },
 ];
 
 // ============================================
-// QUESTIONS SUGGÉRÉES (affichées au démarrage)
+// QUESTIONS SUGGÉRÉES
 // ============================================
 
 export const SUGGESTED_QUESTIONS = [
@@ -201,14 +197,10 @@ export const SUGGESTED_QUESTIONS = [
 ];
 
 // ============================================
-// DÉTECTION DE FAQ
+// DÉTECTION DE FAQ (100% local)
 // ============================================
 
-/**
- * Essaie de trouver une réponse FAQ basée sur les mots-clés du message.
- * Retourne null si aucun match pertinent.
- */
-export function findFAQAnswer(message: string): { question: string; answer: string } | null {
+export function findFAQAnswer(message: string): FAQEntry | null {
   const normalized = message.toLowerCase().trim();
   if (!normalized || normalized.length < 3) return null;
 
@@ -218,23 +210,52 @@ export function findFAQAnswer(message: string): { question: string; answer: stri
     let score = 0;
     for (const keyword of entry.keywords) {
       if (normalized.includes(keyword.toLowerCase())) {
-        // Plus le mot-clé est long, plus le score est élevé
         score += keyword.length;
       }
     }
-
-    // Score minimum pour considérer un match
     if (score >= 4 && (!bestMatch || score > bestMatch.score)) {
       bestMatch = { entry, score };
     }
   }
 
-  if (bestMatch) {
-    return {
-      question: bestMatch.entry.question,
-      answer: bestMatch.entry.answer,
-    };
-  }
+  return bestMatch ? bestMatch.entry : null;
+}
 
-  return null;
+// ============================================
+// TEMPLATES DE CLÔTURE — vers L'ÉQUIPE
+// ============================================
+
+export const CLOSING_TEMPLATES: ((name: string | null) => string)[] = [
+  (name) => `\n\n💬 Une question précise${name ? ` ${name}` : ''} ? Écris à notre équipe sur Telegram, on te répond personnellement : ${TELEGRAM_URL}`,
+  (name) => `\n\nPour échanger en direct${name ? ` ${name}` : ''}, retrouve notre équipe sur Telegram : ${TELEGRAM_URL}`,
+  (name) => `\n\nNotre équipe est dispo sur Telegram${name ? ` ${name}` : ''} si tu veux aller plus loin : ${TELEGRAM_URL}`,
+  (name) => `\n\nOn peut en discuter${name ? ` ${name}` : ''} sur Telegram quand tu veux : ${TELEGRAM_URL}`,
+  (name) => `\n\n💡 Le meilleur moyen d'avancer${name ? ` ${name}` : ''} reste d'en parler directement avec notre équipe. C'est ici : ${TELEGRAM_URL}`,
+];
+
+// ============================================
+// TEMPLATES DE FALLBACK
+// ============================================
+
+export const FALLBACK_TEMPLATES: ((name: string | null) => string)[] = [
+  (name) => `Merci ${name || ''} d'avoir pris le temps de nous écrire 🙏\n\nTa question mérite une réponse personnalisée. Le mieux est qu'on en discute directement pour bien comprendre ton besoin.\n\n👉 Écris à notre équipe sur Telegram : ${TELEGRAM_URL}`,
+  (name) => `${name ? `${name}, ` : ''}nous avons bien noté ta question. Pour te répondre correctement, le mieux c'est qu'on échange en direct.\n\n👉 Notre équipe est sur Telegram : ${TELEGRAM_URL}`,
+  (name) => `Excellente question ${name || ''} 💡\n\nNous voulons te donner une réponse vraiment adaptée, pas du copier-coller. Écris à notre équipe sur Telegram et on te répond rapidement.\n\n👉 ${TELEGRAM_URL}`,
+  (name) => `${name ? `${name}, ` : ''}c'est une question importante et nous ne voulons pas y répondre à la légère.\n\nRejoins notre équipe sur Telegram, on en parle en détail : ${TELEGRAM_URL}`,
+  (name) => `Bien reçu ${name || ''} 🙌\n\nTa question sort un peu des sujets fréquents, donc on préfère la traiter personnellement.\n\n👉 Contacte notre équipe sur Telegram : ${TELEGRAM_URL}`,
+  (name) => `Merci pour ton message ${name || ''} 🤝\n\nPour qu'on aille au fond des choses, retrouve notre équipe sur Telegram. On répond personnellement à chaque personne.\n\n👉 ${TELEGRAM_URL}`,
+  (name) => `${name ? `${name}, ` : ''}ta question mérite mieux qu'une réponse générique. Discutons-en directement sur Telegram.\n\n👉 ${TELEGRAM_URL}`,
+  (name) => `Nous apprécions vraiment que tu nous poses cette question ${name || ''} 💭\n\nPour bien t'accompagner, le mieux c'est un échange direct. Notre équipe est sur Telegram : ${TELEGRAM_URL}`,
+];
+
+// ============================================
+// ANTI-RÉPÉTITION
+// ============================================
+
+export function pickRandom<T>(arr: T[], lastIndex?: number): { item: T; index: number } {
+  let index = Math.floor(Math.random() * arr.length);
+  if (arr.length > 1 && index === lastIndex) {
+    index = (index + 1) % arr.length;
+  }
+  return { item: arr[index], index };
 }

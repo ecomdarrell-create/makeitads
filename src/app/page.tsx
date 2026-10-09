@@ -50,10 +50,69 @@ const faqData = [
 ];
 
 const pricingPlans = [
-  { id: "demo", name: "MakeItAds Démo", price: "0 FCFA", features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"], popular: false, ctaText: "Commencer", link: "/dashboard", checkColor: "text-emerald-500", ctaBg: "bg-emerald-500", ctaHover: "hover:bg-emerald-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: false },
-  { id: "pro", name: "MakeItAds Pro", price: "10 000 FCFA/an", durationNote: "12 mois d'accès", features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"], popular: true, ctaText: "Choisir le Plan Pro", link: "https://makeitads.mychariow.com/plan-pro", checkColor: "text-[#6366F1]", ctaBg: "bg-[#6366F1]", ctaHover: "hover:bg-[#5558e6]", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
-  { id: "premium", name: "MakeItAds Premium", price: "25 000 FCFA/an", durationNote: "12 mois d'accès", features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"], popular: false, ctaText: "Choisir le Plan Premium", link: "https://makeitads.mychariow.com/plan-prem", checkColor: "text-rose-500", ctaBg: "bg-rose-500", ctaHover: "hover:bg-rose-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
-  { id: "elite", name: "MakeItAds Élite", price: "100 000 FCFA/an", durationNote: "12 mois d'accès", features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"], popular: false, ctaText: "Choisir le Plan Élite", link: "https://makeitads.mychariow.com/plan-elit", checkColor: "text-amber-500", ctaBg: "bg-amber-500", ctaHover: "hover:bg-amber-600", ctaTextCol: "text-white", bgCard: "bg-white", isExternal: true },
+  {
+    id: "demo",
+    name: "MakeItAds Démo",
+    price: "0 FCFA",
+    features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"],
+    popular: false,
+    ctaText: "Commencer",
+    link: "/dashboard",
+    checkColor: "text-emerald-500",
+    ctaBg: "bg-emerald-500",
+    ctaHover: "hover:bg-emerald-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-white",
+    isExternal: false,
+  },
+  {
+    id: "pro",
+    name: "MakeItAds Pro",
+    price: "10 000 FCFA/an",
+    durationNote: "12 mois d'accès",
+    features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"],
+    popular: true,
+    ctaText: "Choisir le Plan Pro",
+    link: "https://makeitads.mychariow.com/plan-pro/checkout",
+    checkColor: "text-[#6366F1]",
+    ctaBg: "bg-[#6366F1]",
+    ctaHover: "hover:bg-[#5558e6]",
+    ctaTextCol: "text-white",
+    bgCard: "bg-white",
+    isExternal: true,
+  },
+  {
+    id: "premium",
+    name: "MakeItAds Premium",
+    price: "25 000 FCFA/an",
+    durationNote: "12 mois d'accès",
+    features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"],
+    popular: false,
+    ctaText: "Choisir le Plan Premium",
+    link: "https://makeitads.mychariow.com/plan-prem/checkout",
+    checkColor: "text-rose-500",
+    ctaBg: "bg-rose-500",
+    ctaHover: "hover:bg-rose-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-white",
+    isExternal: true,
+  },
+  {
+    id: "elite",
+    name: "MakeItAds Élite",
+    price: "100 000 FCFA/an",
+    durationNote: "12 mois d'accès",
+    features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"],
+    popular: false,
+    ctaText: "Choisir le Plan Élite",
+    link: "https://makeitads.mychariow.com/plan-elit/checkout",
+    checkColor: "text-amber-500",
+    ctaBg: "bg-amber-500",
+    ctaHover: "hover:bg-amber-600",
+    ctaTextCol: "text-white",
+    bgCard: "bg-white",
+    isExternal: true,
+  },
 ];
 
 const statsData = [
@@ -225,7 +284,10 @@ export default function LandingPage() {
           </div>
 
           <motion.div key={activeStep} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex flex-col gap-3">
-            <div className="relative w-full aspect-[16/9] md:aspect-[21/9] bg-gray-50 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100">
+            <div
+              className="w-full aspect-[16/9] md:aspect-[21/9] bg-gray-50 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100"
+              style={{ position: "relative" }}
+            >
               <Image src={howItWorksSteps[activeStep].image} alt={howItWorksSteps[activeStep].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" priority={activeStep === 0} />
             </div>
             <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm p-4 md:p-6">
@@ -255,7 +317,6 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
-      {/* STATISTIQUES */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
         <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
         <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
@@ -282,8 +343,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5, delay: index * 0.1 }}
                 className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/70 p-5 md:p-7 backdrop-blur-xl group"
                 style={{
-                  boxShadow:
-                    "0 8px 32px rgba(99,102,241,0.12), 0 1px 0 rgba(255,255,255,0.9) inset",
+                  boxShadow: "0 8px 32px rgba(99,102,241,0.12), 0 1px 0 rgba(255,255,255,0.9) inset",
                 }}
               >
                 <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br from-[#6366F1]/20 to-transparent blur-2xl" />
@@ -309,18 +369,12 @@ export default function LandingPage() {
         footerNote="Note de 4.7/5 sur 289 avis."
       />
 
-      {/* QUI SOMMES NOUS */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-b from-[#F8F8FC] via-white to-[#F8F8FC] overflow-hidden">
         <div className="absolute top-40 -left-40 h-96 w-96 rounded-full bg-[#6366F1]/10 blur-[130px]" />
         <div className="absolute bottom-40 -right-40 h-96 w-96 rounded-full bg-[#8B5CF6]/10 blur-[130px]" />
 
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-12 md:mb-20"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-12 md:mb-20">
             <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
               Qui sommes-nous
             </p>
@@ -335,11 +389,7 @@ export default function LandingPage() {
 
           <div className="relative">
             {aboutBlocks.map((block, index) => (
-              <div
-                key={index}
-                className="sticky"
-                style={{ top: `${100 + index * 24}px` }}
-              >
+              <div key={index} className="sticky" style={{ top: `${100 + index * 24}px` }}>
                 <motion.div
                   initial={{ opacity: 0, y: 60 }}
                   whileInView={{ opacity: 1, y: 0 }}
@@ -347,11 +397,9 @@ export default function LandingPage() {
                   transition={{ duration: 0.6, ease: "easeOut" }}
                   className="relative mb-8 overflow-hidden rounded-3xl border border-white/60 bg-white/70 p-6 md:p-10 backdrop-blur-2xl"
                   style={{
-                    boxShadow:
-                      "0 8px 32px rgba(99,102,241,0.10), 0 1px 0 rgba(255,255,255,0.8) inset, 0 -1px 0 rgba(99,102,241,0.06) inset",
+                    boxShadow: "0 8px 32px rgba(99,102,241,0.10), 0 1px 0 rgba(255,255,255,0.8) inset, 0 -1px 0 rgba(99,102,241,0.06) inset",
                   }}
                 >
-                  {/* Chiffre géant transparent en arrière-plan */}
                   <span
                     className="pointer-events-none absolute -top-4 right-2 select-none font-bold leading-none text-[#6366F1]"
                     style={{
@@ -373,7 +421,6 @@ export default function LandingPage() {
                     <h3 className="mb-3 text-lg md:text-2xl font-semibold text-[#18181B] leading-tight">
                       {block.title}
                     </h3>
-
                     <p className="text-xs md:text-sm leading-relaxed text-[#475569] max-w-3xl">
                       {block.text}
                     </p>
@@ -385,7 +432,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* PRICING */}
       <section id="pricing" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white">
         <div className="max-w-5xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
@@ -410,7 +456,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* FAQ */}
       <section id="faq" className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-[#F8F8FC]">
         <div className="max-w-3xl mx-auto">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-8 md:mb-12">
@@ -445,7 +490,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* CTA FINAL */}
       <section className="relative z-10 py-12 md:py-20 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-3xl mx-auto text-left">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>

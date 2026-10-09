@@ -46,7 +46,8 @@ export default function EntrepreneursCarousel() {
             {duplicatedEntrepreneurs.map((entrepreneur, index) => (
               <div
                 key={index}
-                className="relative flex-shrink-0 w-[140px] md:w-[200px] h-[187px] md:h-[267px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#8B5CF6]"
+                className="flex-shrink-0 w-[140px] md:w-[200px] h-[187px] md:h-[267px] rounded-2xl overflow-hidden bg-gradient-to-br from-[#6366F1] to-[#8B5CF6]"
+                style={{ position: "relative" }}
               >
                 <Image
                   src={entrepreneur.image}

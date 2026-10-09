@@ -14,14 +14,10 @@ export interface PricingPlan {
   features: string[];
   limits: {
     businesses: number;
-
-    // Intelligence
     competitorIntelligence: boolean;
     trendIntelligence: boolean;
     predictiveTrends: boolean;
     historicalIntelligence: boolean;
-
-    // Analysis
     swotAnalysis: boolean;
     audienceInsights: boolean;
     marketShareAnalysis: boolean;
@@ -29,27 +25,19 @@ export interface PricingPlan {
     growthForecast: boolean;
     keywordOpportunities: boolean;
     advertisingIntelligence: boolean;
-
-    // Strategy
     strategyFlash: boolean;
     strategyCompleteBasic: boolean;
     strategyCompleteAdvanced: boolean;
     strategyCompleteElite: boolean;
-
-    // Export & Integration
     pdfExport: boolean;
     advancedReports: boolean;
     whiteLabelReports: boolean;
     apiAccess: boolean;
     customIntegrations: boolean;
-
-    // Support
     prioritySupport: boolean;
     dedicatedManager: boolean;
     slaGuarantee: boolean;
     customTraining: boolean;
-
-    // Team
     teamCollaboration: boolean;
     multiBrandManagement: boolean;
     ssoSaml: boolean;
@@ -57,10 +45,6 @@ export interface PricingPlan {
   popular?: boolean;
   cta: string;
 }
-
-// ======================================================
-// COÛTS EN CRÉDITS
-// ======================================================
 
 export const CREDIT_COSTS = {
   DIAGNOSTIC_FLASH: 5,
@@ -71,10 +55,6 @@ export const CREDIT_COSTS = {
 } as const;
 
 export type CreditAction = keyof typeof CREDIT_COSTS;
-
-// ======================================================
-// PACKS DE RECHARGE
-// ======================================================
 
 export interface RechargePack {
   id: string;
@@ -93,7 +73,7 @@ export const RECHARGE_PACKS: RechargePack[] = [
     price: 1500,
     label: '+10 crédits',
     description: '1 stratégie complète',
-    chariowUrl: 'https://makeitads.mychariow.com/recharge-10',
+    chariowUrl: 'https://makeitads.mychariow.com/prd_h75k9z3s/checkout',
   },
   {
     id: 'recharge-30',
@@ -102,7 +82,7 @@ export const RECHARGE_PACKS: RechargePack[] = [
     label: '+30 crédits',
     description: '3 stratégies complètes',
     popular: true,
-    chariowUrl: 'https://makeitads.mychariow.com/recharge-30',
+    chariowUrl: 'https://makeitads.mychariow.com/prd_w4a49pog/checkout',
   },
   {
     id: 'recharge-80',
@@ -110,13 +90,9 @@ export const RECHARGE_PACKS: RechargePack[] = [
     price: 9000,
     label: '+80 crédits',
     description: '8 stratégies complètes',
-    chariowUrl: 'https://makeitads.mychariow.com/recharge-80',
+    chariowUrl: 'https://makeitads.mychariow.com/prd_9oxkwnxl/checkout',
   },
 ];
-
-// ======================================================
-// CONFIGURATION DES PLANS
-// ======================================================
 
 export const PRICING_CONFIG: Record<string, PricingPlan> = {
   free: {
@@ -327,20 +303,12 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
 
 export type PlanId = keyof typeof PRICING_CONFIG;
 
-// ======================================================
-// LABELS
-// ======================================================
-
 export const PLAN_LABELS: Record<PlanId, string> = {
   free: 'Démo',
   pro: 'Pro',
   premium: 'Premium',
   enterprise: 'Élite',
 };
-
-// ======================================================
-// NORMALISATION
-// ======================================================
 
 export function normalizePlanId(planId?: string | null): PlanId {
   const normalized = (planId || 'free').toLowerCase().trim();
@@ -352,10 +320,6 @@ export function normalizePlanId(planId?: string | null): PlanId {
 
   return validPlans.includes(normalized as PlanId) ? (normalized as PlanId) : 'free';
 }
-
-// ======================================================
-// HELPERS
-// ======================================================
 
 export function getPlan(planId: string): PricingPlan | undefined {
   return PRICING_CONFIG[planId];
@@ -432,10 +396,6 @@ export function isPremiumOrAbove(planId: string): boolean {
 export function isEnterprise(planId: string): boolean {
   return planId === 'enterprise';
 }
-
-// ======================================================
-// GÉNÉRATIONS POSSIBLES (calculées)
-// ======================================================
 
 export function getRemainingGenerations(credits: number, type: 'flash' | 'complete'): number {
   const cost = type === 'flash' ? CREDIT_COSTS.DIAGNOSTIC_FLASH : CREDIT_COSTS.STRATEGIE_COMPLETE;

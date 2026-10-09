@@ -575,11 +575,12 @@ img {
    Empêche les débordements horizontaux sur TOUTES les pages
    ═══════════════════════════════════════════════════════════ */
 
-/* 1. Verrou horizontal renforcé sur html et body */
+/* 1. Verrou horizontal sur html et body */
 html {
   overflow-x: hidden;
   width: 100%;
   max-width: 100vw;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -587,7 +588,6 @@ body {
   width: 100%;
   max-width: 100vw;
   position: relative;
-  min-height: 100dvh;
 }
 
 /* 2. Empêche tout élément fixe/absolu de dépasser */
@@ -601,7 +601,7 @@ body > * {
   width: 100%;
 }
 
-/* 3. Images, vidéos, SVG, canvas, iframes ne dépassent jamais */
+/* 3. Images, vidéos, SVG et iframes ne dépassent jamais */
 img,
 video,
 svg,
@@ -609,13 +609,15 @@ canvas,
 iframe {
   max-width: 100%;
   height: auto;
+  display: block;
 }
 
 /* 4. Empêche les longs mots/URLs de casser la mise en page */
-h1, h2, h3, h4, h5, h6,
-p, span, a, li, div {
+p, h1, h2, h3, h4, h5, h6, span, a, li, div {
   overflow-wrap: break-word;
   word-wrap: break-word;
+  word-break: break-word;
+  hyphens: auto;
 }
 
 /* 5. Les pré et code ne débordent pas */
@@ -633,28 +635,40 @@ table {
 }
 
 /* 7. Empêche les éléments en position fixed de dépasser */
-.fixed,
-[class*="fixed "] {
+[class*="fixed"] {
   max-width: 100vw;
 }
 
-/* 8. Sur mobile, évite le zoom automatique sur les inputs (iOS) */
+/* 8. FIX POUR LES NAVBAR FIXES — padding-top sur les pages */
+body {
+  min-height: 100dvh;
+}
+
+/* 9. Sur mobile, évite le zoom automatique sur les inputs */
 @media (max-width: 640px) {
   input,
   textarea,
   select {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 
-/* 9. Force le bon comportement des conteneurs grid et flex */
+/* 10. Force le bon comportement des conteneurs grid et flex */
 .grid > *,
 .flex > * {
   min-width: 0;
 }
 
-/* 10. Modales et drawers ne dépassent jamais */
+/* 11. Modales et drawers ne dépassent jamais */
+[class*="modal"],
+[class*="drawer"],
 [role="dialog"] {
   max-width: 100vw;
   max-height: 100dvh;
+}
+
+/* 12. Correction pour les navigateurs mobiles qui zooment trop */
+@viewport {
+  width: device-width;
+  initial-scale: 1;
 }
