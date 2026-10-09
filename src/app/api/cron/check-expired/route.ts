@@ -1,10 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// ============================================
-// CLIENT SUPABASE ADMIN
-// ============================================
-
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -18,17 +14,13 @@ function getSupabaseAdmin() {
   });
 }
 
-// ============================================
-// GET /api/cron/check-expired
-// ============================================
-
 export async function GET(req: NextRequest) {
   try {
-    // Sécurité cron
     const authHeader = req.headers.get('authorization');
     const expectedSecret = process.env.CRON_SECRET;
 
     if (expectedSecret && authHeader !== `Bearer ${expectedSecret}`) {
+      console.warn('Cron check-expired : secret invalide');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -37,7 +29,6 @@ export async function GET(req: NextRequest) {
     const supabaseAdmin = getSupabaseAdmin();
     const now = new Date().toISOString();
 
-    // Trouver tous les profils avec plan payant expiré
     const { data: expiredProfiles, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, plan, credits_balance, plan_expires_at')
@@ -67,7 +58,6 @@ export async function GET(req: NextRequest) {
 
     for (const profile of expiredProfiles) {
       try {
-        // Retour au plan free + crédits à 0 + expiration à null
         const { error: updateError } = await supabaseAdmin
           .from('profiles')
           .update({
@@ -85,7 +75,6 @@ export async function GET(req: NextRequest) {
           continue;
         }
 
-        // Log transaction
         await supabaseAdmin.from('credit_transactions').insert({
           user_id: profile.id,
           type: 'plan_expired',

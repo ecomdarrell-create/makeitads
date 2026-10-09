@@ -74,7 +74,6 @@ export const metadata: Metadata = {
       },
     ],
   },
-  manifest: "/site.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -87,9 +86,6 @@ export const metadata: Metadata = {
   },
 };
 
-// ═══════════════════════════════════════════════════════════
-// VIEWPORT — Renforcé pour mobile
-// ═══════════════════════════════════════════════════════════
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -109,7 +105,7 @@ const jsonLd = {
       "name": "MakeItAds",
       "url": "https://makeitads.pro",
       "logo": "https://makeitads.pro/favicon.ico",
-      "sameAs": ["https://t.me/MakeItAds_CEO"]
+      "sameAs": ["https://t.me/MakeitAds_CEO"]
     },
     {
       "@type": "SoftwareApplication",

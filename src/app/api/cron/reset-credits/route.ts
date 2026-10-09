@@ -2,18 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
-// ============================================
-// CLIENT SUPABASE ADMIN (à l'appel)
-// ============================================
-
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!url || !key) {
-    throw new Error(
-      'Variables Supabase manquantes : NEXT_PUBLIC_SUPABASE_URL et SUPABASE_SERVICE_ROLE_KEY requises.'
-    );
+    throw new Error('Variables Supabase manquantes');
   }
 
   return createClient(url, key, {
@@ -21,13 +15,8 @@ function getSupabaseAdmin() {
   });
 }
 
-// ============================================
-// GET /api/cron/reset-credits
-// ============================================
-
 export async function GET(req: NextRequest) {
   try {
-    // Sécurité : vérifier le secret du cron
     const authHeader = req.headers.get('authorization');
     const expectedSecret = process.env.CRON_SECRET;
 
@@ -40,7 +29,6 @@ export async function GET(req: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
-    // Récupérer tous les utilisateurs avec un plan payant
     const { data: profiles, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, email, plan, credits_balance')
@@ -72,7 +60,6 @@ export async function GET(req: NextRequest) {
         const planConfig = PRICING_CONFIG[plan];
         const monthlyCredits = planConfig.monthlyCredits;
 
-        // 1. Mettre à jour les crédits + le last_credits_reset
         const { error: updateError } = await supabaseAdmin
           .from('profiles')
           .update({
@@ -89,7 +76,6 @@ export async function GET(req: NextRequest) {
           continue;
         }
 
-        // 2. Enregistrer la transaction (audit)
         await supabaseAdmin.from('credit_transactions').insert({
           user_id: profile.id,
           type: 'monthly_reset',
