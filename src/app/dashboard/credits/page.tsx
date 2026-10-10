@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Coins } from 'lucide-react';
 import { BackButton } from '@/components/ui/BackButton';
 
 function CreditRing({ value, total, label, color, detail }: { value: number; total: number; label: string; color: string; detail: string }) {
@@ -65,13 +66,24 @@ export default async function CreditsPage() {
     <div className="px-4 py-5 sm:px-6 sm:py-6 max-w-5xl mx-auto">
       <BackButton href="/dashboard" label="Retour au dashboard" />
 
-      <div className="mb-5">
-        <h1 className="text-base sm:text-lg font-semibold text-[#111827] mb-1">
-          Vos crédits
-        </h1>
-        <p className="text-[10px] sm:text-xs text-gray-600">
-          Gérez votre solde et consultez l&apos;historique.
-        </p>
+      {/* En-tête avec bouton Recharger */}
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-base sm:text-lg font-semibold text-[#111827] mb-1">
+            Vos crédits
+          </h1>
+          <p className="text-[10px] sm:text-xs text-gray-600">
+            Gérez votre solde et consultez l&apos;historique.
+          </p>
+        </div>
+
+        <Link
+          href="/dashboard/credits/recharge"
+          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-[#6366F1] px-4 py-2 text-[11px] font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6] sm:text-xs flex-shrink-0"
+        >
+          <Coins className="h-3.5 w-3.5" />
+          Recharger des crédits
+        </Link>
       </div>
 
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 mb-5">
@@ -99,14 +111,22 @@ export default async function CreditsPage() {
                 Besoin de plus de crédits ?
               </h3>
               <p className="text-[10px] sm:text-xs text-gray-700 mb-2.5">
-                Passez au plan Pro pour recevoir 15 crédits renouvelés chaque mois.
+                Rechargez un pack de crédits ou passez au plan Pro pour recevoir 50 crédits renouvelés chaque mois.
               </p>
-              <Link
-                href="/dashboard/pricing"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] sm:text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
-              >
-                Voir les plans
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/dashboard/credits/recharge"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] sm:text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
+                >
+                  Recharger maintenant
+                </Link>
+                <Link
+                  href="/dashboard/pricing"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[10px] sm:text-xs font-medium text-[#6366F1] bg-white border border-[#6366F1]/30 rounded-lg hover:bg-indigo-50 transition-colors"
+                >
+                  Voir les plans
+                </Link>
+              </div>
             </div>
           </div>
         </div>

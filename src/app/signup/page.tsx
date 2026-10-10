@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
@@ -20,10 +20,26 @@ function SignupForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [checking, setChecking] = useState(true);
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const referralCode = searchParams.get('ref') || null;
+
+  // ✅ Rediriger si déjà connecté
+  useEffect(() => {
+    const checkSession = async () => {
+      const supabase = createClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        router.replace(redirectTo);
+        return;
+      }
+      setChecking(false);
+    };
+    checkSession();
+  }, [router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +57,6 @@ function SignupForm() {
       return;
     }
 
-    // Préfixer avec + si présent
     const cleanPhone = formData.phone.trim()
       ? '+' + formData.phone.replace(/\D/g, '')
       : null;
@@ -65,6 +80,19 @@ function SignupForm() {
 
       if (error) {
         setError('Impossible de créer votre compte. Vérifiez vos informations et réessayez.');
+        setLoading(false);
+        return;
+      }
+
+      // ✅ Détection : email déjà utilisé (Supabase renvoie identities vide)
+      if (
+        data.user &&
+        Array.isArray(data.user.identities) &&
+        data.user.identities.length === 0
+      ) {
+        setError(
+          'Cet email est déjà utilisé. Connectez-vous plutôt via la page de connexion.'
+        );
         setLoading(false);
         return;
       }
@@ -99,6 +127,23 @@ function SignupForm() {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-6">
+        <div className="w-full max-w-[420px]">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-6">
+            <div className="animate-pulse space-y-3">
+              <div className="h-5 w-3/4 rounded bg-slate-100" />
+              <div className="h-3 w-1/2 rounded bg-slate-100" />
+              <div className="h-10 rounded-xl bg-slate-100" />
+              <div className="h-10 rounded-xl bg-slate-100" />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-6">

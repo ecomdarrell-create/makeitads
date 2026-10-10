@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { ComingSoonModal } from '@/components/auth/ComingSoonModal';
 
 function GoogleLogo() {
   return (
@@ -27,60 +29,81 @@ export function AuthProviderButtons() {
   const [loadingGoogle, setLoadingGoogle] = useState(false);
   const [loadingApple, setLoadingApple] = useState(false);
   const [error, setError] = useState('');
+  const [showAppleModal, setShowAppleModal] = useState(false);
+  const pathname = usePathname();
 
-  const handleOAuth = async (provider: 'google' | 'apple') => {
+  // ✅ Détection de la page pour envoyer le bon intent au callback
+  const isSignup = pathname?.startsWith('/signup') || pathname?.startsWith('/sign-up');
+  const intent = isSignup ? 'signup' : 'login';
+
+  const handleOAuth = async (provider: 'google') => {
     setError('');
-    if (provider === 'google') setLoadingGoogle(true);
-    else setLoadingApple(true);
+    setLoadingGoogle(true);
 
     try {
       const supabase = createClient();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider,
         options: {
-          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard`,
+          // ✅ On passe l'intent au callback pour la détection anti-doublon
+          redirectTo: `${window.location.origin}/auth/callback?next=/dashboard&intent=${intent}`,
         },
       });
 
       if (oauthError) {
         setError('Connexion impossible. Réessayez.');
         setLoadingGoogle(false);
-        setLoadingApple(false);
       }
     } catch {
       setError('Erreur réseau. Réessayez.');
       setLoadingGoogle(false);
-      setLoadingApple(false);
     }
   };
 
+  // ✅ Apple → ouvrir la popup "Bientôt disponible"
+  const handleAppleClick = () => {
+    setError('');
+    setShowAppleModal(true);
+  };
+
   return (
-    <div className="space-y-2">
-      {error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-[10px] text-red-700">
-          {error}
-        </div>
-      )}
+    <>
+      <div className="space-y-2">
+        {error && (
+          <div className="rounded-lg border border-red-200 bg-red-50 p-2 text-[10px] text-red-700">
+            {error}
+          </div>
+        )}
 
-      <button
-        type="button"
-        onClick={() => handleOAuth('google')}
-        disabled={loadingGoogle || loadingApple}
-        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
-      >
-        {loadingGoogle ? <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" /> : <GoogleLogo />}
-        <span>Continuer avec Google</span>
-      </button>
+        <button
+          type="button"
+          onClick={() => handleOAuth('google')}
+          disabled={loadingGoogle || loadingApple}
+          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 transition-all hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+        >
+          {loadingGoogle ? <Loader2 className="h-3.5 w-3.5 animate-spin text-slate-400" /> : <GoogleLogo />}
+          <span>Continuer avec Google</span>
+        </button>
 
-      <button
-        type="button"
-        onClick={() => handleOAuth('apple')}
-        disabled={loadingGoogle || loadingApple}
-        className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-black px-3 py-2 text-xs font-medium text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
-      >
-        {loadingApple ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <AppleLogo />}
-        <span>Continuer avec Apple</span>
-      </button>
-    </div>
+        <button
+          type="button"
+          onClick={handleAppleClick}
+          disabled={loadingGoogle || loadingApple}
+          className="flex min-h-10 w-full items-center justify-center gap-2 rounded-xl border border-slate-900 bg-black px-3 py-2 text-xs font-medium text-white transition-all hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60 sm:text-sm"
+        >
+          {loadingApple ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <AppleLogo />}
+          <span>Continuer avec Apple</span>
+        </button>
+      </div>
+
+      {/* ✅ Popup premium brandée */}
+      <ComingSoonModal
+        isOpen={showAppleModal}
+        onClose={() => setShowAppleModal(false)}
+        provider="Apple"
+        ctaHref={isSignup ? '/signup' : '/login'}
+        ctaLabel={isSignup ? 'Créer un compte avec email' : 'Se connecter avec email'}
+      />
+    </>
   );
 }

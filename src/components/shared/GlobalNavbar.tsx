@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Search, X, MessageCircle } from "lucide-react";
 import { SiTelegram } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,9 +18,25 @@ const navLinks = [
   { name: "Dashboard", href: "/dashboard", isExternal: true },
 ];
 
+// ✅ Index de recherche — modifie librement
+const searchIndex = [
+  { label: "Dashboard", href: "/dashboard", keywords: "accueil tableau de bord home" },
+  { label: "Créer une stratégie", href: "/dashboard/new", keywords: "nouvelle stratégie créer lancer" },
+  { label: "Mes stratégies", href: "/dashboard/strategies", keywords: "liste historique stratégies" },
+  { label: "Analytics", href: "/dashboard/analytics", keywords: "statistiques données activité graphiques" },
+  { label: "Paramètres", href: "/settings", keywords: "settings profil compte préférences" },
+  { label: "Tarifs & facturation", href: "/dashboard/pricing", keywords: "prix plan upgrade facturation billing" },
+  { label: "Recharger des crédits", href: "/dashboard/credits", keywords: "crédits recharge recharger topup" },
+  { label: "Comment ça marche", href: "/dashboard/how-it-works", keywords: "aide tutoriel guide documentation" },
+  { label: "Filleuls / Parrainage", href: "/dashboard/referrals", keywords: "parrainage filleuls invitation referral" },
+  { label: "Support", href: "https://t.me/MakeitAds_CEO", keywords: "aide contact support chat" },
+];
+
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [userName, setUserName] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -53,6 +69,48 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
+  // Raccourcis clavier
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping =
+        target?.tagName === "INPUT" ||
+        target?.tagName === "TEXTAREA" ||
+        target?.isContentEditable;
+      if (isTyping) return;
+
+      if (e.key === "/" || (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey))) {
+        e.preventDefault();
+        setSearchOpen(true);
+      }
+      if (e.key === "Escape") {
+        setSearchOpen(false);
+        setSearchQuery("");
+      }
+    };
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, []);
+
+  useEffect(() => {
+    if (searchOpen) {
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = "";
+      };
+    }
+  }, [searchOpen]);
+
+  const filteredResults = useMemo(() => {
+    if (!searchQuery.trim()) return searchIndex.slice(0, 8);
+    const q = searchQuery.toLowerCase();
+    return searchIndex.filter(
+      (item) =>
+        item.label.toLowerCase().includes(q) ||
+        item.keywords.toLowerCase().includes(q)
+    );
+  }, [searchQuery]);
+
   const handleNavClick = (e: React.MouseEvent, href: string, isExternal?: boolean) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
@@ -78,16 +136,28 @@ export default function Navbar() {
     router.refresh();
   };
 
+  const handleSearchResultClick = (href: string) => {
+    setSearchOpen(false);
+    setSearchQuery("");
+    if (href.startsWith("http")) {
+      window.open(href, "_blank", "noopener,noreferrer");
+    } else {
+      router.push(href);
+    }
+  };
+
   return (
     <>
       <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 md:rounded-none transition-all duration-300">
         <div className="bg-white border border-slate-200/70 rounded-2xl px-4 h-12 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.04)] md:border-b md:border-x-0 md:border-t-0 md:rounded-none md:h-14 md:px-6 md:max-w-7xl md:mx-auto md:shadow-none">
-          <Link href="/" className="group flex items-center transition-transform hover:scale-105">
+          {/* Logo */}
+          <Link href="/" className="group flex items-center transition-transform hover:scale-105 shrink-0">
             <span className="text-sm md:text-lg font-semibold tracking-tight text-gray-900">
               MakeIt<span className="text-[#6366F1]">Ads</span>
             </span>
           </Link>
 
+          {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8 text-sm">
             {navLinks.map((link) => (
               <a
@@ -102,79 +172,98 @@ export default function Navbar() {
             ))}
           </nav>
 
-          <div className="hidden md:flex items-center gap-3">
-            {user ? (
-              <>
-                <div className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600">
-                    <User className="h-3.5 w-3.5 text-white" />
-                  </div>
-                  <span className="max-w-[100px] truncate">{userName}</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
-                >
-                  <LogOut className="h-3.5 w-3.5" />
-                  Déconnexion
-                </button>
-              </>
-            ) : authLoading ? null : (
-              <>
-                <Link
-                  href="/login"
-                  className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
-                >
-                  Se connecter
-                </Link>
-                <Link
-                  href="/signup"
-                  className="rounded-full bg-[#6366F1] px-5 py-1.5 text-sm font-bold text-white shadow-md shadow-[#6366f1]/20 hover:bg-[#5558e6] transition-all"
-                >
-                  S&apos;inscrire
-                </Link>
-              </>
-            )}
-          </div>
+          {/* Bloc droit : loupe + auth + burger */}
+          <div className="flex items-center gap-2 md:gap-4">
+            {/* 🔍 Recherche — sans cercle, trait noir renforcé */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              aria-label="Rechercher"
+              className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center text-slate-900 transition-colors hover:text-[#6366F1]"
+            >
+              <Search
+                className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]"
+                strokeWidth={2.6}
+              />
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-            className="md:hidden relative flex h-10 w-10 items-center justify-center rounded-lg text-gray-800 transition-colors hover:bg-gray-100"
-            aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
-            aria-expanded={isMobileMenuOpen}
-          >
-            <span className="relative block h-4 w-5">
-              <motion.span
-                animate={{
-                  rotate: isMobileMenuOpen ? 45 : 0,
-                  y: isMobileMenuOpen ? 6 : 0,
-                }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="absolute left-0 top-0 block h-0.5 w-5 rounded-full bg-gray-800"
-              />
-              <motion.span
-                animate={{
-                  opacity: isMobileMenuOpen ? 0 : 1,
-                  scaleX: isMobileMenuOpen ? 0 : 1,
-                }}
-                transition={{ duration: 0.2, ease: "easeInOut" }}
-                className="absolute left-0 top-1/2 block h-0.5 w-5 -translate-y-1/2 rounded-full bg-gray-800"
-              />
-              <motion.span
-                animate={{
-                  rotate: isMobileMenuOpen ? -45 : 0,
-                  y: isMobileMenuOpen ? -6 : 0,
-                }}
-                transition={{ duration: 0.25, ease: "easeInOut" }}
-                className="absolute bottom-0 left-0 block h-0.5 w-5 rounded-full bg-gray-800"
-              />
-            </span>
-          </button>
+            {/* Auth desktop */}
+            <div className="hidden md:flex items-center gap-3 ml-1">
+              {user ? (
+                <>
+                  <div className="flex items-center gap-2 rounded-full border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-900">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-600">
+                      <User className="h-3.5 w-3.5 text-white" />
+                    </div>
+                    <span className="max-w-[100px] truncate">{userName}</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSignOut}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                    Déconnexion
+                  </button>
+                </>
+              ) : authLoading ? null : (
+                <>
+                  <Link
+                    href="/login"
+                    className="rounded-full border border-gray-200 px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-all"
+                  >
+                    Se connecter
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className="rounded-full bg-[#6366F1] px-5 py-1.5 text-sm font-bold text-white shadow-md shadow-[#6366f1]/20 hover:bg-[#5558e6] transition-all"
+                  >
+                    S&apos;inscrire
+                  </Link>
+                </>
+              )}
+            </div>
+
+            {/* Burger mobile */}
+            <button
+              type="button"
+              onClick={() => setIsMobileMenuOpen((prev) => !prev)}
+              className="md:hidden relative flex h-8 w-8 items-center justify-center text-slate-900 transition-colors hover:text-[#6366F1]"
+              aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
+              aria-expanded={isMobileMenuOpen}
+            >
+              <span className="relative block h-4 w-5">
+                <motion.span
+                  animate={{
+                    rotate: isMobileMenuOpen ? 45 : 0,
+                    y: isMobileMenuOpen ? 6 : 0,
+                  }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="absolute left-0 top-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
+                />
+                <motion.span
+                  animate={{
+                    opacity: isMobileMenuOpen ? 0 : 1,
+                    scaleX: isMobileMenuOpen ? 0 : 1,
+                  }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="absolute left-0 top-1/2 block h-[2.5px] w-5 -translate-y-1/2 rounded-full bg-slate-900"
+                />
+                <motion.span
+                  animate={{
+                    rotate: isMobileMenuOpen ? -45 : 0,
+                    y: isMobileMenuOpen ? -6 : 0,
+                  }}
+                  transition={{ duration: 0.25, ease: "easeInOut" }}
+                  className="absolute bottom-0 left-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
+                />
+              </span>
+            </button>
+          </div>
         </div>
       </header>
 
+      {/* ── Menu mobile ── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -229,6 +318,19 @@ export default function Navbar() {
                   ))}
                 </nav>
 
+                {/* ✅ Bouton "Nous contacter" — ne fait rien pour l'instant */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    /* À brancher plus tard */
+                  }}
+                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-3 py-2.5 text-center text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Nous contacter
+                </button>
+
+                {/* Bouton Telegram Business Club (inchangé) */}
                 <a
                   href="https://t.me/makeitadsbusinessclub"
                   target="_blank"
@@ -272,6 +374,90 @@ export default function Navbar() {
               </div>
             </motion.div>
           </>
+        )}
+      </AnimatePresence>
+
+      {/* ── Modal de recherche premium ── */}
+      <AnimatePresence>
+        {searchOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            onClick={() => {
+              setSearchOpen(false);
+              setSearchQuery("");
+            }}
+            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-start justify-center pt-20 md:pt-32 px-4"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: -12, scale: 0.98 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -12, scale: 0.98 }}
+              transition={{ duration: 0.18, ease: "easeOut" }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white shadow-2xl overflow-hidden"
+            >
+              <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+                <Search className="h-4 w-4 text-slate-400 shrink-0" />
+                <input
+                  autoFocus
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Rechercher une page, une fonctionnalité…"
+                  className="w-full bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none"
+                />
+                <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-500">
+                  Échap
+                </kbd>
+                <button
+                  onClick={() => {
+                    setSearchOpen(false);
+                    setSearchQuery("");
+                  }}
+                  className="sm:hidden rounded-full p-1 text-slate-400 hover:bg-slate-100"
+                  aria-label="Fermer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto p-2">
+                {filteredResults.length === 0 ? (
+                  <p className="px-3 py-6 text-center text-sm text-slate-400">
+                    Aucun résultat pour « {searchQuery} »
+                  </p>
+                ) : (
+                  <ul className="space-y-0.5">
+                    {filteredResults.map((item) => (
+                      <li key={item.href}>
+                        <button
+                          onClick={() => handleSearchResultClick(item.href)}
+                          className="flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-slate-50"
+                        >
+                          <span className="text-sm font-medium text-slate-900">
+                            {item.label}
+                          </span>
+                          <span className="text-[10px] text-slate-400 truncate max-w-[180px]">
+                            {item.href}
+                          </span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+
+              <div className="flex items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-2 text-[10px] text-slate-400">
+                <span>Navigation rapide</span>
+                <span className="hidden sm:inline">
+                  Astuce : tape <kbd className="rounded border border-slate-200 bg-white px-1">/</kbd> partout
+                </span>
+              </div>
+            </motion.div>
+          </motion.div>
         )}
       </AnimatePresence>
     </>

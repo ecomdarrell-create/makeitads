@@ -7,7 +7,7 @@ import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2 } fr
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
-import { PlanId, hasFeature, normalizePlanId, PRICING_CONFIG } from '@/config/pricing.config';
+import { PlanId, normalizePlanId, PRICING_CONFIG } from '@/config/pricing.config';
 import { Step1Company } from '@/components/generate/steps/Step1Company';
 import { Step2Offer } from '@/components/generate/steps/Step2Offer';
 import { Step3Audience } from '@/components/generate/steps/Step3Audience';
@@ -29,7 +29,6 @@ export default function GeneratePage() {
   const [showSummary, setShowSummary] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  // ⚠️ null = pas encore chargé (évite le flash "0 crédits")
   const [creditsBalance, setCreditsBalance] = useState<number | null>(null);
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('flash');
@@ -38,12 +37,17 @@ export default function GeneratePage() {
   const [refreshingCredits, setRefreshingCredits] = useState(false);
 
   const totalSteps = 8;
-  const completeGenerationAllowed = hasFeature(currentPlan, 'pro');
+
+  // ✅ NOUVELLE LOGIQUE
+  // - free : peut faire Flash ET Complète
+  // - payant : peut faire Complète uniquement
+  const isFree = currentPlan === 'free';
+  const flashAllowed = isFree;
+  const completeAllowed = true; // tout le monde peut faire une complète
 
   const generationCost = strategyType === 'complete' ? 5 : 1;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
 
-  // ─── Le solde réel est-il chargé ? ───
   const creditsLoaded = creditsBalance !== null;
   const safeBalance = creditsBalance ?? 0;
 
@@ -68,7 +72,7 @@ export default function GeneratePage() {
     exhausted: 'border-red-300 bg-red-100 text-red-800',
   }[alertLevel];
 
-  // ─── Charger les crédits ───
+  // ─── Charger les crédits + appliquer la restriction ───
   const loadCreditsBalance = async () => {
     setRefreshingCredits(true);
     try {
@@ -97,16 +101,26 @@ export default function GeneratePage() {
       if (!profile) {
         const bootstrapResponse = await fetch('/api/profile/bootstrap', { method: 'POST' });
         if (!bootstrapResponse.ok) throw new Error('Initialisation du profil impossible.');
-        // Relancer récursivement
         setRefreshingCredits(false);
         await loadCreditsBalance();
         return;
       }
 
-      // ✅ On met le solde à jour en une seule fois
+      const normalizedPlan = normalizePlanId(profile.plan);
       setCreditsBalance(profile.credits_balance ?? 0);
-      setCurrentPlan(normalizePlanId(profile.plan));
+      setCurrentPlan(normalizedPlan);
       setSupabaseError('');
+
+      // ✅ Forcer Complète si plan payant, et lire ?type= pour plan free
+      if (normalizedPlan !== 'free') {
+        setStrategyType('complete');
+      } else {
+        const params = new URLSearchParams(window.location.search);
+        const requestedType = params.get('type');
+        if (requestedType === 'complete' || requestedType === 'flash') {
+          setStrategyType(requestedType);
+        }
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       console.error('Erreur connexion Supabase:', message);
@@ -141,6 +155,13 @@ export default function GeneratePage() {
     loadCreditsBalance();
   }, []);
 
+  // ✅ Si on est sur plan payant et que strategyType vaut flash, forcer complete
+  useEffect(() => {
+    if (!isFree && strategyType !== 'complete') {
+      setStrategyType('complete');
+    }
+  }, [isFree, strategyType]);
+
   useEffect(() => {
     const handleBack = () => setShowSummary(false);
     window.addEventListener('summary-back', handleBack);
@@ -154,7 +175,6 @@ export default function GeneratePage() {
     }
   }, [formData, currentStep]);
 
-  // ─── Réinitialiser le brouillon ───
   const resetDraft = () => {
     if (!confirm('Effacer toutes les informations déjà saisies ?')) return;
     localStorage.removeItem(DRAFT_KEY);
@@ -202,8 +222,9 @@ export default function GeneratePage() {
   };
 
   const handleGenerate = async () => {
-    if (strategyType === 'complete' && !completeGenerationAllowed) {
-      router.push('/dashboard/pricing');
+    // ✅ Sécurité : plan payant + flash → forcer complete
+    if (!isFree && strategyType === 'flash') {
+      setStrategyType('complete');
       return;
     }
 
@@ -342,7 +363,7 @@ export default function GeneratePage() {
           </button>
         </div>
 
-        {/* BANDEAU D'ALERTE CRÉDITS — uniquement si chargé ET solde bas */}
+        {/* BANDEAU ALERTE CRÉDITS */}
         {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
           <div
             className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
@@ -431,40 +452,50 @@ export default function GeneratePage() {
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setStrategyType('flash')}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                  strategyType === 'flash'
-                    ? 'border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                Diagnostic Flash
-                <span className="ml-1 text-[10px] opacity-70">1 crédit</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => completeGenerationAllowed && setStrategyType('complete')}
-                disabled={!completeGenerationAllowed}
-                className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
-                  strategyType === 'complete'
-                    ? 'border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]'
-                    : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                }`}
-              >
-                Stratégie complète
-                <span className="ml-1 text-[10px] opacity-70">5 crédits</span>
-              </button>
-            </div>
-
-            {!completeGenerationAllowed && (
-              <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[10px] text-amber-800">
-                La stratégie complète est réservée au plan Pro.{' '}
-                <Link href="/dashboard/pricing" className="font-semibold underline">
-                  Passer au plan adapté
-                </Link>
+            {isFree ? (
+              // ✅ Plan free : les 2 boutons
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStrategyType('flash')}
+                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                    strategyType === 'flash'
+                      ? 'border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]'
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Diagnostic Flash
+                  <span className="ml-1 text-[10px] opacity-70">1 crédit</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStrategyType('complete')}
+                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                    strategyType === 'complete'
+                      ? 'border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]'
+                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
+                  }`}
+                >
+                  Stratégie complète
+                  <span className="ml-1 text-[10px] opacity-70">5 crédits</span>
+                </button>
+              </div>
+            ) : (
+              // ✅ Plan payant : uniquement Complète, affiché en évidence
+              <div className="rounded-lg border border-[#6366F1] bg-[#6366F1]/10 px-3 py-2.5">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-[#6366F1]">
+                      Stratégie complète
+                    </p>
+                    <p className="mt-0.5 text-[10px] text-[#6366F1]/80">
+                      Inclus dans votre plan {currentPlan}
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-medium text-[#6366F1]">
+                    5 crédits
+                  </span>
+                </div>
               </div>
             )}
           </div>

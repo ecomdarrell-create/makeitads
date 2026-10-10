@@ -21,8 +21,25 @@ const navItems = [
   { name: 'Settings', href: '/dashboard/settings', icon: User },
 ];
 
+// ✅ Routes sur lesquelles la sidebar NE doit PAS s'afficher
+const AUTH_ROUTES = [
+  '/login',
+  '/signup',
+  '/sign-up',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+];
+
 export function Sidebar() {
   const pathname = usePathname();
+
+  // ✅ Sécurité : ne jamais afficher la sidebar sur les pages d'auth
+  const isAuthPage = AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+  if (isAuthPage) return null;
 
   return (
     <aside className="hidden md:flex flex-col w-64 h-[calc(100vh-3.5rem)] fixed left-0 top-14 bg-white border-r border-gray-200 z-30">

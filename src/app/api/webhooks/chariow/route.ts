@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
-const RECHARGE_PACKS: Record<string, number> = {
+// ─────────────────────────────────────────────────────────────
+// Détection de pack — plus robuste :
+//   1. Match exact sur nom normalisé
+//   2. Match sur "credits" / "crédits" suivi/précédé d'un nombre
+//   3. Match sur "pack"/"recharge" + nombre
+// ─────────────────────────────────────────────────────────────
+const RECHARGE_NAMES: Record<string, number> = {
   'recharge 10': 10,
   'recharge 30': 30,
   'recharge 80': 80,
@@ -23,14 +29,34 @@ const PLAN_PRICES: Record<string, number> = {
   enterprise: 100000,
 };
 
+/**
+ * Détecte un pack de crédits dans le nom du produit.
+ * Retourne le nombre de crédits ou null.
+ */
 function detectRechargePack(payload: any): number | null {
   const productName = extractProductName(payload);
   if (!productName) return null;
 
-  for (const [key, credits] of Object.entries(RECHARGE_PACKS)) {
+  // 1) Match exact sur les noms connus
+  for (const [key, credits] of Object.entries(RECHARGE_NAMES)) {
     if (productName.includes(key)) return credits;
   }
 
+  // 2) Pattern "X crédits" ou "X credits" (nombre avant)
+  const beforeCredits = productName.match(/(\d+)\s*(cr[ée]dits?|credits?)/i);
+  if (beforeCredits) {
+    const num = parseInt(beforeCredits[1], 10);
+    if (num > 0 && num <= 1000) return num;
+  }
+
+  // 3) Pattern "crédits X" ou "credits X" (nombre après)
+  const afterCredits = productName.match(/(cr[ée]dits?|credits?)\s*\+?\s*(\d+)/i);
+  if (afterCredits) {
+    const num = parseInt(afterCredits[2], 10);
+    if (num > 0 && num <= 1000) return num;
+  }
+
+  // 4) Pattern "pack" / "recharge" suivi d'un nombre
   if (productName.includes('recharge') || productName.includes('pack')) {
     const match = productName.match(/(\d+)/);
     if (match) {
@@ -38,6 +64,7 @@ function detectRechargePack(payload: any): number | null {
       if (num > 0 && num <= 1000) return num;
     }
   }
+
   return null;
 }
 
@@ -112,16 +139,28 @@ function detectPlan(payload: any): PlanId | null {
   return null;
 }
 
+// ─────────────────────────────────────────────────────────────
+// POST — Traite les paiements Chariow
+// ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
     console.log('=== WEBHOOK CHARIOW RECU ===');
 
-    let payload: any;
-    try { payload = JSON.parse(rawBody); }
-    catch { return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 }); }
+    // ✅ On lit userId depuis les query params (injectés dans l'URL Chariow)
+    const userIdFromQuery = req.nextUrl.searchParams.get('userId');
+    const emailFromQuery = req.nextUrl.searchParams.get('email');
 
-    const email = extractEmail(payload);
+    let payload: any;
+    try {
+      payload = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
+    }
+
+    // ✅ Email : on préfère celui du payload (source de vérité Chariow),
+    //    mais on accepte celui de l'URL en fallback
+    const email = extractEmail(payload) || emailFromQuery?.toLowerCase().trim() || null;
     if (!email) return NextResponse.json({ error: 'No email found' }, { status: 400 });
 
     const supabaseAdmin = getSupabaseAdmin();
@@ -130,50 +169,96 @@ export async function POST(req: NextRequest) {
     let currentPlan: PlanId = 'free';
     let currentCredits = 0;
 
-    const { data: existingProfile } = await supabaseAdmin
-      .from('profiles').select('id, email, plan, credits_balance')
-      .ilike('email', email).maybeSingle();
+    // ✅ PRIORITÉ 1 : userId depuis l'URL (le plus fiable)
+    if (userIdFromQuery) {
+      const { data: profileById } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, plan, credits_balance')
+        .eq('id', userIdFromQuery)
+        .maybeSingle();
 
-    if (existingProfile?.id) {
-      userId = existingProfile.id;
-      currentPlan = (existingProfile.plan as PlanId) || 'free';
-      currentCredits = existingProfile.credits_balance || 0;
-    } else {
+      if (profileById?.id) {
+        userId = profileById.id;
+        currentPlan = (profileById.plan as PlanId) || 'free';
+        currentCredits = profileById.credits_balance || 0;
+        console.log(`[chariow] User trouvé via query userId: ${userId}`);
+      }
+    }
+
+    // ✅ PRIORITÉ 2 : email depuis profiles
+    if (!userId) {
+      const { data: existingProfile } = await supabaseAdmin
+        .from('profiles')
+        .select('id, email, plan, credits_balance')
+        .ilike('email', email)
+        .maybeSingle();
+
+      if (existingProfile?.id) {
+        userId = existingProfile.id;
+        currentPlan = (existingProfile.plan as PlanId) || 'free';
+        currentCredits = existingProfile.credits_balance || 0;
+        console.log(`[chariow] User trouvé via email: ${userId}`);
+      }
+    }
+
+    // ✅ PRIORITÉ 3 : email depuis auth.users
+    if (!userId) {
       const { data: usersList } = await supabaseAdmin.auth.admin.listUsers();
       const match = usersList?.users?.find((u) => u.email?.toLowerCase() === email);
-      if (match) userId = match.id;
+      if (match) {
+        userId = match.id;
+        console.log(`[chariow] User trouvé via auth.users: ${userId}`);
+      }
     }
 
     const rechargeCredits = detectRechargePack(payload);
     const plan = detectPlan(payload);
     const orderId = extractOrderId(payload);
 
-    // ─── CAS A : RECHARGE ───
+    console.log(
+      `[chariow] Detect — recharge=${rechargeCredits} plan=${plan} orderId=${orderId} email=${email} userId=${userId}`
+    );
+
+    // ─── CAS A : RECHARGE DE CRÉDITS ───
     if (rechargeCredits) {
-      console.log(`Recharge detectee : +${rechargeCredits} credits`);
+      console.log(`[chariow] Recharge détectée : +${rechargeCredits} crédits`);
 
       if (!userId) {
-        return NextResponse.json({ error: 'Recharge sans compte existant' }, { status: 400 });
+        console.error(`[chariow] Recharge SANS user correspondant (email=${email})`);
+        return NextResponse.json(
+          {
+            error: 'Recharge sans compte existant',
+            email,
+            hint: 'Le compte doit être créé avant achat',
+          },
+          { status: 400 }
+        );
       }
 
       const newBalance = currentCredits + rechargeCredits;
 
       const { error: updateError } = await supabaseAdmin
         .from('profiles')
-        .update({ credits_balance: newBalance, updated_at: new Date().toISOString() })
+        .update({
+          credits_balance: newBalance,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', userId);
 
       if (updateError) {
+        console.error('[chariow] Update balance failed:', updateError.message);
         return NextResponse.json({ error: 'Update failed' }, { status: 500 });
       }
 
       await supabaseAdmin.from('credit_transactions').insert({
-        user_id: userId, type: 'recharge', amount: rechargeCredits,
+        user_id: userId,
+        type: 'recharge',
+        amount: rechargeCredits,
         balance_after: newBalance,
         description: `Recharge de ${rechargeCredits} crédits via Chariow (${orderId || 'order inconnu'})`,
       });
 
-      // ⭐ TRACKING REVENU
+      // Tracking revenu
       const rechargePrice = RECHARGE_PRICES[rechargeCredits] || 0;
       await supabaseAdmin.from('revenue_transactions').insert({
         user_id: userId,
@@ -184,18 +269,23 @@ export async function POST(req: NextRequest) {
         order_id: orderId,
       });
 
-      console.log(`SUCCES recharge : +${rechargeCredits} (solde: ${newBalance}) — ${rechargePrice} FCFA`);
+      console.log(
+        `[chariow] ✅ SUCCÈS recharge : +${rechargeCredits} (nouveau solde: ${newBalance}) — ${rechargePrice} FCFA`
+      );
 
       return NextResponse.json({
-        success: true, type: 'recharge', userId,
-        creditsAdded: rechargeCredits, newBalance,
+        success: true,
+        type: 'recharge',
+        userId,
+        creditsAdded: rechargeCredits,
+        newBalance,
         revenue: rechargePrice,
       });
     }
 
-    // ─── CAS B : ACHAT PLAN ───
+    // ─── CAS B : ACHAT DE PLAN ───
     if (plan) {
-      console.log(`Achat plan detecte : ${plan}`);
+      console.log(`[chariow] Achat plan détecté : ${plan}`);
 
       const planConfig = PRICING_CONFIG[plan];
       const monthlyCredits = planConfig.monthlyCredits;
@@ -206,18 +296,23 @@ export async function POST(req: NextRequest) {
 
       if (!userId) {
         const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          email, email_confirm: true,
+          email,
+          email_confirm: true,
           user_metadata: { full_name: customerName, created_from: 'chariow_purchase' },
         });
 
         if (createError || !newUser?.user) {
+          console.error('[chariow] User creation failed:', createError?.message);
           return NextResponse.json({ error: 'User creation failed' }, { status: 500 });
         }
 
         userId = newUser.user.id;
 
         await supabaseAdmin.from('profiles').insert({
-          id: userId, email, plan, credits_balance: monthlyCredits,
+          id: userId,
+          email,
+          plan,
+          credits_balance: monthlyCredits,
           plan_expires_at: expiresAt.toISOString(),
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -226,24 +321,28 @@ export async function POST(req: NextRequest) {
         const { error: updateError } = await supabaseAdmin
           .from('profiles')
           .update({
-            plan, credits_balance: monthlyCredits,
+            plan,
+            credits_balance: monthlyCredits,
             plan_expires_at: expiresAt.toISOString(),
             updated_at: new Date().toISOString(),
           })
           .eq('id', userId);
 
         if (updateError) {
+          console.error('[chariow] Plan update failed:', updateError.message);
           return NextResponse.json({ error: 'Update failed' }, { status: 500 });
         }
       }
 
       await supabaseAdmin.from('credit_transactions').insert({
-        user_id: userId, type: 'purchase', amount: monthlyCredits,
+        user_id: userId,
+        type: 'purchase',
+        amount: monthlyCredits,
         balance_after: monthlyCredits,
         description: `Achat du plan ${plan} via Chariow (${orderId || 'order inconnu'})`,
       });
 
-      // ⭐ TRACKING REVENU
+      // Tracking revenu
       const planPrice = PLAN_PRICES[plan] || 0;
       await supabaseAdmin.from('revenue_transactions').insert({
         user_id: userId,
@@ -254,28 +353,39 @@ export async function POST(req: NextRequest) {
         order_id: orderId,
       });
 
-      console.log(`SUCCES plan : ${plan} + ${monthlyCredits} credits — ${planPrice} FCFA`);
+      console.log(`[chariow] ✅ SUCCÈS plan : ${plan} + ${monthlyCredits} crédits — ${planPrice} FCFA`);
 
       return NextResponse.json({
-        success: true, type: 'plan', userId, plan,
+        success: true,
+        type: 'plan',
+        userId,
+        plan,
         creditsAdded: monthlyCredits,
         expiresAt: expiresAt.toISOString(),
         revenue: planPrice,
       });
     }
 
-    return NextResponse.json({ error: 'Produit non reconnu' }, { status: 400 });
+    // ─── CAS C : inconnu ───
+    console.warn('[chariow] Produit non reconnu, payload:', JSON.stringify(payload).slice(0, 500));
+    return NextResponse.json(
+      { error: 'Produit non reconnu', productName: extractProductName(payload) },
+      { status: 400 }
+    );
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
-    console.error('Erreur webhook Chariow:', message);
+    console.error('[chariow] Erreur webhook :', message);
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
+// ─────────────────────────────────────────────────────────────
+// GET — Health check
+// ─────────────────────────────────────────────────────────────
 export async function GET() {
   return NextResponse.json({
     status: 'ok',
-    message: 'Webhook Chariow MakeItAds operationnel',
+    message: 'Webhook Chariow MakeItAds opérationnel',
     timestamp: new Date().toISOString(),
   });
 }

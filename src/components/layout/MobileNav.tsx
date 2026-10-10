@@ -21,8 +21,25 @@ const mobileNavItems = [
   { name: 'Settings', href: '/dashboard/settings', icon: User },
 ];
 
+// ✅ Routes sur lesquelles la barre mobile NE doit PAS s'afficher
+const AUTH_ROUTES = [
+  '/login',
+  '/signup',
+  '/sign-up',
+  '/register',
+  '/forgot-password',
+  '/reset-password',
+  '/auth',
+];
+
 export function MobileNav() {
   const pathname = usePathname();
+
+  // ✅ Masquer la navigation mobile sur les pages d'authentification
+  const isAuthPage = AUTH_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+  if (isAuthPage) return null;
 
   return (
     <nav

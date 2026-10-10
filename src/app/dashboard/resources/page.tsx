@@ -50,29 +50,32 @@ const quickGuides = [
 
 export default function ResourcesPage() {
   return (
-    <div className="px-4 py-5 sm:px-6 sm:py-6 max-w-6xl mx-auto">
+    <div className="px-3 py-4 sm:px-6 sm:py-6 max-w-6xl mx-auto">
       <BackButton href="/dashboard" label="Retour au dashboard" />
 
-      <div className="mb-5">
-        <h1 className="text-lg sm:text-xl font-semibold text-[#111827] mb-1">Ressources</h1>
-        <p className="text-xs sm:text-sm text-gray-600">
+      <div className="mb-4 sm:mb-5">
+        <h1 className="text-base sm:text-xl font-semibold text-[#111827] mb-1">Ressources</h1>
+        <p className="text-[11px] sm:text-sm text-gray-600 leading-relaxed">
           Tout ce qu’il faut savoir pour utiliser MakeItAds efficacement et obtenir des résultats rapides.
         </p>
       </div>
 
-      <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-4 sm:p-5 mb-6">
-        <div className="flex items-start gap-3">
-          <HelpCircle className="w-5 h-5 text-[#6366F1] flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <h2 className="text-sm font-semibold text-[#111827] mb-1">Besoin d’aide rapide ?</h2>
-            <p className="text-xs text-gray-700 mb-3">
+      {/* Bloc support */}
+      <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-xl p-3 sm:p-5 mb-5 sm:mb-6">
+        <div className="flex items-start gap-2.5 sm:gap-3">
+          <HelpCircle className="w-4 h-4 sm:w-5 sm:h-5 text-[#6366F1] flex-shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <h2 className="text-[13px] sm:text-sm font-semibold text-[#111827] mb-1">
+              Besoin d’aide rapide ?
+            </h2>
+            <p className="text-[11px] sm:text-xs text-gray-700 mb-2.5 sm:mb-3 leading-relaxed">
               Notre équipe répond rapidement pour vous aider à lancer votre première stratégie ou à corriger un point précis.
             </p>
             <a
               href="https://t.me/MakeitAds_CEO"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
+              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-[11px] sm:text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
             >
               Contacter le support
               <ExternalLink className="w-3 h-3" />
@@ -81,45 +84,62 @@ export default function ResourcesPage() {
         </div>
       </div>
 
-      <section id="how-it-works" className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <BookOpen className="w-4 h-4 text-[#6366F1]" />
-          <h2 className="text-sm font-semibold text-[#111827]">Comment ça fonctionne</h2>
+      {/* Comment ça fonctionne */}
+      <section id="how-it-works" className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <BookOpen className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6366F1]" />
+          <h2 className="text-[13px] sm:text-sm font-semibold text-[#111827]">
+            Comment ça fonctionne
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-4">
           {workflow.map((step) => {
             const Icon = step.icon;
 
             return (
-              <div key={step.title} className="bg-white border border-gray-200 rounded-xl p-4 shadow-sm hover:border-[#6366F1] transition-colors">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-[#6366F1]">
-                  <Icon className="h-4 w-4" />
+              <div
+                key={step.title}
+                className="bg-white border border-gray-200 rounded-xl p-3 sm:p-4 shadow-sm hover:border-[#6366F1] transition-colors"
+              >
+                <div className="mb-2.5 sm:mb-3 flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-indigo-50 text-[#6366F1]">
+                  <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <h3 className="text-sm font-semibold text-[#111827] mb-2">{step.title}</h3>
-                <p className="text-xs leading-relaxed text-gray-600">{step.description}</p>
+                <h3 className="text-[13px] sm:text-sm font-semibold text-[#111827] mb-1.5 sm:mb-2 leading-snug">
+                  {step.title}
+                </h3>
+                <p className="text-[11px] sm:text-xs leading-relaxed text-gray-600">
+                  {step.description}
+                </p>
               </div>
             );
           })}
         </div>
       </section>
 
-      <section className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <ArrowRight className="w-4 h-4 text-[#6366F1]" />
-          <h2 className="text-sm font-semibold text-[#111827]">Guides utiles</h2>
+      {/* Guides utiles */}
+      <section className="mb-6 sm:mb-8">
+        <div className="flex items-center gap-2 mb-3 sm:mb-4">
+          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#6366F1]" />
+          <h2 className="text-[13px] sm:text-sm font-semibold text-[#111827]">
+            Guides utiles
+          </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
           {quickGuides.map((guide) => (
             <Link
               key={guide.title}
               href={guide.href}
-              className="group rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-colors hover:border-[#6366F1]"
+              className="group rounded-xl border border-gray-200 bg-white p-3 sm:p-4 shadow-sm transition-colors hover:border-[#6366F1]"
             >
-              <p className="text-sm font-semibold text-[#111827] group-hover:text-[#6366F1] transition-colors mb-2">{guide.title}</p>
-              <p className="text-xs leading-relaxed text-gray-600 mb-3">{guide.description}</p>
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-[#6366F1]">
+              <p className="text-[13px] sm:text-sm font-semibold text-[#111827] group-hover:text-[#6366F1] transition-colors mb-1.5 sm:mb-2 leading-snug">
+                {guide.title}
+              </p>
+              <p className="text-[11px] sm:text-xs leading-relaxed text-gray-600 mb-2.5 sm:mb-3">
+                {guide.description}
+              </p>
+              <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-medium text-[#6366F1]">
                 Ouvrir
                 <ArrowRight className="h-3 w-3" />
               </span>
@@ -128,9 +148,12 @@ export default function ResourcesPage() {
         </div>
       </section>
 
-      <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5">
-        <h2 className="text-sm font-semibold text-[#111827] mb-2">Bon à savoir</h2>
-        <ul className="space-y-2 text-xs text-gray-600">
+      {/* Bon à savoir */}
+      <div className="bg-white rounded-xl border border-gray-200 p-3 sm:p-5">
+        <h2 className="text-[13px] sm:text-sm font-semibold text-[#111827] mb-2">
+          Bon à savoir
+        </h2>
+        <ul className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-xs text-gray-600 leading-relaxed">
           <li>• Les diagnostics flash sont idéaux pour une première prise de température rapide.</li>
           <li>• Les stratégies complètes offrent un plan plus détaillé, orienté croissance et conversion.</li>
           <li>• Le support est disponible directement via Telegram pour une réponse rapide et personnalisée.</li>

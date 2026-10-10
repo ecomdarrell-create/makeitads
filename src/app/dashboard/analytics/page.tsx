@@ -1,199 +1,275 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { TrendingUp, Target, Zap, Calendar } from 'lucide-react';
+import { TrendingDown, TrendingUp, Coins, Lightbulb } from 'lucide-react';
 import { BackButton } from '@/components/ui/BackButton';
+import { RadialStat } from '@/components/dashboard/analytics/RadialStat';
+import { ActivityChart } from '@/components/dashboard/analytics/ActivityChart';
+import { ActivityBreakdown } from '@/components/dashboard/analytics/ActivityBreakdown';
+
+interface Advice {
+  tone: 'success' | 'info' | 'warning';
+  title: string;
+  message: string;
+}
+
+function buildAdvice(params: {
+  totalStrategies: number;
+  thisMonth: number;
+  lastMonth: number;
+  delta: number;
+  creditsBalance: number;
+  plan: string;
+  referralCount: number;
+  daysSinceSignup: number;
+}): Advice {
+  const {
+    totalStrategies,
+    thisMonth,
+    lastMonth,
+    delta,
+    creditsBalance,
+    plan,
+    referralCount,
+    daysSinceSignup,
+  } = params;
+
+  if (totalStrategies === 0) {
+    return {
+      tone: 'info',
+      title: 'Commencez votre première stratégie',
+      message:
+        'Vous n’avez encore généré aucune stratégie. Lancez un diagnostic Flash pour tester la plateforme en 1 crédit, puis passez à une stratégie complète.',
+    };
+  }
+
+  if (creditsBalance === 0 && plan === 'free') {
+    return {
+      tone: 'warning',
+      title: 'Vos crédits sont épuisés',
+      message:
+        'Vous avez utilisé tous vos crédits de démo. Passez à un plan payant pour continuer à générer des stratégies et débloquer les analyses avancées.',
+    };
+  }
+
+  if (daysSinceSignup <= 7 && totalStrategies < 3) {
+    return {
+      tone: 'info',
+      title: 'Période d’onboarding',
+      message:
+        'Vous débutez sur MakeItAds. Générez au moins 3 stratégies cette semaine pour explorer les différents angles proposés et trouver celui qui colle à votre audience.',
+    };
+  }
+
+  if (delta > 0) {
+    return {
+      tone: 'success',
+      title: `Belle progression (+${delta} ce mois-ci)`,
+      message:
+        `Votre activité a augmenté par rapport au mois dernier (${lastMonth} → ${thisMonth}). Continuez sur cette lancée et testez une nouvelle variante de votre meilleure stratégie.`,
+    };
+  }
+
+  if (delta < 0) {
+    return {
+      tone: 'warning',
+      title: `Activité en baisse (${delta})`,
+      message:
+        `Vous avez généré ${Math.abs(delta)} stratégie${Math.abs(delta) > 1 ? 's' : ''} de moins que le mois dernier. Reprenez le rythme : une stratégie Flash par semaine suffit à garder votre acquisition active.`,
+    };
+  }
+
+  if (referralCount === 0) {
+    return {
+      tone: 'info',
+      title: 'Activez votre parrainage',
+      message:
+        'Partagez votre lien de parrainage : chaque ami inscrit vous rapporte des crédits bonus. Un canal simple pour faire grandir votre compte sans dépenser.',
+    };
+  }
+
+  return {
+    tone: 'success',
+    title: 'Activité régulière',
+    message:
+      'Votre rythme de génération est stable. Pensez à comparer vos stratégies pour identifier celles qui performent le mieux et à les décliner.',
+  };
+}
 
 export default async function AnalyticsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
   if (!user) redirect('/login');
 
-  const { data: strategies } = await supabase
-    .from('strategies')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const [strategiesRes, transactionsRes, referralsRes, profileRes] = await Promise.all([
+    supabase
+      .from('strategies')
+      .select('id, type, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('credit_transactions')
+      .select('id, amount, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('referrals')
+      .select('id, status, created_at')
+      .eq('referrer_id', user.id),
+    supabase
+      .from('profiles')
+      .select('plan, credits_balance')
+      .eq('id', user.id)
+      .maybeSingle(),
+  ]);
 
-  const { data: transactions } = await supabase
-    .from('credit_transactions')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false });
+  const strategies = strategiesRes.data ?? [];
+  const transactions = transactionsRes.data ?? [];
+  const referrals = referralsRes.data ?? [];
+  const profile = profileRes.data;
 
-  const totalStrategies = strategies?.length || 0;
-  const flashCount = strategies?.filter(s => s.type === 'flash').length || 0;
-  const completeCount = strategies?.filter(s => s.type === 'complete').length || 0;
+  const totalStrategies = strategies.length;
+  const flashCount = strategies.filter((s) => s.type === 'flash').length;
+  const completeCount = strategies.filter((s) => s.type === 'complete').length;
   const totalCreditsUsed = transactions
-    ?.filter(t => t.amount < 0)
-    .reduce((sum, t) => sum + Math.abs(t.amount), 0) || 0;
+    .filter((t) => t.amount < 0)
+    .reduce((sum, t) => sum + Math.abs(t.amount), 0);
+  const referralCount = referrals.length;
 
-  const thirtyDaysAgo = new Date();
-  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  const now = new Date();
+  const daily: { date: string; count: number }[] = [];
+  for (let i = 89; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    d.setHours(0, 0, 0, 0);
+    daily.push({ date: d.toISOString().slice(0, 10), count: 0 });
+  }
+  const dailyMap = new Map(daily.map((d) => [d.date, d]));
+  strategies.forEach((s) => {
+    const d = new Date(s.created_at);
+    d.setHours(0, 0, 0, 0);
+    const key = d.toISOString().slice(0, 10);
+    const entry = dailyMap.get(key);
+    if (entry) entry.count += 1;
+  });
 
-  const recentStrategies = strategies?.filter(s => 
-    new Date(s.created_at) >= thirtyDaysAgo
-  ) || [];
+  const startOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const startOfLastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+  const thisMonth = strategies.filter((s) => new Date(s.created_at) >= startOfThisMonth).length;
+  const lastMonth = strategies.filter((s) => {
+    const d = new Date(s.created_at);
+    return d >= startOfLastMonth && d <= endOfLastMonth;
+  }).length;
+  const delta = thisMonth - lastMonth;
 
-  const recentTransactions = transactions?.filter(t => 
-    new Date(t.created_at) >= thirtyDaysAgo
-  ) || [];
+  const daysSinceSignup = Math.floor(
+    (now.getTime() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24)
+  );
 
-  const weeklyActivity = Array.from({ length: 4 }, (_, i) => {
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - (i + 1) * 7);
-    const weekEnd = new Date();
-    weekEnd.setDate(weekEnd.getDate() - i * 7);
+  const advice = buildAdvice({
+    totalStrategies,
+    thisMonth,
+    lastMonth,
+    delta,
+    creditsBalance: profile?.credits_balance ?? 0,
+    plan: profile?.plan ?? 'free',
+    referralCount,
+    daysSinceSignup,
+  });
 
-    const weekStrategies = recentStrategies.filter(s => {
-      const date = new Date(s.created_at);
-      return date >= weekStart && date < weekEnd;
-    }).length;
-
-    return {
-      week: `Semaine ${4 - i}`,
-      strategies: weekStrategies,
-    };
-  }).reverse();
-
-  const maxWeeklyStrategies = Math.max(...weeklyActivity.map(w => w.strategies), 1);
+  const adviceTone =
+    advice.tone === 'success'
+      ? { bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700', icon: <TrendingUp className="w-4 h-4" /> }
+      : advice.tone === 'warning'
+      ? { bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700', icon: <TrendingDown className="w-4 h-4" /> }
+      : { bg: 'bg-indigo-50', border: 'border-indigo-200', text: 'text-indigo-700', icon: <Lightbulb className="w-4 h-4" /> };
 
   return (
-    <div className="px-4 py-5 sm:px-6 sm:py-6 max-w-5xl mx-auto">
+    <div className="px-3 py-4 sm:px-6 sm:py-6 max-w-6xl mx-auto">
       <BackButton href="/dashboard" label="Retour au dashboard" />
 
-      <div className="mb-5">
-        <h1 className="text-base sm:text-lg font-semibold text-[#111827] mb-1">
-          Analytics
-        </h1>
-        <p className="text-[10px] sm:text-xs text-gray-600">
-            Activité MakeItAds enregistrée. Les résultats publicitaires ne sont pas mesurés sans connexion aux plateformes de campagne.
+      <div className="mb-4 sm:mb-5">
+        <h1 className="text-base sm:text-xl font-semibold text-[#111827] mb-1">Analytics</h1>
+        <p className="text-[11px] sm:text-xs text-gray-600 leading-relaxed">
+          Suivi de votre activité sur MakeItAds. Les performances publicitaires ne sont pas mesurées sans connexion aux plateformes.
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-5">
-        <div className="bg-white rounded-lg border border-gray-200 p-2.5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Target className="w-3.5 h-3.5 text-[#6366F1]" />
-            <span className="text-[9px] font-medium text-gray-600">Stratégies</span>
-          </div>
-          <p className="text-lg sm:text-xl font-bold text-[#111827]">{totalStrategies}</p>
-          <p className="text-[8px] text-gray-500 mt-0.5">
-            {recentStrategies.length} sur les 30 derniers jours
-          </p>
-        </div>
+      {/* ── Anneaux ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3 mb-4 sm:mb-5">
+        <RadialStat
+          value={totalStrategies}
+          max={Math.max(totalStrategies, 20)}
+          label="Stratégies totales"
+          sublabel={`${thisMonth} ce mois-ci`}
+          color="#6366F1"
+        />
+        <RadialStat
+          value={completeCount}
+          max={Math.max(totalStrategies, 1)}
+          label="Stratégies complètes"
+          sublabel={totalStrategies ? `${Math.round((completeCount / totalStrategies) * 100)}% du total` : '—'}
+          color="#8B5CF6"
+        />
+        <RadialStat
+          value={flashCount}
+          max={Math.max(totalStrategies, 1)}
+          label="Diagnostics Flash"
+          sublabel={totalStrategies ? `${Math.round((flashCount / totalStrategies) * 100)}% du total` : '—'}
+          color="#10B981"
+        />
+        <RadialStat
+          value={referralCount}
+          max={Math.max(referralCount, 10)}
+          label="Filleuls"
+          sublabel={referralCount === 0 ? 'Invitez vos amis' : 'Bonus actifs'}
+          color="#F59E0B"
+        />
+      </div>
 
-        <div className="bg-white rounded-lg border border-gray-200 p-2.5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Zap className="w-3.5 h-3.5 text-[#8B5CF6]" />
-            <span className="text-[9px] font-medium text-gray-600">Diagnostics</span>
-          </div>
-          <p className="text-lg sm:text-xl font-bold text-[#111827]">{flashCount}</p>
-          <p className="text-[8px] text-gray-500 mt-0.5">
-            {Math.round((flashCount / Math.max(totalStrategies, 1)) * 100)}% du total
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-2.5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <TrendingUp className="w-3.5 h-3.5 text-green-500" />
-            <span className="text-[9px] font-medium text-gray-600">Stratégies</span>
-          </div>
-          <p className="text-lg sm:text-xl font-bold text-[#111827]">{completeCount}</p>
-          <p className="text-[8px] text-gray-500 mt-0.5">
-            {Math.round((completeCount / Math.max(totalStrategies, 1)) * 100)}% du total
-          </p>
-        </div>
-
-        <div className="bg-white rounded-lg border border-gray-200 p-2.5">
-          <div className="flex items-center gap-1.5 mb-1.5">
-            <Calendar className="w-3.5 h-3.5 text-amber-500" />
-            <span className="text-[9px] font-medium text-gray-600">Crédits utilisés</span>
-          </div>
-          <p className="text-lg sm:text-xl font-bold text-[#111827]">{totalCreditsUsed}</p>
-          <p className="text-[8px] text-gray-500 mt-0.5">
-            Depuis votre inscription
+      {/* ── Crédits utilisés ── */}
+      <div className="mb-4 sm:mb-5 flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3.5 py-3 shadow-sm">
+        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-50 text-[#6366F1] flex-shrink-0">
+          <Coins className="w-4 h-4" />
+        </span>
+        <div className="min-w-0">
+          <p className="text-[11px] sm:text-xs text-gray-500">Crédits utilisés (cumul)</p>
+          <p className="text-sm sm:text-base font-semibold text-[#111827]">
+            {totalCreditsUsed}
           </p>
         </div>
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 mb-5">
-        <h2 className="text-xs sm:text-sm font-semibold text-[#111827] mb-3">
-          Activité des 4 dernières semaines
-        </h2>
-        <div className="space-y-2.5">
-          {weeklyActivity.map((week, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <span className="text-[9px] sm:text-[10px] text-gray-600 w-16 flex-shrink-0">
-                {week.week}
-              </span>
-              <div className="flex-1 h-5 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] rounded-full transition-all duration-500 flex items-center justify-end pr-1.5"
-                  style={{ width: `${(week.strategies / maxWeeklyStrategies) * 100}%` }}
-                >
-                  {week.strategies > 0 && (
-                    <span className="text-[8px] sm:text-[9px] font-semibold text-white">
-                      {week.strategies}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        {recentStrategies.length === 0 && (
-          <p className="text-[10px] text-gray-500 text-center mt-3">
-            Aucune activité récente. Commencez par créer votre première stratégie.
-          </p>
-        )}
+      {/* ── Graphique d'activité ── */}
+      <div className="mb-4 sm:mb-5">
+        <ActivityChart data={daily} />
       </div>
 
-      <div className="bg-white rounded-lg border border-gray-200 p-3 sm:p-4 mb-5">
-        <h2 className="text-xs sm:text-sm font-semibold text-[#111827] mb-3">
-          Répartition des actions
-        </h2>
-        <div className="space-y-2.5">
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] sm:text-xs text-gray-700">Stratégies complètes</span>
-              <span className="text-[10px] sm:text-xs font-semibold text-[#111827]">{completeCount}</span>
-            </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#6366F1] rounded-full transition-all duration-500"
-                style={{ width: `${(completeCount / Math.max(totalStrategies, 1)) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] sm:text-xs text-gray-700">Diagnostics flash</span>
-              <span className="text-[10px] sm:text-xs font-semibold text-[#111827]">{flashCount}</span>
-            </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#8B5CF6] rounded-full transition-all duration-500"
-                style={{ width: `${(flashCount / Math.max(totalStrategies, 1)) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
+      {/* ── Répartition ── */}
+      <div className="mb-4 sm:mb-5">
+        <ActivityBreakdown
+          items={[
+            { name: 'Stratégies complètes', value: completeCount, color: '#8B5CF6' },
+            { name: 'Diagnostics Flash', value: flashCount, color: '#10B981' },
+          ]}
+        />
       </div>
 
-      <div className="bg-gradient-to-br from-indigo-50 to-violet-50 border border-indigo-200 rounded-lg p-3 sm:p-4">
-        <h2 className="text-xs sm:text-sm font-semibold text-[#111827] mb-1.5">
-          Votre activité
-        </h2>
-        <p className="text-[10px] sm:text-xs text-gray-700 leading-relaxed">
-          {totalStrategies === 0 ? (
-            <>Vous n'avez pas encore créé de stratégie. Commencez dès maintenant.</>
-            ) : totalStrategies < 5 ? (
-            <>Vous avez créé {totalStrategies} stratégie{totalStrategies > 1 ? 's' : ''}. Ce total correspond à votre historique MakeItAds.</>
-          ) : (
-            <>Votre historique contient {totalStrategies} stratégies. Aucune performance de campagne n’est déduite de ce total.</>
-          )}
-        </p>
+      {/* ── Conseil personnalisé ── */}
+      <div className={`rounded-xl border ${adviceTone.border} ${adviceTone.bg} p-3.5 sm:p-4`}>
+        <div className="flex items-start gap-2.5">
+          <span className={`flex h-8 w-8 items-center justify-center rounded-lg bg-white/70 ${adviceTone.text} flex-shrink-0`}>
+            {adviceTone.icon}
+          </span>
+          <div className="min-w-0">
+            <h2 className={`text-[13px] sm:text-sm font-semibold ${adviceTone.text}`}>
+              {advice.title}
+            </h2>
+            <p className="mt-1 text-[11px] sm:text-xs text-gray-700 leading-relaxed">
+              {advice.message}
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

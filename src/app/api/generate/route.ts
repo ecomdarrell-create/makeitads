@@ -19,7 +19,6 @@ export async function POST(req: NextRequest) {
     const effectivePlan: PlanTier = isAdmin ? 'enterprise' : (normalizePlanId(profile?.plan) as PlanTier);
     let creditsBalance = isAdmin ? 9999 : profile?.credits_balance || 0;
 
-    // Prénom
     const userFirstName = profile?.first_name || user.email?.split('@')[0] || 'toi';
 
     console.log(`[generate] User=${user.email} Admin=${isAdmin} Plan=${effectivePlan} Credits=${creditsBalance}`);
@@ -37,11 +36,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Données manquantes' }, { status: 400 });
     }
 
-    if (effectivePlan === 'free' && strategyType === 'complete') {
-      return NextResponse.json({ error: 'Les stratégies complètes sont réservées aux plans Pro et supérieurs.', code: 'PLAN_RESTRICTION' }, { status: 403 });
-    }
+    // ✅ NOUVELLE RÈGLE :
+    // - Plan free → peut faire Flash ET Complète
+    // - Plan payant → peut faire Complète uniquement (Flash bloqué)
     if (effectivePlan !== 'free' && strategyType === 'flash') {
-      return NextResponse.json({ error: 'Votre plan donne accès aux stratégies complètes.', code: 'PLAN_RESTRICTION' }, { status: 403 });
+      return NextResponse.json(
+        {
+          error: 'Votre plan donne accès aux stratégies complètes uniquement. Le diagnostic Flash est réservé au plan Démo.',
+          code: 'PLAN_RESTRICTION',
+        },
+        { status: 403 }
+      );
     }
 
     const requiredFields = ['companyName', 'companyDescription', 'sector', 'mainProduct', 'idealClient', 'country', 'mainCountry', 'mainObjective'];
