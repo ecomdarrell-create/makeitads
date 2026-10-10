@@ -5,7 +5,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check, ChevronDown, ArrowUp } from "lucide-react";
 import { useState, Fragment, useEffect, useRef } from "react";
-import { SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp, SiTelegram } from "react-icons/si";
+import {
+  SiMeta,
+  SiGoogle,
+  SiTiktok,
+  SiInstagram,
+  SiWhatsapp,
+  SiTelegram,
+  SiYoutube,
+  SiX,
+  SiPinterest,
+} from "react-icons/si";
+import { FaLinkedin } from "react-icons/fa";
 
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
@@ -15,22 +26,18 @@ import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
 import SaaSChatbot from "@/components/shared/SaaSChatbot";
 
-function LinkedinIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-    </svg>
-  );
-}
-
+// ✅ Logos officiels avec couleurs de marque
 const partnerLogos = [
-  { name: "Meta", icon: SiMeta },
-  { name: "Google", icon: SiGoogle },
-  { name: "TikTok", icon: SiTiktok },
-  { name: "Instagram", icon: SiInstagram },
-  { name: "WhatsApp", icon: SiWhatsapp },
-  { name: "Telegram", icon: SiTelegram },
-  { name: "LinkedIn", icon: LinkedinIcon },
+  { name: "Meta",      icon: SiMeta,      color: "#0866FF" },
+  { name: "Google",    icon: SiGoogle,    color: "#4285F4" },
+  { name: "TikTok",    icon: SiTiktok,    color: "#000000" },
+  { name: "Instagram", icon: SiInstagram, color: "#E1306C" },
+  { name: "WhatsApp",  icon: SiWhatsapp,  color: "#25D366" },
+  { name: "Telegram",  icon: SiTelegram,  color: "#0088CC" },
+  { name: "LinkedIn",  icon: FaLinkedin,  color: "#0A66C2" },
+  { name: "YouTube",   icon: SiYoutube,   color: "#FF0000" },
+  { name: "X",         icon: SiX,         color: "#000000" },
+  { name: "Pinterest", icon: SiPinterest, color: "#E60023" },
 ];
 
 const howItWorksSteps = [
@@ -240,27 +247,48 @@ export default function LandingPage() {
       <GlobalNavbar />
       <HeroSection />
 
+      {/* ── Barre de logos officiels (collée sous le hero) ── */}
+      <section className="relative z-10 border-y border-gray-100 bg-[#F8F8FC] py-5 md:py-6 overflow-hidden">
+        <div className="max-w-5xl mx-auto px-4 mb-3 md:mb-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold text-left">
+            Compatible avec vos plateformes
+          </p>
+        </div>
+
+        <div className="relative w-full overflow-hidden">
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-12 md:w-20 bg-gradient-to-r from-[#F8F8FC] to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-12 md:w-20 bg-gradient-to-l from-[#F8F8FC] to-transparent" />
+
+          <div className="flex w-max items-center animate-[logoScroll_15s_linear_infinite] hover:[animation-play-state:paused]">
+            {[...partnerLogos, ...partnerLogos].map((logo, index) => (
+              <div
+                key={index}
+                title={logo.name}
+                className="flex-shrink-0 mx-5 sm:mx-7 md:mx-10 flex items-center justify-center"
+              >
+                <logo.icon
+                  className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 transition-all duration-300 hover:grayscale hover:opacity-60"
+                  style={{ color: logo.color }}
+                  aria-label={`${logo.name} logo`}
+                />
+              </div>
+            ))}
+          </div>
+
+          <style jsx>{`
+            @keyframes logoScroll {
+              0%   { transform: translateX(0); }
+              100% { transform: translateX(-50%); }
+            }
+          `}</style>
+        </div>
+      </section>
+
       <TrustpilotCarousel
         reviews={section1Reviews}
         title={<span className="block text-left text-xl md:text-3xl font-semibold leading-tight">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span></span>}
         footerNote="Note de 4.8/5 sur 312 avis."
       />
-
-      <section className="relative z-10 py-6 border-y border-gray-100 bg-[#F8F8FC]">
-        <div className="max-w-5xl mx-auto px-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold mb-4 text-left">Compatible avec vos plateformes</p>
-          <div className="relative overflow-hidden">
-            <div className="flex animate-[scroll_20s_linear_infinite] hover:[animation-play-state:paused]">
-              {[...partnerLogos, ...partnerLogos, ...partnerLogos].map((logo, index) => (
-                <div key={index} className="flex-shrink-0 mx-6 md:mx-8 flex items-center justify-center">
-                  <logo.icon className="w-5 h-5 md:w-6 md:h-6 text-gray-400 hover:text-[#6366f1] transition-colors duration-300" />
-                </div>
-              ))}
-            </div>
-            <style jsx>{`@keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-33.333%); } }`}</style>
-          </div>
-        </div>
-      </section>
 
       <section id="how-it-works" className="relative z-10 bg-white py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
@@ -317,13 +345,22 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
+      {/* ── Section statistiques — fond clair façon Stripe ── */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
-        <div className="absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
-        <div className="absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
+        <div className="pointer-events-none absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
+        <div className="pointer-events-none absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-10 md:mb-16">
-            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">Nos chiffres</p>
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-left mb-10 md:mb-16"
+          >
+            <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-3">
+              Nos chiffres
+            </p>
             <h2 className="text-2xl md:text-4xl font-semibold leading-tight text-[#18181B] mb-3 max-w-3xl">
               Des résultats <span className="text-[#6366F1]">concrets</span>,<br />
               mesurés sur le terrain.
@@ -333,30 +370,32 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {statsData.map((stat, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative overflow-hidden rounded-2xl border border-white/80 bg-white/70 p-5 md:p-7 backdrop-blur-xl group"
-                style={{
-                  boxShadow: "0 8px 32px rgba(99,102,241,0.12), 0 1px 0 rgba(255,255,255,0.9) inset",
-                }}
-              >
-                <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-gradient-to-br from-[#6366F1]/20 to-transparent blur-2xl" />
-                <div className="relative">
-                  <p className="text-3xl md:text-5xl font-bold text-[#18181B] leading-none tracking-tight">
+          {/* Grille de stats avec séparateurs fins */}
+          <div className="grid grid-cols-2 md:grid-cols-4">
+            {statsData.map((stat, index) => {
+              const borderClass =
+                index === 1 ? "border-l border-slate-200" :
+                index === 2 ? "border-t md:border-t-0 md:border-l border-slate-200" :
+                index === 3 ? "border-l border-t md:border-t-0 border-slate-200" : "";
+
+              return (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className={`flex flex-col items-center justify-center px-3 sm:px-4 md:px-6 py-7 md:py-4 text-center ${borderClass}`}
+                >
+                  <p className="text-3xl sm:text-4xl md:text-6xl font-semibold text-[#18181B] leading-none tracking-tight">
                     <AnimatedCounter value={stat.value} suffix={stat.suffix} />
                   </p>
-                  <p className="mt-3 text-[10px] md:text-xs text-[#475569] leading-snug uppercase tracking-wider font-medium">
+                  <p className="mt-2.5 md:mt-4 text-[10px] md:text-xs text-[#475569] uppercase tracking-[0.15em] font-medium leading-snug">
                     {stat.label}
                   </p>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

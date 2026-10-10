@@ -40,12 +40,10 @@ export default function Navbar() {
     loadUserName();
   }, [user]);
 
-  // Fermer le menu mobile à chaque navigation
   useEffect(() => {
     setIsMobileMenuOpen(false);
   }, [pathname]);
 
-  // Bloquer le scroll du body quand le menu est ouvert
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -82,8 +80,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 md:rounded-none md:border-b md:bg-white/90 md:backdrop-blur-md transition-all duration-300">
-        <div className="bg-white/90 backdrop-blur-md border border-gray-100 rounded-2xl px-4 h-12 flex items-center justify-between shadow-sm md:bg-transparent md:border-none md:rounded-none md:h-14 md:px-6 md:max-w-7xl md:mx-auto md:shadow-none">
+      <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 md:rounded-none transition-all duration-300">
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-4 h-12 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.04)] md:border-b md:border-x-0 md:border-t-0 md:rounded-none md:h-14 md:px-6 md:max-w-7xl md:mx-auto md:shadow-none">
           <Link href="/" className="group flex items-center transition-transform hover:scale-105">
             <span className="text-sm md:text-lg font-semibold tracking-tight text-gray-900">
               MakeIt<span className="text-[#6366F1]">Ads</span>
@@ -140,7 +138,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* ✅ Bouton hamburger → croix avec animation */}
           <button
             type="button"
             onClick={() => setIsMobileMenuOpen((prev) => !prev)}
@@ -149,7 +146,6 @@ export default function Navbar() {
             aria-expanded={isMobileMenuOpen}
           >
             <span className="relative block h-4 w-5">
-              {/* Ligne du haut */}
               <motion.span
                 animate={{
                   rotate: isMobileMenuOpen ? 45 : 0,
@@ -158,7 +154,6 @@ export default function Navbar() {
                 transition={{ duration: 0.25, ease: "easeInOut" }}
                 className="absolute left-0 top-0 block h-0.5 w-5 rounded-full bg-gray-800"
               />
-              {/* Ligne du milieu */}
               <motion.span
                 animate={{
                   opacity: isMobileMenuOpen ? 0 : 1,
@@ -167,7 +162,6 @@ export default function Navbar() {
                 transition={{ duration: 0.2, ease: "easeInOut" }}
                 className="absolute left-0 top-1/2 block h-0.5 w-5 -translate-y-1/2 rounded-full bg-gray-800"
               />
-              {/* Ligne du bas */}
               <motion.span
                 animate={{
                   rotate: isMobileMenuOpen ? -45 : 0,
@@ -184,7 +178,6 @@ export default function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
-            {/* Overlay sombre */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -194,7 +187,6 @@ export default function Navbar() {
               className="fixed inset-0 z-[55] bg-slate-900/30 backdrop-blur-sm md:hidden"
             />
 
-            {/* Menu */}
             <motion.div
               initial={{ opacity: 0, scale: 0.97, y: -8 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -214,13 +206,7 @@ export default function Navbar() {
                       className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"
                       aria-label="Fermer le menu"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth={2}
-                      >
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                       </svg>
                     </button>

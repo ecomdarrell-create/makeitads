@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { Wallet, Zap, ArrowRight, TrendingDown, Zap as Flash, FileText } from 'lucide-react';
-import { CREDIT_COSTS } from '@/config/pricing.config';
+import { CREDIT_COSTS, PRICING_CONFIG, normalizePlanId } from '@/config/pricing.config';
+import { StatRing } from './StatRing';
 
 interface CreditCenterProps {
   balance: number;
@@ -10,6 +11,7 @@ interface CreditCenterProps {
   flashCount: number;
   completeCount: number;
   currency?: string;
+  plan?: string;
 }
 
 export function CreditCenter({
@@ -18,12 +20,18 @@ export function CreditCenter({
   flashCount,
   completeCount,
   currency = 'XOF',
+  plan = 'free',
 }: CreditCenterProps) {
   // Calculs
   const flashCredits = flashCount * CREDIT_COSTS.DIAGNOSTIC_FLASH;
   const completeCredits = completeCount * CREDIT_COSTS.STRATEGIE_COMPLETE;
   const totalSpent = flashCredits + completeCredits;
   const remainingGenerations = Math.floor(balance / CREDIT_COSTS.STRATEGIE_COMPLETE);
+
+  // Plafond du plan
+  const normalizedPlan = normalizePlanId(plan);
+  const planCreditsCap = PRICING_CONFIG[normalizedPlan]?.monthlyCredits || 50;
+  const maxCap = normalizedPlan === 'free' ? 10 : planCreditsCap;
 
   const isLow = balance < CREDIT_COSTS.STRATEGIE_COMPLETE * 2;
   const isEmpty = balance === 0;
@@ -34,7 +42,7 @@ export function CreditCenter({
       className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm"
     >
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div
             className={`flex h-7 w-7 items-center justify-center rounded-lg ${
@@ -54,23 +62,24 @@ export function CreditCenter({
         </span>
       </div>
 
-      {/* Solde principal */}
-      <div data-tour="credit-balance" className="mb-3">
-        <div className="flex items-baseline gap-1">
-          <span
-            className={`text-2xl font-bold ${
-              isEmpty ? 'text-red-600' : isLow ? 'text-amber-600' : 'text-[#18181B]'
-            }`}
-          >
-            {balance}
-          </span>
-          <span className="text-xs text-gray-500">crédits disponibles</span>
-        </div>
-        <p className="mt-1 text-[11px] text-gray-500">
+      {/* Anneau central */}
+      <div data-tour="credit-balance" className="mb-4 flex flex-col items-center">
+        <StatRing
+          value={balance}
+          max={maxCap}
+          label="Crédits disponibles"
+          unit={`/ ${maxCap}`}
+          color={isEmpty ? '#EF4444' : isLow ? '#F59E0B' : '#6366F1'}
+          size={100}
+          strokeWidth={8}
+        />
+        <p className="mt-3 text-center text-[11px] text-gray-500">
           {remainingGenerations > 0 ? (
             <>
-              Soit <strong className="text-[#18181B]">{remainingGenerations}</strong>{' '}
-              stratégie{remainingGenerations > 1 ? 's' : ''} complète{remainingGenerations > 1 ? 's' : ''}
+              Soit{' '}
+              <strong className="text-[#18181B]">{remainingGenerations}</strong>{' '}
+              stratégie{remainingGenerations > 1 ? 's' : ''} complète
+              {remainingGenerations > 1 ? 's' : ''}
             </>
           ) : (
             'Aucune stratégie complète possible'

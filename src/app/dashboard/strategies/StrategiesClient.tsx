@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Search,
   Trash2,
-  Eye,
   X,
   AlertTriangle,
   Loader2,
@@ -15,11 +14,9 @@ import {
   Zap,
   FileText,
   ArrowRight,
+  Layers,
 } from 'lucide-react';
-
-// ============================================
-// TYPES
-// ============================================
+import { StatRing } from '@/components/dashboard/StatRing';
 
 interface Strategy {
   id: string;
@@ -38,10 +35,6 @@ interface Props {
 type TypeFilter = 'all' | 'flash' | 'complete';
 type SortOption = 'recent' | 'oldest' | 'title';
 
-// ============================================
-// COMPOSANT PRINCIPAL
-// ============================================
-
 export function StrategiesClient({ strategies }: Props) {
   const router = useRouter();
   const [search, setSearch] = useState('');
@@ -52,33 +45,24 @@ export function StrategiesClient({ strategies }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [localStrategies, setLocalStrategies] = useState(strategies);
 
-  // ─── Stats ───
   const stats = useMemo(() => {
     const flash = localStrategies.filter((s) => s.type === 'flash').length;
     const complete = localStrategies.filter((s) => s.type === 'complete').length;
-    const totalCredits = localStrategies.reduce(
-      (sum, s) => sum + (s.credits_cost || 0),
-      0
-    );
-    return { flash, complete, totalCredits, total: localStrategies.length };
+    return { flash, complete, total: localStrategies.length };
   }, [localStrategies]);
 
-  // ─── Filtres + Tri ───
   const filtered = useMemo(() => {
     let result = [...localStrategies];
 
-    // Recherche
     if (search.trim()) {
       const q = search.toLowerCase().trim();
       result = result.filter((s) => s.title.toLowerCase().includes(q));
     }
 
-    // Type
     if (typeFilter !== 'all') {
       result = result.filter((s) => s.type === typeFilter);
     }
 
-    // Tri
     if (sort === 'recent') {
       result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     } else if (sort === 'oldest') {
@@ -90,10 +74,8 @@ export function StrategiesClient({ strategies }: Props) {
     return result;
   }, [localStrategies, search, typeFilter, sort]);
 
-  // ─── Suppression ───
   const handleDelete = async () => {
     if (!deleteTarget) return;
-
     setDeleting(true);
     setError(null);
 
@@ -101,7 +83,6 @@ export function StrategiesClient({ strategies }: Props) {
       const res = await fetch(`/api/strategies/${deleteTarget.id}`, {
         method: 'DELETE',
       });
-
       const data = await res.json();
 
       if (data.success) {
@@ -118,7 +99,6 @@ export function StrategiesClient({ strategies }: Props) {
     }
   };
 
-  // ─── Empty state ───
   if (localStrategies.length === 0) {
     return (
       <motion.div
@@ -151,24 +131,43 @@ export function StrategiesClient({ strategies }: Props) {
 
   return (
     <div className="space-y-4">
-      {/* Stats */}
-      <div className="grid grid-cols-3 gap-3">
-        <StatCard label="Total" value={String(stats.total)} />
-        <StatCard
-          label="Diagnostics"
-          value={String(stats.flash)}
-          hint="Flash"
-        />
-        <StatCard
-          label="Stratégies"
-          value={String(stats.complete)}
-          hint="Complètes"
-        />
+      {/* ═══════════════════════════════════════ */}
+      {/* ANNEAUX STATS */}
+      {/* ═══════════════════════════════════════ */}
+      <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
+          <StatRing
+            value={stats.total}
+            max={Math.max(stats.total, 10)}
+            label="Total"
+            unit="Stratégies"
+            color="#6366F1"
+            size={80}
+            strokeWidth={6}
+          />
+          <StatRing
+            value={stats.flash}
+            max={Math.max(stats.total, 10)}
+            label="Flash"
+            unit="Diagnostics"
+            color="#10B981"
+            size={80}
+            strokeWidth={6}
+          />
+          <StatRing
+            value={stats.complete}
+            max={Math.max(stats.total, 10)}
+            label="Complètes"
+            unit="Stratégies"
+            color="#8B5CF6"
+            size={80}
+            strokeWidth={6}
+          />
+        </div>
       </div>
 
       {/* Recherche + Filtres */}
       <div className="rounded-xl border border-slate-200 bg-white p-3 sm:p-4">
-        {/* Recherche */}
         <div className="relative mb-3">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
           <input
@@ -188,9 +187,7 @@ export function StrategiesClient({ strategies }: Props) {
           )}
         </div>
 
-        {/* Filtres + Tri */}
         <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          {/* Chips de filtre */}
           <div className="flex flex-wrap items-center gap-1.5">
             <FilterChip
               active={typeFilter === 'all'}
@@ -209,7 +206,6 @@ export function StrategiesClient({ strategies }: Props) {
             />
           </div>
 
-          {/* Tri */}
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as SortOption)}
@@ -222,14 +218,12 @@ export function StrategiesClient({ strategies }: Props) {
         </div>
       </div>
 
-      {/* Erreur */}
       {error && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-800">
           {error}
         </div>
       )}
 
-      {/* Liste */}
       {filtered.length === 0 ? (
         <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/40 p-8 text-center">
           <p className="text-xs text-slate-500">
@@ -255,10 +249,7 @@ export function StrategiesClient({ strategies }: Props) {
               transition={{ duration: 0.2, delay: index * 0.02 }}
               className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white transition-all hover:border-[#6366F1]/30 hover:shadow-md"
             >
-              <Link
-                href={`/dashboard/strategies/${strategy.id}`}
-                className="block p-4"
-              >
+              <Link href={`/dashboard/strategies/${strategy.id}`} className="block p-4">
                 <div className="mb-3 flex items-start justify-between gap-3">
                   <div className="min-w-0 flex-1">
                     <h3 className="mb-1.5 break-words text-sm font-semibold text-[#18181B] leading-snug">
@@ -316,7 +307,6 @@ export function StrategiesClient({ strategies }: Props) {
                 </div>
               </Link>
 
-              {/* Bouton supprimer (apparaît au hover) */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -333,7 +323,6 @@ export function StrategiesClient({ strategies }: Props) {
         </div>
       )}
 
-      {/* Modal de confirmation de suppression */}
       <AnimatePresence>
         {deleteTarget && (
           <>
@@ -401,30 +390,6 @@ export function StrategiesClient({ strategies }: Props) {
           </>
         )}
       </AnimatePresence>
-    </div>
-  );
-}
-
-// ============================================
-// SOUS-COMPOSANTS
-// ============================================
-
-function StatCard({
-  label,
-  value,
-  hint,
-}: {
-  label: string;
-  value: string;
-  hint?: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 bg-white p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p className="mt-1 text-lg font-bold text-[#18181B]">{value}</p>
-      {hint && <p className="mt-0.5 text-[10px] text-slate-400">{hint}</p>}
     </div>
   );
 }

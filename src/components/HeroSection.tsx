@@ -13,7 +13,6 @@ export default function HeroSection() {
     window.scrollTo({ top: 0, behavior: "auto" });
   }, []);
 
-  // Force la lecture automatique de la vidéo
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
@@ -44,7 +43,6 @@ export default function HeroSection() {
     tryPlay();
     video.load();
 
-    // Fallback : relance la lecture au premier clic/touch/scroll (contrainte iOS)
     const handleInteraction = () => {
       tryPlay();
       document.removeEventListener("touchstart", handleInteraction);
@@ -87,7 +85,7 @@ export default function HeroSection() {
   );
 
   return (
-    <section className="relative z-10 min-h-[calc(100vh-4rem)] flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
+    <section className="relative z-10 flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/5 rounded-full blur-[150px]" />
         <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
@@ -123,7 +121,6 @@ export default function HeroSection() {
             l&apos;Afrique.
           </motion.p>
 
-          {/* VIDÉO HERO */}
           <motion.div
             initial={{ opacity: 0, y: 40, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -141,7 +138,6 @@ export default function HeroSection() {
                   className="relative overflow-hidden rounded-3xl bg-[#0A0A0B]"
                   style={{ aspectRatio: "1920 / 780" }}
                 >
-                  {/* VIDÉO autoplay muet en boucle */}
                   <video
                     ref={videoRef}
                     autoPlay
@@ -158,7 +154,6 @@ export default function HeroSection() {
                     <source src="/images/video/hero-demo.mp4" type="video/mp4" />
                   </video>
 
-                  {/* Poster affiché avant que la vidéo soit prête */}
                   <img
                     src="/images/couv-X.png"
                     alt="MakeItAds Dashboard"
@@ -167,7 +162,6 @@ export default function HeroSection() {
                     }`}
                   />
 
-                  {/* Reflet subtil sur le dessus (glassmorphism) */}
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 via-transparent to-transparent" />
                 </div>
               </div>

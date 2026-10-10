@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import { Sidebar } from '@/components/layout/Sidebar';
-import { MobileNav } from '@/components/layout/MobileNav';
 import Navbar from '@/components/shared/GlobalNavbar';
 import GlobalFooter from '@/components/shared/GlobalFooter';
 import { createClient } from '@/lib/supabase/server';
@@ -39,7 +38,6 @@ export default async function DashboardLayout({
           <GlobalFooter />
         </div>
       </main>
-      <MobileNav />
       <SaaSChatbot dashboard />
     </div>
   );

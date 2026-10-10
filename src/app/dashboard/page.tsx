@@ -13,9 +13,6 @@ import { BackButton } from '@/components/ui/BackButton';
 import { ensureUserProfile } from '@/lib/profiles/ensure-profile';
 import { getCurrencySymbol, type Currency } from '@/lib/currency';
 
-// ============================================
-// TYPE NextAction
-// ============================================
 type NextAction = {
   title: string;
   description: string;
@@ -62,7 +59,6 @@ export default async function DashboardPage() {
   const profileComplete = Boolean(profile?.first_name && profile?.currency);
   const healthScore = (profileComplete ? 50 : 0) + (totalStrategies > 0 ? 50 : 0);
 
-  // ─── Coûts actuels ───
   const flashCost = CREDIT_COSTS.DIAGNOSTIC_FLASH;
   const completeCost = CREDIT_COSTS.STRATEGIE_COMPLETE;
 
@@ -144,6 +140,7 @@ export default async function DashboardPage() {
             flashCount={flashCount}
             completeCount={completeCount}
             currency={userCurrency}
+            plan={currentPlan}
           />
           <PlanFeatures currentPlan={currentPlan} currency={userCurrency} />
           <HealthScore
@@ -164,7 +161,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Tutoriel interactif */}
       <DashboardTour />
     </div>
   );
