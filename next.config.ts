@@ -24,45 +24,20 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ✅ Headers anti-cache pour le favicon — évite l'ancien favicon Chariow
+  // ✅ Headers anti-cache pour le favicon
   async headers() {
+    const noCacheHeader = [
+      { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+    ];
+
     return [
-      {
-        source: '/favicon.ico',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
-      {
-        source: '/favicon.svg',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
-      {
-        source: '/favicon-:size*.png',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
-      {
-        source: '/apple-touch-icon.png',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
-      {
-        source: '/web-app-manifest-:size*.png',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
-      {
-        source: '/site.webmanifest',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
-        ],
-      },
+      { source: '/favicon.ico', headers: noCacheHeader },
+      { source: '/favicon.svg', headers: noCacheHeader },
+      { source: '/favicon-96x96.png', headers: noCacheHeader },
+      { source: '/apple-touch-icon.png', headers: noCacheHeader },
+      { source: '/web-app-manifest-192x192.png', headers: noCacheHeader },
+      { source: '/web-app-manifest-512x512.png', headers: noCacheHeader },
+      { source: '/site.webmanifest', headers: noCacheHeader },
     ];
   },
 };
