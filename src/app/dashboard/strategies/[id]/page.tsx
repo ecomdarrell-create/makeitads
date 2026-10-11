@@ -31,9 +31,10 @@ export default async function StrategyPage({ params }: StrategyPageProps) {
 
   if (!strategy) notFound();
 
+  // ✅ Ajout de first_name dans la sélection
   const { data: profile } = await supabase
     .from('profiles')
-    .select('plan')
+    .select('plan, first_name')
     .eq('id', user.id)
     .maybeSingle();
 
@@ -44,6 +45,12 @@ export default async function StrategyPage({ params }: StrategyPageProps) {
     : (normalizedPlan as PlanTier);
 
   const planLabel = PLAN_LABELS[userPlan] || 'Démo';
+
+  // ✅ Prénom : profil > email > fallback
+  const userName =
+    profile?.first_name ||
+    user.email?.split('@')[0] ||
+    'Utilisateur';
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 sm:py-6">
@@ -85,6 +92,7 @@ export default async function StrategyPage({ params }: StrategyPageProps) {
           }}
           userPlan={userPlan}
           planLabel={planLabel}
+          userName={userName}
         />
       </div>
 

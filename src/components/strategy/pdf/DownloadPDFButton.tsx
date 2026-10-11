@@ -13,15 +13,15 @@ interface Props {
   };
   userPlan: string;
   planLabel: string;
+  userName?: string; // ✅ optionnel
 }
 
-export function DownloadPDFButton({ strategy, userPlan, planLabel }: Props) {
+export function DownloadPDFButton({ strategy, userPlan, planLabel, userName }: Props) {
   const [loading, setLoading] = useState(false);
 
   const handleDownload = async () => {
     setLoading(true);
     try {
-      // Import dynamique pour éviter SSR
       const [{ pdf }, { StrategyPDFDocument }] = await Promise.all([
         import('@react-pdf/renderer'),
         import('./StrategyPDFDocument'),
@@ -32,12 +32,14 @@ export function DownloadPDFButton({ strategy, userPlan, planLabel }: Props) {
           strategy={strategy}
           userPlan={userPlan}
           planLabel={planLabel}
+          userName={userName}
         />
       ).toBlob();
 
-      // Générer un nom de fichier propre
       const safeTitle = strategy.title
         .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-|-$/g, '')
         .slice(0, 40);
@@ -46,7 +48,6 @@ export function DownloadPDFButton({ strategy, userPlan, planLabel }: Props) {
         .toISOString()
         .slice(0, 10)}.pdf`;
 
-      // Télécharger
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;

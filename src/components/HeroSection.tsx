@@ -1,197 +1,146 @@
-"use client";
+'use client';
 
-import { motion } from "framer-motion";
-import { ArrowRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from 'next/link';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
-export default function HeroSection() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [videoReady, setVideoReady] = useState(false);
+/* ═══════════════════════════════════════════ */
+/* TYPEWRITER — effet d'écriture en boucle     */
+/* ═══════════════════════════════════════════ */
+function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
+  const [display, setDisplay] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: "auto" });
-  }, []);
+    const typingSpeed = 110;
+    const deletingSpeed = 60;
+    const pauseBeforeDelete = 2200;
+    const pauseBeforeTyping = 400;
 
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    if (!isDeleting && display === text) {
+      const t = setTimeout(() => setIsDeleting(true), pauseBeforeDelete);
+      return () => clearTimeout(t);
+    }
 
-    video.muted = true;
-    video.defaultMuted = true;
-    video.playsInline = true;
-    video.setAttribute("muted", "");
-    video.setAttribute("playsinline", "");
+    if (isDeleting && display === '') {
+      const t = setTimeout(() => setIsDeleting(false), pauseBeforeTyping);
+      return () => clearTimeout(t);
+    }
 
-    const tryPlay = () => {
-      video.play().catch(() => {
-        setTimeout(() => video.play().catch(() => {}), 300);
-      });
-    };
+    const t = setTimeout(
+      () => {
+        setDisplay((prev) =>
+          isDeleting ? text.substring(0, prev.length - 1) : text.substring(0, prev.length + 1)
+        );
+      },
+      isDeleting ? deletingSpeed : typingSpeed
+    );
 
-    const markReady = () => {
-      setVideoReady(true);
-      tryPlay();
-    };
-
-    if (video.readyState >= 2) markReady();
-
-    video.addEventListener("loadeddata", markReady);
-    video.addEventListener("canplay", markReady);
-    video.addEventListener("playing", () => setVideoReady(true));
-
-    tryPlay();
-    video.load();
-
-    const handleInteraction = () => {
-      tryPlay();
-      document.removeEventListener("touchstart", handleInteraction);
-      document.removeEventListener("click", handleInteraction);
-      document.removeEventListener("scroll", handleInteraction);
-    };
-
-    document.addEventListener("touchstart", handleInteraction, { once: true });
-    document.addEventListener("click", handleInteraction, { once: true });
-    document.addEventListener("scroll", handleInteraction, { once: true });
-
-    const intervals = [
-      setTimeout(markReady, 500),
-      setTimeout(markReady, 1500),
-      setTimeout(markReady, 3000),
-    ];
-
-    return () => {
-      video.removeEventListener("loadeddata", markReady);
-      video.removeEventListener("canplay", markReady);
-      document.removeEventListener("touchstart", handleInteraction);
-      document.removeEventListener("click", handleInteraction);
-      document.removeEventListener("scroll", handleInteraction);
-      intervals.forEach(clearTimeout);
-    };
-  }, []);
-
-  const heroTitle = (
-    <>
-      <span className="block">
-        Connaissez votre <span className="text-[#6366F1]">marché.</span>
-      </span>
-      <span className="block">
-        Devancez la <span className="text-[#6366F1]">concurrence.</span>
-      </span>
-      <span className="block">
-        Croissez en <span className="text-[#6366F1]">confiance.</span>
-      </span>
-    </>
-  );
+    return () => clearTimeout(t);
+  }, [display, isDeleting, text]);
 
   return (
-    <section className="relative z-10 flex flex-col justify-center overflow-hidden pt-20 sm:pt-24 md:pt-28 pb-10 sm:pb-14 bg-[#FFFFFF]">
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[600px] bg-[#6366f1]/5 rounded-full blur-[150px]" />
-        <div className="absolute top-1/4 right-0 w-[800px] h-[500px] bg-[#8b5cf6]/5 rounded-full blur-[120px]" />
-        <div
-          className="absolute inset-0 bg-[linear-gradient(to_right,#e2e8f0_1px,transparent_1px),linear-gradient(to_bottom,#e2e8f0_1px,transparent_1px)] bg-[size:32px_32px]"
-          style={{
-            maskImage:
-              "radial-gradient(ellipse 70% 50% at 50% 0%, rgba(0,0,0,0.05) 0%, transparent 100%)",
-          }}
-        />
-      </div>
+    <span className="inline-flex items-baseline">
+      <span className="bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#8B5CF6] bg-clip-text text-transparent">
+        {display}
+      </span>
+      <span
+        aria-hidden="true"
+        className="blink-cursor ml-0.5 inline-block w-[2px] self-stretch bg-[#6366F1] align-middle"
+      />
+      <style>{`
+        @keyframes blink {
+          0%, 49% { opacity: 1; }
+          50%, 100% { opacity: 0; }
+        }
+        .blink-cursor {
+          animation: blink 1s steps(1) infinite;
+        }
+      `}</style>
+    </span>
+  );
+}
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="mx-auto max-w-4xl text-left">
-          <motion.h1
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold leading-[1.15] tracking-tight text-[#18181B] mb-4 md:mb-5"
-          >
-            {heroTitle}
-          </motion.h1>
+/* ═══════════════════════════════════════════ */
+/* HERO SECTION                                 */
+/* ═══════════════════════════════════════════ */
+export default function HeroSection() {
+  return (
+    <section className="relative w-full bg-white">
+      <div className="mx-auto w-full max-w-7xl px-4 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-28">
+        <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:gap-x-14 lg:gap-y-0 xl:gap-x-20">
 
-          <motion.p
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.08 }}
-            className="max-w-2xl text-sm md:text-base text-[#475569] leading-relaxed mb-6 md:mb-8"
-          >
-            MakeItAds analyse votre activité, votre audience et votre marché
-            pour construire la stratégie publicitaire complète derrière votre
-            prochaine campagne. Prête à copier-coller, calibrée pour
-            l&apos;Afrique.
-          </motion.p>
-
+          {/* ═══ TITRE + SOUS-TITRE ═══ */}
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.16, ease: "easeOut" }}
-            className="relative w-full mb-8 md:mb-10"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="text-center lg:col-start-1 lg:row-start-1 lg:text-left"
           >
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-gradient-to-br from-[#6366f1]/15 via-[#8b5cf6]/10 to-transparent blur-[120px] rounded-full -z-10" />
+            {/* ✅ Titre — leading généreux + padding bas pour libérer la queue du "g" */}
+            <h1 className="mb-6 text-[1.75rem] font-bold leading-[1.25] tracking-[-0.03em] text-[#0A0A0F] sm:mb-7 sm:text-[2.5rem] sm:leading-[1.2] md:text-5xl lg:mb-4 lg:pb-4 lg:text-[3rem] lg:leading-[1.25] xl:text-[3.5rem]">
+              <span className="block lg:inline">
+                Arrêtez de{' '}
+                <span className="bg-gradient-to-r from-[#6366F1] via-[#7C3AED] to-[#8B5CF6] bg-clip-text text-transparent">
+                  deviner.
+                </span>
+              </span>{' '}
+              <span className="block lg:inline">
+                Passez à la <TypewriterWord text="stratégie." />
+              </span>
+            </h1>
 
-            <div className="relative">
-              <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 w-[95%] h-24 bg-[#0F172A]/15 blur-[60px] rounded-full" />
-              <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-[85%] h-16 bg-[#6366f1]/15 blur-[40px] rounded-full" />
+            {/* ✅ Sous-titre poussé plus bas sur desktop (mt-4 lg) */}
+            <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0 lg:mt-4 lg:max-w-lg lg:text-[1.0625rem]">
+              MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l&apos;Afrique.
+            </p>
+          </motion.div>
 
-              <div className="relative z-10 rounded-3xl p-[1.5px] bg-gradient-to-br from-white/90 via-[#6366F1]/30 to-[#8B5CF6]/40 shadow-2xl">
-                <div
-                  className="relative overflow-hidden rounded-3xl bg-[#0A0A0B]"
-                  style={{ aspectRatio: "1920 / 780" }}
-                >
-                  <video
-                    ref={videoRef}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    preload="auto"
-                    controls={false}
-                    disablePictureInPicture
-                    controlsList="nodownload nofullscreen noremoteplayback"
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ objectPosition: "center bottom" }}
-                  >
-                    <source src="/images/video/hero-demo.mp4" type="video/mp4" />
-                  </video>
+          {/* ═══ IMAGE ═══ */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
+            className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/hero-main.png"
+              alt="MakeItAds sur iPhone — Dashboard stratégie et Analytics"
+              className="block h-auto w-full select-none"
+              draggable={false}
+            />
+          </motion.div>
 
-                  <img
-                    src="/images/couv-X.png"
-                    alt="MakeItAds Dashboard"
-                    className={`absolute inset-0 w-full h-full object-cover object-bottom transition-opacity duration-700 ${
-                      videoReady ? "opacity-0 pointer-events-none" : "opacity-100"
-                    }`}
-                  />
+          {/* ═══ CTA ═══ */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.25, ease: 'easeOut' }}
+            className="lg:col-start-1 lg:row-start-2 lg:self-start"
+          >
+            <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:justify-center lg:justify-start lg:gap-3">
+              <Link
+                href="/dashboard"
+                className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#6366F1]/25 transition-all hover:bg-[#5558e6] hover:scale-[1.02] sm:px-5 sm:py-2.5 sm:text-sm"
+              >
+                Obtenir une démo
+                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
+              </Link>
 
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/10 via-transparent to-transparent" />
-                </div>
-              </div>
-
-              <div className="pointer-events-none absolute inset-x-12 top-full h-16 bg-gradient-to-b from-[#6366F1]/10 to-transparent blur-2xl" />
+              <a
+                href="#how-it-works"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-[#0A0A0F] transition-all hover:border-slate-300 hover:bg-slate-50 sm:px-5 sm:py-2.5 sm:text-sm"
+              >
+                Voir comment ça marche
+              </a>
             </div>
           </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.24 }}
-            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full max-w-md"
-          >
-            <Link
-              href="/dashboard"
-              className="group flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-5 py-2.5 text-xs md:text-sm font-semibold text-white shadow-md shadow-[#6366F1]/25 hover:bg-[#5558e6] transition-colors w-full sm:w-auto"
-            >
-              Obtenir une démo
-              <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
-            </Link>
-
-            <a
-              href="#how-it-works"
-              className="flex items-center justify-center gap-2 rounded-full border border-gray-200 bg-white px-5 py-2.5 text-xs md:text-sm font-medium text-[#0F172A] hover:bg-gray-50 transition-colors w-full sm:w-auto"
-            >
-              Découvrez comment ça marche
-            </a>
-          </motion.div>
         </div>
+
+        <div className="h-14 sm:h-20 lg:h-24" />
       </div>
     </section>
   );
