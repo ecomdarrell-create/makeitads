@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Wallet, Zap, ArrowRight, TrendingDown, Zap as Flash, FileText } from 'lucide-react';
 import { CREDIT_COSTS, PRICING_CONFIG, normalizePlanId } from '@/config/pricing.config';
+import { getCurrencySymbol } from '@/lib/currency';
 import { StatRing } from './StatRing';
 
 interface CreditCenterProps {
@@ -36,6 +37,9 @@ export function CreditCenter({
   const isLow = balance < CREDIT_COSTS.STRATEGIE_COMPLETE * 2;
   const isEmpty = balance === 0;
 
+  // ✅ Symbole de la devise (FCFA, €, $) au lieu du code brut (XOF, EUR, USD)
+  const currencySymbol = getCurrencySymbol(currency);
+
   return (
     <div
       data-tour="credit-center"
@@ -57,8 +61,8 @@ export function CreditCenter({
           </div>
           <h3 className="text-xs font-semibold text-[#18181B]">Crédits</h3>
         </div>
-        <span className="text-[10px] text-gray-400 uppercase tracking-wider">
-          {currency}
+        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">
+          {currencySymbol}
         </span>
       </div>
 
@@ -119,7 +123,7 @@ export function CreditCenter({
       {/* CTA Recharge */}
       {isLow && (
         <Link
-          href="/dashboard/credits"
+          href="/dashboard/credits/recharge"
           data-tour="credit-recharge-cta"
           className={`flex w-full items-center justify-center gap-1.5 rounded-full px-3 py-2 text-xs font-semibold text-white transition-colors ${
             isEmpty

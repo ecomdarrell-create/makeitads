@@ -1,43 +1,80 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, MessageCircle, Send, CheckCircle, ChevronDown, Clock, Globe } from "lucide-react";
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
+import { createClient } from "@/lib/supabase/client";
+import { normalizeCurrency, formatPriceFromXOF, type Currency } from "@/lib/currency";
 
-const FAQS = [
-  {
-    question: "Comment fonctionne MakeItAds ?",
-    answer: "C'est très simple : vous achetez un pack de crédits, vous répondez à 7 questions sur votre entreprise, et notre IA génère instantanément une stratégie publicitaire complète (ciblage, textes, idées de visuels) prête à être copiée-collée dans votre gestionnaire de publicité."
-  },
-  {
-    question: "Quels sont vos tarifs ?",
-    answer: "Nous fonctionnons sans abonnement. Vous achetez des crédits à l'unité : Pack Startup (2 500 FCFA pour 1 stratégie), Pack Business (7 500 FCFA pour 3 stratégies) ou Pack Entreprise (15 000 FCFA pour 10 stratégies). Paiement unique, zéro engagement."
-  },
-  {
-    question: "Comment se passe le paiement ?",
-    answer: "Le paiement est 100% sécurisé via notre partenaire Chariow. Vous pouvez payer par Mobile Money (Orange Money, Wave, MTN, Moov) ou par carte bancaire (Visa/Mastercard). Vos crédits sont ajoutés à votre compte en quelques minutes."
-  },
-  {
-    question: "Est-ce vraiment adapté au marché africain ?",
-    answer: "Oui, c'est notre principale force. Contrairement aux IA génériques, MakeItAds est calibré pour nos réalités : budgets en FCFA, ciblage par villes (Abidjan, Dakar, Douala, etc.), et leviers de confiance locaux (WhatsApp, paiement à la livraison)."
-  },
-  {
-    question: "Comment contacter le support ?",
-    answer: "Vous pouvez nous écrire à support@makeitads.pro ou nous contacter directement via Telegram sur https://t.me/MakeitAds_CEO. Nous répondons généralement en moins de 24 heures ouvrées."
-  },
-  {
-    question: "Mes données sont-elles en sécurité ?",
-    answer: "Absolument. Nous utilisons un chiffrement de niveau bancaire et ne partageons jamais vos informations commerciales avec des tiers. Votre confidentialité est notre priorité."
-  },
-];
+// ✅ Fonction pour construire la FAQ avec les prix dans la bonne devise
+function buildFaqs(currency: Currency): { question: string; answer: string }[] {
+  // Conversion depuis XOF base
+  const startupPrice = formatPriceFromXOF(2500, currency);
+  const businessPrice = formatPriceFromXOF(7500, currency);
+  const enterprisePrice = formatPriceFromXOF(15000, currency);
+
+  return [
+    {
+      question: "Comment fonctionne MakeItAds ?",
+      answer: "C'est très simple : vous achetez un pack de crédits, vous répondez à 7 questions sur votre entreprise, et notre IA génère instantanément une stratégie publicitaire complète (ciblage, textes, idées de visuels) prête à être copiée-collée dans votre gestionnaire de publicité."
+    },
+    {
+      question: "Quels sont vos tarifs ?",
+      answer: `Nous fonctionnons sans abonnement. Vous achetez des crédits à l'unité : Pack Startup (${startupPrice} pour 1 stratégie), Pack Business (${businessPrice} pour 3 stratégies) ou Pack Entreprise (${enterprisePrice} pour 10 stratégies). Paiement unique, zéro engagement.`
+    },
+    {
+      question: "Comment se passe le paiement ?",
+      answer: "Le paiement est 100% sécurisé via notre partenaire Chariow. Vous pouvez payer par Mobile Money (Orange Money, Wave, MTN, Moov) ou par carte bancaire (Visa/Mastercard). Vos crédits sont ajoutés à votre compte en quelques minutes."
+    },
+    {
+      question: "Est-ce vraiment adapté au marché africain ?",
+      answer: `Oui, c'est notre principale force. Contrairement aux IA génériques, MakeItAds est calibré pour nos réalités : budgets réalistes, ciblage par villes (Abidjan, Dakar, Douala, etc.), et leviers de confiance locaux (WhatsApp, paiement à la livraison).`
+    },
+    {
+      question: "Comment contacter le support ?",
+      answer: "Vous pouvez nous écrire à support@makeitads.pro ou nous contacter directement via Telegram sur https://t.me/MakeitAds_CEO. Nous répondons généralement en moins de 24 heures ouvrées."
+    },
+    {
+      question: "Mes données sont-elles en sécurité ?",
+      answer: "Absolument. Nous utilisons un chiffrement de niveau bancaire et ne partageons jamais vos informations commerciales avec des tiers. Votre confidentialité est notre priorité."
+    },
+  ];
+}
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({ name: "", email: "", company: "", subject: "", message: "" });
   const [submitted, setSubmitted] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [currency, setCurrency] = useState<Currency>('XOF');
+
+  // ✅ Charge la devise du user connecté
+  useEffect(() => {
+    const loadCurrency = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('currency')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile?.currency) {
+          setCurrency(normalizeCurrency(profile.currency));
+        }
+      } catch {
+        // Silencieux — fallback XOF
+      }
+    };
+    loadCurrency();
+  }, []);
+
+  const FAQS = buildFaqs(currency);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

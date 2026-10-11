@@ -13,6 +13,7 @@ import {
   Lock,
 } from 'lucide-react';
 import type { FormData } from './types';
+import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 
 // ============================================
 // TYPES
@@ -24,6 +25,7 @@ interface SummaryProps {
   generationCost: number;
   onGenerate: () => void;
   isGenerating: boolean;
+  currency?: string;
 }
 
 // ============================================
@@ -36,10 +38,21 @@ export function Summary({
   generationCost,
   onGenerate,
   isGenerating,
+  currency = 'XOF',
 }: SummaryProps) {
   const remainingCredits = Math.max(0, creditsBalance - generationCost);
   const canAfford = creditsBalance >= generationCost;
   const isLowBalance = remainingCredits > 0 && remainingCredits < 5;
+
+  // ✅ Symbole de la devise du user
+  const currencySymbol = getCurrencySymbol(normalizeCurrency(currency));
+
+  const formatMoney = (amount: number | string | undefined): string => {
+    if (amount === undefined || amount === null || amount === '') return '';
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    if (!Number.isFinite(num)) return String(amount);
+    return num.toLocaleString('fr-FR');
+  };
 
   return (
     <motion.div
@@ -126,10 +139,10 @@ export function Summary({
               label="Budget"
               value={
                 formData.totalBudget
-                  ? `${formData.totalBudget} FCFA${
+                  ? `${formatMoney(formData.totalBudget)} ${currencySymbol}${
                       formData.duration ? ` sur ${formData.duration}` : ''
                     }`
-                  : `${formData.dailyBudget} FCFA/jour`
+                  : `${formatMoney(formData.dailyBudget)} ${currencySymbol}/jour`
               }
             />
           )}
@@ -213,7 +226,6 @@ export function Summary({
         <button
           type="button"
           onClick={() => {
-            // Retour géré par le parent via le bouton existant
             const event = new CustomEvent('summary-back');
             window.dispatchEvent(event);
           }}

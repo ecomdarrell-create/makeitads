@@ -4,12 +4,16 @@ import { useState, useEffect, Fragment } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronDown } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { formatPlanPrice } from '@/config/pricing.config';
+import { normalizeCurrency, type Currency } from '@/lib/currency';
 
+// ✅ Les prix sont maintenant calculés dynamiquement selon la devise du user
 const pricingPlans = [
   {
     id: 'demo',
     name: 'MakeItAds Démo',
-    price: '0 FCFA',
+    basePrice: 0, // en XOF
+    isFree: true,
     features: ['10 crédits de bienvenue (offre unique)', '2 Diagnostics Flash', 'Aperçu rapide de votre activité', 'Support communautaire'],
     popular: false,
     ctaText: 'Commencer',
@@ -24,7 +28,7 @@ const pricingPlans = [
   {
     id: 'pro',
     name: 'MakeItAds Pro',
-    price: '10 000 FCFA/an',
+    basePrice: 10000, // XOF
     durationNote: "12 mois d'accès",
     features: ['50 crédits renouvelés chaque mois', '5 Stratégies Complètes / mois', '12 sections détaillées', 'Scripts WhatsApp prêts à l\'emploi', 'Allocation budgétaire sur 7 jours', 'Ciblage précis par ville', 'Guide créatif', 'Support email (48h)'],
     popular: true,
@@ -40,7 +44,7 @@ const pricingPlans = [
   {
     id: 'premium',
     name: 'MakeItAds Premium',
-    price: '25 000 FCFA/an',
+    basePrice: 25000, // XOF
     durationNote: "12 mois d'accès",
     features: ['150 crédits renouvelés chaque mois', '15 Stratégies Complètes / mois', 'Analyse concurrentielle', '5 variantes de hooks', 'Analyse d\'audience avancée', 'Stratégie de croissance 3 mois', 'Support prioritaire (12h)', 'Rapports avancés'],
     popular: false,
@@ -56,7 +60,7 @@ const pricingPlans = [
   {
     id: 'elite',
     name: 'MakeItAds Élite',
-    price: '100 000 FCFA/an',
+    basePrice: 100000, // XOF
     durationNote: "12 mois d'accès",
     features: ['500 crédits renouvelés chaque mois', '50 Stratégies Complètes / mois', 'Consulting stratégique mensuel', 'Formation personnalisée', 'Accompagnement avancé', 'Rapports white-label', 'Support prioritaire 24/7', 'Accès API'],
     popular: false,
@@ -94,7 +98,6 @@ const faqData = [
 ];
 
 // ✅ Construit l'URL Chariow en y ajoutant les infos du user
-// pour que le webhook puisse identifier qui a payé
 function buildCheckoutUrl(
   baseUrl: string,
   userId: string | null,
@@ -115,16 +118,27 @@ function PricingCard({
   plan,
   userId,
   userEmail,
+  currency,
 }: {
   plan: (typeof pricingPlans)[number];
   userId: string | null;
   userEmail: string | null;
+  currency: Currency;
 }) {
   const isWide = plan.id === 'premium' || plan.id === 'elite';
   const isExternal = !plan.isInternal;
   const finalHref = isExternal
     ? buildCheckoutUrl(plan.link, userId, userEmail)
     : plan.link;
+
+  // ✅ FIX : "Gratuit" au lieu de "0 FCFA" pour le plan Démo
+  const displayPrice = plan.isFree
+    ? 'Gratuit'
+    : formatPlanPrice(
+        plan.id as 'pro' | 'premium' | 'enterprise',
+        currency,
+        '/an'
+      );
 
   return (
     <motion.div
@@ -150,7 +164,7 @@ function PricingCard({
         </h3>
         <div className="flex items-baseline gap-1 flex-wrap">
           <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">
-            {plan.price}
+            {displayPrice}
           </span>
         </div>
         {plan.durationNote && (
@@ -159,7 +173,6 @@ function PricingCard({
           </span>
         )}
 
-        {/* ✅ Lien direct (pas de window.open → plus de popup blocker) */}
         <a
           href={finalHref}
           target={isExternal ? '_blank' : undefined}
@@ -239,19 +252,30 @@ export default function PricingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [userEmail, setUserEmail] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<Currency>('XOF');
 
-  // ✅ Récupère user pour l'injecter dans les URLs Chariow
+  // ✅ Récupère user + devise depuis profiles
   useEffect(() => {
     const loadUser = async () => {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          setUserId(user.id);
-          setUserEmail(user.email ?? null);
+        if (!user) return;
+
+        setUserId(user.id);
+        setUserEmail(user.email ?? null);
+
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('currency')
+          .eq('id', user.id)
+          .maybeSingle();
+
+        if (profile?.currency) {
+          setCurrency(normalizeCurrency(profile.currency));
         }
       } catch {
-        // Silencieux
+        // Silencieux — fallback XOF
       }
     };
     loadUser();
@@ -276,13 +300,13 @@ export default function PricingPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 w-full">
-            <PricingCard plan={pricingPlans[0]} userId={userId} userEmail={userEmail} />
-            <PricingCard plan={pricingPlans[1]} userId={userId} userEmail={userEmail} />
+            <PricingCard plan={pricingPlans[0]} userId={userId} userEmail={userEmail} currency={currency} />
+            <PricingCard plan={pricingPlans[1]} userId={userId} userEmail={userEmail} currency={currency} />
             <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[2]} userId={userId} userEmail={userEmail} />
+              <PricingCard plan={pricingPlans[2]} userId={userId} userEmail={userEmail} currency={currency} />
             </div>
             <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[3]} userId={userId} userEmail={userEmail} />
+              <PricingCard plan={pricingPlans[3]} userId={userId} userEmail={userEmail} currency={currency} />
             </div>
           </div>
         </div>

@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Check, Lock } from 'lucide-react';
-import { normalizePlanId } from '@/config/pricing.config';
-import { formatPlanPrice, normalizeCurrency, getCurrencySymbol } from '@/lib/currency';
+import { normalizePlanId, formatPlanPrice } from '@/config/pricing.config';
+import { normalizeCurrency, getCurrencySymbol } from '@/lib/currency';
 
 interface PlanFeaturesProps {
   currentPlan: string;
@@ -13,11 +13,6 @@ interface Feature {
   available: boolean;
   required?: string;
 }
-
-// ============================================
-// CONFIGURATION DES FONCTIONNALITÉS PAR PLAN
-// (alignée sur pricing.config.ts)
-// ============================================
 
 const featuresConfig: Record<string, Feature[]> = {
   free: [
@@ -69,10 +64,17 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
   const normalizedPlan = normalizePlanId(currentPlan);
   const safeCurrency = normalizeCurrency(currency);
 
-  let dynamicPrice = `0 ${getCurrencySymbol(safeCurrency)}`;
-  if (normalizedPlan === 'pro') dynamicPrice = formatPlanPrice('pro', safeCurrency);
-  else if (normalizedPlan === 'premium') dynamicPrice = formatPlanPrice('premium', safeCurrency);
-  else if (normalizedPlan === 'enterprise') dynamicPrice = formatPlanPrice('enterprise', safeCurrency);
+  // ✅ Prix dynamique selon la devise du user
+  let dynamicPrice: string;
+  if (normalizedPlan === 'free') {
+    dynamicPrice = 'Gratuit';
+  } else {
+    dynamicPrice = formatPlanPrice(
+      normalizedPlan as 'pro' | 'premium' | 'enterprise',
+      safeCurrency,
+      '/an'
+    );
+  }
 
   const planName =
     normalizedPlan === 'free'
@@ -97,7 +99,7 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
             {dynamicPrice}
           </p>
         </div>
-        {currentPlan === 'free' && (
+        {normalizedPlan === 'free' && (
           <Link
             href="/dashboard/pricing"
             data-tour="plan-upgrade-cta"

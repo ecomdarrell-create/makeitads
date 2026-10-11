@@ -11,6 +11,7 @@ import {
   BarChart3,
 } from 'lucide-react';
 import { StatRing } from '@/components/dashboard/StatRing';
+import { getCurrencySymbol, normalizeCurrency, formatPrice } from '@/lib/currency';
 
 interface Profile {
   id: string;
@@ -41,6 +42,7 @@ interface Props {
   profiles: Profile[];
   transactions: Transaction[];
   strategies: Strategy[];
+  currency?: string;
 }
 
 const PLAN_LABELS: Record<string, string> = {
@@ -57,13 +59,17 @@ const PLAN_COLORS: Record<string, string> = {
   enterprise: '#F59E0B',
 };
 
-const PLAN_PRICES: Record<string, number> = {
+// ✅ Prix en XOF (base) — convertis dynamiquement à l'affichage
+const PLAN_PRICES_XOF: Record<string, number> = {
   pro: 10000,
   premium: 25000,
   enterprise: 100000,
 };
 
-export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
+export function AnalyticsClient({ profiles, transactions, strategies, currency = 'XOF' }: Props) {
+  // ✅ Symbole de la devise cible
+  const currencySymbol = getCurrencySymbol(normalizeCurrency(currency));
+
   // ─── Stats globales ───
   const stats = useMemo(() => {
     const totalUsers = profiles.length;
@@ -72,14 +78,13 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
     const premium = profiles.filter((p) => p.plan === 'premium').length;
     const enterprise = profiles.filter((p) => p.plan === 'enterprise').length;
 
-    // Revenu estimé (annuel → mensuel)
-    const monthlyRevenue =
-      (pro * PLAN_PRICES.pro +
-        premium * PLAN_PRICES.premium +
-        enterprise * PLAN_PRICES.enterprise) /
+    // Revenu annuel brut (en XOF) → mensuel
+    const monthlyRevenueXOF =
+      (pro * PLAN_PRICES_XOF.pro +
+        premium * PLAN_PRICES_XOF.premium +
+        enterprise * PLAN_PRICES_XOF.enterprise) /
       12;
 
-    // Crédits consommés cette semaine
     const oneWeekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const creditsUsed = transactions
       .filter(
@@ -96,13 +101,12 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
       pro,
       premium,
       enterprise,
-      monthlyRevenue,
+      monthlyRevenueXOF,
       creditsUsed,
       payingUsers: pro + premium + enterprise,
     };
   }, [profiles, transactions]);
 
-  // ─── Inscriptions par jour (30 derniers jours) ───
   const signupsByDay = useMemo(() => {
     const days: { date: string; count: number }[] = [];
     const now = new Date();
@@ -128,7 +132,6 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
 
   const maxSignups = Math.max(...signupsByDay.map((d) => d.count), 1);
 
-  // ─── Crédits consommés par type (30 jours) ───
   const creditsByType = useMemo(() => {
     const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000;
     const map: Record<string, number> = {};
@@ -146,7 +149,6 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
       .sort((a, b) => b.amount - a.amount);
   }, [transactions]);
 
-  // ─── Top 5 utilisateurs les plus actifs ───
   const topUsers = useMemo(() => {
     const userMap: Record<string, number> = {};
 
@@ -208,19 +210,17 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
             size={90}
           />
           <StatRing
-            value={Math.round(stats.monthlyRevenue)}
-            max={Math.max(Math.round(stats.monthlyRevenue), 50000)}
+            value={Math.round(stats.monthlyRevenueXOF)}
+            max={Math.max(Math.round(stats.monthlyRevenueXOF), 50000)}
             label="Revenu"
-            unit="FCFA/mois"
+            unit={`${currencySymbol}/mois`}
             color="#F59E0B"
             size={90}
           />
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════ */}
       {/* CARTE 2 — RÉPARTITION PAR PLAN */}
-      {/* ═══════════════════════════════════════ */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-5 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#8B5CF6]/10 text-[#8B5CF6]">
@@ -272,9 +272,7 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════ */}
       {/* CARTE 3 — INSCRIPTIONS 30 JOURS */}
-      {/* ═══════════════════════════════════════ */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-5 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -313,9 +311,7 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
         </div>
       </div>
 
-      {/* ═══════════════════════════════════════ */}
       {/* CARTE 4 — CRÉDITS CONSOMMÉS */}
-      {/* ═══════════════════════════════════════ */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-5 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#F59E0B]/10 text-[#F59E0B]">
@@ -371,9 +367,7 @@ export function AnalyticsClient({ profiles, transactions, strategies }: Props) {
         )}
       </div>
 
-      {/* ═══════════════════════════════════════ */}
       {/* CARTE 5 — TOP 5 UTILISATEURS */}
-      {/* ═══════════════════════════════════════ */}
       <div className="rounded-2xl border border-slate-200 bg-white p-5">
         <div className="mb-5 flex items-center gap-2">
           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-[#6366F1]/10 text-[#6366F1]">

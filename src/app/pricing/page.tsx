@@ -1,12 +1,15 @@
 ﻿import Link from 'next/link';
 import { Check } from 'lucide-react';
 import { BackButton } from '@/components/ui/BackButton';
+import { createClient } from '@/lib/supabase/server';
+import { formatPlanPrice } from '@/config/pricing.config';
+import { normalizeCurrency, type Currency } from '@/lib/currency';
 
 const plans = [
   {
     id: 'demo',
     name: 'MakeItAds Démo',
-    price: '0 FCFA',
+    isFree: true,
     note: '12 mois d’accès',
     ctaText: 'Commencer',
     href: '/dashboard',
@@ -27,7 +30,6 @@ const plans = [
   {
     id: 'pro',
     name: 'MakeItAds Pro',
-    price: '10 000 FCFA/an',
     note: '12 mois d’accès',
     ctaText: 'Choisir le Plan Pro',
     href: 'https://makeitads.mychariow.com/plan-pro',
@@ -51,7 +53,6 @@ const plans = [
   {
     id: 'premium',
     name: 'MakeItAds Premium',
-    price: '25 000 FCFA/an',
     note: '12 mois d’accès',
     ctaText: 'Choisir le Plan Premium',
     href: 'https://makeitads.mychariow.com/plan-prem',
@@ -75,7 +76,6 @@ const plans = [
   {
     id: 'enterprise',
     name: 'MakeItAds Élite',
-    price: '100 000 FCFA/an',
     note: '12 mois d’accès',
     ctaText: 'Choisir le Plan Élite',
     href: 'https://makeitads.mychariow.com/plan-elit',
@@ -98,8 +98,23 @@ const plans = [
   },
 ];
 
-function PricingCard({ plan }: { plan: (typeof plans)[number] }) {
+function PricingCard({
+  plan,
+  currency,
+}: {
+  plan: (typeof plans)[number];
+  currency: Currency;
+}) {
   const isWide = plan.id === 'premium' || plan.id === 'enterprise';
+
+  // ✅ Prix dynamique selon la devise (sauf demo → "Gratuit")
+  const displayPrice = plan.isFree
+    ? 'Gratuit'
+    : formatPlanPrice(
+        plan.id as 'pro' | 'premium' | 'enterprise',
+        currency,
+        '/an'
+      );
 
   return (
     <div
@@ -117,7 +132,9 @@ function PricingCard({ plan }: { plan: (typeof plans)[number] }) {
         </h3>
 
         <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-base md:text-xl font-bold text-[#18181B] leading-none">{plan.price}</span>
+          <span className="text-base md:text-xl font-bold text-[#18181B] leading-none">
+            {displayPrice}
+          </span>
         </div>
 
         <span className="inline-block mt-1.5 px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-bold text-white bg-gray-800 whitespace-nowrap">
@@ -148,7 +165,24 @@ function PricingCard({ plan }: { plan: (typeof plans)[number] }) {
   );
 }
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  // ✅ Devise du user connecté (fallback XOF pour visiteurs anonymes)
+  let currency: Currency = 'XOF';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('currency')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profile?.currency) {
+      currency = normalizeCurrency(profile.currency);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-[#F9FAFB] py-8 px-4 sm:px-6">
       <div className="max-w-5xl mx-auto">
@@ -165,16 +199,16 @@ export default function PricingPage() {
 
         <div className="grid grid-cols-2 gap-3 md:gap-5 w-full">
           <div className="col-span-1">
-            <PricingCard plan={plans[0]} />
+            <PricingCard plan={plans[0]} currency={currency} />
           </div>
           <div className="col-span-1">
-            <PricingCard plan={plans[1]} />
+            <PricingCard plan={plans[1]} currency={currency} />
           </div>
           <div className="col-span-2">
-            <PricingCard plan={plans[2]} />
+            <PricingCard plan={plans[2]} currency={currency} />
           </div>
           <div className="col-span-2">
-            <PricingCard plan={plans[3]} />
+            <PricingCard plan={plans[3]} currency={currency} />
           </div>
         </div>
       </div>

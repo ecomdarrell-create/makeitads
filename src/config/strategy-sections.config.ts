@@ -105,7 +105,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Target,
     minPlan: "pro",
     previewText:
-      "Villes prioritaires, tranches d'âge, centres d'intérêt et comportements d'achat pour atteindre précisément les bonnes personnes et maximiser chaque franc investi.",
+      "Villes prioritaires, tranches d'âge, centres d'intérêt et comportements d'achat pour atteindre précisément les bonnes personnes et maximiser chaque unité investie.",
   },
   {
     id: "scripts_whatsapp",
@@ -121,7 +121,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Wallet,
     minPlan: "pro",
     previewText:
-      "Répartition détaillée de votre budget sur 7 jours, entre phase de test, optimisation et scaling, avec montants en FCFA.",
+      "Répartition détaillée de votre budget sur 7 jours, entre phase de test, optimisation et scaling, avec montants adaptés à votre devise.",
   },
   {
     id: "conseil_expert",

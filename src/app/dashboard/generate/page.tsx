@@ -35,15 +35,13 @@ export default function GeneratePage() {
   const [supabaseError, setSupabaseError] = useState('');
   const [hasDraft, setHasDraft] = useState(false);
   const [refreshingCredits, setRefreshingCredits] = useState(false);
+  const [currency, setCurrency] = useState<string>('XOF');
 
   const totalSteps = 8;
 
-  // ✅ NOUVELLE LOGIQUE
-  // - free : peut faire Flash ET Complète
-  // - payant : peut faire Complète uniquement
   const isFree = currentPlan === 'free';
   const flashAllowed = isFree;
-  const completeAllowed = true; // tout le monde peut faire une complète
+  const completeAllowed = true;
 
   const generationCost = strategyType === 'complete' ? 5 : 1;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
@@ -72,7 +70,6 @@ export default function GeneratePage() {
     exhausted: 'border-red-300 bg-red-100 text-red-800',
   }[alertLevel];
 
-  // ─── Charger les crédits + appliquer la restriction ───
   const loadCreditsBalance = async () => {
     setRefreshingCredits(true);
     try {
@@ -88,7 +85,7 @@ export default function GeneratePage() {
 
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('credits_balance, plan')
+        .select('credits_balance, plan, currency')
         .eq('id', user.id)
         .maybeSingle();
 
@@ -111,7 +108,10 @@ export default function GeneratePage() {
       setCurrentPlan(normalizedPlan);
       setSupabaseError('');
 
-      // ✅ Forcer Complète si plan payant, et lire ?type= pour plan free
+      if (profile.currency) {
+        setCurrency(profile.currency);
+      }
+
       if (normalizedPlan !== 'free') {
         setStrategyType('complete');
       } else {
@@ -134,7 +134,6 @@ export default function GeneratePage() {
     }
   };
 
-  // ─── Chargement initial ───
   useEffect(() => {
     const savedDraft = localStorage.getItem(DRAFT_KEY);
     if (savedDraft) {
@@ -155,7 +154,6 @@ export default function GeneratePage() {
     loadCreditsBalance();
   }, []);
 
-  // ✅ Si on est sur plan payant et que strategyType vaut flash, forcer complete
   useEffect(() => {
     if (!isFree && strategyType !== 'complete') {
       setStrategyType('complete');
@@ -168,7 +166,6 @@ export default function GeneratePage() {
     return () => window.removeEventListener('summary-back', handleBack);
   }, []);
 
-  // ─── Autosave du draft ───
   useEffect(() => {
     if (currentStep <= totalSteps) {
       localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
@@ -222,7 +219,6 @@ export default function GeneratePage() {
   };
 
   const handleGenerate = async () => {
-    // ✅ Sécurité : plan payant + flash → forcer complete
     if (!isFree && strategyType === 'flash') {
       setStrategyType('complete');
       return;
@@ -302,16 +298,17 @@ export default function GeneratePage() {
           generationCost={generationCost}
           onGenerate={handleGenerate}
           isGenerating={isGenerating}
+          currency={currency}
         />
       );
     }
     switch (currentStep) {
       case 1: return <Step1Company formData={formData} updateFormData={updateFormData} />;
-      case 2: return <Step2Offer formData={formData} updateFormData={updateFormData} />;
+      case 2: return <Step2Offer formData={formData} updateFormData={updateFormData} currency={currency} />;
       case 3: return <Step3Audience formData={formData} updateFormData={updateFormData} />;
       case 4: return <Step4Market formData={formData} updateFormData={updateFormData} />;
       case 5: return <Step5Objective formData={formData} updateFormData={updateFormData} />;
-      case 6: return <Step6Campaign formData={formData} updateFormData={updateFormData} />;
+      case 6: return <Step6Campaign formData={formData} updateFormData={updateFormData} currency={currency} />;
       case 7: return <Step7Creative formData={formData} updateFormData={updateFormData} />;
       case 8: return <Step8Context formData={formData} updateFormData={updateFormData} />;
       default: return null;
@@ -323,7 +320,6 @@ export default function GeneratePage() {
       <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 sm:py-6">
         <BackButton href="/dashboard" label="Retour au dashboard" />
 
-        {/* HEADER + BADGE CRÉDITS */}
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-semibold text-[#111827] sm:text-xl">
@@ -363,7 +359,6 @@ export default function GeneratePage() {
           </button>
         </div>
 
-        {/* BANDEAU ALERTE CRÉDITS */}
         {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
           <div
             className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
@@ -414,7 +409,6 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* BANDEAU BROUILLON */}
         {hasDraft && !showSummary && !isGenerating && (
           <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5">
             <p className="text-[11px] text-indigo-900">
@@ -437,7 +431,6 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* SÉLECTION DU TYPE DE STRATÉGIE */}
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
@@ -453,7 +446,6 @@ export default function GeneratePage() {
             </div>
 
             {isFree ? (
-              // ✅ Plan free : les 2 boutons
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -481,7 +473,6 @@ export default function GeneratePage() {
                 </button>
               </div>
             ) : (
-              // ✅ Plan payant : uniquement Complète, affiché en évidence
               <div className="rounded-lg border border-[#6366F1] bg-[#6366F1]/10 px-3 py-2.5">
                 <div className="flex items-center justify-between">
                   <div>

@@ -7,21 +7,29 @@ import {
   Plus,
   BarChart3,
   Coins,
-  BadgeDollarSign,
+  Crown,
   Gift,
   User,
+  Shield,
+  TrendingUp,
 } from 'lucide-react';
+import { useIsAdmin } from '@/hooks/useIsAdmin';
 
 const navItems = [
   { name: 'Accueil', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: Plus },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Credits', href: '/dashboard/credits', icon: Coins },
+  { name: 'Plan', href: '/dashboard/pricing', icon: Crown },
   { name: 'Parrainage', href: '/dashboard/referral', icon: Gift },
   { name: 'Settings', href: '/dashboard/settings', icon: User },
 ];
 
-// ✅ Routes sur lesquelles la sidebar NE doit PAS s'afficher
+const adminItems = [
+  { name: 'Admin', href: '/dashboard/admin', icon: Shield },
+  { name: 'Revenus', href: '/dashboard/admin/revenue', icon: TrendingUp },
+];
+
 const AUTH_ROUTES = [
   '/login',
   '/signup',
@@ -34,8 +42,8 @@ const AUTH_ROUTES = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const isAdmin = useIsAdmin();
 
-  // ✅ Sécurité : ne jamais afficher la sidebar sur les pages d'auth
   const isAuthPage = AUTH_ROUTES.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
   );
@@ -51,7 +59,7 @@ export function Sidebar() {
         </Link>
       </div>
 
-      {/* Navigation */}
+      {/* Navigation principale */}
       <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive =
@@ -77,6 +85,37 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {/* Section Admin — uniquement pour les admins */}
+        {isAdmin && (
+          <>
+            <div className="pt-4 pb-2 px-3">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-amber-600">
+                Admin
+              </p>
+            </div>
+            {adminItems.map((item) => {
+              const isActive = pathname === item.href || pathname.startsWith(item.href);
+
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                    isActive
+                      ? 'bg-amber-50 text-amber-700'
+                      : 'text-gray-600 hover:bg-amber-50/50 hover:text-amber-700'
+                  }`}
+                >
+                  <item.icon
+                    className={`w-4 h-4 ${isActive ? 'text-amber-600' : 'text-gray-400'}`}
+                  />
+                  {item.name}
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       {/* Footer Sidebar */}

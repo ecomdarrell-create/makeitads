@@ -1,26 +1,43 @@
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { redirect } from 'next/navigation';
 import { BackButton } from '@/components/ui/BackButton';
 import { RevenueClient } from './RevenueClient';
+import { normalizeCurrency } from '@/lib/currency';
 
-const ADMIN_EMAIL = 'ecomdarrell@gmail.com';
+const ADMIN_EMAILS = ['ecomdarrell@gmail.com', 'darrellkamga@gmail.com'];
 
 export default async function RevenuePage() {
+  // 1) Auth via client normal (cookies user)
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) redirect('/login');
-  if (user.email !== ADMIN_EMAIL) redirect('/dashboard');
+  const isAdmin = user.email ? ADMIN_EMAILS.includes(user.email.toLowerCase().trim()) : false;
+  if (!isAdmin) redirect('/dashboard');
 
-  const { data: revenues } = await supabase
-    .from('revenue_transactions')
-    .select('id, user_id, email, plan_id, amount_fcfa, source, order_id, created_at')
-    .order('created_at', { ascending: false })
-    .limit(500);
+  // 2) Admin client (bypass RLS)
+  const admin = createAdminClient();
 
-  const { data: allProfiles } = await supabase
-    .from('profiles')
-    .select('id, email, first_name, plan');
+  const [revenuesRes, profilesRes, adminProfileRes] = await Promise.all([
+    admin
+      .from('revenue_transactions')
+      .select('id, user_id, email, plan_id, amount_fcfa, source, order_id, created_at')
+      .order('created_at', { ascending: false })
+      .limit(500),
+    admin
+      .from('profiles')
+      .select('id, email, first_name, plan'),
+    admin
+      .from('profiles')
+      .select('currency')
+      .eq('id', user.id)
+      .maybeSingle(),
+  ]);
+
+  const revenues = revenuesRes.data ?? [];
+  const profiles = profilesRes.data ?? [];
+  const adminCurrency = normalizeCurrency(adminProfileRes.data?.currency);
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-5 sm:px-6 sm:py-6">
@@ -36,8 +53,9 @@ export default async function RevenuePage() {
       </div>
 
       <RevenueClient
-        revenues={revenues || []}
-        profiles={allProfiles || []}
+        revenues={revenues}
+        profiles={profiles}
+        currency={adminCurrency}
       />
     </div>
   );

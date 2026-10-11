@@ -26,7 +26,10 @@ import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
 import SaaSChatbot from "@/components/shared/SaaSChatbot";
 
-// ✅ Logos officiels avec couleurs de marque
+import { createClient } from "@/lib/supabase/client";
+import { formatPlanPrice } from "@/config/pricing.config";
+import { normalizeCurrency, type Currency } from "@/lib/currency";
+
 const partnerLogos = [
   { name: "Meta",      icon: SiMeta,      color: "#0866FF" },
   { name: "Google",    icon: SiGoogle,    color: "#4285F4" },
@@ -40,11 +43,12 @@ const partnerLogos = [
   { name: "Pinterest", icon: SiPinterest, color: "#E60023" },
 ];
 
+// ✅ Position de l'image par étape (object-position)
 const howItWorksSteps = [
-  { number: "01", title: "Créez votre compte", description: "Inscrivez-vous gratuitement et accédez immédiatement à votre espace personnel sécurisé.", image: "/images/process/step-1-signup.jpg" },
-  { number: "02", title: "Décrivez votre business", description: "Notre wizard intelligent vous guide à travers 8 questions clés sur votre entreprise.", image: "/images/process/step-2-wizard.jpg" },
-  { number: "03", title: "Recevez votre stratégie", description: "Obtenez une stratégie détaillée avec scripts WhatsApp et allocation budgétaire.", image: "/images/process/step-4-growth.jpg" },
-  { number: "04", title: "Lancez et scalez", description: "Appliquez les recommandations et regardez votre business se développer.", image: "/images/process/step-3-strategy.jpg" },
+  { number: "01", title: "Créez votre compte", description: "Inscrivez-vous gratuitement et accédez immédiatement à votre espace personnel sécurisé.", image: "/images/process/step-1-signup.jpg", position: "35% center" },
+  { number: "02", title: "Décrivez votre business", description: "Notre wizard intelligent vous guide à travers 8 questions clés sur votre entreprise.", image: "/images/process/step-2-wizard.jpg", position: "center center" },
+  { number: "03", title: "Recevez votre stratégie", description: "Obtenez une stratégie détaillée avec scripts WhatsApp et allocation budgétaire.", image: "/images/process/step-4-growth.jpg", position: "center center" },
+  { number: "04", title: "Lancez et scalez", description: "Appliquez les recommandations et regardez votre business se développer.", image: "/images/process/step-3-strategy.jpg", position: "center center" },
 ];
 
 const faqData = [
@@ -56,11 +60,12 @@ const faqData = [
   { question: "Est-ce adapté au marché africain ?", answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux." },
 ];
 
+// ✅ Les prix sont maintenant calculés dynamiquement selon la devise du user
 const pricingPlans = [
   {
     id: "demo",
     name: "MakeItAds Démo",
-    price: "0 FCFA",
+    isFree: true,
     features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"],
     popular: false,
     ctaText: "Commencer",
@@ -75,7 +80,6 @@ const pricingPlans = [
   {
     id: "pro",
     name: "MakeItAds Pro",
-    price: "10 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: ["50 crédits renouvelés chaque mois", "5 Stratégies Complètes / mois", "12 sections détaillées", "Scripts WhatsApp prêts à l'emploi", "Allocation budgétaire sur 7 jours", "Ciblage précis par ville", "Guide créatif", "Support email (48h)"],
     popular: true,
@@ -91,7 +95,6 @@ const pricingPlans = [
   {
     id: "premium",
     name: "MakeItAds Premium",
-    price: "25 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: ["150 crédits renouvelés chaque mois", "15 Stratégies Complètes / mois", "Analyse concurrentielle", "5 variantes de hooks", "Analyse d'audience avancée", "Stratégie de croissance 3 mois", "Support prioritaire (12h)", "Rapports avancés"],
     popular: false,
@@ -107,7 +110,6 @@ const pricingPlans = [
   {
     id: "elite",
     name: "MakeItAds Élite",
-    price: "100 000 FCFA/an",
     durationNote: "12 mois d'accès",
     features: ["500 crédits renouvelés chaque mois", "50 Stratégies Complètes / mois", "Consulting stratégique mensuel", "Formation personnalisée", "Accompagnement avancé", "Rapports white-label", "Support prioritaire 24/7", "Accès API"],
     popular: false,
@@ -175,8 +177,23 @@ const aboutBlocks = [
   },
 ];
 
-function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
+function PricingCard({
+  plan,
+  currency,
+}: {
+  plan: (typeof pricingPlans)[number];
+  currency: Currency;
+}) {
   const isWide = plan.id === "premium" || plan.id === "elite";
+
+  // ✅ Prix dynamique selon la devise (Démo → "Gratuit")
+  const displayPrice = plan.isFree
+    ? "Gratuit"
+    : formatPlanPrice(
+        plan.id as "pro" | "premium" | "enterprise",
+        currency,
+        "/an"
+      );
 
   return (
     <motion.div
@@ -195,7 +212,7 @@ function PricingCard({ plan }: { plan: (typeof pricingPlans)[number] }) {
       <div className={`${isWide ? "md:w-1/3 md:border-r md:border-gray-100 md:pr-5 mb-3 md:mb-0" : "mb-3"}`}>
         <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">{plan.name}</h3>
         <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{plan.price}</span>
+          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
         </div>
         {plan.durationNote && (
           <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
@@ -230,6 +247,7 @@ export default function LandingPage() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [currency, setCurrency] = useState<Currency>("XOF");
 
   const scrollToPricing = () =>
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
@@ -238,6 +256,30 @@ export default function LandingPage() {
     const handleScroll = () => setShowScrollTop(window.scrollY > 600);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // ✅ Charge la devise du user connecté (silencieux si anonyme)
+  useEffect(() => {
+    const loadCurrency = async () => {
+      try {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("currency")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (profile?.currency) {
+          setCurrency(normalizeCurrency(profile.currency));
+        }
+      } catch {
+        // Silencieux — fallback XOF
+      }
+    };
+    loadCurrency();
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -313,10 +355,18 @@ export default function LandingPage() {
 
           <motion.div key={activeStep} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.4, ease: "easeOut" }} className="flex flex-col gap-3">
             <div
-              className="w-full aspect-[16/9] md:aspect-[21/9] bg-gray-50 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100"
+              className="w-full aspect-[4/3] md:aspect-[16/10] bg-gradient-to-br from-slate-50 to-slate-100 rounded-2xl md:rounded-3xl overflow-hidden border border-gray-100"
               style={{ position: "relative" }}
             >
-              <Image src={howItWorksSteps[activeStep].image} alt={howItWorksSteps[activeStep].title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 1200px" priority={activeStep === 0} />
+              <Image
+                src={howItWorksSteps[activeStep].image}
+                alt={howItWorksSteps[activeStep].title}
+                fill
+                className="object-cover"
+                style={{ objectPosition: howItWorksSteps[activeStep].position }}
+                sizes="(max-width: 768px) 100vw, 1200px"
+                priority={activeStep === 0}
+              />
             </div>
             <div className="bg-white rounded-2xl md:rounded-3xl border border-gray-100 shadow-sm p-4 md:p-6">
               <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3 md:gap-8 mb-4">
@@ -345,13 +395,12 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
-      {/* ── Section statistiques — fond clair façon Stripe ── */}
+      {/* ── Section statistiques — fond clair ── */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
         <div className="pointer-events-none absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -370,7 +419,6 @@ export default function LandingPage() {
             </p>
           </motion.div>
 
-          {/* Grille de stats avec séparateurs fins */}
           <div className="grid grid-cols-2 md:grid-cols-4">
             {statsData.map((stat, index) => {
               const borderClass =
@@ -483,13 +531,13 @@ export default function LandingPage() {
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 w-full">
-            <PricingCard plan={pricingPlans[0]} />
-            <PricingCard plan={pricingPlans[1]} />
+            <PricingCard plan={pricingPlans[0]} currency={currency} />
+            <PricingCard plan={pricingPlans[1]} currency={currency} />
             <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[2]} />
+              <PricingCard plan={pricingPlans[2]} currency={currency} />
             </div>
             <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[3]} />
+              <PricingCard plan={pricingPlans[3]} currency={currency} />
             </div>
           </div>
         </div>

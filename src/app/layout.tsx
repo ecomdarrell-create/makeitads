@@ -58,28 +58,28 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+
+  // ✅ FAVICON — fichiers générés par realfavicongenerator.net
   icons: {
     icon: [
-      { url: "/favicon.ico" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
     ],
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
-    other: [
-      {
-        rel: "mask-icon",
-        url: "/safari-pinned-tab.svg",
-        color: "#6366f1",
-      },
-    ],
   },
+
+  // ✅ Manifest PWA
+  manifest: "/site.webmanifest",
+
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "MakeItAds",
   },
+
   formatDetection: {
     telephone: false,
     email: false,
@@ -105,8 +105,8 @@ const jsonLd = {
       "@type": "Organization",
       "name": "MakeItAds",
       "url": "https://makeitads.pro",
-      "logo": "https://makeitads.pro/favicon.ico",
-      "sameAs": ["https://t.me/MakeitAds_CEO"]
+      "logo": "https://makeitads.pro/web-app-manifest-512x512.png",
+      "sameAs": ["https://t.me/MakeItAds_CEO"]
     },
     {
       "@type": "SoftwareApplication",

@@ -18,6 +18,10 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
 
 export type PlanTier = 'free' | 'pro' | 'premium' | 'enterprise';
 
+// ============================================
+// SCHÉMAS
+// ============================================
+
 const ExecutiveSummarySchema = z.object({
   synthese: z.string(),
   preparation: z.number().min(0).max(100),
@@ -26,8 +30,19 @@ const ExecutiveSummarySchema = z.object({
   priorite: z.string(),
 });
 
-const InsightsSchema = z.array(z.object({ titre: z.string(), explication: z.string(), impact: z.string() })).min(3).max(5);
-const PrioritiesSchema = z.array(z.object({ niveau: z.enum(['Priorité immédiate', 'À tester', 'À optimiser', 'À surveiller']), titre: z.string(), pourquoi: z.string(), action: z.string(), impact_attendu: z.string() })).min(3).max(4);
+const InsightsSchema = z.array(z.object({
+  titre: z.string(),
+  explication: z.string(),
+  impact: z.string(),
+})).min(3).max(5);
+
+const PrioritiesSchema = z.array(z.object({
+  niveau: z.enum(['Priorité immédiate', 'À tester', 'À optimiser', 'À surveiller']),
+  titre: z.string(),
+  pourquoi: z.string(),
+  action: z.string(),
+  impact_attendu: z.string(),
+})).min(3).max(4);
 
 const ActionPlanSchema = z.object({
   phase_1: z.object({ titre: z.string(), duree: z.string(), actions: z.array(z.string()).min(2) }),
@@ -35,6 +50,30 @@ const ActionPlanSchema = z.object({
   phase_3: z.object({ titre: z.string(), duree: z.string(), actions: z.array(z.string()).min(2) }),
 });
 
+// ✅ NOUVEAU : schéma structuré du budget
+const BudgetSchema = z.object({
+  montant_total: z.number(),
+  devise: z.string().default('FCFA'),
+  repartition: z.array(z.object({
+    poste: z.string(),
+    pourcentage: z.number(),
+    montant: z.number(),
+  })).min(1),
+  cpc_estime: z.number(),
+  nombre_clics_estimes: z.number(),
+  taux_conversion_estime: z.number(),
+  ventes_estimees: z.number(),
+  roas_estime: z.number(),
+});
+
+const CiblageExactSchema = z.object({
+  villes: z.array(z.string()),
+  ages: z.string(),
+  interets: z.array(z.string()),
+  comportements: z.array(z.string()),
+});
+
+// ✅ SCHÉMA FLASH
 export const FlashDiagnosticSchema = z.object({
   salutation: z.string(),
   diagnostic: z.string(),
@@ -43,6 +82,7 @@ export const FlashDiagnosticSchema = z.object({
   makeitads_teaser: z.string(),
 });
 
+// ✅ SCHÉMA PRO (avec budget + avertissements)
 export const ProCompleteSchema = z.object({
   salutation: z.string(),
   executive_summary: ExecutiveSummarySchema,
@@ -50,15 +90,18 @@ export const ProCompleteSchema = z.object({
   priorities: PrioritiesSchema,
   action_plan: ActionPlanSchema,
   analyse_marche: z.string(),
-  ciblage_exact: z.object({ villes: z.array(z.string()), ages: z.string(), interets: z.array(z.string()), comportements: z.array(z.string()) }),
+  ciblage_exact: CiblageExactSchema,
   scripts_whatsapp: z.array(z.string()).min(3),
+  budget: BudgetSchema,
   allocation_budget: z.string(),
   conseil_expert: z.string(),
   recommandations_plateforme: z.string(),
   guide_creatif: z.string(),
   kpis: z.array(z.object({ nom: z.string(), objectif: z.string(), pourquoi: z.string() })).min(3),
+  avertissements: z.array(z.string()).default([]),
 });
 
+// ✅ SCHÉMA PREMIUM
 export const PremiumCompleteSchema = ProCompleteSchema.extend({
   analyse_concurrentielle: z.string(),
   hooks: z.array(z.string()).min(5),
@@ -66,6 +109,7 @@ export const PremiumCompleteSchema = ProCompleteSchema.extend({
   strategie_croissance: z.string(),
 });
 
+// ✅ SCHÉMA ELITE
 export const EliteCompleteSchema = PremiumCompleteSchema.extend({
   consulting_strategique: z.string(),
   formation_personnalisee: z.string(),
@@ -79,20 +123,24 @@ export type PremiumComplete = z.infer<typeof PremiumCompleteSchema>;
 export type EliteComplete = z.infer<typeof EliteCompleteSchema>;
 
 // ============================================
-// RÈGLES DE STYLE (appliquées à tous les plans)
+// RÈGLES DE STYLE
 // ============================================
 const STYLE_RULES = `
 RÈGLES DE STYLE ABSOLUES :
 1. Commence TOUJOURS ta réponse par le champ "salutation" qui salue l'utilisateur avec son prénom (fourni dans les données sous "userFirstName"). Exemple : "Bonjour Awa, voici ta stratégie."
 2. N'utilise JAMAIS de tirets longs ni de tirets cadratins. Aucun "—" ou "–". Utilise des virgules, des deux-points ou des phrases séparées.
 3. N'utilise JAMAIS de guillemets droits anglais. Si tu dois citer quelque chose, utilise les guillemets français « ».
-4. N'utilise PAS d'astérisques pour le formatage Markdown. Exception : pour mettre un mot clé en gras, utilise **mot clé** (avec deux astérisques avant et après). Le système les convertira automatiquement en gras. N'abuse pas : 1 à 3 mots clés par paragraphe maximum.
+4. N'utilise PAS d'astérisques pour le formatage Markdown. Exception : pour mettre un mot clé en gras, utilise **mot clé** (avec deux astérisques avant et après). N'abuse pas : 1 à 3 mots clés par paragraphe maximum.
 5. N'utilise NI backticks, NI dièses (#), NI tirets de liste. Pour les listes, utilise uniquement des puces simples avec le caractère •
 6. Aère ton texte : sépare tes idées par des sauts de ligne. Chaque paragraphe = une idée. Ne fais JAMAIS un bloc unique compact.
 7. Ton direct, expert, chaleureux. Tutoie systématiquement l'utilisateur.
 8. Pas de jargon marketing creux. Concret et actionnable.
 9. Ne fabrique aucun chiffre de ventes, ROAS, taux de conversion ou résultat observé. Si une donnée manque, formule une hypothèse clairement signalée.
 10. Réponds UNIQUEMENT en JSON valide. Aucun texte avant ni après. Aucun bloc markdown.`;
+
+// ============================================
+// PROMPTS PAR PLAN
+// ============================================
 
 const FLASH_SYSTEM_PROMPT = `Tu es le Directeur Stratégique de MakeItAds, spécialisé dans l'acquisition client en Afrique.
 Génère un diagnostic flash percutant basé sur les données fournies.
@@ -105,9 +153,7 @@ Structure JSON attendue :
   "avatar_client": "Profil psycho-démographique de l'acheteur idéal (ville, âge, douleur principale). Aéré.",
   "angle_publicitaire": "1 concept de pub (hook + visuel) adapté au marché africain. Expliqué en paragraphes.",
   "makeitads_teaser": "2 à 3 phrases présentant sobrement ce que les plans payants débloquent. Crée une vraie envie sans survendre."
-}
-
-IMPORTANT : Pour un plan Démo, fournis un contenu suffisamment solide pour que l'utilisateur ait envie d'en savoir plus. Sois généreux en qualité, concis en quantité.`;
+}`;
 
 const PRO_SYSTEM_PROMPT = `Tu es le Directeur Stratégique de MakeItAds. Génère une stratégie opérationnelle complète pour un entrepreneur solo.
 ${STYLE_RULES}
@@ -122,19 +168,32 @@ Structure JSON attendue :
   "analyse_marche": "Opportunités spécifiques. Aéré en paragraphes.",
   "ciblage_exact": { "villes": ["Ville 1", "Ville 2"], "ages": "tranche", "interets": ["intérêt 1", "intérêt 2"], "comportements": ["comportement 1", "comportement 2"] },
   "scripts_whatsapp": ["Script 1 : accueil et qualification", "Script 2 : relance après 24h", "Script 3 : closing Mobile Money"],
-  "allocation_budget": "Répartition sur 7 jours en FCFA. Aéré.",
+  "budget": {
+    "montant_total": 0,
+    "devise": "SYMBOLE_DEVISE",
+    "repartition": [{ "poste": "Nom du poste", "pourcentage": 0, "montant": 0 }],
+    "cpc_estime": 0,
+    "nombre_clics_estimes": 0,
+    "taux_conversion_estime": 0,
+    "ventes_estimees": 0,
+    "roas_estime": 0
+  },
+  "allocation_budget": "Répartition détaillée sur 7 jours dans la devise de l'utilisateur. Aéré.",
   "conseil_expert": "1 conseil concret pour maximiser le ROAS.",
   "recommandations_plateforme": "Plateforme à privilégier et pourquoi. Aéré.",
   "guide_creatif": "Idées concrètes de visuels et vidéos. Aéré.",
-  "kpis": [{ "nom": "KPI", "objectif": "cible", "pourquoi": "raison" }]
+  "kpis": [{ "nom": "KPI", "objectif": "cible", "pourquoi": "raison" }],
+  "avertissements": ["avertissement si nécessaire", "sinon tableau vide"]
 }
 
-Génère 3 à 5 insights, 3 à 4 priorités, un plan d'action sur 3 phases. Aère TOUS les textes longs en paragraphes séparés par des sauts de ligne.`;
+Génère 3 à 5 insights, 3 à 4 priorités, un plan d'action sur 3 phases. Tous les montants dans la devise de l'utilisateur.
+IMPORTANT : "budget.montant_total" doit être le budget mensuel fourni dans les données utilisateur.
+Aère TOUS les textes longs en paragraphes séparés par des sauts de ligne.`;
 
 const PREMIUM_SYSTEM_PROMPT = `Tu es le Directeur Stratégique de MakeItAds. Génère une stratégie avancée pour un marketeur qui veut dominer sa niche.
 ${STYLE_RULES}
 
-Utilise la même structure que pour le plan Pro, PLUS ces 4 champs additionnels :
+Utilise EXACTEMENT la même structure que pour le plan Pro (avec tous les champs dont "budget" et "avertissements"), PLUS ces 4 champs additionnels :
 {
   "analyse_concurrentielle": "Analyse des concurrents. Aéré en paragraphes.",
   "hooks": ["Hook 1 (douleur)", "Hook 2 (curiosité)", "Hook 3 (preuve sociale)", "Hook 4 (urgence)", "Hook 5 (transformation)"],
@@ -147,7 +206,7 @@ Reprends TOUS les champs de Pro plus ces 4 champs. Aère tous les textes longs.`
 const ELITE_SYSTEM_PROMPT = `Tu es le Directeur Stratégique de MakeItAds. Génère une stratégie complète de niveau agence.
 ${STYLE_RULES}
 
-Utilise la même structure que pour le plan Premium, PLUS ces 4 champs additionnels :
+Utilise EXACTEMENT la même structure que pour le plan Premium (avec tous les champs dont "budget" et "avertissements"), PLUS ces 4 champs additionnels :
 {
   "consulting_strategique": "Recommandations personnalisées de niveau consulting.",
   "formation_personnalisee": "Plan de montée en compétences.",
@@ -157,14 +216,43 @@ Utilise la même structure que pour le plan Premium, PLUS ces 4 champs additionn
 
 Reprends TOUS les champs de Premium plus ces 4 champs. Aère tous les textes longs.`;
 
-export function getSystemPrompt(type: 'flash' | 'complete', plan: PlanTier = 'free'): string {
-  if (type === 'flash') return FLASH_SYSTEM_PROMPT;
-  switch (plan) {
-    case 'pro': return PRO_SYSTEM_PROMPT;
-    case 'premium': return PREMIUM_SYSTEM_PROMPT;
-    case 'enterprise': return ELITE_SYSTEM_PROMPT;
-    default: return PRO_SYSTEM_PROMPT;
+// ============================================
+// CONTEXTE DEVISE
+// ============================================
+function buildCurrencyContext(currency: string, symbol: string): string {
+  return `
+
+⚠️ DEVISE DE L'UTILISATEUR : ${currency} (symbole : ${symbol}).
+Toutes les valeurs monétaires que tu produis (budget, CPC, montants, allocation) DOIVENT être exprimées UNIQUEMENT dans la devise ${symbol}.
+Le champ "budget.devise" doit contenir "${symbol}".
+N'utilise JAMAIS "FCFA" si la devise de l'utilisateur n'est pas XOF ou XAF.
+Exemple : si la devise est EUR, écris "15 €", pas "15 FCFA". Si la devise est USD, écris "$15", pas "15 FCFA".
+Cette règle est ABSOLUE et s'applique à CHAQUE champ monétaire de la réponse JSON.`;
+}
+
+// ============================================
+// GET SYSTEM PROMPT
+// ============================================
+export function getSystemPrompt(
+  type: 'flash' | 'complete',
+  plan: PlanTier = 'free',
+  currency: string = 'XOF',
+  currencySymbol: string = 'FCFA'
+): string {
+  let basePrompt: string;
+
+  if (type === 'flash') {
+    basePrompt = FLASH_SYSTEM_PROMPT;
+  } else {
+    switch (plan) {
+      case 'pro': basePrompt = PRO_SYSTEM_PROMPT; break;
+      case 'premium': basePrompt = PREMIUM_SYSTEM_PROMPT; break;
+      case 'enterprise': basePrompt = ELITE_SYSTEM_PROMPT; break;
+      default: basePrompt = PRO_SYSTEM_PROMPT;
+    }
   }
+
+  return basePrompt + buildCurrencyContext(currency, currencySymbol);
 }
 
 export function getSchema(type: 'flash' | 'complete', plan: PlanTier = 'free'): z.ZodTypeAny {

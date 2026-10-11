@@ -1,12 +1,17 @@
 import { FormData } from '../types';
 import { RequiredLabel } from '../RequiredLabel';
+import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 
 interface StepProps {
   formData: FormData;
   updateFormData: (updates: Partial<FormData>) => void;
+  currency?: string;
 }
 
-export function Step2Offer({ formData, updateFormData }: StepProps) {
+export function Step2Offer({ formData, updateFormData, currency = 'XOF' }: StepProps) {
+  // ✅ Symbole de devise dynamique (FCFA, €, $)
+  const currencySymbol = getCurrencySymbol(normalizeCurrency(currency));
+
   return (
     <div className="space-y-5">
       <div>
@@ -35,7 +40,7 @@ export function Step2Offer({ formData, updateFormData }: StepProps) {
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-            Prix (FCFA)
+            Prix ({currencySymbol})
           </label>
           <input
             type="text"

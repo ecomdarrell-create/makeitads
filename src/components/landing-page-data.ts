@@ -39,7 +39,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     question: "La stratégie gratuite est-elle vraiment gratuite ?",
-    answer: "Oui, à 100%. C'est notre façon de vous prouver la qualité de notre travail avant que vous n'investissiez un seul franc. Aucun engagement requis."
+    answer: "Oui, à 100%. C'est notre façon de vous prouver la qualité de notre travail avant que vous n'investissiez un seul centime. Aucun engagement requis."
   },
   {
     question: "Quelle est la différence avec les plans payants ?",
@@ -59,7 +59,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     question: "Est-ce vraiment adapté au marché africain ?",
-    answer: "Oui, c'est notre ADN. MakeItAds est calibré pour les réalités locales : budgets en FCFA, ciblage par villes africaines, et leviers de confiance locaux."
+    answer: "Oui, c'est notre ADN. MakeItAds est calibré pour les réalités locales : budgets dans votre devise, ciblage par villes africaines, et leviers de confiance locaux."
   }
 ];
 

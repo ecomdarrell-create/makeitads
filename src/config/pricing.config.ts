@@ -1,13 +1,23 @@
 // ======================================================
 // PRICING CONFIGURATION - SOURCE UNIQUE DE VÉRITÉ
+// ⚠️ Tous les prix sont exprimés en XOF (base)
+// La conversion vers EUR/USD se fait à l'affichage via lib/currency.ts
 // ======================================================
+
+import {
+  type Currency,
+  normalizeCurrency,
+  convertFromXOF,
+  formatPriceFromXOF,
+  getCurrencySymbol,
+} from '@/lib/currency';
 
 export interface PricingPlan {
   id: string;
   name: string;
   description: string;
-  monthlyPrice: number;
-  yearlyPrice: number;
+  monthlyPrice: number; // ⚠️ en XOF
+  yearlyPrice: number;  // ⚠️ en XOF
   welcomeCredits: number;
   monthlyCredits: number;
   stripePriceId: string | null;
@@ -59,7 +69,7 @@ export type CreditAction = keyof typeof CREDIT_COSTS;
 export interface RechargePack {
   id: string;
   credits: number;
-  price: number;
+  price: number; // ⚠️ en XOF
   label: string;
   description: string;
   popular?: boolean;
@@ -401,4 +411,78 @@ export function getRemainingGenerations(credits: number, type: 'flash' | 'comple
   const cost = type === 'flash' ? CREDIT_COSTS.DIAGNOSTIC_FLASH : CREDIT_COSTS.STRATEGIE_COMPLETE;
   if (cost <= 0) return 0;
   return Math.floor(credits / cost);
+}
+
+// ======================================================
+// ✅ HELPERS DEVISES — Utiliser ces fonctions dans les composants
+// ======================================================
+
+/**
+ * Retourne le prix d'un plan dans la devise cible (converti depuis XOF).
+ * @example getPlanPriceInCurrency('pro', 'EUR') // → 15.24
+ */
+export function getPlanPriceInCurrency(
+  planId: PlanId | string,
+  currency: Currency | string = 'XOF',
+  isYearly: boolean = true
+): number {
+  const plan = PRICING_CONFIG[normalizePlanId(planId)];
+  if (!plan) return 0;
+  const baseXOF = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
+  return convertFromXOF(baseXOF, currency);
+}
+
+/**
+ * Formate le prix d'un plan prêt à afficher.
+ * @example formatPlanPrice('pro', 'EUR') // → "15,24 € /an"
+ */
+export function formatPlanPrice(
+  planId: PlanId | string,
+  currency: Currency | string = 'XOF',
+  period: string = '/an',
+  isYearly: boolean = true
+): string {
+  const plan = PRICING_CONFIG[normalizePlanId(planId)];
+  if (!plan) return '—';
+  const baseXOF = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
+  if (baseXOF === 0) return '0 FCFA';
+
+  return `${formatPriceFromXOF(baseXOF, currency)}${period}`;
+}
+
+/**
+ * Retourne le prix d'un pack de recharge dans la devise cible.
+ * @example getRechargePrice(10, 'EUR') // → 2.29
+ */
+export function getRechargePrice(
+  credits: number,
+  currency: Currency | string = 'XOF'
+): number {
+  const pack = RECHARGE_PACKS.find((p) => p.credits === credits);
+  if (!pack) return 0;
+  return convertFromXOF(pack.price, currency);
+}
+
+/**
+ * Formate le prix d'un pack de recharge.
+ * @example formatRechargePrice(10, 'EUR') // → "2,29 €"
+ */
+export function formatRechargePrice(
+  credits: number,
+  currency: Currency | string = 'XOF'
+): string {
+  const pack = RECHARGE_PACKS.find((p) => p.credits === credits);
+  if (!pack) return '—';
+  return formatPriceFromXOF(pack.price, currency);
+}
+
+/**
+ * Formate un montant arbitraire exprimé en XOF vers la devise du user.
+ * Utile pour les crédits utilisés, revenus, etc.
+ */
+export function formatAmountFromXOF(
+  amountXOF: number,
+  currency: Currency | string = 'XOF'
+): string {
+  return formatPriceFromXOF(amountXOF, currency);
 }

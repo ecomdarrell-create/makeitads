@@ -6,6 +6,7 @@ import {
   BadgeCheck,
   CalendarClock,
   CreditCard,
+  Crown,
   KeyRound,
   LifeBuoy,
   ShieldCheck,
@@ -15,6 +16,8 @@ import { normalizePlanId } from '@/config/pricing.config';
 import { SettingsProfileForm } from '@/components/dashboard/SettingsProfileForm';
 import { ReferralCard } from '@/components/dashboard/ReferralCard';
 import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
+
+const ADMIN_EMAILS = ['ecomdarrell@gmail.com', 'darrellkamga@gmail.com'];
 
 const planNames: Record<string, string> = {
   free: 'Démo',
@@ -47,6 +50,11 @@ export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
+
+  // ✅ Détection admin
+  const isAdmin = user.email
+    ? ADMIN_EMAILS.includes(user.email.toLowerCase().trim())
+    : false;
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -138,6 +146,27 @@ export default async function SettingsPage() {
         </article>
       </section>
 
+      {/* ✅ SECTION ADMIN — visible UNIQUEMENT sur mobile ET pour les admins */}
+      {isAdmin && (
+        <Link
+          href="/dashboard/admin"
+          className="md:hidden flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99]"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#F97316] text-white shadow-sm">
+            <Crown className="h-4 w-4" />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-[13px] font-semibold text-amber-900">
+              Espace Admin
+            </p>
+            <p className="mt-0.5 text-[11px] text-amber-700">
+              Statistiques, utilisateurs, revenus
+            </p>
+          </div>
+          <ArrowUpRight className="h-4 w-4 shrink-0 text-amber-600" />
+        </Link>
+      )}
+
       {/* ── Profil ── */}
       <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm sm:rounded-2xl">
         <div className="flex items-start gap-2.5 border-b border-slate-50 px-4 py-3.5 sm:gap-3 sm:px-5 sm:py-4">
@@ -196,7 +225,7 @@ export default async function SettingsPage() {
               </dd>
             </div>
             <div className="flex items-center justify-between gap-3">
-              <dt className="text-[11px] text-slate-500 sm:text-xs">Date d’expiration</dt>
+              <dt className="text-[11px] text-slate-500 sm:text-xs">Date d&apos;expiration</dt>
               <dd className="flex items-center gap-1.5 text-[12px] font-semibold text-slate-900 sm:text-sm">
                 {hasExpiry ? (
                   <>
@@ -215,13 +244,13 @@ export default async function SettingsPage() {
           <div className="mt-4 flex flex-col gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:gap-3">
             <Link
               href="/dashboard/pricing"
-              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-indigo-600 px-4 text-[11px] font-semibold text-white transition-colors hover:bg-indigo-700 sm:min-h-10 sm:w-auto sm:text-xs"
+              className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full bg-indigo-600 px-4 text-[11px] font-semibold text-white transition-colors hover:bg-indigo-700 sm:text-xs"
             >
               {isDemo ? 'Passer à un plan payant' : 'Gérer ma formule'}
               <ArrowUpRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
             </Link>
             <Link
-              href="/dashboard/credits"
+              href="/dashboard/credits/recharge"
               className="inline-flex min-h-10 items-center justify-center gap-1.5 rounded-full border border-slate-200 px-4 text-[11px] font-medium text-slate-700 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 sm:text-xs"
             >
               Recharger des crédits
@@ -245,7 +274,7 @@ export default async function SettingsPage() {
                 {user.email}
               </p>
               <p className="mt-2 text-[10px] leading-relaxed text-slate-500 sm:mt-3 sm:text-[11px]">
-                L’adresse e-mail sert à la connexion. Utilisez le lien sécurisé pour renouveler votre mot de passe.
+                L&apos;adresse e-mail sert à la connexion. Utilisez le lien sécurisé pour renouveler votre mot de passe.
               </p>
               <Link
                 href="/forgot-password"
@@ -272,7 +301,7 @@ export default async function SettingsPage() {
           </span>
           <div>
             <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-              Besoin d’assistance ?
+              Besoin d&apos;assistance ?
             </h2>
             <p className="mt-0.5 text-[11px] text-slate-600 sm:mt-1 sm:text-xs">
               Notre équipe peut vous aider sur le compte, les crédits et les paiements.

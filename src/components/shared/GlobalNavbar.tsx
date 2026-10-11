@@ -5,7 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
 import { createClient } from "@/lib/supabase/client";
-import { User, LogOut, Search, X, MessageCircle } from "lucide-react";
+import { User, LogOut, Search, X, Mail } from "lucide-react";
 import { SiTelegram } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,18 +18,18 @@ const navLinks = [
   { name: "Dashboard", href: "/dashboard", isExternal: true },
 ];
 
-// ✅ Index de recherche — modifie librement
 const searchIndex = [
   { label: "Dashboard", href: "/dashboard", keywords: "accueil tableau de bord home" },
-  { label: "Créer une stratégie", href: "/dashboard/new", keywords: "nouvelle stratégie créer lancer" },
+  { label: "Créer une stratégie", href: "/dashboard/generate", keywords: "nouvelle stratégie créer lancer" },
   { label: "Mes stratégies", href: "/dashboard/strategies", keywords: "liste historique stratégies" },
   { label: "Analytics", href: "/dashboard/analytics", keywords: "statistiques données activité graphiques" },
-  { label: "Paramètres", href: "/settings", keywords: "settings profil compte préférences" },
+  { label: "Paramètres", href: "/dashboard/settings", keywords: "settings profil compte préférences" },
   { label: "Tarifs & facturation", href: "/dashboard/pricing", keywords: "prix plan upgrade facturation billing" },
-  { label: "Recharger des crédits", href: "/dashboard/credits", keywords: "crédits recharge recharger topup" },
-  { label: "Comment ça marche", href: "/dashboard/how-it-works", keywords: "aide tutoriel guide documentation" },
-  { label: "Filleuls / Parrainage", href: "/dashboard/referrals", keywords: "parrainage filleuls invitation referral" },
-  { label: "Support", href: "https://t.me/MakeitAds_CEO", keywords: "aide contact support chat" },
+  { label: "Recharger des crédits", href: "/dashboard/credits/recharge", keywords: "crédits recharge recharger topup" },
+  { label: "Mes crédits", href: "/dashboard/credits", keywords: "crédits solde historique" },
+  { label: "Ressources", href: "/dashboard/resources", keywords: "aide tutoriel guide documentation" },
+  { label: "Parrainage", href: "/dashboard/referral", keywords: "parrainage filleuls invitation referral" },
+  { label: "Support", href: "mailto:support@makeitads.com", keywords: "aide contact support mail" },
 ];
 
 export default function Navbar() {
@@ -69,7 +69,6 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
-  // Raccourcis clavier
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       const target = e.target as HTMLElement;
@@ -139,7 +138,7 @@ export default function Navbar() {
   const handleSearchResultClick = (href: string) => {
     setSearchOpen(false);
     setSearchQuery("");
-    if (href.startsWith("http")) {
+    if (href.startsWith("http") || href.startsWith("mailto")) {
       window.open(href, "_blank", "noopener,noreferrer");
     } else {
       router.push(href);
@@ -148,8 +147,8 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 md:rounded-none transition-all duration-300">
-        <div className="bg-white border border-slate-200/70 rounded-2xl px-4 h-12 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.04)] md:border-b md:border-x-0 md:border-t-0 md:rounded-none md:h-14 md:px-6 md:max-w-7xl md:mx-auto md:shadow-none">
+      <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 transition-all duration-300">
+        <div className="bg-white border border-slate-200/70 rounded-2xl px-4 h-12 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.04)] md:border-b md:border-x-0 md:border-t-0 md:rounded-none md:h-14 md:px-8 md:shadow-none">
           {/* Logo */}
           <Link href="/" className="group flex items-center transition-transform hover:scale-105 shrink-0">
             <span className="text-sm md:text-lg font-semibold tracking-tight text-gray-900">
@@ -172,19 +171,16 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Bloc droit : loupe + auth + burger */}
+          {/* Bloc droit */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* 🔍 Recherche — sans cercle, trait noir renforcé */}
+            {/* Loupe */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
               aria-label="Rechercher"
               className="flex h-8 w-8 md:h-9 md:w-9 items-center justify-center text-slate-900 transition-colors hover:text-[#6366F1]"
             >
-              <Search
-                className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]"
-                strokeWidth={2.6}
-              />
+              <Search className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]" strokeWidth={2.6} />
             </button>
 
             {/* Auth desktop */}
@@ -234,26 +230,17 @@ export default function Navbar() {
             >
               <span className="relative block h-4 w-5">
                 <motion.span
-                  animate={{
-                    rotate: isMobileMenuOpen ? 45 : 0,
-                    y: isMobileMenuOpen ? 6 : 0,
-                  }}
+                  animate={{ rotate: isMobileMenuOpen ? 45 : 0, y: isMobileMenuOpen ? 6 : 0 }}
                   transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="absolute left-0 top-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
                 />
                 <motion.span
-                  animate={{
-                    opacity: isMobileMenuOpen ? 0 : 1,
-                    scaleX: isMobileMenuOpen ? 0 : 1,
-                  }}
+                  animate={{ opacity: isMobileMenuOpen ? 0 : 1, scaleX: isMobileMenuOpen ? 0 : 1 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                   className="absolute left-0 top-1/2 block h-[2.5px] w-5 -translate-y-1/2 rounded-full bg-slate-900"
                 />
                 <motion.span
-                  animate={{
-                    rotate: isMobileMenuOpen ? -45 : 0,
-                    y: isMobileMenuOpen ? -6 : 0,
-                  }}
+                  animate={{ rotate: isMobileMenuOpen ? -45 : 0, y: isMobileMenuOpen ? -6 : 0 }}
                   transition={{ duration: 0.25, ease: "easeInOut" }}
                   className="absolute bottom-0 left-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
                 />
@@ -263,7 +250,6 @@ export default function Navbar() {
         </div>
       </header>
 
-      {/* ── Menu mobile ── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -318,26 +304,21 @@ export default function Navbar() {
                   ))}
                 </nav>
 
-                {/* ✅ Bouton "Nous contacter" — ne fait rien pour l'instant */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    /* À brancher plus tard */
-                  }}
-                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-full bg-slate-100 px-3 py-2.5 text-center text-xs font-semibold text-slate-700 transition-colors hover:bg-slate-200"
+                <a
+                  href="mailto:support@makeitads.com"
+                  className="mb-2 flex w-full items-center justify-center gap-2 rounded-full bg-indigo-50 px-3 py-2.5 text-center text-xs font-semibold text-[#6366F1] transition-colors hover:bg-indigo-100"
                 >
-                  <MessageCircle className="w-4 h-4" />
+                  <Mail className="w-4 h-4 shrink-0" />
                   Nous contacter
-                </button>
+                </a>
 
-                {/* Bouton Telegram Business Club (inchangé) */}
                 <a
                   href="https://t.me/makeitadsbusinessclub"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mb-3 flex w-full items-center justify-center gap-2 rounded-full bg-[#0088cc]/10 px-3 py-2.5 text-center text-xs font-semibold text-[#0088cc] transition-colors hover:bg-[#0088cc]/20"
                 >
-                  <SiTelegram className="w-4 h-4" />
+                  <SiTelegram className="w-4 h-4 shrink-0" />
                   Rejoindre le Business Club
                 </a>
 
@@ -346,9 +327,10 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={handleSignOut}
-                      className="inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-full border border-gray-200 px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50"
+                      className="inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-full bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-100"
                     >
-                      <LogOut className="h-3.5 w-3.5" /> Se déconnecter
+                      <LogOut className="h-4 w-4 shrink-0" />
+                      Se déconnecter
                     </button>
                   </div>
                 ) : authLoading ? (
@@ -377,7 +359,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* ── Modal de recherche premium ── */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div

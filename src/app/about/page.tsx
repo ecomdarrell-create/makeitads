@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ArrowRight, Target, Lightbulb, Rocket, Globe, Zap } from "lucide-react";
 import GlobalNavbar from "@/components/shared/GlobalNavbar";
 import GlobalFooter from "@/components/shared/GlobalFooter";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrencySymbol, normalizeCurrency, type Currency } from "@/lib/currency";
 
 export const metadata: Metadata = {
   title: "À propos - MakeItAds",
@@ -24,7 +26,26 @@ const aboutJsonLd = {
   }
 };
 
-export default function AboutPage() {
+export default async function AboutPage() {
+  // ✅ Devise du user (fallback XOF pour anonymes)
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  let currency: Currency = 'XOF';
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('currency')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    if (profile?.currency) {
+      currency = normalizeCurrency(profile.currency);
+    }
+  }
+
+  const currencySymbol = getCurrencySymbol(currency);
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(aboutJsonLd) }} />
@@ -73,7 +94,9 @@ export default function AboutPage() {
                       <Globe className="h-10 w-10 text-[#6366F1]" />
                     </div>
                     <h3 className="text-2xl font-bold text-[#18181B] mb-2">Calibré pour l'Afrique</h3>
-                    <p className="text-[#71717A]">Budgets en FCFA, ciblage local et leviers de confiance adaptés (WhatsApp, livraison, etc.).</p>
+                    <p className="text-[#71717A]">
+                      Budgets en {currencySymbol}, ciblage local et leviers de confiance adaptés (WhatsApp, livraison, etc.).
+                    </p>
                   </div>
                 </div>
               </div>
