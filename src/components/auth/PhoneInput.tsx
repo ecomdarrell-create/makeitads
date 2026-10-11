@@ -6,13 +6,13 @@ import { useMemo, useState } from 'react';
 // BASE DE DONNÉES DES CODES PAYS (monde entier)
 // ============================================
 
-interface Country {
-  code: string; // ISO 3166-1 alpha-2 (lowercase pour le CDN)
+export interface Country {
+  code: string;
   name: string;
   dial: string;
 }
 
-const COUNTRIES: Country[] = [
+export const COUNTRIES: Country[] = [
   // ─── Afrique ───
   { code: 'dz', name: 'Algérie', dial: '213' },
   { code: 'ao', name: 'Angola', dial: '244' },
@@ -223,26 +223,40 @@ const COUNTRIES: Country[] = [
   { code: 'vu', name: 'Vanuatu', dial: '678' },
 ];
 
-// Tri par indicatif décroissant (longueur) pour matcher les codes longs en premier
 const SORTED_COUNTRIES = [...COUNTRIES].sort(
   (a, b) => b.dial.length - a.dial.length
 );
 
 // ============================================
-// DÉTECTION DU PAYS
+// DÉTECTION DU PAYS (exportée pour validation)
 // ============================================
 
-function detectCountry(value: string): Country | null {
+export function detectCountry(value: string): Country | null {
   const digits = value.replace(/\D/g, '');
   if (digits.length < 1) return null;
 
-  // On teste les indicatifs du plus long au plus court (3, puis 2, puis 1)
   for (const len of [4, 3, 2, 1]) {
     const prefix = digits.slice(0, len);
     const found = SORTED_COUNTRIES.find((c) => c.dial === prefix);
     if (found) return found;
   }
   return null;
+}
+
+// ============================================
+// VALIDATION DU NUMÉRO
+// ============================================
+
+export function isValidPhoneNumber(value: string): boolean {
+  const digits = value.replace(/\D/g, '');
+  if (digits.length < 8) return false;
+
+  const country = detectCountry(value);
+  if (!country) return false;
+
+  // Il faut au moins 4 chiffres après l'indicatif
+  const afterDial = digits.slice(country.dial.length);
+  return afterDial.length >= 4;
 }
 
 // ============================================
@@ -266,19 +280,16 @@ export function PhoneInput({
   const [imageError, setImageError] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // On accepte chiffres, espaces, tirets
     const raw = e.target.value.replace(/[^\d\s\-]/g, '');
     onChange(raw);
   };
 
-  // URL du drapeau circulaire (SVG, parfaitement rond)
   const flagUrl = detectedCountry
     ? `https://hatscripts.github.io/circle-flags/flags/${detectedCountry.code}.svg`
     : null;
 
   return (
     <div className="relative">
-      {/* Préfixe + */}
       <span
         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 sm:text-sm"
         aria-hidden="true"
@@ -286,7 +297,6 @@ export function PhoneInput({
         +
       </span>
 
-      {/* Drapeau circulaire détecté */}
       {detectedCountry && flagUrl && !imageError && (
         <span
           className="pointer-events-none absolute left-7 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200 transition-opacity duration-200"

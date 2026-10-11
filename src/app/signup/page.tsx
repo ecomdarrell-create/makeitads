@@ -6,7 +6,32 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
-import { PhoneInput } from '@/components/auth/PhoneInput';
+import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
+
+// ✅ Petit badge (!) cliquable pour afficher une explication
+function InfoBadge({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <span className="relative inline-flex items-center">
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        aria-label="Plus d'informations"
+        className="ml-1.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-slate-300 bg-slate-50 text-[9px] font-bold text-slate-500 transition-colors hover:border-[#6366F1] hover:bg-[#6366F1]/10 hover:text-[#6366F1]"
+      >
+        !
+      </button>
+      {open && (
+        <span className="absolute left-6 top-1/2 z-20 w-[240px] -translate-y-1/2 rounded-lg border border-slate-200 bg-white p-2.5 text-[10px] leading-relaxed text-slate-600 shadow-lg">
+          {text}
+        </span>
+      )}
+    </span>
+  );
+}
 
 function SignupForm() {
   const [formData, setFormData] = useState({
@@ -15,7 +40,7 @@ function SignupForm() {
     email: '',
     phone: '',
     password: '',
-    currency: 'XOF',
+    currency: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -27,7 +52,6 @@ function SignupForm() {
   const redirectTo = searchParams.get('redirect') || '/dashboard';
   const referralCode = searchParams.get('ref') || null;
 
-  // ✅ Rediriger si déjà connecté
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient();
@@ -46,6 +70,7 @@ function SignupForm() {
     setLoading(true);
     setError('');
 
+    // ✅ Validations
     if (formData.password.length < 6) {
       setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
@@ -53,6 +78,18 @@ function SignupForm() {
     }
     if (formData.password !== confirmPassword) {
       setError('Les deux mots de passe ne correspondent pas.');
+      setLoading(false);
+      return;
+    }
+    if (!formData.phone.trim() || !isValidPhoneNumber(formData.phone)) {
+      setError(
+        "Numéro de téléphone invalide. N'oubliez pas l'indicatif du pays (ex : 237, 225, 33…)."
+      );
+      setLoading(false);
+      return;
+    }
+    if (!formData.currency) {
+      setError('Merci de sélectionner la devise de votre pays.');
       setLoading(false);
       return;
     }
@@ -84,7 +121,6 @@ function SignupForm() {
         return;
       }
 
-      // ✅ Détection : email déjà utilisé (Supabase renvoie identities vide)
       if (
         data.user &&
         Array.isArray(data.user.identities) &&
@@ -97,7 +133,6 @@ function SignupForm() {
         return;
       }
 
-      // Traitement parrainage
       if (referralCode && data.user?.id) {
         try {
           await fetch('/api/referral', {
@@ -110,7 +145,6 @@ function SignupForm() {
         }
       }
 
-      // Enregistrer téléphone dans profile
       if (cleanPhone && data.user?.id) {
         try {
           await supabase.from('profiles').update({ phone: cleanPhone }).eq('id', data.user.id);
@@ -171,10 +205,10 @@ function SignupForm() {
           {referralCode && (
             <div className="mb-3 rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-2.5">
               <p className="text-[10px] font-medium text-[#6366F1] sm:text-[11px]">
-                🎁 Tu as été invité par un membre MakeItAds
+                Vous avez été invité par un membre MakeItAds
               </p>
               <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">
-                Ton parrain recevra un bonus dès ton inscription.
+                Votre parrain recevra un bonus dès votre inscription.
               </p>
             </div>
           )}
@@ -241,8 +275,12 @@ function SignupForm() {
             </div>
 
             <div>
-              <label htmlFor="phone" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
+              <label
+                htmlFor="phone"
+                className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs"
+              >
                 Téléphone
+                <InfoBadge text="Nous utilisons votre numéro pour sécuriser votre compte et vous prévenir en cas d'activité inhabituelle. N'oubliez pas de mettre l'indicatif de votre pays (ex : 237, 225, 33…)." />
               </label>
               <PhoneInput
                 id="phone"
@@ -250,7 +288,7 @@ function SignupForm() {
                 onChange={(value) => setFormData({ ...formData, phone: value })}
               />
               <p className="mt-1 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">
-                Uniquement pour les informations importantes. Jamais de spam.
+                Indispensable : indicatif du pays + numéro complet.
               </p>
             </div>
 
@@ -275,16 +313,25 @@ function SignupForm() {
             </div>
 
             <div>
-              <label htmlFor="currency" className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-gray-700 sm:text-xs">
-                Votre devise
+              <label
+                htmlFor="currency"
+                className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs"
+              >
+                Quelle est la devise de votre pays ?
+                <InfoBadge text="La devise nous permet d'afficher tous les prix de la plateforme (crédits, plans, packs) dans votre monnaie locale. Vous pourrez la modifier plus tard dans vos paramètres." />
               </label>
               <select
                 id="currency"
+                required
                 value={formData.currency}
                 onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
                 className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
               >
-                <option value="XOF">Franc CFA (XAF / XOF)</option>
+                <option value="" disabled>
+                  Sélectionnez votre devise…
+                </option>
+                <option value="XAF">Franc CFA CEMAC (XAF) — Cameroun, Gabon, Congo…</option>
+                <option value="XOF">Franc CFA UEMOA (XOF) — Sénégal, Côte d'Ivoire, Mali…</option>
                 <option value="EUR">Euro (EUR)</option>
                 <option value="USD">Dollar US (USD)</option>
               </select>

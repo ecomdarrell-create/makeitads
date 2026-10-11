@@ -1,23 +1,24 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { createClient } from "@/lib/supabase";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { createClient } from '@/lib/supabase';
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { ArrowLeft, Mail, ShieldCheck, CheckCircle2 } from 'lucide-react';
 
 export default function ForgotPasswordPage() {
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
-    if (!email.includes("@")) {
-      setError("Please enter a valid email address.");
+    if (!email.includes('@')) {
+      setError('Veuillez saisir une adresse email valide.');
       setLoading(false);
       return;
     }
@@ -29,7 +30,7 @@ export default function ForgotPasswordPage() {
     });
 
     if (resetError) {
-      setError(resetError.message);
+      setError('Impossible d’envoyer le lien de réinitialisation. Vérifiez votre email.');
       setLoading(false);
     } else {
       setSuccess(true);
@@ -38,138 +39,124 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <main className="flex min-h-screen bg-[#080810]">
-      {/* Panneau gauche : branding */}
-      <div className="hidden lg:flex lg:w-[55%] relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-[#6366f1]/20 via-[#8b5cf6]/10 to-[#38bdf8]/20" />
-        <div className="relative z-10 flex flex-col justify-center px-16">
-          <Link href="/" className="inline-flex items-center mb-12">
-            <span className="text-3xl font-bold text-white tracking-tight">Make</span>
-            <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-3xl font-bold text-transparent tracking-tight">
-              ItAds
+    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-6">
+      <div className="w-full max-w-[420px]">
+
+        {/* Logo */}
+        <div className="mb-4 text-center">
+          <Link href="/" className="inline-flex items-center">
+            <span className="text-base font-semibold tracking-tight sm:text-lg">
+              <span className="text-[#111827]">MakeIt</span>
+              <span className="text-[#6366F1]">Ads</span>
             </span>
           </Link>
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="text-5xl font-bold text-white leading-tight mb-6"
-          >
-            Reset your password
-          </motion.h2>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-xl text-slate-300 leading-relaxed"
-          >
-            We'll send you a secure link to reset your password and get back to creating amazing strategies.
-          </motion.p>
+          <p className="mx-auto mt-1.5 max-w-xs text-[11px] leading-relaxed text-slate-500 sm:text-xs">
+            La plateforme N°1 pour automatiser votre acquisition client en Afrique.
+          </p>
         </div>
-      </div>
 
-      {/* Panneau droit : formulaire */}
-      <div className="flex w-full lg:w-[45%] items-center justify-center px-6 py-12">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className="w-full max-w-md space-y-8"
-        >
-          {/* En-tête mobile */}
-          <div className="lg:hidden text-center mb-8">
-            <Link href="/" className="inline-flex items-center">
-              <span className="text-2xl font-bold text-white tracking-tight">Make</span>
-              <span className="bg-gradient-to-r from-[#6366f1] via-[#8b5cf6] to-[#38bdf8] bg-clip-text text-2xl font-bold text-transparent tracking-tight">
-                ItAds
-              </span>
+        {/* Card */}
+        <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-6">
+
+          {!success ? (
+            <>
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="mb-5"
+              >
+                <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-[#6366F1]/10">
+                  <ShieldCheck className="h-5 w-5 text-[#6366F1]" />
+                </div>
+                <h1 className="mb-1 text-lg font-semibold text-slate-900 sm:text-xl">
+                  Mot de passe oublié ?
+                </h1>
+                <p className="text-[11px] leading-relaxed text-slate-600 sm:text-xs">
+                  Pas de panique. Saisissez votre email et nous vous enverrons un lien sécurisé pour en créer un nouveau.
+                </p>
+              </motion.div>
+
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, y: -5 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mb-3 rounded-xl border border-red-200 bg-red-50 p-2.5 text-[11px] text-red-700 sm:text-xs"
+                >
+                  {error}
+                </motion.div>
+              )}
+
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
+                    Adresse email
+                  </label>
+                  <div className="relative">
+                    <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      placeholder="vous@exemple.com"
+                      className="min-h-10 w-full rounded-xl border border-slate-200 pl-10 pr-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
+                    />
+                  </div>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full rounded-full bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50 sm:text-sm"
+                >
+                  {loading ? 'Envoi en cours…' : 'Envoyer le lien de réinitialisation'}
+                </button>
+              </form>
+            </>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="text-center"
+            >
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+                <CheckCircle2 className="h-7 w-7 text-emerald-600" />
+              </div>
+              <h2 className="mb-1 text-lg font-semibold text-slate-900 sm:text-xl">
+                Email envoyé
+              </h2>
+              <p className="mb-4 text-[11px] leading-relaxed text-slate-600 sm:text-xs">
+                Nous avons envoyé un lien de réinitialisation à{' '}
+                <strong className="text-slate-900 break-all">{email}</strong>.
+                Vérifiez votre boîte de réception et vos spams.
+              </p>
+              <p className="mb-5 text-[10px] text-slate-500 sm:text-[11px]">
+                Vous ne recevez rien ? Patientez 1 à 2 minutes puis réessayez.
+              </p>
+            </motion.div>
+          )}
+
+          {/* Lien retour */}
+          <div className="mt-5 border-t border-slate-100 pt-4 text-center">
+            <Link
+              href="/login"
+              className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#6366F1] transition-colors hover:text-[#5558e6] sm:text-xs"
+            >
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Retour à la connexion
             </Link>
           </div>
+        </div>
 
-          <div>
-            <h1 className="text-4xl font-bold tracking-tight text-white">Forgot password?</h1>
-            <p className="mt-3 text-base text-slate-400">No worries, we'll send you reset instructions</p>
-          </div>
-
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-200"
-            >
-              {error}
-            </motion.div>
-          )}
-
-          {success ? (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-6 text-center"
-            >
-              <div className="h-16 w-16 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto mb-4">
-                <svg className="h-8 w-8 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-bold text-emerald-300 mb-2">Check your email</h3>
-              <p className="text-sm text-emerald-400/70 mb-4">
-                We've sent a password reset link to <strong className="text-emerald-300">{email}</strong>
-              </p>
-              <p className="text-xs text-slate-500">
-                Didn't receive the email? Check your spam folder or try again.
-              </p>
-              <Link
-                href="/login"
-                className="mt-6 inline-block text-sm font-semibold text-[#8b5cf6] hover:text-[#a78bfa] transition-colors"
-              >
-                ← Back to sign in
-              </Link>
-            </motion.div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-5">
-              {/* Email */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-[0.28em] text-slate-400 mb-2">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  placeholder="you@example.com"
-                  className="w-full rounded-2xl border border-white/10 bg-[#080810] px-5 py-4 text-sm text-white outline-none transition-all focus:border-[#6366f1] focus:ring-4 focus:ring-[#6366f1]/20 placeholder:text-slate-600"
-                />
-              </div>
-
-              {/* Bouton principal */}
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                disabled={loading}
-                className="group relative w-full overflow-hidden rounded-2xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] py-4 text-sm font-bold text-white shadow-[0_20px_60px_rgba(99,102,241,0.3)] transition-all hover:shadow-[0_25px_80px_rgba(139,92,246,0.4)] disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <span className="relative z-10">
-                  {loading ? "Sending..." : "Send reset link"}
-                </span>
-                <div className="absolute inset-0 bg-gradient-to-r from-[#8b5cf6] to-[#38bdf8] opacity-0 transition-opacity group-hover:opacity-100" />
-              </motion.button>
-            </form>
-          )}
-
-          {/* Lien vers login */}
-          {!success && (
-            <p className="text-center text-sm text-slate-400">
-              Remember your password?{" "}
-              <Link href="/login" className="font-bold text-[#8b5cf6] transition-colors hover:text-[#a78bfa]">
-                Sign in
-              </Link>
-            </p>
-          )}
-        </motion.div>
+        {/* Footer */}
+        <p className="mt-5 text-center text-[10px] text-slate-400 sm:text-[11px]">
+          Un souci ? Contactez-nous à{' '}
+          <a href="mailto:support@makeitads.com" className="font-medium text-[#6366F1] hover:underline">
+            support@makeitads.com
+          </a>
+        </p>
       </div>
-    </main>
+    </div>
   );
 }
