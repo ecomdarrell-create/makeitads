@@ -10,6 +10,13 @@ const RECHARGE_NAMES: Record<string, number> = {
 const RECHARGE_PRICES: Record<number, number> = { 10: 1500, 30: 4000, 80: 9000 };
 const PLAN_PRICES: Record<string, number> = { pro: 10000, premium: 25000, enterprise: 100000 };
 
+// ✅ Récompenses progressives selon le plan payé par le filleul
+const REFERRAL_REWARDS: Record<string, number> = {
+  pro: 10,
+  premium: 25,
+  enterprise: 50,
+};
+
 // ─────────────────────────────────────────────────────────────
 // DÉTECTION STRICTE
 // ─────────────────────────────────────────────────────────────
@@ -17,26 +24,22 @@ function detectRechargePack(payload: any): number | null {
   const p = extractProductName(payload);
   if (!p) return null;
 
-  // Match exact sur les noms connus
   for (const [key, credits] of Object.entries(RECHARGE_NAMES)) {
     if (p.includes(key)) return credits;
   }
 
-  // Pattern "X crédits" (nombre avant)
   const before = p.match(/(\d+)\s*(cr[ée]dits?|credits?)/i);
   if (before) {
     const n = parseInt(before[1], 10);
     if (n > 0 && n <= 1000) return n;
   }
 
-  // Pattern "crédits X" (nombre après)
   const after = p.match(/(cr[ée]dits?|credits?)\s*\+?\s*(\d+)/i);
   if (after) {
     const n = parseInt(after[2], 10);
     if (n > 0 && n <= 1000) return n;
   }
 
-  // Fallback : "pack" OU "recharge" + nombre (doit contenir le mot-clé)
   if (p.includes('recharge') || p.includes('pack')) {
     const m = p.match(/(\d+)/);
     if (m) {
@@ -48,12 +51,10 @@ function detectRechargePack(payload: any): number | null {
   return null;
 }
 
-// ✅ CORRIGÉ : word boundaries pour ne PAS matcher "product" → "pro"
 function detectPlan(payload: any): PlanId | null {
   const p = extractProductName(payload);
   if (!p) return null;
 
-  // \b = frontière de mot : "pro" matche "makeitads pro" mais PAS "product"
   if (/\b(elite|élite)\b/i.test(p)) return 'enterprise';
   if (/\bpremium\b/i.test(p)) return 'premium';
   if (/\bpro\b/i.test(p)) return 'pro';
@@ -106,7 +107,6 @@ function extractOrderId(payload: any): string | null {
   return null;
 }
 
-// Insert tolérant — ne fait jamais planter le webhook
 async function safeInsert(supabaseAdmin: any, table: string, data: any, label: string): Promise<void> {
   try {
     const { error } = await supabaseAdmin.from(table).insert(data);
@@ -120,6 +120,91 @@ async function safeInsert(supabaseAdmin: any, table: string, data: any, label: s
   }
 }
 
+// ✅ NOUVEAU : Crédite le parrain quand son filleul passe à un plan payant
+async function creditReferrerIfAny(
+  supabaseAdmin: any,
+  refereeId: string,
+  plan: PlanId
+): Promise<{ awarded: number; referrerId: string | null }> {
+  try {
+    // Cherche un parrainage en attente pour ce filleul
+    const { data: referral } = await supabaseAdmin
+      .from('referrals')
+      .select('id, referrer_id')
+      .eq('referee_id', refereeId)
+      .eq('status', 'pending')
+      .maybeSingle();
+
+    if (!referral?.referrer_id) {
+      console.log('[chariow] Aucun parrainage en attente pour ce user');
+      return { awarded: 0, referrerId: null };
+    }
+
+    const reward = REFERRAL_REWARDS[plan] || 0;
+
+    if (reward === 0) {
+      console.log(`[chariow] Plan ${plan} → pas de récompense parrainage`);
+      return { awarded: 0, referrerId: referral.referrer_id };
+    }
+
+    // Récupère le parrain
+    const { data: referrer } = await supabaseAdmin
+      .from('profiles')
+      .select('credits_balance, referral_count')
+      .eq('id', referral.referrer_id)
+      .maybeSingle();
+
+    if (!referrer) {
+      console.error('[chariow] ❌ Parrain introuvable');
+      return { awarded: 0, referrerId: null };
+    }
+
+    const newBalance = (referrer.credits_balance || 0) + reward;
+    const newCount = (referrer.referral_count || 0) + 1;
+
+    // Update balance du parrain
+    await supabaseAdmin
+      .from('profiles')
+      .update({
+        credits_balance: newBalance,
+        referral_count: newCount,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', referral.referrer_id);
+
+    // Marque le parrainage comme terminé
+    await supabaseAdmin
+      .from('referrals')
+      .update({
+        status: 'completed',
+        credits_awarded: reward,
+        rewarded_at: new Date().toISOString(),
+      })
+      .eq('id', referral.id);
+
+    // Trace dans credit_transactions
+    await safeInsert(supabaseAdmin, 'credit_transactions', {
+      user_id: referral.referrer_id,
+      type: 'referral_bonus',
+      amount: reward,
+      balance_after: newBalance,
+      description: `Bonus parrainage — Filleul passé en plan ${plan}`,
+    }, 'credit_transactions (referral)');
+
+    console.log(
+      `[chariow] ✅ Parrain ${referral.referrer_id} crédité de +${reward} (plan ${plan}) — nouveau solde: ${newBalance}`
+    );
+
+    return { awarded: reward, referrerId: referral.referrer_id };
+  } catch (err: any) {
+    console.error('[chariow] ⚠️ Erreur crédit parrain:', err?.message || err);
+    return { awarded: 0, referrerId: null };
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// POST
+// ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
     const rawBody = await req.text();
@@ -136,7 +221,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
     }
 
-    // Log payload pour debug
     console.log('[chariow] PAYLOAD:', JSON.stringify(payload).slice(0, 3000));
 
     const email = extractEmail(payload) || emailFromQuery?.toLowerCase().trim() || null;
@@ -145,7 +229,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No email', success: false }, { status: 200 });
     }
 
-    // ✅ Ignorer les emails de test Chariow
     if (email.endsWith('@example.com') || email.startsWith('test@')) {
       console.log('[chariow] ⏭️ Email de test ignoré:', email);
       return NextResponse.json({ success: true, ignored: true, reason: 'test_email' }, { status: 200 });
@@ -156,7 +239,6 @@ export async function POST(req: NextRequest) {
     let currentPlan: PlanId = 'free';
     let currentCredits = 0;
 
-    // Priorité 1 : userId depuis query
     if (userIdFromQuery) {
       const { data: p } = await supabaseAdmin
         .from('profiles').select('id, email, plan, credits_balance')
@@ -169,7 +251,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Priorité 2 : email dans profiles
     if (!userId) {
       const { data: p } = await supabaseAdmin
         .from('profiles').select('id, email, plan, credits_balance')
@@ -241,8 +322,6 @@ export async function POST(req: NextRequest) {
       console.log('[chariow] Plan détecté:', plan);
 
       if (!userId) {
-        // ✅ On ne crée PLUS de user automatiquement.
-        // L'user doit d'abord s'inscrire sur MakeItAds puis payer.
         console.warn('[chariow] ⚠️ Achat plan sans compte:', email);
         return NextResponse.json({
           success: false,
@@ -286,11 +365,20 @@ export async function POST(req: NextRequest) {
 
       console.log(`[chariow] ✅ Plan ${plan} activé pour user ${userId}`);
 
+      // ✅ NOUVEAU : crédite le parrain si ce user était parrainé
+      const { awarded: referralCreditsAwarded, referrerId } = await creditReferrerIfAny(
+        supabaseAdmin,
+        userId,
+        plan
+      );
+
       return NextResponse.json({
         success: true, type: 'plan', userId, plan,
         creditsAdded: monthlyCredits,
         expiresAt: expiresAt.toISOString(),
         revenue: planPrice,
+        referralCreditsAwarded,
+        referrerId,
       }, { status: 200 });
     }
 

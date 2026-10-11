@@ -2,7 +2,13 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
 
-const REFERRAL_CREDITS = 10;
+// ✅ Récompense progressive selon le plan payé par le filleul
+// (utilisé aussi par le webhook Chariow)
+export const REFERRAL_REWARDS: Record<string, number> = {
+  pro: 10,
+  premium: 25,
+  enterprise: 50,
+};
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -22,7 +28,9 @@ function generateReferralCode(length = 8): string {
   return code;
 }
 
-// GET — Retourne le code de parrainage
+// ============================================
+// GET — Retourne le code de parrainage du user
+// ============================================
 export async function GET() {
   try {
     const supabase = await createClient();
@@ -37,23 +45,18 @@ export async function GET() {
       .eq('id', user.id)
       .maybeSingle();
 
-    if (profileError) {
-      console.error('[referral GET] profileError:', profileError);
+    if (profileError || !profile) {
       return NextResponse.json({
         success: true,
         referral_code: null,
         referral_count: 0,
-        warning: 'Colonnes parrainage non configurées dans Supabase',
       });
     }
 
-    if (!profile) {
-      return NextResponse.json({ error: 'Profil introuvable' }, { status: 404 });
-    }
-
     let code = profile.referral_code;
-    let count = profile.referral_count || 0;
+    const count = profile.referral_count || 0;
 
+    // Génère un code unique si le user n'en a pas encore
     if (!code) {
       const admin = getSupabaseAdmin();
       let attempts = 0;
@@ -68,20 +71,7 @@ export async function GET() {
         if (!existing) break;
       } while (attempts < 5);
 
-      const { error: updateError } = await admin
-        .from('profiles')
-        .update({ referral_code: code })
-        .eq('id', user.id);
-
-      if (updateError) {
-        console.error('[referral GET] updateError:', updateError);
-        return NextResponse.json({
-          success: true,
-          referral_code: null,
-          referral_count: count,
-          warning: 'Colonne referral_code non configurée',
-        });
-      }
+      await admin.from('profiles').update({ referral_code: code }).eq('id', user.id);
     }
 
     return NextResponse.json({
@@ -96,12 +86,15 @@ export async function GET() {
       success: true,
       referral_code: null,
       referral_count: 0,
-      warning: 'Erreur de chargement',
     });
   }
 }
 
-// POST — Enregistre un parrainage (appelé au signup)
+// ============================================
+// POST — Enregistre le LIEN de parrainage
+// ⚠️ PAS de crédit tout de suite. Le crédit tombe
+// quand le filleul paye un plan (voir webhook Chariow).
+// ============================================
 export async function POST(req: NextRequest) {
   try {
     const { referral_code, referee_id } = await req.json();
@@ -112,9 +105,10 @@ export async function POST(req: NextRequest) {
 
     const admin = getSupabaseAdmin();
 
+    // ─── 1. Trouve le parrain par son code ───
     const { data: referrer } = await admin
       .from('profiles')
-      .select('id, referral_count, credits_balance')
+      .select('id, referral_count')
       .eq('referral_code', referral_code.toUpperCase().trim())
       .maybeSingle();
 
@@ -122,6 +116,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Code parrain invalide' }, { status: 404 });
     }
 
+    // ─── 2. Bloque l'auto-parrainage ───
     if (referrer.id === referee_id) {
       return NextResponse.json(
         { error: 'Impossible de se parrainer soi-même' },
@@ -129,9 +124,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ─── 3. Vérifie que le filleul existe et n'a pas déjà de parrain ───
     const { data: referee } = await admin
       .from('profiles')
-      .select('id, created_at')
+      .select('id, created_at, referred_by')
       .eq('id', referee_id)
       .maybeSingle();
 
@@ -139,9 +135,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Filleul introuvable' }, { status: 404 });
     }
 
-    const createdAt = new Date(referee.created_at).getTime();
-    const now = Date.now();
-    const minutesSinceCreation = (now - createdAt) / 1000 / 60;
+    if (referee.referred_by) {
+      return NextResponse.json(
+        { error: 'Ce compte a déjà été parrainé' },
+        { status: 400 }
+      );
+    }
+
+    // ─── 4. Anti-fraude : le filleul doit s'être inscrit il y a moins de 30 min ───
+    const minutesSinceCreation =
+      (Date.now() - new Date(referee.created_at).getTime()) / 60000;
 
     if (minutesSinceCreation > 30) {
       return NextResponse.json(
@@ -150,6 +153,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ─── 5. Anti-fraude : le filleul ne doit pas déjà être dans referrals ───
     const { data: existingReferral } = await admin
       .from('referrals')
       .select('id')
@@ -163,18 +167,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const newBalance = (referrer.credits_balance || 0) + REFERRAL_CREDITS;
-    const newCount = (referrer.referral_count || 0) + 1;
-
-    await admin
-      .from('profiles')
-      .update({
-        credits_balance: newBalance,
-        referral_count: newCount,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', referrer.id);
-
+    // ─── 6. Enregistre le LIEN (sans crédit pour l'instant) ───
     await admin
       .from('profiles')
       .update({ referred_by: referrer.id })
@@ -183,23 +176,19 @@ export async function POST(req: NextRequest) {
     await admin.from('referrals').insert({
       referrer_id: referrer.id,
       referee_id,
-      credits_awarded: REFERRAL_CREDITS,
+      status: 'pending',      // en attente du 1er paiement du filleul
+      credits_awarded: 0,     // sera crédité par le webhook Chariow
     });
 
-    await admin.from('credit_transactions').insert({
-      user_id: referrer.id,
-      type: 'referral_bonus',
-      amount: REFERRAL_CREDITS,
-      balance_after: newBalance,
-      description: 'Bonus parrainage — Un nouvel utilisateur a rejoint via ton lien',
-    });
-
-    console.log(`[referral] +${REFERRAL_CREDITS} crédits pour ${referrer.id}`);
+    console.log(
+      `[referral] Lien enregistré : parrain ${referrer.id} → filleul ${referee_id}`
+    );
 
     return NextResponse.json({
       success: true,
-      credits_awarded: REFERRAL_CREDITS,
-      new_balance: newBalance,
+      status: 'pending',
+      message:
+        'Parrainage enregistré. Le parrain recevra ses crédits dès votre premier paiement.',
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
