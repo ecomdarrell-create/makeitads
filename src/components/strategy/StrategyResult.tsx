@@ -92,7 +92,6 @@ function CircularGauge({
 
   return (
     <div className="flex flex-1 flex-col items-center">
-      {/* ✅ Anneau plus petit sur mobile : 72px → 96px desktop */}
       <div className="relative h-[72px] w-[72px] sm:h-24 sm:w-24">
         <svg
           viewBox="0 0 100 100"
@@ -120,7 +119,6 @@ function CircularGauge({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {/* ✅ Chiffre plus petit sur mobile : 14px → 20px desktop */}
           <span className="text-base font-bold leading-none text-[#18181B] sm:text-xl">
             {value}
           </span>
@@ -167,7 +165,7 @@ function getOpportunityData(level: string): { value: number; color: string; labe
 }
 
 // ============================================
-// EXECUTIVE SUMMARY (avec anneaux) — calibré mobile
+// EXECUTIVE SUMMARY (avec anneaux)
 // ============================================
 
 interface ExecutiveSummaryData {
@@ -185,7 +183,6 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* Synthèse */}
       {summary?.synthese && (
         <div className="rounded-xl border border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/40 to-white p-3.5 sm:p-5">
           <p className="mb-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#6366F1]">
@@ -200,7 +197,6 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
         </div>
       )}
 
-      {/* Anneaux — Préparation + Opportunité */}
       <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
         <div className="flex items-start justify-around gap-3 sm:gap-8">
           <CircularGauge
@@ -222,7 +218,6 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
         </div>
       </div>
 
-      {/* Risque principal */}
       {summary?.risque_principal && (
         <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 sm:p-4">
           <div className="mb-1.5 flex items-center gap-2">
@@ -237,7 +232,6 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
         </div>
       )}
 
-      {/* Priorité immédiate */}
       {summary?.priorite && (
         <div className="rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-3.5 sm:p-4">
           <div className="mb-1.5 flex items-center gap-2">
@@ -301,7 +295,6 @@ export function StrategyResult({
 
   return (
     <div className="space-y-3 sm:space-y-4">
-      {/* ─── SALUTATION ─── */}
       {data.salutation && (
         <div className="rounded-xl border border-[#6366F1]/20 bg-gradient-to-br from-indigo-50/60 to-white p-3.5 sm:p-5">
           <p className="text-[13px] font-medium leading-relaxed text-[#18181B] sm:text-base">
@@ -310,12 +303,10 @@ export function StrategyResult({
         </div>
       )}
 
-      {/* ─── EXECUTIVE SUMMARY ─── */}
       {data.executive_summary && (
         <ExecutiveSummary summary={data.executive_summary} />
       )}
 
-      {/* Fallback */}
       {!data.executive_summary && (
         <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
@@ -338,16 +329,10 @@ export function StrategyResult({
         </div>
       )}
 
-      {/* ─── INSIGHTS ─── */}
       {data.insights && <InsightsSection insights={data.insights} />}
-
-      {/* ─── PRIORITÉS ─── */}
       {data.priorities && <PrioritiesSection priorities={data.priorities} />}
-
-      {/* ─── PLAN D'ACTION ─── */}
       {data.action_plan && <ActionPlanSection plan={data.action_plan} />}
 
-      {/* ─── SECTIONS DÉTAILLÉES ─── */}
       {availableSections
         .filter(
           (s) =>
@@ -372,7 +357,6 @@ export function StrategyResult({
           />
         ))}
 
-      {/* ─── SECTIONS VERROUILLÉES ─── */}
       {lockedSections.length > 0 && (
         <>
           <div className="relative flex items-center gap-3 pt-2">
@@ -662,6 +646,7 @@ function StructuredField({
   );
 }
 
+// ✅ FIX : Cadre des plans bloqués — CTA toujours visible
 function LockedSection({
   section,
   onUpgradeClick,
@@ -673,7 +658,8 @@ function LockedSection({
   const requiredLabel = PLAN_LABELS[section.minPlan];
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
+      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 p-3.5 sm:p-4">
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 sm:h-8 sm:w-8">
@@ -686,7 +672,8 @@ function LockedSection({
         <Lock className="h-4 w-4 shrink-0 text-slate-400" />
       </div>
 
-      <div className="relative p-3.5 sm:p-4">
+      {/* Preview floutée + CTA en flux normal */}
+      <div className="p-3.5 sm:p-4">
         <div
           className="select-none text-[11px] leading-relaxed text-slate-500 blur-[3px] sm:text-sm"
           aria-hidden
@@ -694,23 +681,21 @@ function LockedSection({
           {section.previewText}
         </div>
 
-        <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-[1px]">
-          <div className="px-3 text-center sm:px-4">
-            <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              Section verrouillée
-            </p>
-            <p className="mb-2.5 text-[12px] font-semibold text-[#18181B] sm:mb-3 sm:text-sm">
-              Disponible avec le plan {requiredLabel}
-            </p>
-            <button
-              type="button"
-              onClick={() => onUpgradeClick(section.minPlan, section.title)}
-              className="inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6] sm:px-4 sm:py-2 sm:text-xs"
-            >
-              Plan {requiredLabel}
-              <ArrowRight className="h-3 w-3" />
-            </button>
-          </div>
+        <div className="mt-3.5 rounded-lg border border-dashed border-[#6366F1]/30 bg-[#6366F1]/5 px-3 py-4 text-center sm:mt-4 sm:py-5">
+          <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
+            Section verrouillée
+          </p>
+          <p className="mb-3 text-[12px] font-semibold text-[#18181B] sm:text-sm">
+            Disponible avec le plan {requiredLabel}
+          </p>
+          <button
+            type="button"
+            onClick={() => onUpgradeClick(section.minPlan, section.title)}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6] sm:px-4 sm:py-2 sm:text-xs"
+          >
+            Passer au plan {requiredLabel}
+            <ArrowRight className="h-3 w-3" />
+          </button>
         </div>
       </div>
     </div>

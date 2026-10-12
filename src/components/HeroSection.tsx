@@ -6,9 +6,6 @@ import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
-/* ═══════════════════════════════════════════ */
-/* TYPEWRITER — effet d'écriture en boucle     */
-/* ═══════════════════════════════════════════ */
 function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
   const [display, setDisplay] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
@@ -63,23 +60,19 @@ function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
   );
 }
 
-/* ═══════════════════════════════════════════ */
-/* HERO SECTION                                 */
-/* ═══════════════════════════════════════════ */
 export default function HeroSection() {
   return (
     <section className="relative w-full bg-white">
       <div className="mx-auto w-full max-w-7xl px-4 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-28">
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:gap-x-14 lg:gap-y-0 xl:gap-x-20">
 
-          {/* ═══ TITRE + SOUS-TITRE ═══ */}
+          {/* TITRE + SOUS-TITRE */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="text-center lg:col-start-1 lg:row-start-1 lg:text-left"
           >
-            {/* ✅ Titre — leading généreux + padding bas pour libérer la queue du "g" */}
             <h1 className="mb-6 text-[1.75rem] font-bold leading-[1.25] tracking-[-0.03em] text-[#0A0A0F] sm:mb-7 sm:text-[2.5rem] sm:leading-[1.2] md:text-5xl lg:mb-4 lg:pb-4 lg:text-[3rem] lg:leading-[1.25] xl:text-[3.5rem]">
               <span className="block lg:inline">
                 Arrêtez de{' '}
@@ -92,13 +85,13 @@ export default function HeroSection() {
               </span>
             </h1>
 
-            {/* ✅ Sous-titre poussé plus bas sur desktop (mt-4 lg) */}
+            {/* ✅ Nouveau sous-titre en un bloc */}
             <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0 lg:mt-4 lg:max-w-lg lg:text-[1.0625rem]">
-              MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne. Prête à copier-coller, calibrée pour l&apos;Afrique.
+              MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne, prête à copier-coller.
             </p>
           </motion.div>
 
-          {/* ═══ IMAGE ═══ */}
+          {/* IMAGE */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -114,7 +107,7 @@ export default function HeroSection() {
             />
           </motion.div>
 
-          {/* ═══ CTA ═══ */}
+          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}

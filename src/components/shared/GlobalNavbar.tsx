@@ -22,15 +22,31 @@ const searchIndex = [
   { label: "Dashboard", href: "/dashboard", keywords: "accueil tableau de bord home" },
   { label: "Créer une stratégie", href: "/dashboard/generate", keywords: "nouvelle stratégie créer lancer" },
   { label: "Mes stratégies", href: "/dashboard/strategies", keywords: "liste historique stratégies" },
-  { label: "Analytics", href: "/dashboard/analytics", keywords: "statistiques données activité graphiques" },
-  { label: "Paramètres", href: "/dashboard/settings", keywords: "settings profil compte préférences" },
-  { label: "Tarifs & facturation", href: "/dashboard/pricing", keywords: "prix plan upgrade facturation billing" },
-  { label: "Recharger des crédits", href: "/dashboard/credits/recharge", keywords: "crédits recharge recharger topup" },
+  { label: "Analytics", href: "/dashboard/analytics", keywords: "statistiques données activité" },
+  { label: "Paramètres", href: "/dashboard/settings", keywords: "settings profil compte" },
+  { label: "Tarifs & facturation", href: "/dashboard/pricing", keywords: "prix plan upgrade" },
+  { label: "Recharger des crédits", href: "/dashboard/credits/recharge", keywords: "crédits recharge" },
   { label: "Mes crédits", href: "/dashboard/credits", keywords: "crédits solde historique" },
-  { label: "Ressources", href: "/dashboard/resources", keywords: "aide tutoriel guide documentation" },
-  { label: "Parrainage", href: "/dashboard/referral", keywords: "parrainage filleuls invitation referral" },
-  { label: "Support", href: "mailto:support@makeitads.com", keywords: "aide contact support mail" },
+  { label: "Ressources", href: "/dashboard/resources", keywords: "aide tutoriel guide" },
+  { label: "Parrainage", href: "/dashboard/referral", keywords: "parrainage filleuls" },
+  { label: "Support", href: "mailto:support@makeitads.com", keywords: "aide contact support" },
 ];
+
+// ✅ Icône custom : 3 points épais (SVG adaptatif)
+function DotsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <circle cx="5" cy="12" r="3.1" />
+      <circle cx="12" cy="12" r="3.1" />
+      <circle cx="19" cy="12" r="3.1" />
+    </svg>
+  );
+}
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -149,14 +165,12 @@ export default function Navbar() {
     <>
       <header className="fixed top-3 left-3 right-3 z-50 md:top-0 md:left-0 md:right-0 transition-all duration-300">
         <div className="bg-white border border-slate-200/70 rounded-2xl px-4 h-12 flex items-center justify-between shadow-[0_2px_12px_rgba(15,23,42,0.04)] md:border-b md:border-x-0 md:border-t-0 md:rounded-none md:h-14 md:px-8 md:shadow-none">
-          {/* Logo */}
           <Link href="/" className="group flex items-center transition-transform hover:scale-105 shrink-0">
             <span className="text-sm md:text-lg font-semibold tracking-tight text-gray-900">
               MakeIt<span className="text-[#6366F1]">Ads</span>
             </span>
           </Link>
 
-          {/* Nav desktop */}
           <nav className="hidden md:flex items-center gap-8 text-sm">
             {navLinks.map((link) => (
               <a
@@ -171,9 +185,8 @@ export default function Navbar() {
             ))}
           </nav>
 
-          {/* Bloc droit */}
           <div className="flex items-center gap-2 md:gap-4">
-            {/* Loupe */}
+            {/* 🔍 Loupe — référence de taille */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -183,7 +196,6 @@ export default function Navbar() {
               <Search className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]" strokeWidth={2.6} />
             </button>
 
-            {/* Auth desktop */}
             <div className="hidden md:flex items-center gap-3 ml-1">
               {user ? (
                 <>
@@ -220,36 +232,46 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Burger mobile */}
+            {/* ✅ Burger : 3 points épais dans un cercle — MÊME TAILLE que la loupe */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
-              className="md:hidden relative flex h-8 w-8 items-center justify-center text-slate-900 transition-colors hover:text-[#6366F1]"
+              className="md:hidden relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 border-slate-900 bg-white text-slate-900 transition-all hover:bg-slate-900 hover:text-white active:scale-95"
               aria-label={isMobileMenuOpen ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={isMobileMenuOpen}
             >
-              <span className="relative block h-4 w-5">
-                <motion.span
-                  animate={{ rotate: isMobileMenuOpen ? 45 : 0, y: isMobileMenuOpen ? 6 : 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                  className="absolute left-0 top-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
-                />
-                <motion.span
-                  animate={{ opacity: isMobileMenuOpen ? 0 : 1, scaleX: isMobileMenuOpen ? 0 : 1 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="absolute left-0 top-1/2 block h-[2.5px] w-5 -translate-y-1/2 rounded-full bg-slate-900"
-                />
-                <motion.span
-                  animate={{ rotate: isMobileMenuOpen ? -45 : 0, y: isMobileMenuOpen ? -6 : 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                  className="absolute bottom-0 left-0 block h-[2.5px] w-5 rounded-full bg-slate-900"
-                />
-              </span>
+              <AnimatePresence mode="wait" initial={false}>
+                {isMobileMenuOpen ? (
+                  <motion.span
+                    key="close"
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center justify-center"
+                  >
+                    <X className="h-3 w-3" strokeWidth={3.5} />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="dots"
+                    initial={{ scale: 0.6, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    exit={{ scale: 0.6, opacity: 0 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex items-center justify-center"
+                  >
+                    {/* Icône : 3 points remplis, gabarit calé sur la loupe */}
+                    <DotsIcon className="h-[10px] w-[10px]" />
+                  </motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </div>
       </header>
 
+      {/* ── Menu mobile ── */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <>
@@ -338,7 +360,7 @@ export default function Navbar() {
                     Vérification de la session…
                   </p>
                 ) : (
-                  <div className="grid w-full grid-cols-2 gap-3">
+                  <div className="grid w-full grid-cols-2 gap-3 border-t border-gray-100 pt-3">
                     <Link
                       href="/login"
                       className="flex items-center justify-center rounded-full border border-gray-200 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50"
@@ -359,6 +381,7 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
+      {/* ── Recherche ── */}
       <AnimatePresence>
         {searchOpen && (
           <motion.div

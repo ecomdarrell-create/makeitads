@@ -4,6 +4,8 @@ import { Suspense, useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Mail, CheckCircle2 } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
@@ -46,6 +48,7 @@ function SignupForm() {
   const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [checking, setChecking] = useState(true);
+  const [emailSent, setEmailSent] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -70,7 +73,7 @@ function SignupForm() {
     setLoading(true);
     setError('');
 
-    // ✅ Validations
+    // Validations
     if (formData.password.length < 6) {
       setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
@@ -104,6 +107,7 @@ function SignupForm() {
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}${redirectTo}`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
@@ -116,11 +120,24 @@ function SignupForm() {
       });
 
       if (error) {
-        setError('Impossible de créer votre compte. Vérifiez vos informations et réessayez.');
+        // ✅ Messages d'erreur clairs selon la cause
+        const msg = error.message.toLowerCase();
+        if (msg.includes('already registered') || msg.includes('already been registered')) {
+          setError('Cet email est déjà utilisé. Connectez-vous à la place.');
+        } else if (msg.includes('rate limit')) {
+          setError('Trop de tentatives. Patientez quelques minutes et réessayez.');
+        } else if (msg.includes('password')) {
+          setError('Mot de passe trop faible. Utilisez au moins 6 caractères.');
+        } else if (msg.includes('email')) {
+          setError('Adresse email invalide. Vérifiez et réessayez.');
+        } else {
+          setError('Impossible de créer votre compte. Vérifiez vos informations et réessayez.');
+        }
         setLoading(false);
         return;
       }
 
+      // Détection : email déjà utilisé (Supabase renvoie identities vide)
       if (
         data.user &&
         Array.isArray(data.user.identities) &&
@@ -133,6 +150,7 @@ function SignupForm() {
         return;
       }
 
+      // Traitement parrainage
       if (referralCode && data.user?.id) {
         try {
           await fetch('/api/referral', {
@@ -145,6 +163,7 @@ function SignupForm() {
         }
       }
 
+      // Enregistrer téléphone
       if (cleanPhone && data.user?.id) {
         try {
           await supabase.from('profiles').update({ phone: cleanPhone }).eq('id', data.user.id);
@@ -153,9 +172,16 @@ function SignupForm() {
         }
       }
 
+      // ✅ CAS 1 : Session créée → connexion immédiate
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) await new Promise((resolve) => setTimeout(resolve, 300));
-      window.location.href = redirectTo;
+      if (session) {
+        window.location.href = redirectTo;
+        return;
+      }
+
+      // ✅ CAS 2 : Pas de session → email de confirmation envoyé
+      setEmailSent(true);
+      setLoading(false);
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
@@ -174,6 +200,43 @@ function SignupForm() {
               <div className="h-10 rounded-xl bg-slate-100" />
             </div>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ✅ Écran de succès "email envoyé"
+  if (emailSent) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-6">
+        <div className="w-full max-w-[420px]">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="rounded-2xl border border-slate-200/80 bg-white p-5 text-center shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-7"
+          >
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+              <Mail className="h-7 w-7 text-emerald-600" />
+            </div>
+            <h1 className="mb-2 text-lg font-semibold text-slate-900 sm:text-xl">
+              Vérifiez votre email
+            </h1>
+            <p className="mb-4 text-xs leading-relaxed text-slate-600 sm:text-sm">
+              Un lien de confirmation a été envoyé à{' '}
+              <strong className="break-all text-slate-900">{formData.email}</strong>.
+              <br />
+              Cliquez sur le lien pour activer votre compte.
+            </p>
+            <p className="mb-5 text-[10px] text-slate-500 sm:text-[11px]">
+              Vous ne recevez rien ? Vérifiez vos spams ou réessayez dans 2 minutes.
+            </p>
+            <Link
+              href="/login"
+              className="inline-flex items-center justify-center rounded-full bg-[#6366F1] px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#6366f1]/20 transition-all hover:bg-[#5558e6] sm:text-sm"
+            >
+              Aller à la connexion
+            </Link>
+          </motion.div>
         </div>
       </div>
     );
@@ -208,7 +271,7 @@ function SignupForm() {
                 Vous avez été invité par un membre MakeItAds
               </p>
               <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">
-                Votre parrain recevra un bonus dès votre inscription.
+                Votre parrain recevra un bonus dès votre premier paiement.
               </p>
             </div>
           )}
