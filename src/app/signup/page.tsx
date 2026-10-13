@@ -96,6 +96,7 @@ function SignupForm() {
       return;
     }
 
+    // ✅ Le PhoneInput peut renvoyer un "+" initial (collage), on le nettoie
     const cleanPhone = formData.phone.trim()
       ? '+' + formData.phone.replace(/\D/g, '')
       : null;
@@ -106,8 +107,6 @@ function SignupForm() {
         email: formData.email,
         password: formData.password,
         options: {
-          // ✅ URL de confirmation : on renvoie vers /auth/callback
-          // qui échangera le token contre une session, puis redirigera vers /dashboard.
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
           data: {
             first_name: formData.firstName,
@@ -293,7 +292,9 @@ function SignupForm() {
                   type="text"
                   required
                   value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, firstName: e.target.value }))
+                  }
                   className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
                   placeholder="Jean"
                 />
@@ -307,7 +308,9 @@ function SignupForm() {
                   type="text"
                   required
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, lastName: e.target.value }))
+                  }
                   className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
                   placeholder="Dupont"
                 />
@@ -323,7 +326,9 @@ function SignupForm() {
                 type="email"
                 required
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, email: e.target.value }))
+                }
                 className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
                 placeholder="vous@exemple.com"
               />
@@ -337,10 +342,13 @@ function SignupForm() {
                 Téléphone
                 <InfoBadge text="Nous utilisons votre numéro pour sécuriser votre compte et vous prévenir en cas d'activité inhabituelle. N'oubliez pas de mettre l'indicatif de votre pays (ex : 237, 225, 33…)." />
               </label>
+              {/* ✅ Fix : forme fonctionnelle pour ne plus perdre la valeur */}
               <PhoneInput
                 id="phone"
                 value={formData.phone}
-                onChange={(value) => setFormData({ ...formData, phone: value })}
+                onChange={(value) =>
+                  setFormData((prev) => ({ ...prev, phone: value }))
+                }
               />
               <p className="mt-1 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">
                 Indispensable : indicatif du pays + numéro complet.
@@ -352,7 +360,9 @@ function SignupForm() {
                 id="password"
                 label="Mot de passe"
                 value={formData.password}
-                onChange={(password) => setFormData({ ...formData, password })}
+                onChange={(password) =>
+                  setFormData((prev) => ({ ...prev, password }))
+                }
                 autoComplete="new-password"
               />
             </div>
@@ -379,7 +389,9 @@ function SignupForm() {
                 id="currency"
                 required
                 value={formData.currency}
-                onChange={(e) => setFormData({ ...formData, currency: e.target.value })}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, currency: e.target.value }))
+                }
                 className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
               >
                 <option value="" disabled>

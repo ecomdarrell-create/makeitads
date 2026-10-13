@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 
 // ============================================
 // BASE DE DONNÉES DES CODES PAYS (monde entier)
@@ -228,7 +228,7 @@ const SORTED_COUNTRIES = [...COUNTRIES].sort(
 );
 
 // ============================================
-// DÉTECTION DU PAYS (exportée pour validation)
+// DÉTECTION DU PAYS
 // ============================================
 
 export function detectCountry(value: string): Country | null {
@@ -254,7 +254,6 @@ export function isValidPhoneNumber(value: string): boolean {
   const country = detectCountry(value);
   if (!country) return false;
 
-  // Il faut au moins 4 chiffres après l'indicatif
   const afterDial = digits.slice(country.dial.length);
   return afterDial.length >= 4;
 }
@@ -278,18 +277,44 @@ export function PhoneInput({
 }: PhoneInputProps) {
   const detectedCountry = useMemo(() => detectCountry(value), [value]);
   const [imageError, setImageError] = useState(false);
+  const lastCountryCodeRef = useRef<string | null>(null);
+
+  // ✅ Reset imageError dès que le pays détecté change
+  // Sinon un drapeau cassé bloque tous les suivants
+  useEffect(() => {
+    const currentCode = detectedCountry?.code ?? null;
+    if (currentCode !== lastCountryCodeRef.current) {
+      setImageError(false);
+      lastCountryCodeRef.current = currentCode;
+    }
+  }, [detectedCountry?.code]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const raw = e.target.value.replace(/[^\d\s\-]/g, '');
-    onChange(raw);
+    const input = e.target.value;
+
+    // ✅ Autorise les chiffres, espaces, tirets, parenthèses
+    // et UN SEUL "+" au tout début (utile pour coller un numéro complet)
+    let cleaned = input.replace(/[^\d\s\-()+]/g, '');
+
+    // Ne garde qu'un seul "+" et uniquement en 1ère position
+    cleaned = cleaned.replace(/\+/g, (match, offset) => (offset === 0 ? '+' : ''));
+
+    // ✅ Passe la valeur propre au parent (le `+` initial est conservé
+    // pour permettre à detectCountry de fonctionner, et il sera retiré
+    // au moment de la sauvegarde dans signup/page.tsx)
+    onChange(cleaned);
   };
 
   const flagUrl = detectedCountry
     ? `https://hatscripts.github.io/circle-flags/flags/${detectedCountry.code}.svg`
     : null;
 
+  // Largeur de la zone à gauche : "+", drapeau, marges
+  const showFlag = !!(detectedCountry && flagUrl && !imageError);
+
   return (
     <div className="relative">
+      {/* Signe + */}
       <span
         className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-500 sm:text-sm"
         aria-hidden="true"
@@ -297,16 +322,17 @@ export function PhoneInput({
         +
       </span>
 
-      {detectedCountry && flagUrl && !imageError && (
+      {/* Drapeau */}
+      {showFlag && (
         <span
-          className="pointer-events-none absolute left-7 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200 transition-opacity duration-200"
-          aria-label={detectedCountry.name}
-          title={detectedCountry.name}
+          className="pointer-events-none absolute left-7 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200"
+          aria-label={detectedCountry!.name}
+          title={detectedCountry!.name}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={flagUrl}
-            alt={detectedCountry.name}
+            src={flagUrl!}
+            alt={detectedCountry!.name}
             width={20}
             height={20}
             loading="lazy"
@@ -321,11 +347,12 @@ export function PhoneInput({
         id={id}
         type="tel"
         inputMode="tel"
+        autoComplete="tel"
         value={value}
         onChange={handleChange}
         placeholder={placeholder}
         className={`min-h-10 w-full rounded-xl border border-slate-200 bg-white py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm ${
-          detectedCountry && !imageError ? 'pl-14' : 'pl-8'
+          showFlag ? 'pl-14' : 'pl-8'
         } pr-3.5`}
       />
     </div>
