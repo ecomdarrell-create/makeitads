@@ -5,9 +5,8 @@ import { createClient } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, CheckCircle2 } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
-import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
 // ✅ Petit badge (!) cliquable pour afficher une explication
@@ -107,7 +106,9 @@ function SignupForm() {
         email: formData.email,
         password: formData.password,
         options: {
-          emailRedirectTo: `${window.location.origin}${redirectTo}`,
+          // ✅ URL de confirmation : on renvoie vers /auth/callback
+          // qui échangera le token contre une session, puis redirigera vers /dashboard.
+          emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
@@ -120,7 +121,6 @@ function SignupForm() {
       });
 
       if (error) {
-        // ✅ Messages d'erreur clairs selon la cause
         const msg = error.message.toLowerCase();
         if (msg.includes('already registered') || msg.includes('already been registered')) {
           setError('Cet email est déjà utilisé. Connectez-vous à la place.');
@@ -172,14 +172,14 @@ function SignupForm() {
         }
       }
 
-      // ✅ CAS 1 : Session créée → connexion immédiate
+      // CAS 1 : Session créée (confirm email désactivé) → connexion immédiate
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         window.location.href = redirectTo;
         return;
       }
 
-      // ✅ CAS 2 : Pas de session → email de confirmation envoyé
+      // CAS 2 : Pas de session → email de confirmation envoyé
       setEmailSent(true);
       setLoading(false);
     } catch {
@@ -275,14 +275,6 @@ function SignupForm() {
               </p>
             </div>
           )}
-
-          <AuthProviderButtons />
-
-          <div className="my-3.5 flex items-center gap-3 text-[9px] text-slate-400 sm:text-[10px]">
-            <span className="h-px flex-1 bg-slate-100" />
-            OU AVEC VOTRE EMAIL
-            <span className="h-px flex-1 bg-slate-100" />
-          </div>
 
           {error && (
             <div className="mb-3 rounded border border-red-200 bg-red-50 p-2 text-[11px] text-red-700 sm:text-xs">
