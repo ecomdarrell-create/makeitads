@@ -19,59 +19,56 @@ function getResend(): Resend {
 }
 
 // ─────────────────────────────────────────────────────────────
-// VÉRIFICATION SIGNATURE (format Resend/Svix : t=...,v1=...)
+// VÉRIFICATION SIGNATURE (format Svix : v1,<base64>)
+// Doc : https://docs.svix.com/receiving/verifying-payloads/how
 // ─────────────────────────────────────────────────────────────
 function verifyResendSignature(
   rawBody: string,
-  sigHeader: string | null,
+  svixId: string | null,
+  svixTimestamp: string | null,
+  svixSignature: string | null,
   secret: string
 ): boolean {
-  if (!sigHeader) return false;
+  if (!svixId || !svixTimestamp || !svixSignature) return false;
 
-  // Format 1 : t=...,v1=...
-  const parts: Record<string, string> = {};
-  sigHeader.split(',').forEach((p) => {
-    const [k, v] = p.split('=');
-    if (k && v) parts[k.trim()] = v.trim();
-  });
+  // 1. Chaîne à signer : "id.timestamp.body"
+  const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
 
-  const timestamp = parts['t'];
-  const receivedSig = parts['v1'];
-
-  if (timestamp && receivedSig) {
-    const signedPayload = `${timestamp}.${rawBody}`;
-    const expected = crypto
-      .createHmac('sha256', secret)
-      .update(signedPayload, 'utf8')
-      .digest('hex');
-
-    try {
-      return crypto.timingSafeEqual(
-        Buffer.from(expected, 'utf8'),
-        Buffer.from(receivedSig, 'utf8')
-      );
-    } catch {
-      return false;
-    }
-  }
-
-  // Format 2 : Svix standard "v1,<base64>"
+  // 2. Décoder le secret (whsec_xxx → base64 → bytes)
+  let secretBytes: Buffer;
   try {
-    const [version, b64sig] = sigHeader.split(',');
-    if (version === 'v1' && b64sig) {
-      const secretBytes = Buffer.from(secret.replace(/^whsec_/, ''), 'base64');
-      const expected = crypto
-        .createHmac('sha256', secretBytes)
-        .update(rawBody, 'utf8')
-        .digest('base64');
-
-      return crypto.timingSafeEqual(
-        Buffer.from(expected, 'utf8'),
-        Buffer.from(b64sig, 'utf8')
-      );
-    }
+    const secretBase64 = secret.replace(/^whsec_/, '');
+    secretBytes = Buffer.from(secretBase64, 'base64');
   } catch {
     return false;
+  }
+
+  // 3. HMAC-SHA256 → base64
+  const expectedSig = crypto
+    .createHmac('sha256', secretBytes)
+    .update(signedContent, 'utf8')
+    .digest('base64');
+
+  // 4. Le header peut contenir plusieurs signatures séparées par espace,
+  //    chacune au format "v1,<base64>"
+  const signatures = svixSignature.split(' ');
+
+  for (const sig of signatures) {
+    const [version, hash] = sig.split(',');
+    if (version !== 'v1' || !hash) continue;
+
+    try {
+      if (
+        crypto.timingSafeEqual(
+          Buffer.from(expectedSig, 'utf8'),
+          Buffer.from(hash, 'utf8')
+        )
+      ) {
+        return true;
+      }
+    } catch {
+      continue;
+    }
   }
 
   return false;
@@ -91,12 +88,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
     }
 
-    // Resend utilise le header "svix-signature"
-    const sig =
-      req.headers.get('svix-signature') ||
-      req.headers.get('x-resend-signature');
+    // Headers Svix (format Resend)
+    const svixId = req.headers.get('svix-id');
+    const svixTimestamp = req.headers.get('svix-timestamp');
+    const svixSignature = req.headers.get('svix-signature');
 
-    if (!sig || !verifyResendSignature(rawBody, sig, secret)) {
+    if (!svixId || !svixTimestamp || !svixSignature) {
+      console.error('[resend-inbound] ❌ Headers Svix manquants');
+      return NextResponse.json({ error: 'Missing svix headers' }, { status: 401 });
+    }
+
+    const isValid = verifyResendSignature(
+      rawBody,
+      svixId,
+      svixTimestamp,
+      svixSignature,
+      secret
+    );
+
+    if (!isValid) {
       console.error('[resend-inbound] ❌ Signature invalide');
       return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
@@ -127,7 +137,7 @@ export async function POST(req: NextRequest) {
 
     const supabaseAdmin = getSupabaseAdmin();
 
-    // ─── Extrait les infos — parse "Nom <email@domain.com>" ───
+    // Extrait les infos — parse "Nom <email@domain.com>"
     const rawFrom = (typeof email.from === 'string' ? email.from : '').trim();
     let fromName: string | null = null;
     let fromEmail = '';
@@ -159,9 +169,7 @@ export async function POST(req: NextRequest) {
       .ilike('email', fromEmail)
       .maybeSingle();
 
-    // Détermine le thread_id :
-    // - Si c'est une réponse (in_reply_to présent), on cherche le message original
-    // - Sinon, on crée un nouveau thread avec ce message_id
+    // Détermine le thread_id
     let threadId = messageId;
     if (inReplyTo) {
       const { data: original } = await supabaseAdmin
@@ -192,7 +200,6 @@ export async function POST(req: NextRequest) {
       });
 
     if (insertError) {
-      // Cas doublon : on log mais on renvoie OK (Resend ne retentera pas)
       if (insertError.code === '23505') {
         console.log('[resend-inbound] ⏭️ Message déjà traité');
         return NextResponse.json({ success: true, duplicate: true }, { status: 200 });
