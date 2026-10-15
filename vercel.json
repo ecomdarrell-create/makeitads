@@ -2,7 +2,11 @@
   "crons": [
     {
       "path": "/api/cron/reset-credits",
-      "schedule": "0 0 1 * *"
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/expiration-warnings",
+      "schedule": "0 2 * * *"
     },
     {
       "path": "/api/cron/check-expired",
