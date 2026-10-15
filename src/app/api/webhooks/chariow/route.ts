@@ -29,7 +29,7 @@ const SIGNATURE_HEADERS = [
 ];
 
 // ─────────────────────────────────────────────────────────────
-// SIGNATURE (Stripe-compatible : t=timestamp,v1=hash)
+// SIGNATURE (supporte "sha256=<hex>" ET "t=...,v1=...")
 // ─────────────────────────────────────────────────────────────
 function extractSignatureHeader(req: NextRequest): string | null {
   for (const name of SIGNATURE_HEADERS) {
@@ -46,44 +46,52 @@ function verifyChariowSignature(
 ): boolean {
   if (!signatureHeader) return false;
 
-  // Format Stripe-style : "t=1234567890,v1=abcdef..."
-  const parts: Record<string, string> = {};
-  signatureHeader.split(',').forEach((part) => {
-    const [k, v] = part.split('=');
-    if (k && v) parts[k.trim()] = v.trim();
-  });
+  let receivedSig = signatureHeader.trim();
 
-  const timestamp = parts['t'];
-  const receivedSig = parts['v1'];
-
-  // Cas 1 : Stripe-style (t + v1)
-  if (timestamp && receivedSig) {
-    const signedPayload = `${timestamp}.${rawBody}`;
-    const expectedSig = crypto
-      .createHmac('sha256', secret)
-      .update(signedPayload, 'utf8')
-      .digest('hex');
-
-    try {
-      return crypto.timingSafeEqual(
-        Buffer.from(expectedSig, 'utf8'),
-        Buffer.from(receivedSig, 'utf8')
-      );
-    } catch {
-      return false;
+  // ─── Format 1 : "sha256=<hex>" (Chariow) ───
+  if (receivedSig.toLowerCase().startsWith('sha256=')) {
+    receivedSig = receivedSig.slice(7);
+  }
+  // ─── Format 2 : "t=...,v1=..." (Stripe-style) ───
+  else if (receivedSig.includes('=') && receivedSig.includes(',')) {
+    const parts: Record<string, string> = {};
+    receivedSig.split(',').forEach((part) => {
+      const [k, v] = part.split('=');
+      if (k && v) parts[k.trim()] = v.trim();
+    });
+    const timestamp = parts['t'];
+    const sig = parts['v1'];
+    if (sig) {
+      const signedPayload = timestamp ? `${timestamp}.${rawBody}` : rawBody;
+      const expectedSig = crypto
+        .createHmac('sha256', secret)
+        .update(signedPayload, 'utf8')
+        .digest('hex');
+      try {
+        return crypto.timingSafeEqual(
+          Buffer.from(expectedSig.toLowerCase(), 'utf8'),
+          Buffer.from(sig.toLowerCase(), 'utf8')
+        );
+      } catch {
+        return false;
+      }
     }
   }
 
-  // Cas 2 : Fallback — HMAC brut du body
-  const expectedRaw = crypto
+  // ─── Cas principal : HMAC SHA256 du body brut ───
+  const expectedSig = crypto
     .createHmac('sha256', secret)
     .update(rawBody, 'utf8')
     .digest('hex');
 
+  // Comparaison safe (insensible à la casse)
   try {
+    const a = expectedSig.toLowerCase();
+    const b = receivedSig.toLowerCase();
+    if (a.length !== b.length) return false;
     return crypto.timingSafeEqual(
-      Buffer.from(expectedRaw, 'utf8'),
-      Buffer.from(signatureHeader, 'utf8')
+      Buffer.from(a, 'utf8'),
+      Buffer.from(b, 'utf8')
     );
   } catch {
     return false;
@@ -306,11 +314,6 @@ export async function POST(req: NextRequest) {
     // ─── 0) Récupère le body brut AVANT toute lecture ───
     const rawBody = await req.text();
     console.log('=== [chariow] WEBHOOK REÇU ===');
-
-    // 🔍 DEBUG TEMPORAIRE — À RETIRER APRÈS
-    console.log('[chariow] HEADERS:', JSON.stringify(Object.fromEntries(req.headers.entries())));
-    console.log('[chariow] RAW BODY:', rawBody.slice(0, 300));
-    // ────────────────────────────────────
 
     // ─── 1) VÉRIFICATION DE LA SIGNATURE (OBLIGATOIRE) ───
     const secret = process.env.CHARIOW_WEBHOOK_SECRET;
