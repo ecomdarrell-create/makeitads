@@ -307,6 +307,11 @@ export async function POST(req: NextRequest) {
     const rawBody = await req.text();
     console.log('=== [chariow] WEBHOOK REÇU ===');
 
+    // 🔍 DEBUG TEMPORAIRE — À RETIRER APRÈS
+    console.log('[chariow] HEADERS:', JSON.stringify(Object.fromEntries(req.headers.entries())));
+    console.log('[chariow] RAW BODY:', rawBody.slice(0, 300));
+    // ────────────────────────────────────
+
     // ─── 1) VÉRIFICATION DE LA SIGNATURE (OBLIGATOIRE) ───
     const secret = process.env.CHARIOW_WEBHOOK_SECRET;
     if (!secret) {
