@@ -97,10 +97,22 @@ export async function GET() {
 // ============================================
 export async function POST(req: NextRequest) {
   try {
+    // ✅ 1) Vérifie que l'appelant est bien un user connecté
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
+    }
+
     const { referral_code, referee_id } = await req.json();
 
     if (!referral_code || !referee_id) {
       return NextResponse.json({ error: 'Paramètres manquants' }, { status: 400 });
+    }
+
+    // ✅ 2) L'appelant doit être le filleul lui-même
+    if (user.id !== referee_id) {
+      return NextResponse.json({ error: 'Action non autorisée' }, { status: 403 });
     }
 
     const admin = getSupabaseAdmin();

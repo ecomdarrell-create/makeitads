@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 import { PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
 
+// ─────────────────────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────────────────────
 const RECHARGE_NAMES: Record<string, number> = {
   'recharge 10': 10, 'recharge 30': 30, 'recharge 80': 80,
   'pack 10': 10, 'pack 30': 30, 'pack 80': 80,
@@ -10,15 +14,84 @@ const RECHARGE_NAMES: Record<string, number> = {
 const RECHARGE_PRICES: Record<number, number> = { 10: 1500, 30: 4000, 80: 9000 };
 const PLAN_PRICES: Record<string, number> = { pro: 10000, premium: 25000, enterprise: 100000 };
 
-// ✅ Récompenses progressives selon le plan payé par le filleul
 const REFERRAL_REWARDS: Record<string, number> = {
   pro: 10,
   premium: 25,
   enterprise: 50,
 };
 
+// Header que Chariow utilise (fallback sur plusieurs noms possibles)
+const SIGNATURE_HEADERS = [
+  'x-chariow-signature',
+  'chariow-signature',
+  'x-webhook-signature',
+  'x-signature',
+];
+
 // ─────────────────────────────────────────────────────────────
-// DÉTECTION STRICTE
+// SIGNATURE (Stripe-compatible : t=timestamp,v1=hash)
+// ─────────────────────────────────────────────────────────────
+function extractSignatureHeader(req: NextRequest): string | null {
+  for (const name of SIGNATURE_HEADERS) {
+    const v = req.headers.get(name);
+    if (v) return v;
+  }
+  return null;
+}
+
+function verifyChariowSignature(
+  rawBody: string,
+  signatureHeader: string | null,
+  secret: string
+): boolean {
+  if (!signatureHeader) return false;
+
+  // Format Stripe-style : "t=1234567890,v1=abcdef..."
+  const parts: Record<string, string> = {};
+  signatureHeader.split(',').forEach((part) => {
+    const [k, v] = part.split('=');
+    if (k && v) parts[k.trim()] = v.trim();
+  });
+
+  const timestamp = parts['t'];
+  const receivedSig = parts['v1'];
+
+  // Cas 1 : Stripe-style (t + v1)
+  if (timestamp && receivedSig) {
+    const signedPayload = `${timestamp}.${rawBody}`;
+    const expectedSig = crypto
+      .createHmac('sha256', secret)
+      .update(signedPayload, 'utf8')
+      .digest('hex');
+
+    try {
+      return crypto.timingSafeEqual(
+        Buffer.from(expectedSig, 'utf8'),
+        Buffer.from(receivedSig, 'utf8')
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  // Cas 2 : Fallback — HMAC brut du body
+  const expectedRaw = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody, 'utf8')
+    .digest('hex');
+
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedRaw, 'utf8'),
+      Buffer.from(signatureHeader, 'utf8')
+    );
+  } catch {
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// DÉTECTION
 // ─────────────────────────────────────────────────────────────
 function detectRechargePack(payload: any): number | null {
   const p = extractProductName(payload);
@@ -66,7 +139,9 @@ function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) throw new Error('Variables Supabase manquantes');
-  return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } });
+  return createClient(url, key, {
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
 }
 
 function extractEmail(payload: any): string | null {
@@ -107,27 +182,53 @@ function extractOrderId(payload: any): string | null {
   return null;
 }
 
-async function safeInsert(supabaseAdmin: any, table: string, data: any, label: string): Promise<void> {
+async function safeInsert(supabaseAdmin: any, table: string, data: any, label: string): Promise<boolean> {
   try {
     const { error } = await supabaseAdmin.from(table).insert(data);
     if (error) {
       console.error(`[chariow] ⚠️ Insert ${label} échoué:`, error.message, '| code:', error.code);
-    } else {
-      console.log(`[chariow] ✅ Insert ${label} OK`);
+      return false;
     }
+    console.log(`[chariow] ✅ Insert ${label} OK`);
+    return true;
   } catch (e: any) {
     console.error(`[chariow] ⚠️ Exception insert ${label}:`, e?.message || e);
+    return false;
   }
 }
 
-// ✅ NOUVEAU : Crédite le parrain quand son filleul passe à un plan payant
+// ─────────────────────────────────────────────────────────────
+// IDEMPOTENCE : vérifie si l'order_id a déjà été traité
+// ─────────────────────────────────────────────────────────────
+async function isOrderAlreadyProcessed(
+  supabaseAdmin: any,
+  orderId: string | null
+): Promise<boolean> {
+  if (!orderId) return false;
+
+  try {
+    const { data } = await supabaseAdmin
+      .from('revenue_transactions')
+      .select('id')
+      .eq('order_id', orderId)
+      .limit(1)
+      .maybeSingle();
+
+    return !!data?.id;
+  } catch {
+    return false;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// PARRAINAGE
+// ─────────────────────────────────────────────────────────────
 async function creditReferrerIfAny(
   supabaseAdmin: any,
   refereeId: string,
   plan: PlanId
 ): Promise<{ awarded: number; referrerId: string | null }> {
   try {
-    // Cherche un parrainage en attente pour ce filleul
     const { data: referral } = await supabaseAdmin
       .from('referrals')
       .select('id, referrer_id')
@@ -141,13 +242,11 @@ async function creditReferrerIfAny(
     }
 
     const reward = REFERRAL_REWARDS[plan] || 0;
-
     if (reward === 0) {
       console.log(`[chariow] Plan ${plan} → pas de récompense parrainage`);
       return { awarded: 0, referrerId: referral.referrer_id };
     }
 
-    // Récupère le parrain
     const { data: referrer } = await supabaseAdmin
       .from('profiles')
       .select('credits_balance, referral_count')
@@ -162,7 +261,6 @@ async function creditReferrerIfAny(
     const newBalance = (referrer.credits_balance || 0) + reward;
     const newCount = (referrer.referral_count || 0) + 1;
 
-    // Update balance du parrain
     await supabaseAdmin
       .from('profiles')
       .update({
@@ -172,7 +270,6 @@ async function creditReferrerIfAny(
       })
       .eq('id', referral.referrer_id);
 
-    // Marque le parrainage comme terminé
     await supabaseAdmin
       .from('referrals')
       .update({
@@ -182,7 +279,6 @@ async function creditReferrerIfAny(
       })
       .eq('id', referral.id);
 
-    // Trace dans credit_transactions
     await safeInsert(supabaseAdmin, 'credit_transactions', {
       user_id: referral.referrer_id,
       type: 'referral_bonus',
@@ -207,13 +303,35 @@ async function creditReferrerIfAny(
 // ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
   try {
+    // ─── 0) Récupère le body brut AVANT toute lecture ───
     const rawBody = await req.text();
     console.log('=== [chariow] WEBHOOK REÇU ===');
 
-    const userIdFromQuery = req.nextUrl.searchParams.get('userId');
-    const emailFromQuery = req.nextUrl.searchParams.get('email');
-    console.log('[chariow] Query — userId:', userIdFromQuery, '| email:', emailFromQuery);
+    // ─── 1) VÉRIFICATION DE LA SIGNATURE (OBLIGATOIRE) ───
+    const secret = process.env.CHARIOW_WEBHOOK_SECRET;
+    if (!secret) {
+      console.error('[chariow] ❌ CHARIOW_WEBHOOK_SECRET manquant');
+      return NextResponse.json(
+        { error: 'Server misconfigured' },
+        { status: 500 }
+      );
+    }
 
+    const signatureHeader = extractSignatureHeader(req);
+    if (!signatureHeader) {
+      console.error('[chariow] ❌ Aucune signature dans les headers');
+      return NextResponse.json({ error: 'Missing signature' }, { status: 401 });
+    }
+
+    const isValid = verifyChariowSignature(rawBody, signatureHeader, secret);
+    if (!isValid) {
+      console.error('[chariow] ❌ SIGNATURE INVALIDE — requête rejetée');
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+    }
+
+    console.log('[chariow] ✅ Signature valide');
+
+    // ─── 2) Parse du JSON ───
     let payload: any;
     try {
       payload = JSON.parse(rawBody);
@@ -223,59 +341,74 @@ export async function POST(req: NextRequest) {
 
     console.log('[chariow] PAYLOAD:', JSON.stringify(payload).slice(0, 3000));
 
-    const email = extractEmail(payload) || emailFromQuery?.toLowerCase().trim() || null;
+    // ─── 3) Extraction des données ───
+    const email = extractEmail(payload);
     if (!email) {
       console.error('[chariow] ❌ Aucun email');
-      return NextResponse.json({ error: 'No email', success: false }, { status: 200 });
+      return NextResponse.json({ error: 'No email' }, { status: 200 });
     }
 
     if (email.endsWith('@example.com') || email.startsWith('test@')) {
       console.log('[chariow] ⏭️ Email de test ignoré:', email);
-      return NextResponse.json({ success: true, ignored: true, reason: 'test_email' }, { status: 200 });
+      return NextResponse.json(
+        { success: true, ignored: true, reason: 'test_email' },
+        { status: 200 }
+      );
     }
 
+    const orderId = extractOrderId(payload);
+    const productName = extractProductName(payload);
+
     const supabaseAdmin = getSupabaseAdmin();
+
+    // ─── 4) IDEMPOTENCE ───
+    if (await isOrderAlreadyProcessed(supabaseAdmin, orderId)) {
+      console.log(`[chariow] ⏭️ Order ${orderId} déjà traitée — skip`);
+      return NextResponse.json(
+        { success: true, duplicate: true, orderId },
+        { status: 200 }
+      );
+    }
+
+    // ─── 5) Récupération du user (via email uniquement) ───
     let userId: string | null = null;
     let currentPlan: PlanId = 'free';
     let currentCredits = 0;
 
-    if (userIdFromQuery) {
-      const { data: p } = await supabaseAdmin
-        .from('profiles').select('id, email, plan, credits_balance')
-        .eq('id', userIdFromQuery).maybeSingle();
-      if (p?.id) {
-        userId = p.id;
-        currentPlan = (p.plan as PlanId) || 'free';
-        currentCredits = p.credits_balance || 0;
-        console.log('[chariow] User via query userId:', userId);
-      }
-    }
+    const { data: p } = await supabaseAdmin
+      .from('profiles')
+      .select('id, email, plan, credits_balance')
+      .ilike('email', email)
+      .maybeSingle();
 
-    if (!userId) {
-      const { data: p } = await supabaseAdmin
-        .from('profiles').select('id, email, plan, credits_balance')
-        .ilike('email', email).maybeSingle();
-      if (p?.id) {
-        userId = p.id;
-        currentPlan = (p.plan as PlanId) || 'free';
-        currentCredits = p.credits_balance || 0;
-        console.log('[chariow] User via email:', userId);
-      }
+    if (p?.id) {
+      userId = p.id;
+      currentPlan = (p.plan as PlanId) || 'free';
+      currentCredits = p.credits_balance || 0;
+      console.log('[chariow] User trouvé via email:', userId);
     }
 
     const rechargeCredits = detectRechargePack(payload);
     const plan = detectPlan(payload);
-    const orderId = extractOrderId(payload);
-    const productName = extractProductName(payload);
 
-    console.log('[chariow] Détection:', { productName, rechargeCredits, plan, orderId, email, userId });
+    console.log('[chariow] Détection:', {
+      productName, rechargeCredits, plan, orderId, email, userId,
+    });
 
-    // ─── CAS A : RECHARGE ───
-    if (rechargeCredits) {
+    // ✅ FIX : Si le produit contient un PLAN, on ignore la détection recharge
+    // (sinon "Plan Premium — 150 crédits" serait mal interprété comme une recharge one-shot)
+    const isPlanPurchase = plan !== null;
+
+    // ─── CAS A : RECHARGE (uniquement si ce n'est PAS un plan) ───
+    if (rechargeCredits && !isPlanPurchase) {
       if (!userId) {
         console.error('[chariow] ⚠️ Recharge sans compte:', email);
         return NextResponse.json(
-          { success: false, error: 'Aucun compte MakeItAds pour cet email', email },
+          {
+            success: false,
+            error: 'Aucun compte MakeItAds pour cet email',
+            email,
+          },
           { status: 200 }
         );
       }
@@ -283,12 +416,18 @@ export async function POST(req: NextRequest) {
       const newBalance = currentCredits + rechargeCredits;
       const { error: updateError } = await supabaseAdmin
         .from('profiles')
-        .update({ credits_balance: newBalance, updated_at: new Date().toISOString() })
+        .update({
+          credits_balance: newBalance,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', userId);
 
       if (updateError) {
         console.error('[chariow] ❌ Update balance échoué:', updateError.message);
-        return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
+        return NextResponse.json(
+          { success: false, error: updateError.message },
+          { status: 500 }
+        );
       }
 
       console.log(`[chariow] ✅ Balance : ${currentCredits} → ${newBalance}`);
@@ -312,8 +451,12 @@ export async function POST(req: NextRequest) {
       }, 'revenue_transactions');
 
       return NextResponse.json({
-        success: true, type: 'recharge', userId,
-        creditsAdded: rechargeCredits, newBalance, revenue: rechargePrice,
+        success: true,
+        type: 'recharge',
+        userId,
+        creditsAdded: rechargeCredits,
+        newBalance,
+        revenue: rechargePrice,
       }, { status: 200 });
     }
 
@@ -327,7 +470,7 @@ export async function POST(req: NextRequest) {
           success: false,
           error: 'Aucun compte MakeItAds pour cet email',
           email,
-          hint: 'L\'utilisateur doit d\'abord s\'inscrire sur makeitads.pro',
+          hint: "L'utilisateur doit d'abord s'inscrire sur makeitads.pro",
         }, { status: 200 });
       }
 
@@ -348,32 +491,40 @@ export async function POST(req: NextRequest) {
 
       if (updateError) {
         console.error('[chariow] ❌ Update plan échoué:', updateError.message);
-        return NextResponse.json({ success: false, error: updateError.message }, { status: 500 });
+        return NextResponse.json(
+          { success: false, error: updateError.message },
+          { status: 500 }
+        );
       }
 
       await safeInsert(supabaseAdmin, 'credit_transactions', {
-        user_id: userId, type: 'purchase', amount: monthlyCredits,
+        user_id: userId,
+        type: 'purchase',
+        amount: monthlyCredits,
         balance_after: monthlyCredits,
         description: `Achat du plan ${plan} via Chariow (${orderId || 'order inconnu'})`,
       }, 'credit_transactions');
 
       const planPrice = PLAN_PRICES[plan] || 0;
       await safeInsert(supabaseAdmin, 'revenue_transactions', {
-        user_id: userId, email, plan_id: plan,
-        amount_fcfa: planPrice, source: 'chariow', order_id: orderId,
+        user_id: userId,
+        email,
+        plan_id: plan,
+        amount_fcfa: planPrice,
+        source: 'chariow',
+        order_id: orderId,
       }, 'revenue_transactions');
 
       console.log(`[chariow] ✅ Plan ${plan} activé pour user ${userId}`);
 
-      // ✅ NOUVEAU : crédite le parrain si ce user était parrainé
-      const { awarded: referralCreditsAwarded, referrerId } = await creditReferrerIfAny(
-        supabaseAdmin,
-        userId,
-        plan
-      );
+      const { awarded: referralCreditsAwarded, referrerId } =
+        await creditReferrerIfAny(supabaseAdmin, userId, plan);
 
       return NextResponse.json({
-        success: true, type: 'plan', userId, plan,
+        success: true,
+        type: 'plan',
+        userId,
+        plan,
         creditsAdded: monthlyCredits,
         expiresAt: expiresAt.toISOString(),
         revenue: planPrice,
@@ -389,10 +540,14 @@ export async function POST(req: NextRequest) {
       error: 'Produit non reconnu',
       productName,
     }, { status: 200 });
+
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Erreur inconnue';
     console.error('[chariow] ❌ Exception:', message);
-    return NextResponse.json({ success: false, error: message }, { status: 200 });
+    return NextResponse.json(
+      { success: false, error: message },
+      { status: 200 }
+    );
   }
 }
 

@@ -15,7 +15,8 @@ import { BackButton } from '@/components/ui/BackButton';
 import { StatRing } from '@/components/dashboard/StatRing';
 import { AdminRevenueChart } from '@/components/dashboard/AdminRevenueChart';
 
-const ADMIN_EMAILS = ['ecomdarrell@gmail.com', 'darrellkamga@gmail.com'];
+// ✅ Admin unique : ecomdarrell@gmail.com
+const ADMIN_EMAILS = ['ecomdarrell@gmail.com'];
 
 const PLAN_PRICES_XOF: Record<string, number> = {
   pro: 10000,
