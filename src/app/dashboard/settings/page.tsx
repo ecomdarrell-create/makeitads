@@ -9,6 +9,7 @@ import {
   Crown,
   KeyRound,
   LifeBuoy,
+  Megaphone,
   ShieldCheck,
   UserRound,
 } from 'lucide-react';
@@ -17,7 +18,8 @@ import { SettingsProfileForm } from '@/components/dashboard/SettingsProfileForm'
 import { ReferralCard } from '@/components/dashboard/ReferralCard';
 import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 
-const ADMIN_EMAILS = ['ecomdarrell@gmail.com', 'darrellkamga@gmail.com'];
+// ✅ Admin unique : ecomdarrell@gmail.com
+const ADMIN_EMAILS = ['ecomdarrell@gmail.com'];
 
 const planNames: Record<string, string> = {
   free: 'Démo',
@@ -146,25 +148,50 @@ export default async function SettingsPage() {
         </article>
       </section>
 
-      {/* ✅ SECTION ADMIN — visible UNIQUEMENT sur mobile ET pour les admins */}
+      {/* ✅ SECTION ADMIN — visible UNIQUEMENT pour ecomdarrell@gmail.com */}
       {isAdmin && (
-        <Link
-          href="/dashboard/admin"
-          className="md:hidden flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99]"
+        <section
+          aria-label="Administration"
+          className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3"
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#F97316] text-white shadow-sm">
-            <Crown className="h-4 w-4" />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-[13px] font-semibold text-amber-900">
-              Espace Admin
-            </p>
-            <p className="mt-0.5 text-[11px] text-amber-700">
-              Statistiques, utilisateurs, revenus
-            </p>
-          </div>
-          <ArrowUpRight className="h-4 w-4 shrink-0 text-amber-600" />
-        </Link>
+          {/* Espace Admin */}
+          <Link
+            href="/dashboard/admin"
+            className="flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#F97316] text-white shadow-sm sm:h-10 sm:w-10">
+              <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-amber-900 sm:text-sm">
+                Espace Admin
+              </p>
+              <p className="mt-0.5 text-[11px] text-amber-700 sm:text-xs">
+                Statistiques, utilisateurs, revenus
+              </p>
+            </div>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-amber-600" />
+          </Link>
+
+          {/* Annonces */}
+          <Link
+            href="/admin/announcements"
+            className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-3.5 shadow-sm transition-all hover:border-indigo-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-sm sm:h-10 sm:w-10">
+              <Megaphone className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-indigo-900 sm:text-sm">
+                Annonces
+              </p>
+              <p className="mt-0.5 text-[11px] text-indigo-700 sm:text-xs">
+                Publier des nouveautés aux utilisateurs
+              </p>
+            </div>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-indigo-600" />
+          </Link>
+        </section>
       )}
 
       {/* ── Profil ── */}

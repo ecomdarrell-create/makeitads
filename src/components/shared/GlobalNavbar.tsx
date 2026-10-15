@@ -4,10 +4,14 @@ import { useState, useEffect, useMemo } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
 import { createClient } from "@/lib/supabase/client";
 import { User, LogOut, Search, X, Mail } from "lucide-react";
 import { SiTelegram } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
+import { NotificationPanel } from "@/components/notifications/NotificationPanel";
+import { NotificationToaster } from "@/components/notifications/NotificationToaster";
 
 const navLinks = [
   { name: "Comment ça marche ?", href: "#how-it-works" },
@@ -53,7 +57,17 @@ export default function Navbar() {
   const [userName, setUserName] = useState("");
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [notifOpen, setNotifOpen] = useState(false);
   const { user, loading: authLoading } = useAuth();
+  const {
+    notifications,
+    unreadCount,
+    loading: notifLoading,
+    toasts,
+    dismissToast,
+    markAsRead,
+    markAllAsRead,
+  } = useNotifications();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -74,6 +88,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsMobileMenuOpen(false);
+    setNotifOpen(false);
   }, [pathname]);
 
   useEffect(() => {
@@ -84,6 +99,26 @@ export default function Navbar() {
       };
     }
   }, [isMobileMenuOpen]);
+
+  // Fermer le panneau notif au clic extérieur / Escape
+  useEffect(() => {
+    if (!notifOpen) return;
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (!target.closest("[data-notif-panel]") && !target.closest("[data-notif-bell]")) {
+        setNotifOpen(false);
+      }
+    };
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setNotifOpen(false);
+    };
+    window.addEventListener("mousedown", handleClick);
+    window.addEventListener("keydown", handleKey);
+    return () => {
+      window.removeEventListener("mousedown", handleClick);
+      window.removeEventListener("keydown", handleKey);
+    };
+  }, [notifOpen]);
 
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
@@ -147,6 +182,7 @@ export default function Navbar() {
     await supabase.auth.signOut();
     setUserName("");
     setIsMobileMenuOpen(false);
+    setNotifOpen(false);
     router.push("/");
     router.refresh();
   };
@@ -186,7 +222,7 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
-            {/* 🔍 Loupe — référence de taille */}
+            {/* 🔍 Loupe */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -195,6 +231,31 @@ export default function Navbar() {
             >
               <Search className="h-[20px] w-[20px] md:h-[22px] md:w-[22px]" strokeWidth={2.6} />
             </button>
+
+            {/* 🔔 Cloche — seulement si connecté */}
+            {user && (
+              <div data-notif-bell className="relative">
+                <NotificationBell
+                  unreadCount={unreadCount}
+                  isOpen={notifOpen}
+                  onClick={() => setNotifOpen((v) => !v)}
+                />
+                <AnimatePresence>
+                  {notifOpen && (
+                    <div data-notif-panel>
+                      <NotificationPanel
+                        notifications={notifications}
+                        unreadCount={unreadCount}
+                        loading={notifLoading}
+                        onClose={() => setNotifOpen(false)}
+                        onMarkAsRead={markAsRead}
+                        onMarkAllAsRead={markAllAsRead}
+                      />
+                    </div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
 
             <div className="hidden md:flex items-center gap-3 ml-1">
               {user ? (
@@ -232,7 +293,7 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* ✅ Burger : 3 points épais dans un cercle — MÊME TAILLE que la loupe */}
+            {/* ✅ Burger mobile */}
             <button
               type="button"
               onClick={() => setIsMobileMenuOpen((prev) => !prev)}
@@ -261,7 +322,6 @@ export default function Navbar() {
                     transition={{ duration: 0.15 }}
                     className="flex items-center justify-center"
                   >
-                    {/* Icône : 3 points remplis, gabarit calé sur la loupe */}
                     <DotsIcon className="h-[10px] w-[10px]" />
                   </motion.span>
                 )}
@@ -464,6 +524,15 @@ export default function Navbar() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* 🔔 Toasts en bas de l'écran */}
+      {user && (
+        <NotificationToaster
+          toasts={toasts}
+          onDismiss={dismissToast}
+          onRead={markAsRead}
+        />
+      )}
     </>
   );
 }
