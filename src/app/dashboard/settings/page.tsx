@@ -10,6 +10,7 @@ import {
   KeyRound,
   LifeBuoy,
   Megaphone,
+  MessageSquare,
   ShieldCheck,
   UserRound,
 } from 'lucide-react';
@@ -152,7 +153,7 @@ export default async function SettingsPage() {
       {isAdmin && (
         <section
           aria-label="Administration"
-          className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3"
+          className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3"
         >
           {/* Espace Admin */}
           <Link
@@ -190,6 +191,25 @@ export default async function SettingsPage() {
               </p>
             </div>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-indigo-600" />
+          </Link>
+
+          {/* Support client */}
+          <Link
+            href="/dashboard/admin/support"
+            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3.5 shadow-sm transition-all hover:border-emerald-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#10B981] to-[#0D9488] text-white shadow-sm sm:h-10 sm:w-10">
+              <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-emerald-900 sm:text-sm">
+                Support client
+              </p>
+              <p className="mt-0.5 text-[11px] text-emerald-700 sm:text-xs">
+                Répondre aux messages des utilisateurs
+              </p>
+            </div>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-emerald-600" />
           </Link>
         </section>
       )}
