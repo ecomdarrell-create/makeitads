@@ -1,13 +1,64 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 interface PremiumLoaderProps {
   fullScreen?: boolean;
   message?: string;
   size?: number;
+}
+
+function MakeItAdsLogo({ size }: { size: number }) {
+  return (
+    <svg
+      viewBox="0 0 100 100"
+      width={size}
+      height={size}
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <defs>
+        <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#6366F1" />
+          <stop offset="50%" stopColor="#7C7FF5" />
+          <stop offset="100%" stopColor="#A855F7" />
+        </linearGradient>
+        <linearGradient id="logo-gradient-right" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#7C7FF5" />
+          <stop offset="100%" stopColor="#C084FC" />
+        </linearGradient>
+        <filter id="logo-glow" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.5" result="blur" />
+          <feMerge>
+            <feMergeNode in="blur" />
+            <feMergeNode in="SourceGraphic" />
+          </feMerge>
+        </filter>
+      </defs>
+
+      <path
+        d="M 18 82 L 30 18 L 50 58"
+        stroke="url(#logo-gradient)"
+        strokeWidth="12"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        filter="url(#logo-glow)"
+      />
+      <path
+        d="M 50 58 L 70 18 L 82 82"
+        stroke="url(#logo-gradient-right)"
+        strokeWidth="12"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        fill="none"
+        filter="url(#logo-glow)"
+      />
+      <circle cx="50" cy="58" r="2.5" fill="url(#logo-gradient)" opacity="0.6" />
+    </svg>
+  );
 }
 
 export function PremiumLoader({
@@ -40,9 +91,8 @@ export function PremiumLoader({
     : 'flex flex-col items-center justify-center py-20 px-4';
 
   return (
-    <div className={wrapperClass}>
+    <div className={wrapperClass} role="status" aria-live="polite">
       <div className="relative" style={{ width: size, height: size }}>
-        {/* Ring SVG */}
         <svg
           width={size}
           height={size}
@@ -88,7 +138,6 @@ export function PremiumLoader({
           />
         </svg>
 
-        {/* Halo conique rotatif */}
         <motion.div
           className="absolute inset-2 rounded-full"
           style={{
@@ -100,22 +149,12 @@ export function PremiumLoader({
           aria-hidden="true"
         />
 
-        {/* ✅ TON LOGO au centre */}
         <div className="absolute inset-0 flex items-center justify-center">
           <motion.div
             animate={{ scale: [1, 1.06, 1] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            style={{ width: size * 0.45, height: size * 0.45 }}
-            className="relative"
           >
-            <Image
-              src="/images/logo-m.png"
-              alt="MakeItAds"
-              fill
-              className="object-contain"
-              sizes={`${Math.round(size * 0.45)}px`}
-              priority
-            />
+            <MakeItAdsLogo size={size * 0.42} />
           </motion.div>
         </div>
       </div>
