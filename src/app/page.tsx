@@ -24,7 +24,6 @@ import HeroSection from "@/components/HeroSection";
 import WhyChooseSection from "../components/WhyChooseSection";
 import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
-import SaaSChatbot from "@/components/shared/SaaSChatbot";
 
 import { createClient } from "@/lib/supabase/client";
 import { formatPlanPrice } from "@/config/pricing.config";
@@ -600,7 +599,6 @@ export default function LandingPage() {
       </section>
 
       <GlobalFooter />
-      <SaaSChatbot />
 
       <AnimatePresence>
         {showScrollTop && (
