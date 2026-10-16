@@ -31,7 +31,7 @@ export async function checkCredits(
 }
 
 // ======================================================
-// RÉSERVATION (le solde est la source de vérité)
+// RÉSERVATION — ATOMIQUE (évite la race condition)
 // ======================================================
 
 export async function reserveCredits(
@@ -43,38 +43,43 @@ export async function reserveCredits(
   const supabase = await createClient();
   const amount = amountOverride ?? CREDIT_COSTS[action];
 
-  // 1. Récupérer le solde actuel
-  const { data: profile, error: profileError } = await supabase
+  // ✅ 1. Récupérer le solde AVANT (pour log)
+  const { data: profileBefore, error: profileError } = await supabase
     .from('profiles')
     .select('credits_balance')
     .eq('id', userId)
     .single();
 
-  if (profileError || !profile) {
+  if (profileError || !profileBefore) {
     console.error('Erreur récupération profil:', profileError);
     return null;
   }
 
-  if (profile.credits_balance < amount) {
-    return null;
-  }
+  const balanceBefore = profileBefore.credits_balance;
 
-  const newBalance = profile.credits_balance - amount;
-
-  // 2. Débiter le solde — C'EST LA SEULE OPÉRATION CRITIQUE
-  const { data: updatedProfile, error: updateError } = await supabase
-    .from('profiles')
-    .update({ credits_balance: newBalance })
-    .eq('id', userId)
-    .select('credits_balance')
+  // ✅ 2. Déduction ATOMIQUE via RPC (empêche la race condition)
+  const { data: rpcResult, error: rpcError } = await supabase
+    .rpc('deduct_credits', {
+      p_user_id: userId,
+      p_amount: amount,
+    })
     .single();
 
-  if (updateError || !updatedProfile) {
-    console.error('Erreur mise à jour crédits:', updateError);
+  if (rpcError) {
+    console.error('Erreur RPC deduct_credits:', rpcError);
     return null;
   }
 
-  // 3. Enregistrer la transaction — FIRE AND FORGET (ne bloque pas)
+  const result = rpcResult as { new_balance: number; success: boolean } | null;
+
+  if (!result || !result.success) {
+    console.warn(`[credits] Solde insuffisant pour ${userId}`);
+    return null;
+  }
+
+  const newBalance = result.new_balance;
+
+  // 3. Enregistrer la transaction (fire and forget)
   const transactionType =
     action === 'DIAGNOSTIC_FLASH' ? 'generation_flash' : 'generation_complete';
 
@@ -91,7 +96,6 @@ export async function reserveCredits(
     .select()
     .single();
 
-  // Si la transaction échoue, on ne rembourse PAS — le solde est déjà débité
   if (!transaction) {
     console.warn('Transaction non enregistrée (mais solde bien débité)');
   }
@@ -99,7 +103,7 @@ export async function reserveCredits(
   return {
     transactionId: transaction?.id || 'no-transaction',
     reservedAmount: amount,
-    balanceBefore: profile.credits_balance,
+    balanceBefore,
   };
 }
 

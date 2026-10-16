@@ -7,7 +7,7 @@ import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2 } fr
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
-import { PlanId, normalizePlanId, PRICING_CONFIG } from '@/config/pricing.config';
+import { PlanId, normalizePlanId, PRICING_CONFIG, CREDIT_COSTS } from '@/config/pricing.config';
 import { Step1Company } from '@/components/generate/steps/Step1Company';
 import { Step2Offer } from '@/components/generate/steps/Step2Offer';
 import { Step3Audience } from '@/components/generate/steps/Step3Audience';
@@ -18,9 +18,12 @@ import { Step7Creative } from '@/components/generate/steps/Step7Creative';
 import { Step8Context } from '@/components/generate/steps/Step8Context';
 import { Summary } from '@/components/generate/Summary';
 import { LoadingGeneration } from '@/components/generate/LoadingGeneration';
+import { PreGenerationModal } from '@/components/generate/PreGenerationModal';
+import { PostFlashUpgradeModal } from '@/components/generate/PostFlashUpgradeModal';
 import { BackButton } from '@/components/ui/BackButton';
 
 const DRAFT_KEY = 'makeitads_draft';
+const FIRST_GEN_KEY = 'makeitads_first_generation_seen';
 
 export default function GeneratePage() {
   const router = useRouter();
@@ -37,13 +40,17 @@ export default function GeneratePage() {
   const [refreshingCredits, setRefreshingCredits] = useState(false);
   const [currency, setCurrency] = useState<string>('XOF');
 
+  const [showPreGeneration, setShowPreGeneration] = useState(false);
+  const [showPostFlash, setShowPostFlash] = useState(false);
+  const [lastStrategyId, setLastStrategyId] = useState<string>('');
+
   const totalSteps = 8;
 
   const isFree = currentPlan === 'free';
-  const flashAllowed = isFree;
-  const completeAllowed = true;
 
-  const generationCost = strategyType === 'complete' ? 5 : 1;
+  const generationCost = strategyType === 'complete'
+    ? CREDIT_COSTS.STRATEGIE_COMPLETE
+    : CREDIT_COSTS.DIAGNOSTIC_FLASH;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
 
   const creditsLoaded = creditsBalance !== null;
@@ -218,6 +225,21 @@ export default function GeneratePage() {
     else if (currentStep > 1) setCurrentStep(currentStep - 1);
   };
 
+  const handleOpenPreGeneration = () => {
+    const hasSeenFirst = localStorage.getItem(FIRST_GEN_KEY);
+    if (!hasSeenFirst) {
+      setShowPreGeneration(true);
+    } else {
+      handleGenerate();
+    }
+  };
+
+  const handleConfirmPreGeneration = () => {
+    localStorage.setItem(FIRST_GEN_KEY, '1');
+    setShowPreGeneration(false);
+    handleGenerate();
+  };
+
   const handleGenerate = async () => {
     if (!isFree && strategyType === 'flash') {
       setStrategyType('complete');
@@ -260,7 +282,21 @@ export default function GeneratePage() {
       if (response.ok) {
         localStorage.removeItem(DRAFT_KEY);
         setHasDraft(false);
-        router.push(`/dashboard/strategies/${data.strategyId}`);
+
+        const newBalance = typeof data.creditsRemaining === 'number'
+          ? data.creditsRemaining
+          : Math.max(0, safeBalance - generationCost);
+
+        if (
+          strategyType === 'flash' &&
+          newBalance > 0 &&
+          newBalance < CREDIT_COSTS.STRATEGIE_COMPLETE
+        ) {
+          setLastStrategyId(data.strategyId);
+          setShowPostFlash(true);
+        } else {
+          router.push(`/dashboard/strategies/${data.strategyId}`);
+        }
       } else {
         let errorMsg = data.error || 'Erreur lors de la génération';
 
@@ -296,7 +332,7 @@ export default function GeneratePage() {
           formData={formData}
           creditsBalance={safeBalance}
           generationCost={generationCost}
-          onGenerate={handleGenerate}
+          onGenerate={handleOpenPreGeneration}
           isGenerating={isGenerating}
           currency={currency}
         />
@@ -376,21 +412,12 @@ export default function GeneratePage() {
             )}
 
             <div className="min-w-0 flex-1">
-              <p
-                className={`text-xs font-semibold ${
-                  alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'
-                }`}
-              >
+              <p className={`text-xs font-semibold ${alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'}`}>
                 {alertLevel === 'exhausted' && 'Vous avez épuisé vos crédits ce mois-ci'}
-                {alertLevel === 'critical' &&
-                  `Il vous reste seulement ${safeBalance} crédit${safeBalance > 1 ? 's' : ''}`}
+                {alertLevel === 'critical' && `Il vous reste seulement ${safeBalance} crédit${safeBalance > 1 ? 's' : ''}`}
                 {alertLevel === 'attention' && 'Vous approchez de la fin de vos crédits'}
               </p>
-              <p
-                className={`mt-0.5 text-[11px] leading-relaxed ${
-                  alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'
-                }`}
-              >
+              <p className={`mt-0.5 text-[11px] leading-relaxed ${alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'}`}>
                 {alertLevel === 'exhausted'
                   ? 'Passez à un plan supérieur ou attendez le renouvellement mensuel.'
                   : `Il vous reste ${creditsPercent}% de vos crédits mensuels.`}
@@ -457,7 +484,7 @@ export default function GeneratePage() {
                   }`}
                 >
                   Diagnostic Flash
-                  <span className="ml-1 text-[10px] opacity-70">1 crédit</span>
+                  <span className="ml-1 text-[10px] opacity-70">{CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits</span>
                 </button>
                 <button
                   type="button"
@@ -469,7 +496,7 @@ export default function GeneratePage() {
                   }`}
                 >
                   Stratégie complète
-                  <span className="ml-1 text-[10px] opacity-70">5 crédits</span>
+                  <span className="ml-1 text-[10px] opacity-70">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
                 </button>
               </div>
             ) : (
@@ -484,7 +511,7 @@ export default function GeneratePage() {
                     </p>
                   </div>
                   <span className="text-[11px] font-medium text-[#6366F1]">
-                    5 crédits
+                    {CREDIT_COSTS.STRATEGIE_COMPLETE} crédits
                   </span>
                 </div>
               </div>
@@ -524,6 +551,25 @@ export default function GeneratePage() {
           </div>
         )}
       </div>
+
+      <PreGenerationModal
+        isOpen={showPreGeneration}
+        onClose={() => setShowPreGeneration(false)}
+        onContinue={handleConfirmPreGeneration}
+        plan={currentPlan}
+        strategyType={strategyType}
+        creditsBalance={safeBalance}
+      />
+
+      <PostFlashUpgradeModal
+        isOpen={showPostFlash}
+        onClose={() => {
+          setShowPostFlash(false);
+          router.push(`/dashboard/strategies/${lastStrategyId}`);
+        }}
+        remainingCredits={safeBalance - generationCost}
+        strategyId={lastStrategyId}
+      />
     </div>
   );
 }

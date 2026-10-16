@@ -56,8 +56,12 @@ export interface PricingPlan {
   cta: string;
 }
 
+// ✅ Coûts en crédits ajustés
+// Diagnostic Flash = 4 crédits → le user Démo (10 crédits) peut en faire 2,
+// puis il lui reste 2 crédits → insuffisant pour une stratégie complète (10)
+// → On le pousse vers l'upgrade sans le décourager.
 export const CREDIT_COSTS = {
-  DIAGNOSTIC_FLASH: 5,
+  DIAGNOSTIC_FLASH: 4,
   STRATEGIE_COMPLETE: 10,
   ANALYSE_CONCURRENTIELLE: 3,
   ANALYSE_PUBLICITAIRE: 2,
@@ -116,7 +120,7 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
     stripePriceId: null,
     features: [
       '10 crédits de bienvenue (offre unique)',
-      '2 Diagnostics Flash',
+      '1 Diagnostic Flash inclus',
       'Aperçu rapide de votre activité',
       'Support communautaire',
     ],

@@ -42,7 +42,6 @@ const partnerLogos = [
   { name: "Pinterest", icon: SiPinterest, color: "#E60023" },
 ];
 
-// ✅ Position de l'image par étape (object-position)
 const howItWorksSteps = [
   { number: "01", title: "Créez votre compte", description: "Inscrivez-vous gratuitement et accédez immédiatement à votre espace personnel sécurisé.", image: "/images/process/step-1-signup.jpg", position: "35% center" },
   { number: "02", title: "Décrivez votre business", description: "Notre wizard intelligent vous guide à travers 8 questions clés sur votre entreprise.", image: "/images/process/step-2-wizard.jpg", position: "center center" },
@@ -59,13 +58,12 @@ const faqData = [
   { question: "Est-ce adapté au marché africain ?", answer: "Oui, c'est notre ADN. Calibré pour les budgets en FCFA et les leviers de confiance locaux." },
 ];
 
-// ✅ Les prix sont maintenant calculés dynamiquement selon la devise du user
 const pricingPlans = [
   {
     id: "demo",
     name: "MakeItAds Démo",
     isFree: true,
-    features: ["10 crédits de bienvenue (offre unique)", "2 Diagnostics Flash", "Aperçu rapide de votre activité", "Support communautaire"],
+    features: ["10 crédits de bienvenue (offre unique)", "1 Diagnostic Flash inclus", "Aperçu rapide de votre activité", "Support communautaire"],
     popular: false,
     ctaText: "Commencer",
     link: "/dashboard",
@@ -185,7 +183,6 @@ function PricingCard({
 }) {
   const isWide = plan.id === "premium" || plan.id === "elite";
 
-  // ✅ Prix dynamique selon la devise (Démo → "Gratuit")
   const displayPrice = plan.isFree
     ? "Gratuit"
     : formatPlanPrice(
@@ -257,7 +254,6 @@ export default function LandingPage() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // ✅ Charge la devise du user connecté (silencieux si anonyme)
   useEffect(() => {
     const loadCurrency = async () => {
       try {
@@ -325,11 +321,14 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <TrustpilotCarousel
-        reviews={section1Reviews}
-        title={<span className="block text-left text-xl md:text-3xl font-semibold leading-tight">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span></span>}
-        footerNote="Note de 4.8/5 sur 312 avis."
-      />
+      {/* ✅ SECTION AVIS — avec id pour redirection depuis le menu burger */}
+      <section id="avis" className="scroll-mt-24">
+        <TrustpilotCarousel
+          reviews={section1Reviews}
+          title={<span className="block text-left text-xl md:text-3xl font-semibold leading-tight">Ne nous croyez pas, <span className="text-[#6366F1]">Croyez-les</span></span>}
+          footerNote="Note de 4.8/5 sur 312 avis."
+        />
+      </section>
 
       <section id="how-it-works" className="relative z-10 bg-white py-12 md:py-20 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
@@ -394,7 +393,7 @@ export default function LandingPage() {
 
       <WhyChooseSection />
 
-      {/* ── Section statistiques — fond clair ── */}
+      {/* ── Section statistiques ── */}
       <section className="relative z-10 py-16 md:py-24 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#EEF2FF] overflow-hidden">
         <div className="pointer-events-none absolute -top-40 left-1/4 h-80 w-80 rounded-full bg-[#6366F1]/15 blur-[120px]" />
         <div className="pointer-events-none absolute -bottom-40 right-1/4 h-80 w-80 rounded-full bg-[#8B5CF6]/15 blur-[120px]" />

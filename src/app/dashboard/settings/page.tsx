@@ -9,6 +9,7 @@ import {
   Crown,
   KeyRound,
   LifeBuoy,
+  Mail,
   Megaphone,
   MessageSquare,
   ShieldCheck,
@@ -17,9 +18,9 @@ import {
 import { normalizePlanId } from '@/config/pricing.config';
 import { SettingsProfileForm } from '@/components/dashboard/SettingsProfileForm';
 import { ReferralCard } from '@/components/dashboard/ReferralCard';
+import { DangerZone } from '@/components/dashboard/DangerZone';
 import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 
-// ✅ Admin unique : ecomdarrell@gmail.com
 const ADMIN_EMAILS = ['ecomdarrell@gmail.com'];
 
 const planNames: Record<string, string> = {
@@ -54,7 +55,6 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect('/login');
 
-  // ✅ Détection admin
   const isAdmin = user.email
     ? ADMIN_EMAILS.includes(user.email.toLowerCase().trim())
     : false;
@@ -81,35 +81,25 @@ export default async function SettingsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4 px-3 py-5 sm:space-y-6 sm:px-6 sm:py-8">
 
-      {/* ── En-tête ── */}
       <header>
         <p className="mb-0.5 text-[11px] font-medium text-indigo-600 sm:mb-1 sm:text-xs">
           Compte & préférences
         </p>
-        <h1 className="text-lg font-semibold text-slate-900 sm:text-2xl">
-          Paramètres
-        </h1>
+        <h1 className="text-lg font-semibold text-slate-900 sm:text-2xl">Paramètres</h1>
         <p className="mt-1.5 max-w-2xl text-[12px] leading-relaxed text-slate-500 sm:mt-2 sm:text-sm">
           Gérez les informations de votre compte, votre formule et vos préférences MakeItAds.
         </p>
       </header>
 
-      {/* ── Résumé ── */}
-      <section
-        aria-label="Résumé du compte"
-        className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3"
-      >
+      {/* Résumé */}
+      <section aria-label="Résumé du compte" className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
         <article className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3.5 shadow-sm sm:gap-4 sm:rounded-2xl sm:p-4">
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-indigo-600 sm:h-10 sm:w-10">
             <UserRound className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">
-              Compte
-            </p>
-            <p className="truncate text-[13px] font-semibold text-slate-900 sm:text-sm">
-              {displayName}
-            </p>
+            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">Compte</p>
+            <p className="truncate text-[13px] font-semibold text-slate-900 sm:text-sm">{displayName}</p>
           </div>
         </article>
 
@@ -118,9 +108,7 @@ export default async function SettingsPage() {
             <CreditCard className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
           <div className="min-w-0">
-            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">
-              Solde
-            </p>
+            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">Solde</p>
             <p className="text-[13px] font-semibold text-slate-900 sm:text-sm">
               {profile?.credits_balance ?? 0} crédits
             </p>
@@ -132,16 +120,10 @@ export default async function SettingsPage() {
             <BadgeCheck className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">
-              Formule
-            </p>
+            <p className="text-[10px] font-medium text-slate-500 sm:text-[11px]">Formule</p>
             <div className="flex items-center gap-2">
-              <p className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-                {planNames[plan]}
-              </p>
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-medium ring-1 ring-inset sm:text-[10px] ${planColors[plan]}`}
-              >
+              <p className="text-[13px] font-semibold text-slate-900 sm:text-sm">{planNames[plan]}</p>
+              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-medium ring-1 ring-inset sm:text-[10px] ${planColors[plan]}`}>
                 {currencySymbol}
               </span>
             </div>
@@ -149,79 +131,50 @@ export default async function SettingsPage() {
         </article>
       </section>
 
-      {/* ✅ SECTION ADMIN — visible UNIQUEMENT pour ecomdarrell@gmail.com */}
+      {/* Section admin */}
       {isAdmin && (
-        <section
-          aria-label="Administration"
-          className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3"
-        >
-          {/* Espace Admin */}
-          <Link
-            href="/dashboard/admin"
-            className="flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
-          >
+        <section aria-label="Administration" className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
+          <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#F97316] text-white shadow-sm sm:h-10 sm:w-10">
               <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-amber-900 sm:text-sm">
-                Espace Admin
-              </p>
-              <p className="mt-0.5 text-[11px] text-amber-700 sm:text-xs">
-                Statistiques, utilisateurs, revenus
-              </p>
+              <p className="text-[13px] font-semibold text-amber-900 sm:text-sm">Espace Admin</p>
+              <p className="mt-0.5 text-[11px] text-amber-700 sm:text-xs">Statistiques, utilisateurs, revenus</p>
             </div>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-amber-600" />
           </Link>
 
-          {/* Annonces */}
-          <Link
-            href="/admin/announcements"
-            className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-3.5 shadow-sm transition-all hover:border-indigo-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
-          >
+          <Link href="/admin/announcements" className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-3.5 shadow-sm transition-all hover:border-indigo-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-sm sm:h-10 sm:w-10">
               <Megaphone className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-indigo-900 sm:text-sm">
-                Annonces
-              </p>
-              <p className="mt-0.5 text-[11px] text-indigo-700 sm:text-xs">
-                Publier des nouveautés aux utilisateurs
-              </p>
+              <p className="text-[13px] font-semibold text-indigo-900 sm:text-sm">Annonces</p>
+              <p className="mt-0.5 text-[11px] text-indigo-700 sm:text-xs">Publier des nouveautés</p>
             </div>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-indigo-600" />
           </Link>
 
-          {/* Support client */}
-          <Link
-            href="/dashboard/admin/support"
-            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3.5 shadow-sm transition-all hover:border-emerald-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
-          >
+          <Link href="/dashboard/admin/support" className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3.5 shadow-sm transition-all hover:border-emerald-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#10B981] to-[#0D9488] text-white shadow-sm sm:h-10 sm:w-10">
               <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-[13px] font-semibold text-emerald-900 sm:text-sm">
-                Support client
-              </p>
-              <p className="mt-0.5 text-[11px] text-emerald-700 sm:text-xs">
-                Répondre aux messages des utilisateurs
-              </p>
+              <p className="text-[13px] font-semibold text-emerald-900 sm:text-sm">Support client</p>
+              <p className="mt-0.5 text-[11px] text-emerald-700 sm:text-xs">Répondre aux messages</p>
             </div>
             <ArrowUpRight className="h-4 w-4 shrink-0 text-emerald-600" />
           </Link>
         </section>
       )}
 
-      {/* ── Profil ── */}
+      {/* Profil */}
       <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm sm:rounded-2xl">
         <div className="flex items-start gap-2.5 border-b border-slate-50 px-4 py-3.5 sm:gap-3 sm:px-5 sm:py-4">
           <UserRound className="mt-0.5 h-4 w-4 text-indigo-600 sm:h-5 sm:w-5" />
           <div>
-            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-              Profil professionnel
-            </h2>
+            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">Profil professionnel</h2>
             <p className="mt-0.5 text-[11px] text-slate-500 sm:mt-1 sm:text-xs">
               Ces informations orientent le contexte de vos recommandations.
             </p>
@@ -237,17 +190,13 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* ── Formule & facturation ── */}
+      {/* Formule & facturation */}
       <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm sm:rounded-2xl">
         <div className="flex items-start gap-2.5 border-b border-slate-50 px-4 py-3.5 sm:gap-3 sm:px-5 sm:py-4">
           <CreditCard className="mt-0.5 h-4 w-4 text-indigo-600 sm:h-5 sm:w-5" />
           <div>
-            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-              Formule & facturation
-            </h2>
-            <p className="mt-0.5 text-[11px] text-slate-500 sm:mt-1 sm:text-xs">
-              Détails de votre abonnement en cours.
-            </p>
+            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">Formule & facturation</h2>
+            <p className="mt-0.5 text-[11px] text-slate-500 sm:mt-1 sm:text-xs">Détails de votre abonnement en cours.</p>
           </div>
         </div>
 
@@ -255,21 +204,15 @@ export default async function SettingsPage() {
           <dl className="space-y-3">
             <div className="flex items-center justify-between gap-3">
               <dt className="text-[11px] text-slate-500 sm:text-xs">Plan actuel</dt>
-              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">
-                {planNames[plan]}
-              </dd>
+              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">{planNames[plan]}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-[11px] text-slate-500 sm:text-xs">Crédits disponibles</dt>
-              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">
-                {profile?.credits_balance ?? 0}
-              </dd>
+              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">{profile?.credits_balance ?? 0}</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-[11px] text-slate-500 sm:text-xs">Devise</dt>
-              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">
-                {currency} ({currencySymbol})
-              </dd>
+              <dd className="text-[12px] font-semibold text-slate-900 sm:text-sm">{currency} ({currencySymbol})</dd>
             </div>
             <div className="flex items-center justify-between gap-3">
               <dt className="text-[11px] text-slate-500 sm:text-xs">Date d&apos;expiration</dt>
@@ -279,10 +222,10 @@ export default async function SettingsPage() {
                     <CalendarClock className="h-3 w-3 text-slate-400 sm:h-3.5 sm:w-3.5" />
                     {formatDate(expiresAt)}
                   </>
+                ) : isDemo ? (
+                  <span className="text-slate-500">Formule gratuite (sans limite)</span>
                 ) : (
-                  <span className="text-slate-400">
-                    {isDemo ? 'Démo (sans expiration)' : '—'}
-                  </span>
+                  <span className="text-slate-400">Non définie</span>
                 )}
               </dd>
             </div>
@@ -306,7 +249,7 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* ── Sécurité + Parrainage ── */}
+      {/* Sécurité + Parrainage */}
       <section className="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <article className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-5">
           <div className="flex items-start gap-2.5 sm:gap-3">
@@ -314,12 +257,8 @@ export default async function SettingsPage() {
               <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-                Sécurité du compte
-              </h2>
-              <p className="mt-0.5 break-all text-[11px] text-slate-500 sm:mt-1 sm:text-xs">
-                {user.email}
-              </p>
+              <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">Sécurité du compte</h2>
+              <p className="mt-0.5 break-all text-[11px] text-slate-500 sm:mt-1 sm:text-xs">{user.email}</p>
               <p className="mt-2 text-[10px] leading-relaxed text-slate-500 sm:mt-3 sm:text-[11px]">
                 L&apos;adresse e-mail sert à la connexion. Utilisez le lien sécurisé pour renouveler votre mot de passe.
               </p>
@@ -334,36 +273,33 @@ export default async function SettingsPage() {
           </div>
         </article>
 
-        <ReferralCard
-          code={profile?.referral_code || null}
-          count={profile?.referral_count ?? 0}
-        />
+        <ReferralCard code={profile?.referral_code || null} count={profile?.referral_count ?? 0} />
       </section>
 
-      {/* ── Support ── */}
+      {/* Support — email au lieu de Telegram */}
       <section className="flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-2xl sm:p-5">
         <div className="flex items-start gap-2.5 sm:gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm sm:h-10 sm:w-10">
             <LifeBuoy className="h-4 w-4 sm:h-5 sm:w-5" />
           </span>
           <div>
-            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
-              Besoin d&apos;assistance ?
-            </h2>
+            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">Besoin d&apos;assistance ?</h2>
             <p className="mt-0.5 text-[11px] text-slate-600 sm:mt-1 sm:text-xs">
               Notre équipe peut vous aider sur le compte, les crédits et les paiements.
             </p>
           </div>
         </div>
         <a
-          href="https://t.me/MakeitAds_CEO"
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex min-h-9 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-white px-4 text-[11px] font-medium text-slate-700 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 sm:min-h-10 sm:px-5 sm:text-xs"
+          href="mailto:support@makeitads.pro"
+          className="inline-flex min-h-9 shrink-0 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-4 text-[11px] font-medium text-slate-700 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 sm:min-h-10 sm:px-5 sm:text-xs"
         >
-          Contacter le support
+          <Mail className="h-3.5 w-3.5" />
+          Écrire à l&apos;équipe
         </a>
       </section>
+
+      {/* 🚨 Zone de danger — en bas de page */}
+      <DangerZone />
     </div>
   );
 }

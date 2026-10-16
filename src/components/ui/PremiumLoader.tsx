@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 
 interface PremiumLoaderProps {
@@ -16,14 +17,11 @@ export function PremiumLoader({
 }: PremiumLoaderProps) {
   const [progress, setProgress] = useState(0);
 
-  // ✅ Progression intelligente : rapide au début, ralentit vers 95%
-  // → l'utilisateur a l'impression que ça charge vite
   useEffect(() => {
     let current = 0;
     const interval = setInterval(() => {
       const remaining = 95 - current;
       if (remaining <= 0) return;
-      // Easing exponentiel : plus on approche de 95, plus c'est lent
       const step = Math.max(0.3, remaining * 0.075);
       current = Math.min(95, current + step);
       setProgress(current);
@@ -43,7 +41,6 @@ export function PremiumLoader({
 
   return (
     <div className={wrapperClass}>
-      {/* Ring + icon container */}
       <div className="relative" style={{ width: size, height: size }}>
         {/* Ring SVG */}
         <svg
@@ -68,7 +65,6 @@ export function PremiumLoader({
             </filter>
           </defs>
 
-          {/* Fond du ring (gris léger) */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -78,7 +74,6 @@ export function PremiumLoader({
             strokeWidth={strokeWidth}
           />
 
-          {/* Ring de progression (gradient) */}
           <circle
             cx={size / 2}
             cy={size / 2}
@@ -93,7 +88,7 @@ export function PremiumLoader({
           />
         </svg>
 
-        {/* Halo lumineux rotatif */}
+        {/* Halo conique rotatif */}
         <motion.div
           className="absolute inset-2 rounded-full"
           style={{
@@ -105,35 +100,26 @@ export function PremiumLoader({
           aria-hidden="true"
         />
 
-        {/* Logo M au centre */}
+        {/* ✅ TON LOGO au centre */}
         <div className="absolute inset-0 flex items-center justify-center">
-          <motion.svg
-            viewBox="0 0 40 40"
-            width={size * 0.42}
-            height={size * 0.42}
+          <motion.div
             animate={{ scale: [1, 1.06, 1] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-            aria-hidden="true"
+            style={{ width: size * 0.45, height: size * 0.45 }}
+            className="relative"
           >
-            <defs>
-              <linearGradient id="logo-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6366F1" />
-                <stop offset="100%" stopColor="#8B5CF6" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M 8 30 L 8 12 L 20 24 L 32 12 L 32 30"
-              stroke="url(#logo-gradient)"
-              strokeWidth="4.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              fill="none"
+            <Image
+              src="/images/logo-m.png"
+              alt="MakeItAds"
+              fill
+              className="object-contain"
+              sizes={`${Math.round(size * 0.45)}px`}
+              priority
             />
-          </motion.svg>
+          </motion.div>
         </div>
       </div>
 
-      {/* Pourcentage sous le ring */}
       <div className="mt-5 flex items-baseline gap-1">
         <span
           className="text-3xl font-bold text-slate-900 tabular-nums sm:text-4xl"
@@ -144,7 +130,6 @@ export function PremiumLoader({
         <span className="text-lg font-semibold text-slate-400 sm:text-xl">%</span>
       </div>
 
-      {/* Message optionnel */}
       {message && (
         <motion.p
           initial={{ opacity: 0, y: 4 }}
@@ -156,7 +141,6 @@ export function PremiumLoader({
         </motion.p>
       )}
 
-      {/* Mention discrète */}
       <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-300 sm:text-[11px]">
         MakeItAds
       </p>

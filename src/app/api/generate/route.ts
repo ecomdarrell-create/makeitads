@@ -3,11 +3,9 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '@/lib/supabase/server';
 import { generateStrategy, getSystemPrompt, getSchema, DEFAULT_AI_CONFIG, type PlanTier } from '@/lib/ai/provider';
 import { reserveCredits, confirmReservation, refundCredits, CREDIT_COSTS } from '@/lib/credits/manager';
-import { normalizePlanId, PRICING_CONFIG, type PlanId } from '@/config/pricing.config';
+import { normalizePlanId, type PlanId } from '@/config/pricing.config';
 import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 import { ensureUserProfile } from '@/lib/profiles/ensure-profile';
-
-const ADMIN_EMAILS = ['ecomdarrell@gmail.com', 'darrellkamga@gmail.com'];
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,10 +13,9 @@ export async function POST(req: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) return NextResponse.json({ error: 'Non authentifié' }, { status: 401 });
 
-    const isAdmin = user.email ? ADMIN_EMAILS.includes(user.email.toLowerCase().trim()) : false;
     const profile = await ensureUserProfile(user);
-    const effectivePlan: PlanTier = isAdmin ? 'enterprise' : (normalizePlanId(profile?.plan) as PlanTier);
-    let creditsBalance = isAdmin ? 9999 : profile?.credits_balance || 0;
+    const effectivePlan: PlanTier = normalizePlanId(profile?.plan) as PlanTier;
+    let creditsBalance = profile?.credits_balance || 0;
 
     // ✅ Devise du user (fallback XOF)
     const userCurrencyCode = profile?.currency || 'XOF';
@@ -27,15 +24,11 @@ export async function POST(req: NextRequest) {
 
     const userFirstName = profile?.first_name || user.email?.split('@')[0] || 'toi';
 
-    console.log(`[generate] User=${user.email} Admin=${isAdmin} Plan=${effectivePlan} Credits=${creditsBalance} Currency=${userCurrency} (${userCurrencySymbol})`);
+    console.log(`[generate] User=${user.email} Plan=${effectivePlan} Credits=${creditsBalance} Currency=${userCurrency} (${userCurrencySymbol})`);
 
-    if (!isAdmin && effectivePlan !== 'free' && creditsBalance === 0) {
-      const planCredits = PRICING_CONFIG[effectivePlan as PlanId]?.monthlyCredits || 0;
-      if (planCredits > 0) {
-        await supabase.from('profiles').update({ credits_balance: planCredits, updated_at: new Date().toISOString() }).eq('id', user.id);
-        creditsBalance = planCredits;
-      }
-    }
+    // ⚠️ BLOC AUTO-RECHARGE SUPPRIMÉ (était une faille)
+    // L'ancien code remettait automatiquement les crédits dès que le solde tombait à 0.
+    // → À présent les crédits ne sont renouvelés QUE via le cron mensuel.
 
     const { strategyType, formData } = await req.json();
     if (!['flash', 'complete'].includes(strategyType) || !formData || typeof formData !== 'object') {
@@ -61,7 +54,8 @@ export async function POST(req: NextRequest) {
     const creditAction = strategyType === 'complete' ? 'STRATEGIE_COMPLETE' : 'DIAGNOSTIC_FLASH';
     const creditCost = CREDIT_COSTS[creditAction];
 
-    if (!isAdmin && creditsBalance < creditCost) {
+    // ✅ Vérif du solde AVANT réservation
+    if (creditsBalance < creditCost) {
       return NextResponse.json({
         error: `Crédits insuffisants. Il vous reste ${creditsBalance} crédit${creditsBalance > 1 ? 's' : ''} mais cette génération en coûte ${creditCost}.`,
         creditsBalance,
@@ -82,10 +76,10 @@ export async function POST(req: NextRequest) {
 
     const generationId = randomUUID();
 
-    let reservation = null;
-    if (!isAdmin) {
-      reservation = await reserveCredits(user.id, creditAction, undefined, creditCost);
-      if (!reservation) return NextResponse.json({ error: 'Erreur de réservation des crédits' }, { status: 500 });
+    // ✅ Réservation ATOMIQUE des crédits
+    const reservation = await reserveCredits(user.id, creditAction, undefined, creditCost);
+    if (!reservation) {
+      return NextResponse.json({ error: 'Erreur de réservation des crédits (solde insuffisant ?)' }, { status: 402 });
     }
 
     try {
@@ -124,7 +118,7 @@ export async function POST(req: NextRequest) {
           type: strategyType,
           platform: safePlatform,
           status: 'completed',
-          credits_cost: isAdmin ? 0 : creditCost,
+          credits_cost: creditCost,
           data: aiResult,
         })
         .select()
@@ -132,10 +126,10 @@ export async function POST(req: NextRequest) {
 
       if (strategyError || !strategy) throw new Error(`Erreur sauvegarde: ${strategyError?.message || 'aucune'}`);
 
-      if (!isAdmin && reservation) await confirmReservation(user.id, reservation.transactionId, strategy.id);
+      await confirmReservation(user.id, reservation.transactionId, strategy.id);
 
-      const finalBalance = isAdmin ? 9999 : creditsBalance - creditCost;
-      console.log(`[generate] SUCCESS — Balance: ${finalBalance}`);
+      const finalBalance = creditsBalance - creditCost;
+      console.log(`[generate] SUCCESS — Balance: ${creditsBalance} → ${finalBalance}`);
 
       return NextResponse.json({
         success: true,
@@ -146,7 +140,7 @@ export async function POST(req: NextRequest) {
       });
     } catch (aiError) {
       const message = aiError instanceof Error ? aiError.message : 'Erreur inconnue';
-      if (!isAdmin && reservation) await refundCredits(user.id, creditCost, 'Génération échouée');
+      await refundCredits(user.id, creditCost, 'Génération échouée');
       return NextResponse.json({ error: message }, { status: 500 });
     }
   } catch (error) {
