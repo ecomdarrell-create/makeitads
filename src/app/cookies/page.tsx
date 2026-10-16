@@ -112,8 +112,7 @@ En cas de changement important, la date de mise à jour sera modifiée et une no
     id: '10',
     title: 'Nous contacter',
     content: `Pour toute question sur cette politique :
-Par email : support@makeitads.com
-Par Telegram : https://t.me/MakeitAds_CEO
+Par email : support@makeitads.pro
 Nous répondons sous 30 jours.`,
   },
 ];

@@ -72,9 +72,7 @@ export default function ResourcesPage() {
               Notre équipe répond rapidement pour vous aider à lancer votre première stratégie ou à corriger un point précis.
             </p>
             <a
-              href="https://t.me/MakeitAds_CEO"
-              target="_blank"
-              rel="noreferrer"
+              href="mailto:support@makeitads.pro"
               className="inline-flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 text-[11px] sm:text-xs font-medium text-white bg-[#6366F1] rounded-lg hover:bg-[#5558e6] transition-colors"
             >
               Contacter le support
@@ -156,7 +154,7 @@ export default function ResourcesPage() {
         <ul className="space-y-1.5 sm:space-y-2 text-[11px] sm:text-xs text-gray-600 leading-relaxed">
           <li>• Les diagnostics flash sont idéaux pour une première prise de température rapide.</li>
           <li>• Les stratégies complètes offrent un plan plus détaillé, orienté croissance et conversion.</li>
-          <li>• Le support est disponible directement via Telegram pour une réponse rapide et personnalisée.</li>
+          <li>• Le support est disponible par email à <a href="mailto:support@makeitads.pro" className="text-[#6366F1] hover:underline font-medium">support@makeitads.pro</a> pour une réponse rapide et personnalisée.</li>
         </ul>
       </div>
     </div>

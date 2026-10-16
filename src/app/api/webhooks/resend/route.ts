@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
+const ADMIN_EMAIL = 'ecomdarrell@gmail.com';
+
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -68,7 +70,6 @@ async function fetchReceivedEmail(emailId: string): Promise<any> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error('RESEND_API_KEY manquante');
 
-  // Endpoint officiel Resend pour récupérer un email entrant
   const url = `https://api.resend.com/emails/receiving/${emailId}`;
 
   console.log(`[resend-inbound] Fetch: ${url}`);
@@ -93,6 +94,82 @@ async function fetchReceivedEmail(emailId: string): Promise<any> {
     return JSON.parse(text);
   } catch {
     throw new Error('Resend API returned invalid JSON');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
+// NOTIFICATION ADMIN (nouveau message reçu)
+// ─────────────────────────────────────────────────────────────
+async function notifyAdminNewSupportMessage(
+  supabaseAdmin: any,
+  params: {
+    threadId: string;
+    messageId: string;
+    fromEmail: string;
+    fromName: string | null;
+    subject: string;
+    bodyText: string;
+  }
+): Promise<void> {
+  try {
+    // 1) Trouve l'user_id de l'admin
+    const { data: adminProfile } = await supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .ilike('email', ADMIN_EMAIL)
+      .maybeSingle();
+
+    if (!adminProfile?.id) {
+      console.warn('[resend-inbound] ⚠️ Profil admin introuvable — pas de notif');
+      return;
+    }
+
+    // 2) Prépare le contenu de la notif
+    const senderLabel = params.fromName || params.fromEmail;
+    const title = `📩 Nouveau message de ${senderLabel}`;
+
+    // Message court : sujet + début du corps
+    const previewBody = (params.bodyText || '').replace(/\s+/g, ' ').trim();
+    const preview = previewBody.length > 140
+      ? previewBody.slice(0, 140) + '…'
+      : previewBody;
+
+    const message = preview
+      ? `${params.subject} — ${preview}`
+      : params.subject;
+
+    // 3) Insert avec idempotence (event_key unique par message)
+    const { error } = await supabaseAdmin.from('notifications').insert({
+      user_id: adminProfile.id,
+      event_key: `support_msg_${params.messageId}`,
+      type: 'support_message',
+      category: 'system',
+      title,
+      message,
+      action_label: 'Lire et répondre',
+      action_path: `/dashboard/admin/support/${params.threadId}`,
+      metadata: {
+        thread_id: params.threadId,
+        from_email: params.fromEmail,
+        from_name: params.fromName,
+      },
+    });
+
+    if (error) {
+      // 23505 = doublon → pas grave, on ignore
+      if (error.code === '23505') {
+        console.log('[resend-inbound] ⏭️ Notif admin déjà créée');
+        return;
+      }
+      console.error('[resend-inbound] ⚠️ Notif admin échouée:', error.message);
+      return;
+    }
+
+    console.log(`[resend-inbound] 🔔 Notif admin créée pour ${params.fromEmail}`);
+  } catch (err) {
+    // On ne bloque JAMAIS le webhook pour une notif ratée
+    const msg = err instanceof Error ? err.message : 'Erreur inconnue';
+    console.error('[resend-inbound] ⚠️ Exception notif admin:', msg);
   }
 }
 
@@ -231,6 +308,16 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`[resend-inbound] ✅ Email de ${fromEmail} enregistré (sujet: ${subject})`);
+
+    // 🔔 Crée la notif pour l'admin (n'échoue jamais le webhook)
+    await notifyAdminNewSupportMessage(supabaseAdmin, {
+      threadId,
+      messageId,
+      fromEmail,
+      fromName,
+      subject,
+      bodyText,
+    });
 
     return NextResponse.json({ success: true, threadId }, { status: 200 });
   } catch (err) {

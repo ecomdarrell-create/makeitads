@@ -105,7 +105,7 @@ Pour les résidents de Californie (CCPA) :
 • Droit de savoir quelles données sont collectées
 • Droit de refuser la vente de vos données
 • Droit à la suppression
-Pour exercer vos droits, écrivez-nous à support@makeitads.com. Réponse sous 30 jours.`,
+Pour exercer vos droits, écrivez-nous à support@makeitads.pro. Réponse sous 30 jours.`,
   },
   {
     id: '8',
@@ -156,8 +156,7 @@ Vous pouvez demander la suppression de vos données à tout moment.`,
     id: '14',
     title: 'Nous contacter',
     content: `Pour toute question concernant cette politique ou vos données :
-Par email : support@makeitads.com
-Par Telegram : https://t.me/MakeitAds_CEO
+Par email : support@makeitads.pro
 Nous répondons dans un délai de 30 jours.`,
   },
 ];

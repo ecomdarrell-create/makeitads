@@ -2,12 +2,8 @@
 
 import { useAuth } from '@/hooks/useAuth';
 
-// ✅ Liste des emails ayant accès à l'espace admin
-// Modifie librement cette liste pour ajouter/retirer des admins
-export const ADMIN_EMAILS = [
-  'ecomdarrell@gmail.com',
-  'darrellkamga@gmail.com',
-];
+// ✅ Admin unique : ecomdarrell@gmail.com
+export const ADMIN_EMAILS = ['ecomdarrell@gmail.com'];
 
 export function useIsAdmin(): boolean {
   const { user } = useAuth();

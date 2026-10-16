@@ -152,8 +152,8 @@ export default function ForgotPasswordPage() {
         {/* Footer */}
         <p className="mt-5 text-center text-[10px] text-slate-400 sm:text-[11px]">
           Un souci ? Contactez-nous à{' '}
-          <a href="mailto:support@makeitads.com" className="font-medium text-[#6366F1] hover:underline">
-            support@makeitads.com
+          <a href="mailto:support@makeitads.pro" className="font-medium text-[#6366F1] hover:underline">
+            support@makeitads.pro
           </a>
         </p>
       </div>

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Mail, Send, HelpCircle } from 'lucide-react';
+import { Mail, MessageCircle, HelpCircle } from 'lucide-react';
 
 export default function GlobalFooter() {
   const slogan = 'La plateforme N°1 pour automatiser votre acquisition client en Afrique.';
@@ -74,22 +74,11 @@ export default function GlobalFooter() {
           <ul className="space-y-2.5 text-[12px] text-[#71717A]">
             <li>
               <a
-                href="mailto:support@makeitads.com"
+                href="mailto:support@makeitads.pro"
                 className="inline-flex items-center gap-2 hover:text-[#6366F1] transition-colors"
               >
                 <Mail className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
-                <span>support@makeitads.com</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href="https://t.me/MakeitAds_CEO"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-2 hover:text-[#6366F1] transition-colors"
-              >
-                <Send className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
-                <span>Support sur Telegram</span>
+                <span>support@makeitads.pro</span>
               </a>
             </li>
             <li>
@@ -97,8 +86,17 @@ export default function GlobalFooter() {
                 href="/contact"
                 className="inline-flex items-center gap-2 hover:text-[#6366F1] transition-colors"
               >
+                <MessageCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
+                <span>Formulaire de contact</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="/dashboard/resources"
+                className="inline-flex items-center gap-2 hover:text-[#6366F1] transition-colors"
+              >
                 <HelpCircle className="h-3.5 w-3.5 shrink-0" strokeWidth={2.2} />
-                <span>Contacter MakeItAds</span>
+                <span>Centre d&apos;aide</span>
               </Link>
             </li>
           </ul>

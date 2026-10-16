@@ -58,8 +58,6 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-
-  // ✅ FAVICON — fichiers générés par realfavicongenerator.net
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -70,16 +68,12 @@ export const metadata: Metadata = {
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
     ],
   },
-
-  // ✅ Manifest PWA
   manifest: "/site.webmanifest",
-
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "MakeItAds",
   },
-
   formatDetection: {
     telephone: false,
     email: false,

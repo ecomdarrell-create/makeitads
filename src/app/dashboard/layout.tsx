@@ -4,7 +4,6 @@ import Navbar from '@/components/shared/GlobalNavbar';
 import GlobalFooter from '@/components/shared/GlobalFooter';
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import SaaSChatbot from '@/components/shared/SaaSChatbot';
 
 export const metadata: Metadata = {
   title: 'Dashboard',
@@ -23,10 +22,11 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  // ✅ getSession() lit depuis le cookie → INSTANTANÉ, aucun appel réseau
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { session } } = await supabase.auth.getSession();
 
-  if (!user) redirect('/login');
+  if (!session) redirect('/login');
 
   return (
     <div className="min-h-screen bg-[#F9FAFB]">
@@ -38,7 +38,6 @@ export default async function DashboardLayout({
           <GlobalFooter />
         </div>
       </main>
-      <SaaSChatbot dashboard />
     </div>
   );
 }

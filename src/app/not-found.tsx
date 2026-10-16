@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Home, ArrowRight, Search, Compass } from 'lucide-react';
+import { Home, ArrowRight, Search, Compass, Mail } from 'lucide-react';
 
 export default function NotFound() {
   return (
@@ -98,12 +98,10 @@ export default function NotFound() {
               FAQ
             </Link>
             <a
-              href="https://t.me/MakeitAds_CEO"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="mailto:support@makeitads.pro"
               className="inline-flex items-center gap-1 sm:gap-1.5 text-[10px] sm:text-xs font-medium text-[#71717A] transition-colors hover:text-[#6366F1]"
             >
-              <ArrowRight className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
+              <Mail className="h-3 w-3 sm:h-3.5 sm:w-3.5" />
               Contacter l&apos;équipe
             </a>
           </div>

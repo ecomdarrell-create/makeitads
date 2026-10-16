@@ -6,7 +6,12 @@
 import { formatPlanPrice, formatRechargePrice } from '@/config/pricing.config';
 import { normalizeCurrency, type Currency } from '@/lib/currency';
 
-export const TELEGRAM_URL = 'https://t.me/MakeitAds_CEO';
+// ✅ Support par email (plus de Telegram pour le support client)
+export const SUPPORT_EMAIL = 'support@makeitads.pro';
+export const SUPPORT_URL = 'mailto:support@makeitads.pro';
+
+// Alias pour compatibilité avec d'éventuels imports existants
+export const TELEGRAM_URL = SUPPORT_URL;
 
 export interface FAQEntry {
   keywords: string[];
@@ -120,13 +125,13 @@ Tous les paiements passent par Chariow, une plateforme sécurisée utilisée par
     {
       keywords: ['support', 'contact', 'aide', 'humain', 'parler', 'joindre'],
       question: 'Comment contacter le support ?',
-      answer: `Tu peux joindre notre équipe directement sur Telegram. Nous répondons personnellement à toutes les questions, généralement en moins d'une heure.`,
+      answer: `Tu peux joindre notre équipe par email à ${SUPPORT_EMAIL}. Nous répondons personnellement à toutes les questions, généralement en moins de 24 heures ouvrées.`,
       category: 'support',
     },
     {
       keywords: ['bug', 'problème', 'marche pas', 'erreur', 'connexion', 'bloqué', 'panne', 'technique'],
       question: 'J\'ai un problème technique',
-      answer: `Désolé pour ce désagrément. Pour qu'on règle ça au plus vite, décris-nous le problème exact (capture d'écran si possible) sur Telegram.`,
+      answer: `Désolé pour ce désagrément. Pour qu'on règle ça au plus vite, décris-nous le problème exact (capture d'écran si possible) en écrivant à ${SUPPORT_EMAIL}.`,
       category: 'support',
     },
     {
@@ -193,7 +198,7 @@ Tes données bancaires ne transitent jamais par nos serveurs. Nous acceptons Mob
       answer: `Pour ton compte :
 
 🔑 Utilise "Mot de passe oublié" sur la page de connexion pour réinitialiser ton mot de passe
-🔑 Pour tout autre problème (compte bloqué, email erroné), contacte notre équipe sur Telegram`,
+🔑 Pour tout autre problème (compte bloqué, email erroné), écris-nous à ${SUPPORT_EMAIL}`,
       category: 'support',
     },
   ];
@@ -263,11 +268,11 @@ export function findFAQAnswer(
 // ============================================
 
 export const CLOSING_TEMPLATES: ((name: string | null) => string)[] = [
-  (name) => `\n\n💬 Une question précise${name ? ` ${name}` : ''} ? Écris à notre équipe sur Telegram, on te répond personnellement : ${TELEGRAM_URL}`,
-  (name) => `\n\nPour échanger en direct${name ? ` ${name}` : ''}, retrouve notre équipe sur Telegram : ${TELEGRAM_URL}`,
-  (name) => `\n\nNotre équipe est dispo sur Telegram${name ? ` ${name}` : ''} si tu veux aller plus loin : ${TELEGRAM_URL}`,
-  (name) => `\n\nOn peut en discuter${name ? ` ${name}` : ''} sur Telegram quand tu veux : ${TELEGRAM_URL}`,
-  (name) => `\n\n💡 Le meilleur moyen d'avancer${name ? ` ${name}` : ''} reste d'en parler directement avec notre équipe. C'est ici : ${TELEGRAM_URL}`,
+  (name) => `\n\n💬 Une question précise${name ? ` ${name}` : ''} ? Écris à notre équipe à ${SUPPORT_EMAIL}, on te répond personnellement.`,
+  (name) => `\n\nPour échanger en direct${name ? ` ${name}` : ''}, écris-nous à ${SUPPORT_EMAIL}.`,
+  (name) => `\n\nNotre équipe est dispo à ${SUPPORT_EMAIL}${name ? ` ${name}` : ''} si tu veux aller plus loin.`,
+  (name) => `\n\nOn peut en discuter${name ? ` ${name}` : ''} par email quand tu veux : ${SUPPORT_EMAIL}.`,
+  (name) => `\n\n💡 Le meilleur moyen d'avancer${name ? ` ${name}` : ''} reste d'en parler directement avec notre équipe : ${SUPPORT_EMAIL}.`,
 ];
 
 // ============================================
@@ -275,14 +280,14 @@ export const CLOSING_TEMPLATES: ((name: string | null) => string)[] = [
 // ============================================
 
 export const FALLBACK_TEMPLATES: ((name: string | null) => string)[] = [
-  (name) => `Merci ${name || ''} d'avoir pris le temps de nous écrire 🙏\n\nTa question mérite une réponse personnalisée. Le mieux est qu'on en discute directement pour bien comprendre ton besoin.\n\n👉 Écris à notre équipe sur Telegram : ${TELEGRAM_URL}`,
-  (name) => `${name ? `${name}, ` : ''}nous avons bien noté ta question. Pour te répondre correctement, le mieux c'est qu'on échange en direct.\n\n👉 Notre équipe est sur Telegram : ${TELEGRAM_URL}`,
-  (name) => `Excellente question ${name || ''} 💡\n\nNous voulons te donner une réponse vraiment adaptée, pas du copier-coller. Écris à notre équipe sur Telegram et on te répond rapidement.\n\n👉 ${TELEGRAM_URL}`,
-  (name) => `${name ? `${name}, ` : ''}c'est une question importante et nous ne voulons pas y répondre à la légère.\n\nRejoins notre équipe sur Telegram, on en parle en détail : ${TELEGRAM_URL}`,
-  (name) => `Bien reçu ${name || ''} 🙌\n\nTa question sort un peu des sujets fréquents, donc on préfère la traiter personnellement.\n\n👉 Contacte notre équipe sur Telegram : ${TELEGRAM_URL}`,
-  (name) => `Merci pour ton message ${name || ''} 🤝\n\nPour qu'on aille au fond des choses, retrouve notre équipe sur Telegram. On répond personnellement à chaque personne.\n\n👉 ${TELEGRAM_URL}`,
-  (name) => `${name ? `${name}, ` : ''}ta question mérite mieux qu'une réponse générique. Discutons-en directement sur Telegram.\n\n👉 ${TELEGRAM_URL}`,
-  (name) => `Nous apprécions vraiment que tu nous poses cette question ${name || ''} 💭\n\nPour bien t'accompagner, le mieux c'est un échange direct. Notre équipe est sur Telegram : ${TELEGRAM_URL}`,
+  (name) => `Merci ${name || ''} d'avoir pris le temps de nous écrire 🙏\n\nTa question mérite une réponse personnalisée. Le mieux est qu'on en discute directement pour bien comprendre ton besoin.\n\n👉 Écris à notre équipe : ${SUPPORT_EMAIL}`,
+  (name) => `${name ? `${name}, ` : ''}nous avons bien noté ta question. Pour te répondre correctement, le mieux c'est qu'on échange en direct.\n\n👉 Notre équipe est joignable à ${SUPPORT_EMAIL}`,
+  (name) => `Excellente question ${name || ''} 💡\n\nNous voulons te donner une réponse vraiment adaptée, pas du copier-coller. Écris à notre équipe et on te répond rapidement.\n\n👉 ${SUPPORT_EMAIL}`,
+  (name) => `${name ? `${name}, ` : ''}c'est une question importante et nous ne voulons pas y répondre à la légère.\n\nÉcris à notre équipe, on en parle en détail : ${SUPPORT_EMAIL}`,
+  (name) => `Bien reçu ${name || ''} 🙌\n\nTa question sort un peu des sujets fréquents, donc on préfère la traiter personnellement.\n\n👉 Contacte notre équipe : ${SUPPORT_EMAIL}`,
+  (name) => `Merci pour ton message ${name || ''} 🤝\n\nPour qu'on aille au fond des choses, écris à notre équipe. On répond personnellement à chaque personne.\n\n👉 ${SUPPORT_EMAIL}`,
+  (name) => `${name ? `${name}, ` : ''}ta question mérite mieux qu'une réponse générique. Discutons-en par email.\n\n👉 ${SUPPORT_EMAIL}`,
+  (name) => `Nous apprécions vraiment que tu nous poses cette question ${name || ''} 💭\n\nPour bien t'accompagner, le mieux c'est un échange direct : ${SUPPORT_EMAIL}`,
 ];
 
 // ============================================

@@ -46,7 +46,6 @@ export function MobileNav() {
       style={{ bottom: 'max(12px, env(safe-area-inset-bottom))' }}
       aria-label="Navigation principale"
     >
-      {/* ✅ Hauteur 48px (h-12) identique à la navbar, coins pilule préservés */}
       <div
         className="h-12 rounded-full bg-white px-1.5 flex items-center"
         style={{
@@ -68,7 +67,6 @@ export function MobileNav() {
               <Link
                 key={item.name}
                 href={item.href}
-                prefetch={true}
                 aria-label={item.name}
                 className="relative flex items-center justify-center rounded-full p-2 transition-colors duration-150"
                 style={{
@@ -77,7 +75,6 @@ export function MobileNav() {
                     : 'transparent',
                 }}
               >
-                {/* ✅ Icône 22px + trait plus épais (strokeWidth 2.8 / 2.2) */}
                 <Icon
                   className="relative h-[22px] w-[22px] transition-colors duration-150"
                   strokeWidth={isActive ? 2.8 : 2.2}

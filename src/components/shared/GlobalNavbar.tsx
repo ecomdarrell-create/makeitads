@@ -13,6 +13,8 @@ import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
 import { NotificationToaster } from "@/components/notifications/NotificationToaster";
 
+const SUPPORT_EMAIL = "support@makeitads.pro";
+
 const navLinks = [
   { name: "Comment ça marche ?", href: "#how-it-works" },
   { name: "Fonctionnalités", href: "#fonctionnalites" },
@@ -33,10 +35,10 @@ const searchIndex = [
   { label: "Mes crédits", href: "/dashboard/credits", keywords: "crédits solde historique" },
   { label: "Ressources", href: "/dashboard/resources", keywords: "aide tutoriel guide" },
   { label: "Parrainage", href: "/dashboard/referral", keywords: "parrainage filleuls" },
-  { label: "Support", href: "mailto:support@makeitads.com", keywords: "aide contact support" },
+  { label: "Support", href: "mailto:support@makeitads.pro", keywords: "aide contact support" },
 ];
 
-// ✅ Icône custom : 3 points épais (SVG adaptatif)
+// ✅ Icône custom : 3 points épais
 function DotsIcon({ className }: { className?: string }) {
   return (
     <svg
@@ -48,6 +50,34 @@ function DotsIcon({ className }: { className?: string }) {
       <circle cx="5" cy="12" r="3.1" />
       <circle cx="12" cy="12" r="3.1" />
       <circle cx="19" cy="12" r="3.1" />
+    </svg>
+  );
+}
+
+// ✅ Icône custom : tête de bonhomme avec casque (style call center)
+function SupportAgentIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.4}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      {/* Arceau du casque */}
+      <path d="M5 11a7 7 0 0 1 14 0" />
+      {/* Écouteur gauche */}
+      <rect x="3.5" y="11" width="2.5" height="4.5" rx="1.2" fill="currentColor" stroke="none" />
+      {/* Écouteur droit */}
+      <rect x="18" y="11" width="2.5" height="4.5" rx="1.2" fill="currentColor" stroke="none" />
+      {/* Tête */}
+      <circle cx="12" cy="12.5" r="3.8" />
+      {/* Micro (tige + embout) */}
+      <path d="M20.5 14v1.5a2.5 2.5 0 0 1-2.5 2.5h-2.5" />
+      <circle cx="15" cy="18" r="0.9" fill="currentColor" stroke="none" />
     </svg>
   );
 }
@@ -100,7 +130,6 @@ export default function Navbar() {
     }
   }, [isMobileMenuOpen]);
 
-  // Fermer le panneau notif au clic extérieur / Escape
   useEffect(() => {
     if (!notifOpen) return;
     const handleClick = (e: MouseEvent) => {
@@ -222,6 +251,30 @@ export default function Navbar() {
           </nav>
 
           <div className="flex items-center gap-2 md:gap-4">
+            {/* 🎧 Support — cercle violet brillant calibré sur les autres icônes */}
+            <a
+              href={`mailto:${SUPPORT_EMAIL}`}
+              aria-label="Contacter le support par email"
+              title="Contacter le support"
+              className="group relative flex h-8 w-8 md:h-9 md:w-9 shrink-0 items-center justify-center"
+            >
+              <span
+                aria-hidden="true"
+                className="absolute inset-0 m-auto h-[26px] w-[26px] md:h-[28px] md:w-[28px] rounded-full bg-gradient-to-br from-[#7C7FF5] via-[#6366F1] to-[#8B5CF6] shadow-[0_3px_10px_rgba(99,102,241,0.4),inset_0_1px_0_rgba(255,255,255,0.55),inset_0_-1px_2px_rgba(79,70,229,0.4)] transition-all duration-200 group-hover:scale-110 group-hover:shadow-[0_5px_16px_rgba(99,102,241,0.6),inset_0_1px_0_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(79,70,229,0.5)] group-active:scale-95"
+              />
+              {/* Reflet brillant en haut */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute inset-0 m-auto h-[8px] w-[18px] md:h-[9px] md:w-[20px] -translate-y-[5px] md:-translate-y-[6px] rounded-full bg-white/45 blur-[3px]"
+              />
+              {/* Petit point lumineux */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute right-[4px] top-[4px] md:right-[5px] md:top-[5px] h-1 w-1 rounded-full bg-white/70 blur-[1px]"
+              />
+              <SupportAgentIcon className="relative h-[15px] w-[15px] md:h-[16px] md:w-[16px] text-white drop-shadow-[0_1px_1px_rgba(0,0,0,0.15)]" />
+            </a>
+
             {/* 🔍 Loupe */}
             <button
               type="button"
@@ -387,7 +440,7 @@ export default function Navbar() {
                 </nav>
 
                 <a
-                  href="mailto:support@makeitads.com"
+                  href="mailto:support@makeitads.pro"
                   className="mb-2 flex w-full items-center justify-center gap-2 rounded-full bg-indigo-50 px-3 py-2.5 text-center text-xs font-semibold text-[#6366F1] transition-colors hover:bg-indigo-100"
                 >
                   <Mail className="w-4 h-4 shrink-0" />

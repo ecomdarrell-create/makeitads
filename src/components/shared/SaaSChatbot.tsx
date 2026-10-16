@@ -3,11 +3,11 @@
 import { FormEvent, useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ArrowLeft, Send, Phone } from 'lucide-react';
+import { X, ArrowLeft, Send, Mail, Sparkles } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import {
   SUGGESTED_QUESTIONS,
-  TELEGRAM_URL,
+  SUPPORT_EMAIL,
   CLOSING_TEMPLATES,
   FALLBACK_TEMPLATES,
   findFAQAnswer,
@@ -28,14 +28,14 @@ const QUICK_ACTIONS: QuickAction[] = [
   { id: 'plans', title: 'Choisir un plan', subtitle: 'Comparer les 4 formules', question: 'Quel plan choisir selon mes besoins ?' },
   { id: 'credits', title: 'Comprendre les crédits', subtitle: 'Comment ça marche', question: 'Comment fonctionnent les crédits ?' },
   { id: 'generate', title: 'Générer une stratégie', subtitle: 'Guide étape par étape', question: 'Comment générer une stratégie ?' },
-  { id: 'support', title: "Contacter l'équipe", subtitle: 'Parler à un humain', question: 'Comment contacter le support ?' },
+  { id: 'support', title: 'Contacter l\'équipe', subtitle: 'Parler à un humain', question: 'Comment contacter le support ?' },
 ];
 
 // ============================================
 // RENDU DES MESSAGES AVEC LIENS CLIQUABLES
 // ============================================
 function renderMessageWithLinks(text: string): React.ReactNode {
-  const urlPattern = /(https?:\/\/[^\s]+)/g;
+  const urlPattern = /((https?:\/\/[^\s]+)|([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}))/g;
   const parts: (string | { url: string })[] = [];
   let lastIndex = 0;
   let match;
@@ -55,12 +55,14 @@ function renderMessageWithLinks(text: string): React.ReactNode {
     if (typeof part === 'string') {
       return <span key={i}>{part}</span>;
     }
+    const isEmail = !part.url.startsWith('http');
+    const href = isEmail ? `mailto:${part.url}` : part.url;
     return (
       <a
         key={i}
-        href={part.url}
-        target="_blank"
-        rel="noopener noreferrer"
+        href={href}
+        target={isEmail ? undefined : '_blank'}
+        rel={isEmail ? undefined : 'noopener noreferrer'}
         className="font-semibold text-[#6366F1] underline decoration-[#6366F1]/40 underline-offset-2 transition-colors hover:text-[#5558e6] break-all"
       >
         {part.url.replace(/^https?:\/\//, '')}
@@ -70,7 +72,7 @@ function renderMessageWithLinks(text: string): React.ReactNode {
 }
 
 // ============================================
-// MESSAGE D'ACCUEIL (sans emoji)
+// MESSAGE D'ACCUEIL
 // ============================================
 function buildWelcomeMessage(name: string | null): string {
   const greeting = name ? `Bonjour ${name}` : 'Bonjour';
@@ -83,6 +85,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [imageError, setImageError] = useState(false);
+  const [heroError, setHeroError] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [lastClosingIndex, setLastClosingIndex] = useState<number>(-1);
   const [lastFallbackIndex, setLastFallbackIndex] = useState<number>(-1);
@@ -99,7 +102,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
   }, []);
 
   // ============================================
-  // CHARGEMENT DU PRÉNOM + SALUTATION DYNAMIQUE
+  // CHARGEMENT DU PRÉNOM
   // ============================================
   useEffect(() => {
     const loadName = async () => {
@@ -196,18 +199,15 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
           initial={{ opacity: 0, y: 20, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ duration: 0.2, ease: 'easeOut' }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
           aria-label="Assistante MakeItAds"
-          className="fixed right-4 bottom-5 z-[80] sm:right-6 sm:bottom-6 flex h-[min(70vh,560px)] w-[min(380px,calc(100vw-32px))] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.25)]"
+          className="fixed inset-x-2 bottom-2 top-16 z-[80] flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_20px_70px_rgba(15,23,42,0.25)] sm:inset-auto sm:right-6 sm:bottom-6 sm:h-[600px] sm:w-[400px]"
         >
           {/* HEADER */}
-          <header className="flex items-center justify-between border-b border-slate-100 bg-white px-4 py-3">
+          <header className="flex items-center justify-between border-b border-slate-100 bg-white px-3 py-3 sm:px-4">
             <div className="flex items-center gap-2.5">
-              <div style={{ position: 'relative' }}>
-                <div
-                  className="h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-2 ring-white shadow-sm"
-                  style={{ position: 'relative' }}
-                >
+              <div className="relative">
+                <div className="relative h-10 w-10 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-2 ring-white shadow-sm">
                   {!imageError ? (
                     <Image
                       src="/images/gisele.jpg"
@@ -246,24 +246,49 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
           {/* VUE HOME */}
           {view === 'home' && (
             <div className="flex-1 overflow-y-auto">
-              <div className="relative overflow-hidden bg-white border-b border-[#6366F1]/15 p-5">
-                <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-[#6366F1]/8 blur-2xl" />
-                <div className="absolute -bottom-14 -left-8 h-32 w-32 rounded-full bg-[#8B5CF6]/6 blur-2xl" />
-                <div className="relative">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#6366F1]">
-                    Gisèle · Assistante MakeItAds
-                  </p>
-                  <h2 className="mt-2 text-lg font-bold leading-snug text-[#18181B]">
+              {/* HERO — image premium */}
+              <div className="relative h-40 overflow-hidden bg-slate-900 sm:h-48">
+                {!heroError ? (
+                  <Image
+                    src="/images/chatbot-hero.png"
+                    alt="Aperçu de la conversation MakeItAds"
+                    fill
+                    className="object-cover opacity-95"
+                    sizes="(max-width: 640px) 100vw, 400px"
+                    priority
+                    onError={() => setHeroError(true)}
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-gradient-to-br from-[#1e1b4b] via-[#312e81] to-[#4c1d95]" />
+                )}
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
+
+                {/* Contenu sur l'image */}
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <div className="mb-1.5 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-2.5 py-0.5 backdrop-blur-sm">
+                    <Sparkles className="h-3 w-3 text-indigo-300" />
+                    <span className="text-[9px] font-bold uppercase tracking-[0.14em] text-indigo-200">
+                      Assistante IA
+                    </span>
+                  </div>
+                  <h2 className="text-base font-bold leading-snug text-white sm:text-lg">
                     Bonjour {firstName || ''},
                     <br />
-                    Comment puis-je t&apos;aider ?
+                    Comment puis-je t&apos;aider&nbsp;?
                   </h2>
-                  <p className="mt-2 text-[11px] leading-relaxed text-[#475569]">
-                    Je t&apos;accompagne sur les plans, les crédits, la génération de stratégies et tout ce qui concerne la plateforme.
-                  </p>
                 </div>
               </div>
 
+              {/* Intro */}
+              <div className="border-b border-slate-100 bg-white px-4 py-3">
+                <p className="text-[11px] leading-relaxed text-slate-600">
+                  Je t&apos;accompagne sur les plans, les crédits, la génération de stratégies
+                  et tout ce qui concerne la plateforme.
+                </p>
+              </div>
+
+              {/* Quick actions */}
               <div className="p-4">
                 <p className="mb-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-slate-500">
                   Suggestions rapides
@@ -326,10 +351,7 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
                 {messages.map((message, index) => (
                   <div key={`${index}-${message.role}`} className="flex items-start gap-2">
                     {message.role === 'assistant' && (
-                      <div
-                        className="h-7 w-7 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-1 ring-slate-200"
-                        style={{ position: 'relative' }}
-                      >
+                      <div className="relative h-7 w-7 shrink-0 overflow-hidden rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] ring-1 ring-slate-200">
                         {!imageError ? (
                           <Image
                             src="/images/gisele.jpg"
@@ -393,15 +415,13 @@ export default function SaaSChatbot({ dashboard = false }: { dashboard?: boolean
             </button>
           </form>
 
-          {/* FOOTER TELEGRAM */}
+          {/* FOOTER — Email support (remplace Telegram) */}
           <a
-            href={TELEGRAM_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-1.5 border-t border-[#0088cc]/15 bg-[#0088cc]/5 px-3 py-2 text-[10px] font-semibold text-[#0088cc] transition-colors hover:bg-[#0088cc]/10"
+            href={`mailto:${SUPPORT_EMAIL}`}
+            className="flex items-center justify-center gap-1.5 border-t border-indigo-100 bg-indigo-50/60 px-3 py-2 text-[10px] font-semibold text-[#6366F1] transition-colors hover:bg-indigo-100/60"
           >
-            <Phone className="h-3 w-3" />
-            Contacter l&apos;équipe sur Telegram
+            <Mail className="h-3 w-3" />
+            Contacter l&apos;équipe par email
           </a>
         </motion.section>
       )}

@@ -101,8 +101,7 @@ Les stratégies et recommandations générées par l'IA sont fournies à titre i
     id: '13',
     title: 'Contact',
     content: `Pour toute question relative aux présentes conditions :
-Par email : support@makeitads.com
-Par Telegram : https://t.me/MakeitAds_CEO
+Par email : support@makeitads.pro
 Nous répondons sous 5 jours ouvrés.`,
   },
 ];

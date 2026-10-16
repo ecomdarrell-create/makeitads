@@ -1,7 +1,31 @@
 import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
+  // ✅ Compression + cache optimisé
+  compress: true,
+  poweredByHeader: false,
+  productionBrowserSourceMaps: false,
+
+  // ✅ Tree-shaking automatique des grosses libs (lucide, framer, etc.)
+  // → réduit drastiquement le bundle JS
+  experimental: {
+    optimizePackageImports: [
+      'lucide-react',
+      'framer-motion',
+      'react-icons',
+      'date-fns',
+      '@tiptap/react',
+      '@tiptap/starter-kit',
+      'recharts',
+    ],
+  },
+
+  // ✅ Optimisation images : AVIF en priorité, WebP en fallback
   images: {
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 jours
+    deviceSizes: [360, 414, 640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
     remotePatterns: [
       {
         protocol: 'https',
@@ -24,10 +48,13 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // ✅ Headers anti-cache pour le favicon
+  // ✅ Headers anti-cache pour le favicon + cache long pour les assets statiques
   async headers() {
     const noCacheHeader = [
       { key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' },
+    ];
+    const longCacheHeader = [
+      { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
     ];
 
     return [
@@ -38,6 +65,8 @@ const nextConfig: NextConfig = {
       { source: '/web-app-manifest-192x192.png', headers: noCacheHeader },
       { source: '/web-app-manifest-512x512.png', headers: noCacheHeader },
       { source: '/site.webmanifest', headers: noCacheHeader },
+      // Cache long pour les assets statiques
+      { source: '/images/:path*', headers: longCacheHeader },
     ];
   },
 };

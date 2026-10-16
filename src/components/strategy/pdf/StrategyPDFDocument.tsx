@@ -1198,7 +1198,7 @@ export function StrategyPDFDocument({ strategy, userPlan, planLabel, userName }:
                 letterSpacing: 0.5,
               }}
             >
-              makeitads.pro  ·  support@makeitads.com
+              makeitads.pro  ·  support@makeitads.pro
             </Text>
           </View>
         </View>

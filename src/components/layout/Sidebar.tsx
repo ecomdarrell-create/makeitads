@@ -126,12 +126,10 @@ export function Sidebar() {
             Consultez nos ressources ou contactez le support.
           </p>
           <a
-            href="https://t.me/MakeitAds_CEO"
-            target="_blank"
-            rel="noreferrer"
+            href="mailto:support@makeitads.pro"
             className="inline-flex items-center text-[11px] font-medium text-[#6366F1] hover:text-[#5558e6]"
           >
-            Contacter via Telegram
+            Contacter le support
           </a>
         </div>
       </div>
