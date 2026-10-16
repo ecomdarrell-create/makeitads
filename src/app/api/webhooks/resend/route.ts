@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
-import { Resend } from 'resend';
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -12,15 +11,8 @@ function getSupabaseAdmin() {
   });
 }
 
-function getResend(): Resend {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) throw new Error('RESEND_API_KEY manquante');
-  return new Resend(key);
-}
-
 // ─────────────────────────────────────────────────────────────
 // VÉRIFICATION SIGNATURE (format Svix : v1,<base64>)
-// Doc : https://docs.svix.com/receiving/verifying-payloads/how
 // ─────────────────────────────────────────────────────────────
 function verifyResendSignature(
   rawBody: string,
@@ -31,10 +23,8 @@ function verifyResendSignature(
 ): boolean {
   if (!svixId || !svixTimestamp || !svixSignature) return false;
 
-  // 1. Chaîne à signer : "id.timestamp.body"
   const signedContent = `${svixId}.${svixTimestamp}.${rawBody}`;
 
-  // 2. Décoder le secret (whsec_xxx → base64 → bytes)
   let secretBytes: Buffer;
   try {
     const secretBase64 = secret.replace(/^whsec_/, '');
@@ -43,14 +33,11 @@ function verifyResendSignature(
     return false;
   }
 
-  // 3. HMAC-SHA256 → base64
   const expectedSig = crypto
     .createHmac('sha256', secretBytes)
     .update(signedContent, 'utf8')
     .digest('base64');
 
-  // 4. Le header peut contenir plusieurs signatures séparées par espace,
-  //    chacune au format "v1,<base64>"
   const signatures = svixSignature.split(' ');
 
   for (const sig of signatures) {
@@ -75,6 +62,41 @@ function verifyResendSignature(
 }
 
 // ─────────────────────────────────────────────────────────────
+// RÉCUPÈRE L'EMAIL VIA L'API RESEND (fetch direct)
+// ─────────────────────────────────────────────────────────────
+async function fetchReceivedEmail(emailId: string): Promise<any> {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error('RESEND_API_KEY manquante');
+
+  // Endpoint officiel Resend pour récupérer un email entrant
+  const url = `https://api.resend.com/emails/receiving/${emailId}`;
+
+  console.log(`[resend-inbound] Fetch: ${url}`);
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Authorization': `Bearer ${apiKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const text = await res.text();
+  console.log(`[resend-inbound] Fetch status: ${res.status}`);
+  console.log(`[resend-inbound] Fetch response: ${text.slice(0, 500)}`);
+
+  if (!res.ok) {
+    throw new Error(`Resend API ${res.status}: ${text.slice(0, 200)}`);
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    throw new Error('Resend API returned invalid JSON');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────
 // POST
 // ─────────────────────────────────────────────────────────────
 export async function POST(req: NextRequest) {
@@ -88,7 +110,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Server misconfigured' }, { status: 500 });
     }
 
-    // Headers Svix (format Resend)
     const svixId = req.headers.get('svix-id');
     const svixTimestamp = req.headers.get('svix-timestamp');
     const svixSignature = req.headers.get('svix-signature');
@@ -116,7 +137,6 @@ export async function POST(req: NextRequest) {
     const payload = JSON.parse(rawBody);
     console.log('[resend-inbound] Event:', payload.type);
 
-    // On ne traite que email.received
     if (payload.type !== 'email.received') {
       return NextResponse.json({ ignored: true, type: payload.type }, { status: 200 });
     }
@@ -126,18 +146,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No email_id' }, { status: 400 });
     }
 
-    // Récupère le contenu complet de l'email via l'API Resend
-    const resend = getResend();
-    const { data: email, error: fetchError } = await resend.emails.receiving.get(emailId);
-
-    if (fetchError || !email) {
-      console.error('[resend-inbound] ❌ Erreur fetch email:', fetchError);
-      return NextResponse.json({ error: 'Fetch failed' }, { status: 500 });
+    // Récupère le contenu complet de l'email
+    let email: any;
+    try {
+      email = await fetchReceivedEmail(emailId);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : 'Erreur inconnue';
+      console.error('[resend-inbound] ❌ Fetch email failed:', msg);
+      return NextResponse.json({ error: `Fetch failed: ${msg}` }, { status: 500 });
     }
+
+    console.log('[resend-inbound] Email keys:', Object.keys(email));
+    console.log('[resend-inbound] Email from:', email.from);
+    console.log('[resend-inbound] Email subject:', email.subject);
 
     const supabaseAdmin = getSupabaseAdmin();
 
-    // Extrait les infos — parse "Nom <email@domain.com>"
+    // Extrait les infos
     const rawFrom = (typeof email.from === 'string' ? email.from : '').trim();
     let fromName: string | null = null;
     let fromEmail = '';
@@ -154,22 +179,20 @@ export async function POST(req: NextRequest) {
     const subject = email.subject || '(Sans sujet)';
     const bodyText = email.text || '';
     const bodyHtml = email.html || '';
-    const messageId = (email as any).id || emailId;
-    const headers = (email as any).headers || {};
+    const messageId = email.id || emailId;
+    const headers = email.headers || {};
     const inReplyTo = headers['in-reply-to'] || null;
 
     if (!fromEmail) {
       return NextResponse.json({ error: 'No from email' }, { status: 400 });
     }
 
-    // Cherche l'utilisateur correspondant
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('id')
       .ilike('email', fromEmail)
       .maybeSingle();
 
-    // Détermine le thread_id
     let threadId = messageId;
     if (inReplyTo) {
       const { data: original } = await supabaseAdmin
@@ -180,7 +203,6 @@ export async function POST(req: NextRequest) {
       if (original?.thread_id) threadId = original.thread_id;
     }
 
-    // Insert
     const { error: insertError } = await supabaseAdmin
       .from('support_messages')
       .insert({
