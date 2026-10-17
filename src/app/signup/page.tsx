@@ -5,11 +5,10 @@ import { createClient } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail } from 'lucide-react';
+import { Mail, Headset } from 'lucide-react'; // ✅ Headset ajouté
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
-// ✅ Petit badge (!) cliquable pour afficher une explication
 function InfoBadge({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
 
@@ -72,7 +71,6 @@ function SignupForm() {
     setLoading(true);
     setError('');
 
-    // Validations
     if (formData.password.length < 6) {
       setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
@@ -84,9 +82,7 @@ function SignupForm() {
       return;
     }
     if (!formData.phone.trim() || !isValidPhoneNumber(formData.phone)) {
-      setError(
-        "Numéro de téléphone invalide. N'oubliez pas l'indicatif du pays (ex : 237, 225, 33…)."
-      );
+      setError("Numéro de téléphone invalide. N'oubliez pas l'indicatif du pays (ex : 237, 225, 33…).");
       setLoading(false);
       return;
     }
@@ -96,10 +92,7 @@ function SignupForm() {
       return;
     }
 
-    // ✅ Le PhoneInput peut renvoyer un "+" initial (collage), on le nettoie
-    const cleanPhone = formData.phone.trim()
-      ? '+' + formData.phone.replace(/\D/g, '')
-      : null;
+    const cleanPhone = formData.phone.trim() ? '+' + formData.phone.replace(/\D/g, '') : null;
 
     try {
       const supabase = createClient();
@@ -136,20 +129,12 @@ function SignupForm() {
         return;
       }
 
-      // Détection : email déjà utilisé (Supabase renvoie identities vide)
-      if (
-        data.user &&
-        Array.isArray(data.user.identities) &&
-        data.user.identities.length === 0
-      ) {
-        setError(
-          'Cet email est déjà utilisé. Connectez-vous plutôt via la page de connexion.'
-        );
+      if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+        setError('Cet email est déjà utilisé. Connectez-vous plutôt via la page de connexion.');
         setLoading(false);
         return;
       }
 
-      // Traitement parrainage
       if (referralCode && data.user?.id) {
         try {
           await fetch('/api/referral', {
@@ -162,7 +147,6 @@ function SignupForm() {
         }
       }
 
-      // Enregistrer téléphone
       if (cleanPhone && data.user?.id) {
         try {
           await supabase.from('profiles').update({ phone: cleanPhone }).eq('id', data.user.id);
@@ -171,14 +155,12 @@ function SignupForm() {
         }
       }
 
-      // CAS 1 : Session créée (confirm email désactivé) → connexion immédiate
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         window.location.href = redirectTo;
         return;
       }
 
-      // CAS 2 : Pas de session → email de confirmation envoyé
       setEmailSent(true);
       setLoading(false);
     } catch {
@@ -204,7 +186,6 @@ function SignupForm() {
     );
   }
 
-  // ✅ Écran de succès "email envoyé"
   if (emailSent) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(ellipse_at_top,_#eef2ff,_#f8fafc_52%,_#ffffff)] px-4 py-6">
@@ -217,22 +198,15 @@ function SignupForm() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
               <Mail className="h-7 w-7 text-emerald-600" />
             </div>
-            <h1 className="mb-2 text-lg font-semibold text-slate-900 sm:text-xl">
-              Vérifiez votre email
-            </h1>
+            <h1 className="mb-2 text-lg font-semibold text-slate-900 sm:text-xl">Vérifiez votre email</h1>
             <p className="mb-4 text-xs leading-relaxed text-slate-600 sm:text-sm">
-              Un lien de confirmation a été envoyé à{' '}
-              <strong className="break-all text-slate-900">{formData.email}</strong>.
-              <br />
+              Un lien de confirmation a été envoyé à <strong className="break-all text-slate-900">{formData.email}</strong>.<br />
               Cliquez sur le lien pour activer votre compte.
             </p>
             <p className="mb-5 text-[10px] text-slate-500 sm:text-[11px]">
               Vous ne recevez rien ? Vérifiez vos spams ou réessayez dans 2 minutes.
             </p>
-            <Link
-              href="/login"
-              className="inline-flex items-center justify-center rounded-full bg-[#6366F1] px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#6366f1]/20 transition-all hover:bg-[#5558e6] sm:text-sm"
-            >
+            <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-[#6366F1] px-5 py-2.5 text-xs font-semibold text-white shadow-md shadow-[#6366f1]/20 transition-all hover:bg-[#5558e6] sm:text-sm">
               Aller à la connexion
             </Link>
           </motion.div>
@@ -246,8 +220,7 @@ function SignupForm() {
       <div className="w-full max-w-[420px]">
         <div className="mb-4 text-center">
           <h1 className="text-base font-semibold tracking-tight sm:text-lg">
-            <span className="text-[#111827]">MakeIt</span>
-            <span className="text-[#6366F1]">Ads</span>
+            <span className="text-[#111827]">MakeIt</span><span className="text-[#6366F1]">Ads</span>
           </h1>
           <p className="mx-auto mt-1.5 max-w-xs text-[11px] leading-relaxed text-slate-500 sm:text-xs">
             La plateforme N°1 pour automatiser votre acquisition client en Afrique.
@@ -256,22 +229,14 @@ function SignupForm() {
 
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-6">
           <div className="mb-4">
-            <h2 className="mb-0.5 text-lg font-semibold text-slate-900 sm:text-xl">
-              Créer votre compte
-            </h2>
-            <p className="text-[11px] text-slate-600 sm:text-xs">
-              Commencez à construire de meilleures stratégies publicitaires.
-            </p>
+            <h2 className="mb-0.5 text-lg font-semibold text-slate-900 sm:text-xl">Créer votre compte</h2>
+            <p className="text-[11px] text-slate-600 sm:text-xs">Commencez à construire de meilleures stratégies publicitaires.</p>
           </div>
 
           {referralCode && (
             <div className="mb-3 rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-2.5">
-              <p className="text-[10px] font-medium text-[#6366F1] sm:text-[11px]">
-                Vous avez été invité par un membre MakeItAds
-              </p>
-              <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">
-                Votre parrain recevra un bonus dès votre premier paiement.
-              </p>
+              <p className="text-[10px] font-medium text-[#6366F1] sm:text-[11px]">Vous avez été invité par un membre MakeItAds</p>
+              <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">Votre parrain recevra un bonus dès votre premier paiement.</p>
             </div>
           )}
 
@@ -284,119 +249,44 @@ function SignupForm() {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label htmlFor="firstName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
-                  Prénom
-                </label>
-                <input
-                  id="firstName"
-                  type="text"
-                  required
-                  value={formData.firstName}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, firstName: e.target.value }))
-                  }
-                  className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
-                  placeholder="Jean"
-                />
+                <label htmlFor="firstName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Prénom</label>
+                <input id="firstName" type="text" required value={formData.firstName} onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="Jean" />
               </div>
               <div>
-                <label htmlFor="lastName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
-                  Nom
-                </label>
-                <input
-                  id="lastName"
-                  type="text"
-                  required
-                  value={formData.lastName}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, lastName: e.target.value }))
-                  }
-                  className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
-                  placeholder="Dupont"
-                />
+                <label htmlFor="lastName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Nom</label>
+                <input id="lastName" type="text" required value={formData.lastName} onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="Dupont" />
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                required
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, email: e.target.value }))
-                }
-                className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
-                placeholder="vous@exemple.com"
-              />
+              <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Email</label>
+              <input id="email" type="email" required value={formData.email} onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="vous@exemple.com" />
             </div>
 
             <div>
-              <label
-                htmlFor="phone"
-                className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs"
-              >
+              <label htmlFor="phone" className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs">
                 Téléphone
                 <InfoBadge text="Nous utilisons votre numéro pour sécuriser votre compte et vous prévenir en cas d'activité inhabituelle. N'oubliez pas de mettre l'indicatif de votre pays (ex : 237, 225, 33…)." />
               </label>
-              {/* ✅ Fix : forme fonctionnelle pour ne plus perdre la valeur */}
-              <PhoneInput
-                id="phone"
-                value={formData.phone}
-                onChange={(value) =>
-                  setFormData((prev) => ({ ...prev, phone: value }))
-                }
-              />
-              <p className="mt-1 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">
-                Indispensable : indicatif du pays + numéro complet.
-              </p>
+              <PhoneInput id="phone" value={formData.phone} onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))} />
+              <p className="mt-1 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">Indispensable : indicatif du pays + numéro complet.</p>
             </div>
 
             <div>
-              <AuthPasswordField
-                id="password"
-                label="Mot de passe"
-                value={formData.password}
-                onChange={(password) =>
-                  setFormData((prev) => ({ ...prev, password }))
-                }
-                autoComplete="new-password"
-              />
+              <AuthPasswordField id="password" label="Mot de passe" value={formData.password} onChange={(password) => setFormData((prev) => ({ ...prev, password }))} autoComplete="new-password" />
             </div>
 
             <div>
-              <AuthPasswordField
-                id="confirmPassword"
-                label="Confirmer le mot de passe"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                autoComplete="new-password"
-              />
+              <AuthPasswordField id="confirmPassword" label="Confirmer le mot de passe" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />
             </div>
 
             <div>
-              <label
-                htmlFor="currency"
-                className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs"
-              >
+              <label htmlFor="currency" className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs">
                 Quelle est la devise de votre pays ?
                 <InfoBadge text="La devise nous permet d'afficher tous les prix de la plateforme (crédits, plans, packs) dans votre monnaie locale. Vous pourrez la modifier plus tard dans vos paramètres." />
               </label>
-              <select
-                id="currency"
-                required
-                value={formData.currency}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, currency: e.target.value }))
-                }
-                className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
-              >
-                <option value="" disabled>
-                  Sélectionnez votre devise…
-                </option>
+              <select id="currency" required value={formData.currency} onChange={(e) => setFormData((prev) => ({ ...prev, currency: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm">
+                <option value="" disabled>Sélectionnez votre devise…</option>
                 <option value="XAF">Franc CFA CEMAC (XAF) — Cameroun, Gabon, Congo…</option>
                 <option value="XOF">Franc CFA UEMOA (XOF) — Sénégal, Côte d'Ivoire, Mali…</option>
                 <option value="EUR">Euro (EUR)</option>
@@ -404,6 +294,7 @@ function SignupForm() {
               </select>
             </div>
 
+            {/* ✅ BOUTON PRINCIPAL */}
             <button
               type="submit"
               disabled={loading}
@@ -411,9 +302,18 @@ function SignupForm() {
             >
               {loading ? 'Création de votre compte...' : 'Créer mon compte'}
             </button>
+
+            {/* ✅ NOUVEAU BOUTON SUPPORT (Design Premium) */}
+            <Link
+              href="mailto:support@makeitads.pro"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"
+            >
+              <Headset className="h-4 w-4" />
+              Contacter le support
+            </Link>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <p className="text-xs text-gray-600 sm:text-sm">
               Vous avez déjà un compte ?{' '}
               <Link href="/login" className="font-medium text-[#6366F1] hover:text-[#5558e6]">

@@ -1,35 +1,37 @@
-import { PremiumLoader } from '@/components/ui/PremiumLoader';
+'use client';
 
-export default function DashboardLoading() {
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
+
+export default function Loading() {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= 95) return 95;
+        const increment = prev < 50 ? 3 : prev < 80 ? 1.5 : 0.5;
+        return prev + increment;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <>
-      <div className="px-4 py-5 space-y-5 sm:px-6 sm:py-6 sm:space-y-6 opacity-40">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-          <div className="space-y-2">
-            <div className="h-5 w-48 animate-pulse rounded bg-slate-100" />
-            <div className="h-3 w-72 animate-pulse rounded bg-slate-100" />
-          </div>
-          <div className="h-8 w-32 animate-pulse rounded-full bg-slate-100" />
-        </div>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-white px-4">
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className="mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#6366F1]/10"
+      >
+        <Sparkles className="h-7 w-7 sm:h-8 sm:w-8 text-[#6366F1]" />
+      </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
-          <div className="lg:col-span-2 space-y-5 sm:space-y-6">
-            <div className="h-40 animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-32 animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-64 animate-pulse rounded-xl bg-slate-100" />
-          </div>
-          <div className="space-y-5 sm:space-y-6">
-            <div className="h-56 animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-48 animate-pulse rounded-xl bg-slate-100" />
-            <div className="h-32 animate-pulse rounded-xl bg-slate-100" />
-          </div>
-        </div>
-      </div>
-
-      <PremiumLoader
-        fullScreen
-        message="Chargement de votre espace MakeItAds…"
-      />
-    </>
+      <p className="text-2xl sm:text-3xl font-bold text-[#18181B] tabular-nums">
+        {Math.round(progress)}%
+      </p>
+    </div>
   );
 }

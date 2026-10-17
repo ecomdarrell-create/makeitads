@@ -57,7 +57,7 @@ export default function GetStartedButton({
         <Loader2 className="h-4 w-4 animate-spin" />
       ) : (
         <>
-          Get Started
+          Choisir ce plan
           <ArrowRight className="h-4 w-4" />
         </>
       )}

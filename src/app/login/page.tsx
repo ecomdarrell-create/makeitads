@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { Headset } from 'lucide-react'; // ✅ Ajout de l'icône Headset
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
 
@@ -15,7 +16,6 @@ export default function LoginPage() {
   const [checking, setChecking] = useState(true);
   const router = useRouter();
 
-  // ✅ Rediriger si déjà connecté
   useEffect(() => {
     const checkSession = async () => {
       const supabase = createClient();
@@ -93,8 +93,8 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Si tu veux supprimer les boutons sociaux, supprime les 6 lignes ci-dessous */}
           <AuthProviderButtons />
-
           <div className="my-3.5 flex items-center gap-3 text-[9px] text-slate-400 sm:text-[10px]">
             <span className="h-px flex-1 bg-slate-100" />
             OU AVEC VOTRE EMAIL
@@ -139,6 +139,7 @@ export default function LoginPage() {
               </Link>
             </div>
 
+            {/* ✅ BOUTON PRINCIPAL */}
             <button
               type="submit"
               disabled={loading}
@@ -146,9 +147,18 @@ export default function LoginPage() {
             >
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
+
+            {/* ✅ NOUVEAU BOUTON SUPPORT (Design Premium) */}
+            <Link
+              href="mailto:support@makeitads.pro"
+              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"
+            >
+              <Headset className="h-4 w-4" />
+              Contacter le support
+            </Link>
           </form>
 
-          <div className="mt-4 text-center">
+          <div className="mt-5 text-center">
             <p className="text-xs text-gray-600 sm:text-sm">
               Vous n&apos;avez pas encore de compte ?{' '}
               <Link href="/signup" className="font-medium text-[#6366F1] hover:text-[#5558e6]">

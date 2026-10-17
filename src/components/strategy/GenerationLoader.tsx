@@ -1,96 +1,51 @@
-"use client";
+'use client';
 
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
-import { GENERATION_MESSAGES } from "@/lib/constants/strategy";
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import { Sparkles } from 'lucide-react';
 
 interface GenerationLoaderProps {
-  error?: string | null;
+  error?: string | null; // Conservé pour éviter les erreurs TypeScript avec les composants parents
 }
 
 export default function GenerationLoader({ error }: GenerationLoaderProps) {
-  const [msgIndex, setMsgIndex] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
+    // Simulation fluide de la progression jusqu'à 95%
     const interval = setInterval(() => {
-      setMsgIndex((prev) => (prev + 1) % GENERATION_MESSAGES.length);
-    }, 800);
+      setProgress((prev) => {
+        if (prev >= 95) return 95;
+        const increment = prev < 50 ? 3 : prev < 80 ? 1.5 : 0.5;
+        return prev + increment;
+      });
+    }, 100);
+
     return () => clearInterval(interval);
   }, []);
 
-  const currentMessage = GENERATION_MESSAGES[msgIndex];
-
   return (
-    <motion.div
-      key="generating"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="h-full flex items-center justify-center p-6 relative overflow-hidden min-h-[60vh]"
-    >
-      {/* Particules */}
-      <div className="absolute inset-0 pointer-events-none">
-        {[...Array(30)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-1 h-1 bg-[#6366f1] rounded-full"
-            initial={{ x: "50%", y: "50%", opacity: 0 }}
-            animate={{
-              x: `${Math.random() * 100}%`,
-              y: `${Math.random() * 100}%`,
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 3 + Math.random() * 2,
-              repeat: Infinity,
-              delay: Math.random() * 2,
-            }}
-          />
-        ))}
-      </div>
+    <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
+      {/* Étoile qui tourbillonne (taille compacte et adaptée mobile/PC) */}
+      <motion.div
+        animate={{ rotate: 360 }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+        className="mb-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-[#6366F1]/10"
+      >
+        <Sparkles className="h-7 w-7 sm:h-8 sm:w-8 text-[#6366F1]" />
+      </motion.div>
 
-      <div className="text-center relative z-10">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-          className="inline-flex h-24 w-24 items-center justify-center rounded-full border-2 border-[#6366f1]/30 mb-8"
-        >
-          <div className="h-14 w-14 rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-lg shadow-[#6366f1]/50" />
-        </motion.div>
+      {/* Pourcentage uniquement. AUCUN message, AUCUNE particule, AUCUN "M" */}
+      <p className="text-2xl sm:text-3xl font-bold text-[#18181B] tabular-nums">
+        {Math.round(progress)}%
+      </p>
 
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={msgIndex}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.3 }}
-          >
-            <p className="text-xl font-bold text-white mb-2">
-              {currentMessage.title}
-            </p>
-            <p className="text-sm text-slate-400 max-w-md mx-auto">
-              {currentMessage.description}
-            </p>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className="flex items-center justify-center gap-2 mt-6">
-          {GENERATION_MESSAGES.map((_, i) => (
-            <motion.div
-              key={i}
-              className={`h-1.5 rounded-full ${i <= msgIndex ? "bg-[#6366f1]" : "bg-white/10"}`}
-              animate={{ width: i === msgIndex ? 24 : 6 }}
-              transition={{ duration: 0.3 }}
-            />
-          ))}
-        </div>
-
-        {error && (
-          <div className="mt-6 p-4 rounded-lg border border-red-500/30 bg-red-500/10">
-            <p className="text-sm text-red-300">Error: {error}</p>
-          </div>
-        )}
-      </div>
-    </motion.div>
+      {/* Fallback discret si une erreur critique est passée, sinon invisible */}
+      {error && (
+        <p className="mt-4 text-xs text-red-500 text-center">
+          Une erreur est survenue. Veuillez réessayer.
+        </p>
+      )}
+    </div>
   );
 }

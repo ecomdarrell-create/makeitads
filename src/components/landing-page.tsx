@@ -3,7 +3,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Eye, Check, X, ChevronDown, Loader2 } from "lucide-react";
+import { ArrowRight, Eye, Check, X, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import { SiShopify, SiStripe, SiMeta, SiGoogle, SiTiktok, SiHubspot } from "react-icons/si";
 
@@ -249,7 +249,6 @@ export default function LandingPage() {
       <GlobalNavbar />
       <HeroSection />
       
-      {/* ✅ CORRECTION : Suppression de la prop 'variant' */}
       <PremiumStories />
 
       <section className="relative z-10 py-10 border-y border-[#E2E8F0] bg-[#F8FAFC]">
@@ -290,7 +289,6 @@ export default function LandingPage() {
       </section>
 
       <section id="success-stories" className="relative z-10 py-16 md:py-24 px-6 bg-[#FFFFFF]">
-        {/* ✅ CORRECTION : Suppression de la prop 'variant' */}
         <PremiumStories />
       </section>
 

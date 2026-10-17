@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2 } from 'lucide-react';
+import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2, Lock } from 'lucide-react'; // ✅ Lock ajouté
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
@@ -45,7 +45,6 @@ export default function GeneratePage() {
   const [lastStrategyId, setLastStrategyId] = useState<string>('');
 
   const totalSteps = 8;
-
   const isFree = currentPlan === 'free';
 
   const generationCost = strategyType === 'complete'
@@ -472,6 +471,7 @@ export default function GeneratePage() {
               </span>
             </div>
 
+            {/* ✅ SECTION MODIFIÉE : VERROUILLAGE POUR LE PLAN DÉMO */}
             {isFree ? (
               <div className="grid grid-cols-2 gap-2">
                 <button
@@ -486,17 +486,18 @@ export default function GeneratePage() {
                   Diagnostic Flash
                   <span className="ml-1 text-[10px] opacity-70">{CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits</span>
                 </button>
+                
+                {/* Bouton verrouillé qui redirige vers le pricing */}
                 <button
                   type="button"
-                  onClick={() => setStrategyType('complete')}
-                  className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
-                    strategyType === 'complete'
-                      ? 'border-[#6366F1] bg-[#6366F1]/10 text-[#6366F1]'
-                      : 'border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100'
-                  }`}
+                  onClick={() => router.push('/dashboard/pricing')}
+                  className="group relative flex flex-col items-center justify-center gap-1 rounded-lg border border-amber-200 bg-amber-50/50 px-3 py-2 text-xs font-medium text-amber-800 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1]"
                 >
-                  Stratégie complète
-                  <span className="ml-1 text-[10px] opacity-70">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
+                  <Lock className="h-4 w-4 text-amber-600 transition-colors group-hover:text-[#6366F1]" />
+                  <span>Stratégie complète</span>
+                  <span className="text-[9px] font-bold uppercase tracking-wide text-[#6366F1] opacity-0 transition-opacity group-hover:opacity-100">
+                    Upgrader pour débloquer
+                  </span>
                 </button>
               </div>
             ) : (
