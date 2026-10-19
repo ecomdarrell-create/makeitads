@@ -471,59 +471,57 @@ export default function GeneratePage() {
               </span>
             </div>
 
-            {/* ✅ SECTION PREMIUM : VERROUILLAGE ÉLÉGANT POUR LE PLAN DÉMO */}
+            {/* ✅ SECTION PREMIUM : 2 COLONNES MOBILE */}
             {isFree ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-2 sm:gap-4">
                 {/* Option 1 : Diagnostic Flash (Actif et accessible) */}
                 <button
                   type="button"
                   onClick={() => setStrategyType('flash')}
-                  className={`relative flex flex-col p-4 rounded-xl border-2 text-left transition-all duration-200 ${
+                  className={`relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border-2 text-left transition-all duration-200 ${
                     strategyType === 'flash'
                       ? 'border-[#6366F1] bg-[#6366F1]/5 shadow-sm'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-semibold text-[#111827]">Diagnostic Flash</span>
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <span className="text-xs sm:text-sm font-bold text-[#111827]">Flash</span>
                     {strategyType === 'flash' && (
-                      <CheckCircle2 className="h-5 w-5 text-[#6366F1]" />
+                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-[#6366F1]" />
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 mb-3">4 sections • Analyse rapide</p>
-                  <div className="mt-auto flex items-center gap-2">
-                    <span className="text-sm font-bold text-[#6366F1]">
+                  <p className="text-[10px] sm:text-xs text-slate-500 leading-tight break-words mb-2">
+                    4 sections • Analyse rapide
+                  </p>
+                  <div className="mt-auto">
+                    <span className="text-xs sm:text-sm font-bold text-[#6366F1]">
                       {CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits
                     </span>
                   </div>
                 </button>
 
                 {/* Option 2 : Stratégie Complète (Verrouillée Premium) */}
-                <div className="relative flex flex-col p-4 rounded-xl border border-slate-200 bg-slate-50/80 text-left overflow-hidden group transition-all duration-200 hover:border-[#6366F1]/30 hover:shadow-md">
+                <div className="relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/80 text-left overflow-hidden group transition-all duration-200 hover:border-[#6366F1]/30 hover:shadow-md">
                   {/* Badge PRO en haut à droite */}
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[10px] font-bold px-2.5 py-1 rounded-bl-lg flex items-center gap-1">
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-bl-lg flex items-center gap-1">
                     <Crown className="h-3 w-3" />
                     PRO
                   </div>
 
-                  <div className="flex items-center justify-between mb-3 mt-1">
-                    <span className="font-semibold text-[#111827]">Stratégie Complète</span>
-                    <Lock className="h-4 w-4 text-slate-400" />
+                  <div className="flex items-center justify-between mb-1 sm:mb-2 mt-1">
+                    <span className="text-xs sm:text-sm font-bold text-[#111827]">Complète</span>
+                    <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
                   </div>
 
-                  {/* Liste des avantages pour créer le désir (FOMO) */}
-                  <ul className="text-xs text-slate-500 mb-4 space-y-1.5">
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-[#6366F1]" />
-                      12 sections détaillées
+                  {/* Liste des avantages compacte pour mobile */}
+                  <ul className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-4 space-y-1">
+                    <li className="flex items-start gap-1">
+                      <span className="h-1 w-1 mt-1.5 rounded-full bg-[#6366F1] shrink-0" />
+                      <span className="leading-tight break-words">12 sections détaillées</span>
                     </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-[#6366F1]" />
-                      Scripts WhatsApp & KPIs
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-[#6366F1]" />
-                      Allocation budgétaire 7 jours
+                    <li className="flex items-start gap-1">
+                      <span className="h-1 w-1 mt-1.5 rounded-full bg-[#6366F1] shrink-0" />
+                      <span className="leading-tight break-words">Scripts WhatsApp & KPIs</span>
                     </li>
                   </ul>
 
@@ -531,25 +529,25 @@ export default function GeneratePage() {
                   <button
                     type="button"
                     onClick={() => router.push('/dashboard/pricing')}
-                    className="mt-auto w-full flex items-center justify-center gap-2 rounded-lg bg-[#111827] py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#6366F1] group-hover:shadow-lg"
+                    className="mt-auto w-full flex items-center justify-center gap-1 sm:gap-2 rounded-lg bg-[#111827] py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-semibold text-white transition-all hover:bg-[#6366F1] group-hover:shadow-sm"
                   >
-                    Débloquer avec Pro
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+                    Voir les offres
+                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
                   </button>
                 </div>
               </div>
             ) : (
-              <div className="rounded-lg border border-[#6366F1] bg-[#6366F1]/10 px-3 py-2.5">
+              <div className="rounded-lg border border-[#6366F1] bg-[#6366F1]/10 px-3 sm:px-4 py-2.5 sm:py-3">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-semibold text-[#6366F1]">
+                    <p className="text-xs sm:text-sm font-semibold text-[#6366F1]">
                       Stratégie complète
                     </p>
-                    <p className="mt-0.5 text-[10px] text-[#6366F1]/80">
+                    <p className="mt-0.5 text-[10px] sm:text-xs text-[#6366F1]/80 break-words">
                       Inclus dans votre plan {currentPlan}
                     </p>
                   </div>
-                  <span className="text-[11px] font-medium text-[#6366F1]">
+                  <span className="text-xs sm:text-sm font-bold text-[#6366F1]">
                     {CREDIT_COSTS.STRATEGIE_COMPLETE} crédits
                   </span>
                 </div>

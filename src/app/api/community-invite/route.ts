@@ -60,10 +60,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Erreur lors de l\'enregistrement.' }, { status: 500 });
     }
 
-    // 4. Envoi de la notification administrateur via Resend
+    // 4. ✅ MISE À JOUR DU PROFIL : Empêche le pop-up de s'afficher à nouveau pour cet utilisateur
+    if (user_id) {
+      await supabaseAdmin
+        .from('profiles')
+        .update({ 
+          has_joined_telegram: true,
+          telegram_phone: phone_e164
+        })
+        .eq('id', user_id);
+    }
+
+    // 5. Envoi de la notification administrateur via Resend (UNIQUEMENT À TOI)
     try {
       await resend.emails.send({
-        from: 'MakeItAds <onboarding@resend.dev>', // Remplace par ton domaine vérifié Resend si tu en as un (ex: noreply@makeitads.pro)
+        from: 'MakeItAds <onboarding@resend.dev>', 
         to: ['ecomdarrell@gmail.com'],
         subject: '🔔 Nouvelle demande d\'invitation Communautaire MakeItAds',
         html: `
@@ -92,7 +103,6 @@ export async function POST(req: NextRequest) {
 
     } catch (emailError) {
       console.error('Erreur envoi email Resend:', emailError);
-      // On ne bloque pas la réponse si l'email échoue, la demande est quand même en base
     }
 
     return NextResponse.json({ success: true, message: 'Demande enregistrée avec succès.' });

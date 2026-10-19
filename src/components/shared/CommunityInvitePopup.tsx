@@ -100,8 +100,8 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                   <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
                     <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#0F172A] mb-2">Demande enregistrée !</h3>
-                  <p className="text-sm text-[#64748B] leading-relaxed">
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-2 break-words">Demande enregistrée !</h3>
+                  <p className="text-sm text-[#64748B] leading-relaxed break-words">
                     Notre équipe vous transmettra votre invitation sur WhatsApp dès que possible.
                   </p>
                 </div>
@@ -115,13 +115,13 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                   </div>
 
                   <div className="text-center mb-4">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[9px] font-bold uppercase tracking-wider mb-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[9px] font-bold uppercase tracking-wider mb-2 break-words">
                       Invitation exclusive
                     </span>
-                    <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2 leading-tight">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2 leading-tight break-words">
                       Avant de continuer, découvrez un privilège réservé.
                     </h3>
-                    <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
+                    <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed break-words">
                       Rejoignez gratuitement le cercle communautaire MakeItAds et accédez à des opportunités exclusives.
                     </p>
                   </div>
@@ -135,14 +135,14 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     ].map((item, i) => (
                       <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-[#0F172A]">
                         <CheckCircle2 className="h-3.5 w-3.5 text-[#6366F1] shrink-0 mt-0.5" />
-                        <span>{item}</span>
+                        <span className="leading-relaxed break-words">{item}</span>
                       </div>
                     ))}
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F172A] mb-1">
+                      <label className="block text-xs font-semibold text-[#0F172A] mb-1 break-words">
                         Où vous envoyer votre invitation ?
                       </label>
                       <PhoneInput 
@@ -150,7 +150,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                         onChange={setPhone} 
                         placeholder="Votre numéro WhatsApp"
                       />
-                      <p className="mt-1 text-[10px] text-[#64748B]">
+                      <p className="mt-1 text-[10px] text-[#64748B] leading-relaxed break-words">
                         Notre équipe vous transmettra directement le lien d'accès.
                       </p>
                     </div>
@@ -164,7 +164,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                           className="peer h-4 w-4 rounded border-slate-300 text-[#6366F1] focus:ring-[#6366F1] cursor-pointer"
                         />
                       </div>
-                      <span className="text-[10px] leading-relaxed text-[#64748B] group-hover:text-[#0F172A] transition-colors">
+                      <span className="text-[10px] leading-relaxed text-[#64748B] group-hover:text-[#0F172A] transition-colors break-words">
                         J'accepte que MakeItAds utilise mon numéro pour me transmettre l'invitation. 
                         <a href="/privacy" className="text-[#6366F1] hover:underline ml-1">Politique</a>.
                       </span>
@@ -173,7 +173,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     {errorMessage && (
                       <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
                         <AlertCircle className="h-4 w-4 shrink-0" />
-                        {errorMessage}
+                        <span className="break-words">{errorMessage}</span>
                       </div>
                     )}
 
@@ -199,7 +199,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                       <button
                         type="button"
                         onClick={onClose}
-                        className="w-full py-2 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors"
+                        className="w-full py-2 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors break-words"
                       >
                         Non merci, continuer ma visite
                       </button>
