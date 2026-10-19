@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { MobileNav } from "@/components/layout/MobileNav";
+import CommunityInviteClient from "@/components/shared/CommunityInviteClient"; // ✅ AJOUT
 
 const inter = Inter({
   subsets: ["latin"],
@@ -163,6 +164,9 @@ export default function RootLayout({
           {children}
           <MobileNav />
         </div>
+
+        {/* ✅ NOUVEAU SYSTÈME D'INVITATION COMMUNAUTAIRE */}
+        <CommunityInviteClient />
 
         <div
           id="portal-root"

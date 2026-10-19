@@ -2,8 +2,6 @@ import type { Metadata } from 'next';
 import { Sidebar } from '@/components/layout/Sidebar';
 import Navbar from '@/components/shared/GlobalNavbar';
 import GlobalFooter from '@/components/shared/GlobalFooter';
-import ExitIntentPopup from '@/components/shared/ExitIntentPopup';
-// ✅ AILoader retiré d'ici pour éviter le conflit avec les loading.tsx du dossier dashboard
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 
@@ -24,9 +22,6 @@ export default async function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[#F8F8FC]">
-      {/* ✅ Seul le Pop-up de rétention reste ici */}
-      <ExitIntentPopup /> 
-      
       <Navbar />
       <Sidebar />
       <main className="md:pl-64 pt-16 pb-28 md:pb-0 min-h-screen">

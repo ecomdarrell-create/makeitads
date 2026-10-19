@@ -30,22 +30,17 @@ export default async function DashboardPage() {
   const profile = await ensureUserProfile(user);
 
   const userCurrency = (profile?.currency as Currency) || 'XOF';
-  const currencySymbol = getCurrencySymbol(userCurrency);
-
+  
+  // ✅ OPTIMISATION : Une seule requête pour récupérer toutes les stratégies nécessaires
   const { data: strategies } = await supabase
     .from('strategies')
-    .select('type, credits_cost, created_at, platform')
+    .select('id, type, credits_cost, created_at, platform, title') // Ajoute 'title' ou autres colonnes nécessaires à RecentStrategies
     .eq('user_id', user.id)
     .order('created_at', { ascending: false });
 
-  const { data: recentStrategies } = await supabase
-    .from('strategies')
-    .select('*')
-    .eq('user_id', user.id)
-    .order('created_at', { ascending: false })
-    .limit(5);
-
   const strategiesList = strategies || [];
+  const recentStrategies = strategiesList.slice(0, 5); // ✅ Récupération des 5 dernières sans nouvelle requête
+  
   const totalStrategies = strategiesList.length;
   const flashCount = strategiesList.filter((s) => s.type === 'flash').length;
   const completeCount = strategiesList.filter((s) => s.type === 'complete').length;
@@ -63,29 +58,19 @@ export default async function DashboardPage() {
   const completeCost = CREDIT_COSTS.STRATEGIE_COMPLETE;
 
   let nextAction: NextAction = {
-    title:
-      totalStrategies === 0
-        ? 'Créez votre premier diagnostic'
-        : 'Continuez à tester vos angles',
-    description:
-      totalStrategies === 0
-        ? 'Votre historique ne contient pas encore de stratégie. Décrivez votre activité pour obtenir une première analyse personnalisée.'
-        : 'Lancez un nouveau diagnostic avec un angle ou un objectif différent pour enrichir votre historique.',
+    title: totalStrategies === 0 ? 'Créez votre premier diagnostic' : 'Continuez à tester vos angles',
+    description: totalStrategies === 0 
+      ? 'Votre historique ne contient pas encore de stratégie. Décrivez votre activité pour obtenir une première analyse personnalisée.'
+      : 'Lancez un nouveau diagnostic avec un angle ou un objectif différent pour enrichir votre historique.',
     action: 'Créer un diagnostic flash',
     href: '/dashboard/generate?type=flash',
     cost: flashCost,
   };
 
-  if (
-    currentPlan !== 'free' &&
-    creditsBalance >= completeCost &&
-    totalStrategies > 0 &&
-    completeCount === 0
-  ) {
+  if (currentPlan !== 'free' && creditsBalance >= completeCost && totalStrategies > 0 && completeCount === 0) {
     nextAction = {
       title: 'Passez à une stratégie complète',
-      description:
-        'Votre historique contient des diagnostics flash, mais aucune stratégie complète enregistrée.',
+      description: 'Votre historique contient des diagnostics flash, mais aucune stratégie complète enregistrée.',
       action: 'Créer une stratégie complète',
       href: '/dashboard/generate?type=complete',
       cost: completeCost,
@@ -93,8 +78,7 @@ export default async function DashboardPage() {
   } else if (currentPlan !== 'free' && creditsBalance >= completeCost) {
     nextAction = {
       title: 'Créez une stratégie complète',
-      description:
-        'Votre solde permet une génération complète, basée sur les informations de votre activité.',
+      description: 'Votre solde permet une génération complète, basée sur les informations de votre activité.',
       action: 'Créer une stratégie complète',
       href: '/dashboard/generate?type=complete',
       cost: completeCost,
@@ -102,8 +86,7 @@ export default async function DashboardPage() {
   } else if (creditsBalance < (currentPlan === 'free' ? flashCost : completeCost)) {
     nextAction = {
       title: 'Rechargez vos crédits',
-      description:
-        'Votre solde ne couvre pas le coût de la prochaine génération disponible.',
+      description: 'Votre solde ne couvre pas le coût de la prochaine génération disponible.',
       action: 'Voir les plans',
       href: '/dashboard/pricing',
       cost: 0,
@@ -119,44 +102,26 @@ export default async function DashboardPage() {
         </h1>
       </div>
 
-      <Header
-        firstName={profile?.first_name}
-        credits={creditsBalance}
-        plan={currentPlan}
-        currency={userCurrency}
-      />
+      <Header firstName={profile?.first_name} credits={creditsBalance} plan={currentPlan} currency={userCurrency} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         <div className="lg:col-span-2 space-y-5 sm:space-y-6">
-          {/* ✅ Plan passé au composant */}
           <HeroActionCard plan={currentPlan} />
           <NextBestAction data={nextAction} />
-          <RecentStrategies strategies={recentStrategies || []} />
+          <RecentStrategies strategies={recentStrategies} />
         </div>
 
         <div className="space-y-5 sm:space-y-6">
-          <CreditCenter
-            balance={creditsBalance}
-            used={creditsUsed}
-            flashCount={flashCount}
-            completeCount={completeCount}
-            currency={userCurrency}
-            plan={currentPlan}
-          />
+          <CreditCenter balance={creditsBalance} used={creditsUsed} flashCount={flashCount} completeCount={completeCount} currency={userCurrency} plan={currentPlan} />
           <PlanFeatures currentPlan={currentPlan} currency={userCurrency} />
-          <HealthScore
-            score={healthScore}
-            profileComplete={profileComplete}
-            strategyCount={totalStrategies}
-          />
+          <HealthScore score={healthScore} profileComplete={profileComplete} strategyCount={totalStrategies} />
         </div>
       </div>
 
       <div className="pt-4 mt-6 border-t border-gray-100">
         <div className="flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
           <p className="text-[10px] text-gray-400 text-center sm:text-left">
-            Vous êtes ici :{' '}
-            <span className="font-medium text-gray-600">Vue d&apos;ensemble</span>
+            Vous êtes ici : <span className="font-medium text-gray-600">Vue d&apos;ensemble</span>
           </p>
           <BackButton href="/" label="Retour à l'accueil" />
         </div>

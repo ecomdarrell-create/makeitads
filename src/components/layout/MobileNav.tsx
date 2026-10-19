@@ -2,25 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import {
-  Home,
-  Plus,
-  BarChart3,
-  Coins,
-  Crown,
-  Gift,
-  User,
-} from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Home, Plus, BarChart3, Coins, Crown, Gift, User } from 'lucide-react';
 
-const AUTH_ROUTES = [
-  '/login',
-  '/signup',
-  '/sign-up',
-  '/register',
-  '/forgot-password',
-  '/reset-password',
-  '/auth',
-];
+const AUTH_ROUTES = ['/login', '/signup', '/sign-up', '/register', '/forgot-password', '/reset-password', '/auth'];
 
 const items = [
   { name: 'Accueil', href: '/', icon: Home },
@@ -34,10 +19,7 @@ const items = [
 
 export function MobileNav() {
   const pathname = usePathname();
-
-  const isAuthPage = AUTH_ROUTES.some(
-    (route) => pathname === route || pathname.startsWith(`${route}/`)
-  );
+  const isAuthPage = AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
   if (isAuthPage) return null;
 
   return (
@@ -48,19 +30,11 @@ export function MobileNav() {
     >
       <div
         className="h-12 rounded-full bg-white px-1.5 flex items-center"
-        style={{
-          boxShadow:
-            '0 4px 20px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04)',
-        }}
+        style={{ boxShadow: '0 4px 20px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.06), 0 0 0 1px rgba(15, 23, 42, 0.04)' }}
       >
         <div className="flex w-full items-center justify-around">
           {items.map((item) => {
-            const isActive =
-              item.href === '/'
-                ? pathname === '/'
-                : pathname === item.href ||
-                  (item.href !== '/dashboard' && pathname.startsWith(item.href));
-
+            const isActive = item.href === '/' ? pathname === '/' : pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (
@@ -68,19 +42,22 @@ export function MobileNav() {
                 key={item.name}
                 href={item.href}
                 aria-label={item.name}
-                className="relative flex items-center justify-center rounded-full p-2 transition-colors duration-150"
-                style={{
-                  background: isActive
-                    ? 'linear-gradient(135deg, rgba(99,102,241,0.14) 0%, rgba(139,92,246,0.14) 100%)'
-                    : 'transparent',
-                }}
+                className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
+                {/* ✅ HALO GLISSANT : Framer Motion anime automatiquement la position et la taille */}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-halo-mobile"
+                    className="absolute inset-0 rounded-full bg-gradient-to-br from-[#6366F1]/14 to-[#8B5CF6]/14"
+                    transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
+                  />
+                )}
+                
                 <Icon
-                  className="relative h-[22px] w-[22px] transition-colors duration-150"
+                  className={`relative z-10 h-[22px] w-[22px] transition-colors duration-150 ${
+                    isActive ? 'text-[#6366F1]' : 'text-[#0F172A]'
+                  }`}
                   strokeWidth={isActive ? 2.8 : 2.2}
-                  style={{
-                    color: isActive ? '#6366F1' : '#0F172A',
-                  }}
                 />
               </Link>
             );

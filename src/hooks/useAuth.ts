@@ -1,36 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { User, Session } from "@supabase/supabase-js";
-import { createClient } from "@/lib/supabase";
+import { useState, useEffect, useRef } from "react";
+import { User, Session, AuthError } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/client";
 
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const isMounted = useRef(false);
 
   useEffect(() => {
+    isMounted.current = true;
     const supabase = createClient();
 
-    const getSession = async () => {
-      const { data } = await supabase.auth.getSession();
-      const currentSession = data.session;
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
-    };
-
-    getSession();
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event: string, currentSession: Session | null) => {
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-      setLoading(false);
+    supabase.auth.getSession().then(({ data: { session: currentSession } }: { data: { session: Session | null } }) => {
+      if (isMounted.current) {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+      }
+    }).catch((error: AuthError) => {
+      console.error('Erreur session:', error);
+      if (isMounted.current) {
+        setSession(null);
+        setUser(null);
+      }
     });
 
-    return () => subscription.unsubscribe();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event: 'SIGNED_IN' | 'SIGNED_OUT' | 'TOKEN_REFRESHED' | 'USER_UPDATED', currentSession: Session | null) => {
+      if (isMounted.current) {
+        setSession(currentSession);
+        setUser(currentSession?.user ?? null);
+      }
+    });
+
+    return () => {
+      isMounted.current = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return { user, session, loading };
