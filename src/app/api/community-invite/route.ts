@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// On garde Supabase en haut car il est souvent mieux toléré, 
+// mais on déplace Resend à l'intérieur de la fonction POST.
 const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -11,6 +12,10 @@ const supabaseAdmin = createClient(
 
 export async function POST(req: NextRequest) {
   try {
+    // ✅ CORRECTION : Initialisation différée de Resend à l'intérieur de la fonction
+    // Cela empêche l'erreur de build "Missing API key"
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
     const body = await req.json();
     const { phone_e164, country_code, consent, user_id, anonymous_id, email } = body;
 
@@ -23,7 +28,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Format de numéro de téléphone invalide.' }, { status: 400 });
     }
 
-    // 2. Vérification anti-doublon (numéro déjà soumis récemment)
+    // 2. Vérification anti-doublon
     const { data: existingRequest } = await supabaseAdmin
       .from('community_invite_requests')
       .select('id, status')
@@ -60,7 +65,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Erreur lors de l\'enregistrement.' }, { status: 500 });
     }
 
-    // 4. ✅ MISE À JOUR DU PROFIL : Empêche le pop-up de s'afficher à nouveau pour cet utilisateur
+    // 4. Mise à jour du profil utilisateur pour ne plus afficher le pop-up
     if (user_id) {
       await supabaseAdmin
         .from('profiles')
@@ -71,7 +76,7 @@ export async function POST(req: NextRequest) {
         .eq('id', user_id);
     }
 
-    // 5. Envoi de la notification administrateur via Resend (UNIQUEMENT À TOI)
+    // 5. Envoi de la notification administrateur via Resend
     try {
       await resend.emails.send({
         from: 'MakeItAds <onboarding@resend.dev>', 
@@ -95,7 +100,6 @@ export async function POST(req: NextRequest) {
         `,
       });
 
-      // Mise à jour du statut de notification en base
       await supabaseAdmin
         .from('community_invite_requests')
         .update({ admin_notified_at: new Date().toISOString() })
