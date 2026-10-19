@@ -23,15 +23,10 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
     e.preventDefault();
     setErrorMessage('');
 
-    // ✅ VÉRIFICATION STRICTE DE L'INDICATIF ET DE LA LONGUEUR
-    const cleanPhone = phone.replace(/\D/g, '');
-    if (!phone.startsWith('+') || cleanPhone.length < 10) {
-      setErrorMessage('Veuillez saisir votre numéro COMPLET avec l\'indicatif du pays (ex: +237 6XX XX XX XX).');
-      return;
-    }
-
+    // ✅ CORRECTION 1 : Utilisation exclusive de la validation existante du projet.
+    // Elle gère automatiquement l'indicatif (avec ou sans '+') et les longueurs internationales variables.
     if (!isValidPhoneNumber(phone)) {
-      setErrorMessage('Format de numéro invalide. Vérifiez l\'indicatif et le numéro.');
+      setErrorMessage('Veuillez saisir un numéro valide avec son indicatif (ex: 237 6XX XX XX XX).');
       return;
     }
     if (!consent) {
@@ -43,7 +38,9 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
 
     try {
       const country = detectCountry(phone);
-      const finalCleanPhone = '+' + cleanPhone;
+      // ✅ Normalisation propre pour l'API : on s'assure du format E.164 (+237...)
+      const digitsOnly = phone.replace(/\D/g, '');
+      const finalCleanPhone = '+' + digitsOnly;
 
       const response = await fetch('/api/community-invite', {
         method: 'POST',
@@ -107,8 +104,8 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                   <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
                     <CheckCircle2 className="h-7 w-7 text-emerald-600" />
                   </div>
-                  <h3 className="text-lg font-bold text-[#0F172A] mb-2 break-words">Demande enregistrée !</h3>
-                  <p className="text-sm text-[#64748B] leading-relaxed break-words">
+                  <h3 className="text-lg font-bold text-[#0F172A] mb-2">Demande enregistrée !</h3>
+                  <p className="text-sm text-[#64748B] leading-relaxed">
                     Notre équipe vous transmettra votre invitation sur WhatsApp dès que possible.
                   </p>
                 </div>
@@ -121,14 +118,15 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     </span>
                   </div>
 
-                  <div className="text-center mb-4">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[9px] font-bold uppercase tracking-wider mb-2 break-words">
+                  {/* ✅ CORRECTION 2 : Suppression de 'break-words' pour un retour à la ligne naturel et professionnel */}
+                  <div className="text-center mb-4 px-2">
+                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[9px] font-bold uppercase tracking-wider mb-2">
                       Invitation exclusive
                     </span>
-                    <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2 leading-tight break-words">
+                    <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2 leading-tight">
                       Avant de continuer, découvrez un privilège réservé.
                     </h3>
-                    <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed break-words">
+                    <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
                       Rejoignez gratuitement le cercle communautaire MakeItAds et accédez à des opportunités exclusives.
                     </p>
                   </div>
@@ -142,22 +140,22 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     ].map((item, i) => (
                       <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-[#0F172A]">
                         <CheckCircle2 className="h-3.5 w-3.5 text-[#6366F1] shrink-0 mt-0.5" />
-                        <span className="leading-relaxed break-words">{item}</span>
+                        <span className="leading-relaxed">{item}</span>
                       </div>
                     ))}
                   </div>
 
                   <form onSubmit={handleSubmit} className="space-y-3">
                     <div>
-                      <label className="block text-xs font-semibold text-[#0F172A] mb-1 break-words">
+                      <label className="block text-xs font-semibold text-[#0F172A] mb-1">
                         Où vous envoyer votre invitation ?
                       </label>
                       <PhoneInput 
                         value={phone} 
                         onChange={setPhone} 
-                        placeholder="Ex: +237 6XX XX XX XX"
+                        placeholder="237 6XX XX XX XX"
                       />
-                      <p className="mt-1 text-[10px] text-[#64748B] leading-relaxed break-words">
+                      <p className="mt-1 text-[10px] text-[#64748B] leading-relaxed">
                         Notre équipe vous transmettra directement le lien d'accès.
                       </p>
                     </div>
@@ -171,7 +169,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                           className="peer h-4 w-4 rounded border-slate-300 text-[#6366F1] focus:ring-[#6366F1] cursor-pointer"
                         />
                       </div>
-                      <span className="text-[10px] leading-relaxed text-[#64748B] group-hover:text-[#0F172A] transition-colors break-words">
+                      <span className="text-[10px] leading-relaxed text-[#64748B] group-hover:text-[#0F172A] transition-colors">
                         J'accepte que MakeItAds utilise mon numéro pour me transmettre l'invitation. 
                         <a href="/privacy" className="text-[#6366F1] hover:underline ml-1">Politique</a>.
                       </span>
@@ -180,7 +178,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     {errorMessage && (
                       <div className="flex items-start gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
                         <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                        <span className="break-words leading-snug">{errorMessage}</span>
+                        <span className="leading-snug">{errorMessage}</span>
                       </div>
                     )}
 
@@ -206,7 +204,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                       <button
                         type="button"
                         onClick={onClose}
-                        className="w-full py-2 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors break-words"
+                        className="w-full py-2 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors"
                       >
                         Non merci, continuer ma visite
                       </button>
