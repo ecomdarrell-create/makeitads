@@ -2,19 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { Resend } from 'resend';
 
-// On garde Supabase en haut car il est souvent mieux toléré, 
-// mais on déplace Resend à l'intérieur de la fonction POST.
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { persistSession: false } }
-);
-
 export async function POST(req: NextRequest) {
   try {
-    // ✅ CORRECTION : Initialisation différée de Resend à l'intérieur de la fonction
-    // Cela empêche l'erreur de build "Missing API key"
+    // ✅ CORRECTION DÉFINITIVE : Initialisation différée de TOUTES les dépendances
+    // Cela empêche toute erreur de build liée aux variables d'environnement
     const resend = new Resend(process.env.RESEND_API_KEY);
+    const supabaseAdmin = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+      { auth: { persistSession: false } }
+    );
 
     const body = await req.json();
     const { phone_e164, country_code, consent, user_id, anonymous_id, email } = body;
