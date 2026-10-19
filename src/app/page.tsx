@@ -245,6 +245,11 @@ export default function LandingPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currency, setCurrency] = useState<Currency>("XOF");
 
+  // ✅ AJOUT : Force le scroll tout en haut de la page au chargement
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   const scrollToPricing = () =>
     document.getElementById("pricing")?.scrollIntoView({ behavior: "smooth" });
 

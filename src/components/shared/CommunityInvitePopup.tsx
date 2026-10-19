@@ -23,8 +23,15 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
     e.preventDefault();
     setErrorMessage('');
 
+    // ✅ VÉRIFICATION STRICTE DE L'INDICATIF ET DE LA LONGUEUR
+    const cleanPhone = phone.replace(/\D/g, '');
+    if (!phone.startsWith('+') || cleanPhone.length < 10) {
+      setErrorMessage('Veuillez saisir votre numéro COMPLET avec l\'indicatif du pays (ex: +237 6XX XX XX XX).');
+      return;
+    }
+
     if (!isValidPhoneNumber(phone)) {
-      setErrorMessage('Veuillez saisir un numéro de téléphone valide avec son indicatif.');
+      setErrorMessage('Format de numéro invalide. Vérifiez l\'indicatif et le numéro.');
       return;
     }
     if (!consent) {
@@ -36,13 +43,13 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
 
     try {
       const country = detectCountry(phone);
-      const cleanPhone = '+' + phone.replace(/\D/g, '');
+      const finalCleanPhone = '+' + cleanPhone;
 
       const response = await fetch('/api/community-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone_e164: cleanPhone,
+          phone_e164: finalCleanPhone,
           country_code: country?.dial || 'unknown',
           consent: true,
           user_id: userId || null,
@@ -148,7 +155,7 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                       <PhoneInput 
                         value={phone} 
                         onChange={setPhone} 
-                        placeholder="Votre numéro WhatsApp"
+                        placeholder="Ex: +237 6XX XX XX XX"
                       />
                       <p className="mt-1 text-[10px] text-[#64748B] leading-relaxed break-words">
                         Notre équipe vous transmettra directement le lien d'accès.
@@ -171,9 +178,9 @@ export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId
                     </label>
 
                     {errorMessage && (
-                      <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-100">
-                        <AlertCircle className="h-4 w-4 shrink-0" />
-                        <span className="break-words">{errorMessage}</span>
+                      <div className="flex items-start gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
+                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                        <span className="break-words leading-snug">{errorMessage}</span>
                       </div>
                     )}
 

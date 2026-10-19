@@ -15,11 +15,31 @@ export default function CommunityInviteWrapper({ hasAlreadyJoined, userId, email
   useEffect(() => {
     if (hasAlreadyJoined) return;
 
-    const timer = setTimeout(() => {
-      setIsOpen(true);
-    }, 10000); // 10 secondes
+    let hasTriggered = false;
 
-    return () => clearTimeout(timer);
+    const triggerPopup = () => {
+      if (!hasTriggered) {
+        hasTriggered = true;
+        setIsOpen(true);
+      }
+    };
+
+    // 1. Déclencheur temporel : 4 secondes (entre 3 et 5s)
+    const timer = setTimeout(triggerPopup, 4000);
+
+    // 2. Déclencheur au scroll : dès que l'utilisateur descend de 50px
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        triggerPopup();
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [hasAlreadyJoined]);
 
   if (hasAlreadyJoined) return null;
