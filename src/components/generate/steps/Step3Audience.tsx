@@ -1,5 +1,7 @@
+import { useState, useMemo } from 'react';
 import { FormData } from '../types';
 import { RequiredLabel } from '../RequiredLabel';
+import { Country, City } from 'country-state-city';
 
 interface StepProps {
   formData: FormData;
@@ -7,6 +9,35 @@ interface StepProps {
 }
 
 export function Step3Audience({ formData, updateFormData }: StepProps) {
+  // On récupère tous les pays
+  const allCountries = useMemo(() => Country.getAllCountries(), []);
+  
+  // On stocke les pays sélectionnés sous forme de tableau
+  const selectedCountries = formData.country ? formData.country.split(', ') : [];
+
+  // On récupère les villes des pays sélectionnés
+  const availableCities = useMemo(() => {
+    let cities: any[] = [];
+    selectedCountries.forEach((countryName) => {
+      const country = allCountries.find(c => c.name === countryName);
+      if (country) {
+        cities = [...cities, ...City.getCitiesOfCountry(country.isoCode) || []];
+      }
+    });
+    // Trier les villes par ordre alphabétique
+    return cities.sort((a, b) => a.name.localeCompare(b.name));
+  }, [selectedCountries, allCountries]);
+
+  const handleCountryToggle = (countryName: string) => {
+    let newSelected;
+    if (selectedCountries.includes(countryName)) {
+      newSelected = selectedCountries.filter(c => c !== countryName);
+    } else {
+      newSelected = [...selectedCountries, countryName];
+    }
+    updateFormData({ country: newSelected.join(', ') });
+  };
+
   return (
     <div className="space-y-5">
       <div>
@@ -62,31 +93,55 @@ export function Step3Audience({ formData, updateFormData }: StepProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        {/* Liste des pays (Multi-select avec checkboxes) */}
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
-            <RequiredLabel>Pays ciblé</RequiredLabel>
+            <RequiredLabel>Pays ciblés</RequiredLabel>
           </label>
-          <input
-            type="text"
-            required
-            value={formData.country}
-            onChange={(e) => updateFormData({ country: e.target.value })}
-            placeholder="Cameroun"
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none transition-all"
-          />
+          <div className="border border-gray-200 rounded-lg max-h-40 overflow-y-auto p-2 bg-white">
+            {allCountries.map((c) => (
+              <label key={c.isoCode} className="flex items-center gap-2 px-2 py-1 hover:bg-slate-50 rounded cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={selectedCountries.includes(c.name)}
+                  onChange={() => handleCountryToggle(c.name)}
+                  className="rounded border-gray-300 text-[#6366F1] focus:ring-[#6366F1]"
+                />
+                <span className="text-sm text-gray-700">{c.name}</span>
+              </label>
+            ))}
+          </div>
+          {selectedCountries.length > 0 && (
+            <p className="mt-1 text-[10px] text-gray-500">
+              {selectedCountries.length} pays sélectionné(s)
+            </p>
+          )}
         </div>
+
+        {/* Liste des villes (basée sur les pays sélectionnés) */}
         <div>
           <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5">
             Ville / région
           </label>
-          <input
-            type="text"
+          <select
             value={formData.city}
             onChange={(e) => updateFormData({ city: e.target.value })}
-            placeholder="Douala"
-            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none transition-all"
-          />
+            disabled={selectedCountries.length === 0}
+            className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:ring-2 focus:ring-[#6366F1] focus:border-transparent outline-none transition-all bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <option value="">Sélectionnez une ville...</option>
+            {availableCities.map((city) => (
+              <option key={`${city.name}-${city.countryCode}`} value={city.name}>
+                {city.name}
+              </option>
+            ))}
+          </select>
+          {selectedCountries.length === 0 && (
+            <p className="mt-1 text-[10px] text-amber-600">
+              Sélectionnez d&apos;abord un pays.
+            </p>
+          )}
         </div>
       </div>
 

@@ -38,36 +38,20 @@ export default function GeneratePage() {
   const [hasDraft, setHasDraft] = useState(false);
   const [refreshingCredits, setRefreshingCredits] = useState(false);
   const [currency, setCurrency] = useState<string>('XOF');
-
   const [showPreGeneration, setShowPreGeneration] = useState(false);
 
-  // Ajout : ref pour éviter le scroll au tout premier rendu
   const isFirstRender = useRef(true);
-
   const totalSteps = 8;
   const isFree = currentPlan === 'free';
 
-  const generationCost = strategyType === 'complete'
-    ? CREDIT_COSTS.STRATEGIE_COMPLETE
-    : CREDIT_COSTS.DIAGNOSTIC_FLASH;
+  const generationCost = strategyType === 'complete' ? CREDIT_COSTS.STRATEGIE_COMPLETE : CREDIT_COSTS.DIAGNOSTIC_FLASH;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
-
   const creditsLoaded = creditsBalance !== null;
   const safeBalance = creditsBalance ?? 0;
-
-  const creditsPercent =
-    planCreditsCap > 0
-      ? Math.min(100, Math.round((safeBalance / planCreditsCap) * 100))
-      : 0;
+  const creditsPercent = planCreditsCap > 0 ? Math.min(100, Math.round((safeBalance / planCreditsCap) * 100)) : 0;
 
   const alertLevel: 'normal' | 'attention' | 'critical' | 'exhausted' =
-    safeBalance === 0
-      ? 'exhausted'
-      : creditsPercent < 20
-        ? 'critical'
-        : creditsPercent < 50
-          ? 'attention'
-          : 'normal';
+    safeBalance === 0 ? 'exhausted' : creditsPercent < 20 ? 'critical' : creditsPercent < 50 ? 'attention' : 'normal';
 
   const badgeStyle = {
     normal: 'border-emerald-200 bg-emerald-50 text-emerald-700',
@@ -81,60 +65,27 @@ export default function GeneratePage() {
     try {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
-
       if (authError) throw new Error(`Authentification Supabase: ${authError.message}`);
+      if (!user) { setSupabaseError('Aucune session utilisateur active. Reconnectez-vous.'); return; }
 
-      if (!user) {
-        setSupabaseError('Aucune session utilisateur active. Reconnectez-vous puis réessayez.');
-        return;
-      }
-
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('credits_balance, plan, currency')
-        .eq('id', user.id)
-        .maybeSingle();
-
-      if (profileError) {
-        console.error('Erreur lecture profil:', profileError);
-        setSupabaseError(`Lecture du profil impossible: ${profileError.message}`);
-        return;
-      }
-
-      if (!profile) {
-        const bootstrapResponse = await fetch('/api/profile/bootstrap', { method: 'POST' });
-        if (!bootstrapResponse.ok) throw new Error('Initialisation du profil impossible.');
-        setRefreshingCredits(false);
-        await loadCreditsBalance();
-        return;
-      }
+      const { data: profile, error: profileError } = await supabase.from('profiles').select('credits_balance, plan, currency').eq('id', user.id).maybeSingle();
+      if (profileError) { setSupabaseError(`Lecture du profil impossible: ${profileError.message}`); return; }
+      if (!profile) { await fetch('/api/profile/bootstrap', { method: 'POST' }); await loadCreditsBalance(); return; }
 
       const normalizedPlan = normalizePlanId(profile.plan);
       setCreditsBalance(profile.credits_balance ?? 0);
       setCurrentPlan(normalizedPlan);
       setSupabaseError('');
-
-      if (profile.currency) {
-        setCurrency(profile.currency);
-      }
+      if (profile.currency) setCurrency(profile.currency);
 
       if (normalizedPlan !== 'free') {
         setStrategyType('complete');
       } else {
-        const params = new URLSearchParams(window.location.search);
-        const requestedType = params.get('type');
-        if (requestedType === 'complete' || requestedType === 'flash') {
-          setStrategyType(requestedType);
-        }
+        const requestedType = new URLSearchParams(window.location.search).get('type');
+        if (requestedType === 'complete' || requestedType === 'flash') setStrategyType(requestedType);
       }
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      console.error('Erreur connexion Supabase:', message);
-      setSupabaseError(
-        message.includes("project's URL and API key are required")
-          ? 'Configuration Supabase absente au runtime.'
-          : `Connexion Supabase impossible : ${message}`
-      );
+    } catch (error: any) {
+      setSupabaseError(`Connexion Supabase impossible : ${error.message}`);
     } finally {
       setRefreshingCredits(false);
     }
@@ -145,39 +96,21 @@ export default function GeneratePage() {
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        const hasContent = Object.values(parsed).some((v) => v && v !== '' && v !== 0);
-        if (hasContent) {
-          setFormData(parsed);
-          setHasDraft(true);
-        } else {
-          localStorage.removeItem(DRAFT_KEY);
-        }
-      } catch (error) {
-        console.error('Erreur chargement brouillon:', error);
-        localStorage.removeItem(DRAFT_KEY);
-      }
+        if (Object.values(parsed).some((v) => v && v !== '' && v !== 0)) { setFormData(parsed); setHasDraft(true); }
+        else { localStorage.removeItem(DRAFT_KEY); }
+      } catch { localStorage.removeItem(DRAFT_KEY); }
     }
     loadCreditsBalance();
   }, []);
 
-  // Ajout : scroll en haut à chaque changement d'étape / summary / génération
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }, 80);
-
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    const timer = setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 80);
     return () => clearTimeout(timer);
   }, [currentStep, showSummary, isGenerating]);
 
   useEffect(() => {
-    if (!isFree && strategyType !== 'complete') {
-      setStrategyType('complete');
-    }
+    if (!isFree && strategyType !== 'complete') setStrategyType('complete');
   }, [isFree, strategyType]);
 
   useEffect(() => {
@@ -187,9 +120,7 @@ export default function GeneratePage() {
   }, []);
 
   useEffect(() => {
-    if (currentStep <= totalSteps) {
-      localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
-    }
+    if (currentStep <= totalSteps) localStorage.setItem(DRAFT_KEY, JSON.stringify(formData));
   }, [formData, currentStep]);
 
   const resetDraft = () => {
@@ -202,28 +133,13 @@ export default function GeneratePage() {
   };
 
   const validateStep = (step: number): boolean => {
-    if (step === 1) {
-      if (!formData.companyName.trim() || !formData.companyDescription.trim() || !formData.sector) {
-        alert("Le nom, la description et le secteur de l'entreprise sont obligatoires.");
-        return false;
-      }
+    if (step === 1 && (!formData.companyName.trim() || !formData.companyDescription.trim() || !formData.sector)) {
+      alert("Le nom, la description et le secteur sont obligatoires."); return false;
     }
-    if (step === 2 && !formData.mainProduct.trim()) {
-      alert('Indiquez le produit ou service principal.');
-      return false;
-    }
-    if (step === 3 && (!formData.idealClient.trim() || !formData.country.trim())) {
-      alert('Décrivez votre client idéal et son pays.');
-      return false;
-    }
-    if (step === 4 && !formData.mainCountry.trim()) {
-      alert('Indiquez le pays principal de ciblage.');
-      return false;
-    }
-    if (step === 5 && !formData.mainObjective) {
-      alert('Vous devez définir un objectif principal pour continuer.');
-      return false;
-    }
+    if (step === 2 && !formData.mainProduct.trim()) { alert('Indiquez le produit principal.'); return false; }
+    if (step === 3 && (!formData.idealClient.trim() || !formData.country.trim())) { alert('Décrivez votre client idéal et son pays.'); return false; }
+    // ✅ SUPPRESSION DE LA VALIDATION mainCountry À L'ÉTAPE 4
+    if (step === 5 && !formData.mainObjective) { alert('Définissez un objectif principal.'); return false; }
     return true;
   };
 
@@ -239,12 +155,8 @@ export default function GeneratePage() {
   };
 
   const handleOpenPreGeneration = () => {
-    const hasSeenFirst = localStorage.getItem(FIRST_GEN_KEY);
-    if (!hasSeenFirst) {
-      setShowPreGeneration(true);
-    } else {
-      handleGenerate();
-    }
+    if (!localStorage.getItem(FIRST_GEN_KEY)) setShowPreGeneration(true);
+    else handleGenerate();
   };
 
   const handleConfirmPreGeneration = () => {
@@ -254,22 +166,13 @@ export default function GeneratePage() {
   };
 
   const handleGenerate = async () => {
-    if (!isFree && strategyType === 'flash') {
-      setStrategyType('complete');
-      return;
-    }
-
+    if (!isFree && strategyType === 'flash') { setStrategyType('complete'); return; }
     setIsGenerating(true);
 
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-
-      if (!user) {
-        alert('Vous devez être connecté');
-        setIsGenerating(false);
-        return;
-      }
+      if (!user) { alert('Vous devez être connecté'); setIsGenerating(false); return; }
 
       const cleanFormData = {
         ...formData,
@@ -279,7 +182,6 @@ export default function GeneratePage() {
         mainProduct: formData.mainProduct?.trim() || 'Non spécifié',
         idealClient: formData.idealClient?.trim() || 'Non spécifié',
         country: formData.country?.trim() || 'Non spécifié',
-        mainCountry: formData.mainCountry?.trim() || 'Non spécifié',
         mainObjective: formData.mainObjective?.trim() || 'Non spécifié',
         platform: formData.platform && formData.platform.trim() !== '' ? formData.platform.trim() : null,
       };
@@ -295,50 +197,27 @@ export default function GeneratePage() {
       if (response.ok) {
         localStorage.removeItem(DRAFT_KEY);
         setHasDraft(false);
-
-        // MODIFICATION : suppression du PostFlashUpgradeModal — redirection directe
         router.push(`/dashboard/strategies/${data.strategyId}`);
       } else {
         let errorMsg = data.error || 'Erreur lors de la génération';
-
-        if (errorMsg.toLowerCase().includes('clé api') || errorMsg.toLowerCase().includes('deepseek')) {
-          errorMsg = 'Erreur de configuration de l\'IA. Veuillez contacter le support technique.';
-        }
-
-        if (data.creditsBalance !== undefined && data.creditCost !== undefined) {
-          errorMsg += `\n\nSolde actuel : ${data.creditsBalance} crédits\nCoût : ${data.creditCost} crédits`;
-        }
-
+        if (errorMsg.toLowerCase().includes('clé api')) errorMsg = 'Erreur de configuration de l\'IA.';
+        if (data.creditsBalance !== undefined) errorMsg += `\n\nSolde : ${data.creditsBalance} crédits`;
         alert(errorMsg);
         setIsGenerating(false);
-
         await loadCreditsBalance();
       }
-    } catch (error) {
-      console.error('Erreur:', error);
+    } catch {
       alert('Erreur de connexion au serveur.');
       setIsGenerating(false);
     }
   };
 
-  const updateFormData = (updates: Partial<FormData>) => {
-    setFormData((prev) => ({ ...prev, ...updates }));
-  };
+  const updateFormData = (updates: Partial<FormData>) => setFormData((prev) => ({ ...prev, ...updates }));
 
   const renderStep = () => {
     if (isGenerating) return <LoadingGeneration strategyType={strategyType} />;
-    if (showSummary) {
-      return (
-        <Summary
-          formData={formData}
-          creditsBalance={safeBalance}
-          generationCost={generationCost}
-          onGenerate={handleOpenPreGeneration}
-          isGenerating={isGenerating}
-          currency={currency}
-        />
-      );
-    }
+    if (showSummary) return <Summary formData={formData} creditsBalance={safeBalance} generationCost={generationCost} onGenerate={handleOpenPreGeneration} isGenerating={isGenerating} currency={currency} />;
+
     switch (currentStep) {
       case 1: return <Step1Company formData={formData} updateFormData={updateFormData} />;
       case 2: return <Step2Offer formData={formData} updateFormData={updateFormData} currency={currency} />;
@@ -363,75 +242,28 @@ export default function GeneratePage() {
               {isGenerating ? 'Génération en cours' : showSummary ? 'Résumé' : 'Nouvelle stratégie'}
             </h1>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
-              {isGenerating
-                ? 'Veuillez patienter pendant que notre moteur analyse vos données.'
-                : showSummary
-                  ? 'Vérifiez les informations avant de lancer la génération.'
-                  : 'Construisez une stratégie adaptée à votre entreprise, votre marché et vos objectifs.'}
+              {isGenerating ? 'Veuillez patienter...' : showSummary ? 'Vérifiez les informations.' : 'Construisez une stratégie adaptée à votre entreprise.'}
             </p>
           </div>
-
-          <button
-            type="button"
-            onClick={loadCreditsBalance}
-            disabled={refreshingCredits}
-            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${
-              creditsLoaded
-                ? badgeStyle
-                : 'border-slate-200 bg-slate-50 text-slate-500'
-            } ${refreshingCredits ? 'opacity-60' : 'hover:opacity-90'}`}
-            title="Cliquer pour rafraîchir le solde"
-          >
-            {refreshingCredits ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Wallet className="h-3.5 w-3.5" />
-            )}
-            <span className="text-[11px] font-bold">
-              {creditsLoaded ? safeBalance : '—'}
-            </span>
-            <span className="text-[10px] opacity-80">
-              {creditsLoaded && safeBalance > 1 ? 'crédits' : 'crédit'}
-            </span>
+          <button onClick={loadCreditsBalance} disabled={refreshingCredits} className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${creditsLoaded ? badgeStyle : 'border-slate-200 bg-slate-50 text-slate-500'}`}>
+            {refreshingCredits ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wallet className="h-3.5 w-3.5" />}
+            <span className="text-[11px] font-bold">{creditsLoaded ? safeBalance : '—'}</span>
+            <span className="text-[10px] opacity-80">{creditsLoaded && safeBalance > 1 ? 'crédits' : 'crédit'}</span>
           </button>
         </div>
 
         {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
-          <div
-            className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
-              alertLevel === 'exhausted'
-                ? 'border-red-300 bg-red-50'
-                : alertLevel === 'critical'
-                  ? 'border-red-200 bg-red-50/70'
-                  : 'border-amber-200 bg-amber-50/70'
-            }`}
-          >
-            {alertLevel === 'attention' ? (
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
-            ) : (
-              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
-            )}
-
+          <div className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${alertLevel === 'exhausted' ? 'border-red-300 bg-red-50' : alertLevel === 'critical' ? 'border-red-200 bg-red-50/70' : 'border-amber-200 bg-amber-50/70'}`}>
+            {alertLevel === 'attention' ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> : <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />}
             <div className="min-w-0 flex-1">
               <p className={`text-xs font-semibold ${alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'}`}>
-                {alertLevel === 'exhausted' && 'Vous avez épuisé vos crédits ce mois-ci'}
-                {alertLevel === 'critical' && `Il vous reste seulement ${safeBalance} crédit${safeBalance > 1 ? 's' : ''}`}
-                {alertLevel === 'attention' && 'Vous approchez de la fin de vos crédits'}
+                {alertLevel === 'exhausted' ? 'Crédits épuisés' : alertLevel === 'critical' ? 'Crédits critiques' : 'Fin de vos crédits proche'}
               </p>
               <p className={`mt-0.5 text-[11px] leading-relaxed ${alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'}`}>
-                {alertLevel === 'exhausted'
-                  ? 'Passez à un plan supérieur ou attendez le renouvellement mensuel.'
-                  : `Il vous reste ${creditsPercent}% de vos crédits mensuels.`}
+                {alertLevel === 'exhausted' ? 'Passez à un plan supérieur.' : `Il vous reste ${creditsPercent}% de vos crédits.`}
               </p>
-
               {(alertLevel === 'exhausted' || alertLevel === 'critical') && (
-                <Link
-                  href="/dashboard/pricing"
-                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6]"
-                >
-                  Voir les plans supérieurs
-                  <ArrowRight className="h-3 w-3" />
-                </Link>
+                <Link href="/dashboard/pricing" className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white">Voir les plans <ArrowRight className="h-3 w-3" /></Link>
               )}
             </div>
           </div>
@@ -439,160 +271,73 @@ export default function GeneratePage() {
 
         {hasDraft && !showSummary && !isGenerating && (
           <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5">
-            <p className="text-[11px] text-indigo-900">
-              Vous avez un brouillon en cours. Voulez-vous repartir de zéro ?
-            </p>
-            <button
-              type="button"
-              onClick={resetDraft}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700 transition-colors hover:bg-indigo-50"
-            >
-              <RotateCcw className="h-3 w-3" />
-              Réinitialiser
-            </button>
+            <p className="text-[11px] text-indigo-900">Un brouillon est en cours.</p>
+            <button onClick={resetDraft} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700"><RotateCcw className="h-3 w-3" /> Réinitialiser</button>
           </div>
         )}
 
-        {supabaseError && (
-          <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-            {supabaseError}
-          </div>
-        )}
+        {supabaseError && <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{supabaseError}</div>}
 
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-xl border border-slate-200 bg-white p-3 shadow-sm sm:p-4">
             <div className="mb-3 flex items-center justify-between gap-2">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6366F1]">
-                  Type de stratégie
-                </p>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-[#6366F1]">Type de stratégie</p>
                 <h2 className="text-sm font-semibold text-[#111827]">Mode de génération</h2>
               </div>
-              <span className="rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-[#6366F1]">
-                {currentPlan}
-              </span>
+              <span className="rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-semibold capitalize text-[#6366F1]">{currentPlan}</span>
             </div>
 
             {isFree ? (
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                <button
-                  type="button"
-                  onClick={() => setStrategyType('flash')}
-                  className={`relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border-2 text-left transition-all duration-200 ${
-                    strategyType === 'flash'
-                      ? 'border-[#6366F1] bg-[#6366F1]/5 shadow-sm'
-                      : 'border-slate-200 bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-1 sm:mb-2">
-                    <span className="text-xs sm:text-sm font-bold text-[#111827]">Flash</span>
-                    {strategyType === 'flash' && (
-                      <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-[#6366F1]" />
-                    )}
-                  </div>
-                  <p className="text-[10px] sm:text-xs text-slate-500 leading-tight break-words mb-2">
-                    4 sections • Analyse rapide
-                  </p>
-                  <div className="mt-auto">
-                    <span className="text-xs sm:text-sm font-bold text-[#6366F1]">
-                      {CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits
-                    </span>
-                  </div>
+                <button onClick={() => setStrategyType('flash')} className={`relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border-2 text-left transition-all ${strategyType === 'flash' ? 'border-[#6366F1] bg-[#6366F1]/5' : 'border-slate-200 bg-white'}`}>
+                  <div className="flex items-center justify-between mb-1"><span className="text-xs sm:text-sm font-bold">Flash</span>{strategyType === 'flash' && <CheckCircle2 className="h-4 w-4 text-[#6366F1]" />}</div>
+                  <p className="text-[10px] sm:text-xs text-slate-500 mb-2">4 sections</p>
+                  <div className="mt-auto"><span className="text-xs font-bold text-[#6366F1]">{CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits</span></div>
                 </button>
-
-                <div className="relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/80 text-left overflow-hidden group transition-all duration-200 hover:border-[#6366F1]/30 hover:shadow-md">
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-bl-lg flex items-center gap-1">
-                    <Crown className="h-3 w-3" />
-                    PRO
-                  </div>
-
-                  <div className="flex items-center justify-between mb-1 sm:mb-2 mt-1">
-                    <span className="text-xs sm:text-sm font-bold text-[#111827]">Complète</span>
-                    <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
-                  </div>
-
-                  <ul className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-4 space-y-1">
-                    <li className="flex items-start gap-1">
-                      <span className="h-1 w-1 mt-1.5 rounded-full bg-[#6366F1] shrink-0" />
-                      <span className="leading-tight break-words">12 sections détaillées</span>
-                    </li>
-                    <li className="flex items-start gap-1">
-                      <span className="h-1 w-1 mt-1.5 rounded-full bg-[#6366F1] shrink-0" />
-                      <span className="leading-tight break-words">Scripts WhatsApp & KPIs</span>
-                    </li>
-                  </ul>
-
-                  <button
-                    type="button"
-                    onClick={() => router.push('/dashboard/pricing')}
-                    className="mt-auto w-full flex items-center justify-center gap-1 sm:gap-2 rounded-lg bg-[#111827] py-1.5 sm:py-2.5 text-[10px] sm:text-xs font-semibold text-white transition-all hover:bg-[#6366F1] group-hover:shadow-sm"
-                  >
-                    Voir les offres
-                    <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-                  </button>
+                <div className="relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/80 text-left">
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[9px] font-bold px-1.5 py-0.5 rounded-bl-lg"><Crown className="h-3 w-3 inline mr-1" />PRO</div>
+                  <div className="flex items-center justify-between mb-1 mt-1"><span className="text-xs font-bold">Complète</span><Lock className="h-3.5 w-3.5 text-slate-400" /></div>
+                  <ul className="text-[10px] text-slate-500 mb-2 space-y-1"><li>• 12 sections</li><li>• Scripts WhatsApp</li></ul>
+                  <button onClick={() => router.push('/dashboard/pricing')} className="mt-auto w-full rounded-lg bg-[#111827] py-1.5 text-[10px] font-semibold text-white hover:bg-[#6366F1]">Voir les offres</button>
                 </div>
               </div>
             ) : (
               <div className="rounded-lg border border-[#6366F1] bg-[#6366F1]/10 px-3 sm:px-4 py-2.5 sm:py-3">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold text-[#6366F1]">
-                      Stratégie complète
-                    </p>
-                    <p className="mt-0.5 text-[10px] sm:text-xs text-[#6366F1]/80 break-words">
-                      Inclus dans votre plan {currentPlan}
-                    </p>
-                  </div>
-                  <span className="text-xs sm:text-sm font-bold text-[#6366F1]">
-                    {CREDIT_COSTS.STRATEGIE_COMPLETE} crédits
-                  </span>
+                  <div><p className="text-xs sm:text-sm font-semibold text-[#6366F1]">Stratégie complète</p><p className="text-[10px] text-[#6366F1]/80">Inclus dans votre plan {currentPlan}</p></div>
+                  <span className="text-xs font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
-          <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />
+        {/* ✅ NOUVELLE NOTE ICI */}
+        {!showSummary && !isGenerating && (
+          <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
+            <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
+              <strong className="text-[#0F172A]">Conseil de l'expert :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels. Les informations détaillées nous permettent de calibrer au mieux votre ciblage, votre budget et vos recommandations.
+            </p>
+          </div>
         )}
 
-        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-          {renderStep()}
-        </div>
+        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />}
+
+        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">{renderStep()}</div>
 
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="flex items-center justify-between gap-3">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 1}
-              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-[#18181B] transition-colors hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 sm:text-sm"
-            >
-              ← Retour
-            </button>
-
+            <button onClick={handlePrevious} disabled={currentStep === 1} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold disabled:opacity-40 sm:text-sm">← Retour</button>
             <div className="flex items-center gap-3">
-              <span className="hidden text-[10px] text-slate-500 sm:inline sm:text-xs">
-                Étape {currentStep} sur {totalSteps}
-              </span>
-              <button
-                onClick={handleNext}
-                className="rounded-full bg-[#6366F1] px-4 py-2 text-xs font-bold text-white shadow-sm shadow-[#6366F1]/20 transition-colors hover:bg-[#5558e6] sm:text-sm"
-              >
-                {currentStep === totalSteps ? 'Voir le résumé →' : 'Continuer →'}
-              </button>
+              <span className="hidden text-[10px] text-slate-500 sm:inline sm:text-xs">Étape {currentStep}/{totalSteps}</span>
+              <button onClick={handleNext} className="rounded-full bg-[#6366F1] px-4 py-2 text-xs font-bold text-white shadow-sm sm:text-sm">{currentStep === totalSteps ? 'Voir le résumé →' : 'Continuer →'}</button>
             </div>
           </div>
         )}
       </div>
 
-      <PreGenerationModal
-        isOpen={showPreGeneration}
-        onClose={() => setShowPreGeneration(false)}
-        onContinue={handleConfirmPreGeneration}
-        plan={currentPlan}
-        strategyType={strategyType}
-        creditsBalance={safeBalance}
-      />
+      <PreGenerationModal isOpen={showPreGeneration} onClose={() => setShowPreGeneration(false)} onContinue={handleConfirmPreGeneration} plan={currentPlan} strategyType={strategyType} creditsBalance={safeBalance} />
     </div>
   );
 }
