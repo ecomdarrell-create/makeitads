@@ -3,16 +3,27 @@ import { Resend } from 'resend';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { NotificationEmail } from '@/emails/NotificationEmail';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// ✅ Force Next.js à utiliser Node.js (obligatoire pour Resend)
+export const runtime = 'nodejs';
+// ✅ Empêche Next.js d'essayer de pré-générer cette route au build
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  // 1. Vérifier le secret
-  const secret = req.headers.get('x-webhook-secret');
-  if (secret !== process.env.WEBHOOK_SECRET) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
   try {
+    // ✅ Initialisation LAZY (à l'intérieur de la fonction, pas au niveau module)
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error('🚨 RESEND_API_KEY manquante');
+      return NextResponse.json({ error: 'Configuration email manquante.' }, { status: 500 });
+    }
+    const resend = new Resend(apiKey);
+
+    // 1. Vérifier le secret
+    const secret = req.headers.get('x-webhook-secret');
+    if (secret !== process.env.WEBHOOK_SECRET) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await req.json();
     const notification = body.record;
 
@@ -32,16 +43,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No email' }, { status: 400 });
     }
 
-    // ✅ 3. NOUVEAU : Filtrer par plan
-    // Si la notification cible un plan spécifique et que le user n'y est pas → skip
+    // ✅ 3. Filtrer par plan (skip si mismatch)
     if (notification.target_plan && profile.plan !== notification.target_plan) {
       await supabase
         .from('notifications')
         .update({ emailed_at: new Date().toISOString() })
         .eq('id', notification.id);
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         skipped: 'plan_mismatch',
         userPlan: profile.plan,
         targetPlan: notification.target_plan,
