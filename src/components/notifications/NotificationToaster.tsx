@@ -8,12 +8,15 @@ interface NotificationToasterProps {
   toasts: AppNotification[];
   onDismiss: (id: string) => void;
   onRead: (id: string) => void;
+  // MODIFICATION 6 : transmission du callback pour ouvrir le panneau
+  onOpenPanel?: () => void;
 }
 
 export function NotificationToaster({
   toasts,
   onDismiss,
   onRead,
+  onOpenPanel,
 }: NotificationToasterProps) {
   return (
     <div
@@ -29,6 +32,7 @@ export function NotificationToaster({
             notification={notif}
             onDismiss={() => onDismiss(notif.id)}
             onRead={() => onRead(notif.id)}
+            onOpenPanel={onOpenPanel}
           />
         ))}
       </AnimatePresence>

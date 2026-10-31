@@ -5,13 +5,12 @@ import { createClient } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Headset } from 'lucide-react'; // ✅ Headset ajouté
+import { Mail, Headset } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
-import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
+import { CurrencyCombobox } from '@/components/ui/CurrencyCombobox';
 
 function InfoBadge({ text }: { text: string }) {
   const [open, setOpen] = useState(false);
-
   return (
     <span className="relative inline-flex items-center">
       <button
@@ -38,7 +37,6 @@ function SignupForm() {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
     password: '',
     currency: '',
   });
@@ -71,6 +69,18 @@ function SignupForm() {
     setLoading(true);
     setError('');
 
+    // ✅ Validation stricte du prénom
+    if (!formData.firstName.trim() || formData.firstName.trim().length < 2) {
+      setError('Le prénom est obligatoire (au moins 2 caractères).');
+      setLoading(false);
+      return;
+    }
+    // ✅ Validation stricte du nom
+    if (!formData.lastName.trim() || formData.lastName.trim().length < 2) {
+      setError('Le nom est obligatoire (au moins 2 caractères).');
+      setLoading(false);
+      return;
+    }
     if (formData.password.length < 6) {
       setError('Le mot de passe doit contenir au moins 6 caractères');
       setLoading(false);
@@ -81,18 +91,15 @@ function SignupForm() {
       setLoading(false);
       return;
     }
-    if (!formData.phone.trim() || !isValidPhoneNumber(formData.phone)) {
-      setError("Numéro de téléphone invalide. N'oubliez pas l'indicatif du pays (ex : 237, 225, 33…).");
-      setLoading(false);
-      return;
-    }
+    // ✅ Validation devise (plus de téléphone)
     if (!formData.currency) {
-      setError('Merci de sélectionner la devise de votre pays.');
+      setError('Merci de sélectionner votre devise.');
       setLoading(false);
       return;
     }
 
-    const cleanPhone = formData.phone.trim() ? '+' + formData.phone.replace(/\D/g, '') : null;
+    const cleanFirstName = formData.firstName.trim();
+    const cleanLastName = formData.lastName.trim();
 
     try {
       const supabase = createClient();
@@ -102,9 +109,8 @@ function SignupForm() {
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            phone: cleanPhone,
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
             currency: formData.currency,
             plan_type: 'free',
             credits_balance: 10,
@@ -147,11 +153,16 @@ function SignupForm() {
         }
       }
 
-      if (cleanPhone && data.user?.id) {
+      // ✅ S'assurer que first_name, last_name et currency sont bien dans profiles
+      if (data.user?.id) {
         try {
-          await supabase.from('profiles').update({ phone: cleanPhone }).eq('id', data.user.id);
-        } catch (phoneError) {
-          console.warn('Erreur enregistrement téléphone:', phoneError);
+          await supabase.from('profiles').update({
+            first_name: cleanFirstName,
+            last_name: cleanLastName,
+            currency: formData.currency,
+          }).eq('id', data.user.id);
+        } catch (profileError) {
+          console.warn('Erreur enregistrement profil:', profileError);
         }
       }
 
@@ -249,52 +260,78 @@ function SignupForm() {
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <label htmlFor="firstName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Prénom</label>
-                <input id="firstName" type="text" required value={formData.firstName} onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="Jean" />
+                <label htmlFor="firstName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Prénom *</label>
+                <input
+                  id="firstName"
+                  type="text"
+                  required
+                  minLength={2}
+                  value={formData.firstName}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
+                  className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
+                  placeholder="Jean"
+                />
               </div>
               <div>
-                <label htmlFor="lastName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Nom</label>
-                <input id="lastName" type="text" required value={formData.lastName} onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="Dupont" />
+                <label htmlFor="lastName" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Nom *</label>
+                <input
+                  id="lastName"
+                  type="text"
+                  required
+                  minLength={2}
+                  value={formData.lastName}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
+                  className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
+                  placeholder="Dupont"
+                />
               </div>
             </div>
 
             <div>
               <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">Email</label>
-              <input id="email" type="email" required value={formData.email} onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm" placeholder="vous@exemple.com" />
+              <input
+                id="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
+                className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm"
+                placeholder="vous@exemple.com"
+              />
             </div>
 
             <div>
-              <label htmlFor="phone" className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs">
-                Téléphone
-                <InfoBadge text="Nous utilisons votre numéro pour sécuriser votre compte et vous prévenir en cas d'activité inhabituelle. N'oubliez pas de mettre l'indicatif de votre pays (ex : 237, 225, 33…)." />
-              </label>
-              <PhoneInput id="phone" value={formData.phone} onChange={(value) => setFormData((prev) => ({ ...prev, phone: value }))} />
-              <p className="mt-1 text-[9px] leading-relaxed text-slate-500 sm:text-[10px]">Indispensable : indicatif du pays + numéro complet.</p>
+              <AuthPasswordField
+                id="password"
+                label="Mot de passe"
+                value={formData.password}
+                onChange={(password) => setFormData((prev) => ({ ...prev, password }))}
+                autoComplete="new-password"
+              />
             </div>
 
             <div>
-              <AuthPasswordField id="password" label="Mot de passe" value={formData.password} onChange={(password) => setFormData((prev) => ({ ...prev, password }))} autoComplete="new-password" />
-            </div>
-
-            <div>
-              <AuthPasswordField id="confirmPassword" label="Confirmer le mot de passe" value={confirmPassword} onChange={setConfirmPassword} autoComplete="new-password" />
+              <AuthPasswordField
+                id="confirmPassword"
+                label="Confirmer le mot de passe"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                autoComplete="new-password"
+              />
             </div>
 
             <div>
               <label htmlFor="currency" className="mb-1 flex items-center text-[11px] font-medium text-gray-700 sm:text-xs">
-                Quelle est la devise de votre pays ?
-                <InfoBadge text="La devise nous permet d'afficher tous les prix de la plateforme (crédits, plans, packs) dans votre monnaie locale. Vous pourrez la modifier plus tard dans vos paramètres." />
+                En quelle devise souhaitez-vous voir le SaaS ?
+                <InfoBadge text="Tous les prix de la plateforme s'afficheront dans cette devise. Vous pourrez la modifier plus tard dans vos paramètres." />
               </label>
-              <select id="currency" required value={formData.currency} onChange={(e) => setFormData((prev) => ({ ...prev, currency: e.target.value }))} className="min-h-10 w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 sm:min-h-11 sm:text-sm">
-                <option value="" disabled>Sélectionnez votre devise…</option>
-                <option value="XAF">Franc CFA CEMAC (XAF) — Cameroun, Gabon, Congo…</option>
-                <option value="XOF">Franc CFA UEMOA (XOF) — Sénégal, Côte d'Ivoire, Mali…</option>
-                <option value="EUR">Euro (EUR)</option>
-                <option value="USD">Dollar US (USD)</option>
-              </select>
+              <CurrencyCombobox
+                value={formData.currency}
+                onChange={(currency) => setFormData((prev) => ({ ...prev, currency }))}
+                placeholder="Sélectionnez votre devise…"
+              />
             </div>
 
-            {/* ✅ BOUTON PRINCIPAL */}
             <button
               type="submit"
               disabled={loading}
@@ -303,7 +340,6 @@ function SignupForm() {
               {loading ? 'Création de votre compte...' : 'Créer mon compte'}
             </button>
 
-            {/* ✅ NOUVEAU BOUTON SUPPORT (Design Premium) */}
             <Link
               href="mailto:support@makeitads.pro"
               className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"

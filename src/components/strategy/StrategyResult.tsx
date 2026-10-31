@@ -23,14 +23,41 @@ import { PrioritiesSection } from './PrioritiesSection';
 import { ActionPlanSection } from './ActionPlanSection';
 import { UpgradeModal } from './UpgradeModal';
 
-// ============================================
-// TYPES
-// ============================================
-
 interface StrategyResultProps {
   strategy: any;
   strategyType: 'flash' | 'complete';
   userPlan: PlanTier;
+}
+
+// ============================================
+// ✅ UTILITAIRE : NETTOYAGE DES ASTÉRISQUES
+// ============================================
+
+/**
+ * Nettoie tous les patterns markdown résiduels qui ne sont pas gérés
+ * (italiques, underscores, astérisques isolés).
+ * IMPORTANT : ne touche PAS aux `**mot**` (gérés séparément).
+ */
+function cleanMarkdown(text: string): string {
+  if (!text) return '';
+
+  return (
+    text
+      // 1. Nettoyer les gras+italiques ***mot*** → mot (les astérisques sont retirés)
+      .replace(/\*\*\*([^*]+)\*\*\*/g, '$1')
+      // 2. Nettoyer les italiques *mot* → mot (sans astérisques)
+      .replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1')
+      // 3. Nettoyer les italiques _mot_ → mot (sans underscores)
+      .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '$1')
+      // 4. Nettoyer les astérisques résiduels isolés (au cas où)
+      .replace(/\*/g, '')
+      // 5. Nettoyer les underscores résiduels isolés
+      .replace(/(?<!\w)_(?!\w)/g, '')
+      // 6. Nettoyer les backticks résiduels
+      .replace(/`/g, '')
+      // 7. Nettoyer les dièses markdown (# en début de ligne)
+      .replace(/^#{1,6}\s+/gm, '')
+  );
 }
 
 // ============================================
@@ -40,22 +67,32 @@ interface StrategyResultProps {
 function renderRichText(text: string): React.ReactNode {
   if (!text) return null;
 
-  const lines = text.split('\n');
+  // Normaliser ***mot*** en **mot** pour que le gras soit prioritaire
+  const normalized = text.replace(/\*\*\*([^*]+)\*\*\*/g, '**$1**');
+
+  const lines = normalized.split('\n');
 
   return lines.map((line, lineIdx) => {
+    // Split sur les patterns **mot** en préservant les délimiteurs
     const parts = line.split(/(\*\*[^*]+\*\*)/g);
 
     return (
       <span key={lineIdx}>
         {parts.map((part, i) => {
-          if (part.startsWith('**') && part.endsWith('**')) {
+          // Mot clé en gras violet (pattern **mot**)
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            const innerText = cleanMarkdown(part.slice(2, -2));
+            if (!innerText) return null;
             return (
-              <strong key={i} className="font-semibold text-[#18181B]">
-                {part.slice(2, -2)}
+              <strong key={i} className="font-bold text-[#8B5CF6]">
+                {innerText}
               </strong>
             );
           }
-          return <span key={i}>{part}</span>;
+          // Texte normal : nettoyer les astérisques résiduels
+          const cleaned = cleanMarkdown(part);
+          if (!cleaned) return null;
+          return <span key={i}>{cleaned}</span>;
         })}
         {lineIdx < lines.length - 1 && <br />}
       </span>
@@ -64,7 +101,7 @@ function renderRichText(text: string): React.ReactNode {
 }
 
 // ============================================
-// GAUGE CIRCULAIRE — calibrée mobile
+// GAUGE CIRCULAIRE
 // ============================================
 
 interface CircularGaugeProps {
@@ -76,14 +113,7 @@ interface CircularGaugeProps {
   unit?: string;
 }
 
-function CircularGauge({
-  value,
-  max = 100,
-  label,
-  sublabel,
-  color,
-  unit,
-}: CircularGaugeProps) {
+function CircularGauge({ value, max = 100, label, sublabel, color, unit }: CircularGaugeProps) {
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
   const pct = Math.min(Math.max(value / max, 0), 1);
@@ -93,19 +123,8 @@ function CircularGauge({
   return (
     <div className="flex flex-1 flex-col items-center">
       <div className="relative h-[72px] w-[72px] sm:h-24 sm:w-24">
-        <svg
-          viewBox="0 0 100 100"
-          className="h-full w-full -rotate-90"
-          aria-hidden="true"
-        >
-          <circle
-            cx="50"
-            cy="50"
-            r={radius}
-            fill="none"
-            stroke="#F1F5F9"
-            strokeWidth="9"
-          />
+        <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden="true">
+          <circle cx="50" cy="50" r={radius} fill="none" stroke="#F1F5F9" strokeWidth="9" />
           <circle
             cx="50"
             cy="50"
@@ -119,29 +138,17 @@ function CircularGauge({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="text-base font-bold leading-none text-[#18181B] sm:text-xl">
-            {value}
-          </span>
-          <span className="mt-0.5 text-[8px] font-medium text-slate-500 sm:text-[10px]">
-            {unit || `/ ${max}`}
-          </span>
+          <span className="text-base font-bold leading-none text-[#18181B] sm:text-xl">{value}</span>
+          <span className="mt-0.5 text-[8px] font-medium text-slate-500 sm:text-[10px]">{unit || `/ ${max}`}</span>
         </div>
       </div>
-      <p className="mt-2.5 text-[11px] font-semibold text-[#18181B] sm:mt-3 sm:text-xs">
-        {label}
-      </p>
+      <p className="mt-2.5 text-[11px] font-semibold text-[#18181B] sm:mt-3 sm:text-xs">{label}</p>
       {sublabel && (
-        <p className="mt-0.5 text-center text-[9px] leading-tight text-slate-500 sm:text-[11px]">
-          {sublabel}
-        </p>
+        <p className="mt-0.5 text-center text-[9px] leading-tight text-slate-500 sm:text-[11px]">{sublabel}</p>
       )}
     </div>
   );
 }
-
-// ============================================
-// COULEURS DYNAMIQUES
-// ============================================
 
 function getPreparationColor(score: number): string {
   if (score >= 75) return '#10B981';
@@ -163,10 +170,6 @@ function getOpportunityData(level: string): { value: number; color: string; labe
   }
   return { value: 50, color: '#64748B', label: level || '—' };
 }
-
-// ============================================
-// EXECUTIVE SUMMARY (avec anneaux)
-// ============================================
 
 interface ExecutiveSummaryData {
   synthese?: string;
@@ -199,22 +202,8 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
 
       <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
         <div className="flex items-start justify-around gap-3 sm:gap-8">
-          <CircularGauge
-            value={preparation}
-            max={100}
-            label="Préparation"
-            sublabel="Maturité"
-            color={preparationColor}
-            unit="/ 100"
-          />
-          <CircularGauge
-            value={opportunity.value}
-            max={100}
-            label="Opportunité"
-            sublabel={opportunity.label}
-            color={opportunity.color}
-            unit={opportunity.label}
-          />
+          <CircularGauge value={preparation} max={100} label="Préparation" sublabel="Maturité" color={preparationColor} unit="/ 100" />
+          <CircularGauge value={opportunity.value} max={100} label="Opportunité" sublabel={opportunity.label} color={opportunity.color} unit={opportunity.label} />
         </div>
       </div>
 
@@ -222,9 +211,7 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
         <div className="rounded-xl border border-amber-200 bg-amber-50/60 p-3.5 sm:p-4">
           <div className="mb-1.5 flex items-center gap-2">
             <AlertTriangle className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">
-              Risque principal
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-amber-700">Risque principal</p>
           </div>
           <p className="text-[12px] leading-relaxed text-amber-900 sm:text-sm">
             {renderRichText(summary.risque_principal)}
@@ -236,9 +223,7 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
         <div className="rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-3.5 sm:p-4">
           <div className="mb-1.5 flex items-center gap-2">
             <Sparkles className="h-3.5 w-3.5 shrink-0 text-[#6366F1]" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#6366F1]">
-              Priorité immédiate
-            </p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#6366F1]">Priorité immédiate</p>
           </div>
           <p className="text-[12px] leading-relaxed text-[#18181B] sm:text-sm">
             {renderRichText(summary.priorite)}
@@ -250,14 +235,151 @@ function ExecutiveSummary({ summary }: { summary: ExecutiveSummaryData }) {
 }
 
 // ============================================
+// RENDERER SEGMENTATION
+// ============================================
+
+interface SegmentationItem {
+  nom_segment?: string;
+  villes?: string[];
+  ages?: string;
+  interets?: string[];
+  comportements?: string[];
+  budget_conseille?: number;
+  pourcentage_budget?: number;
+}
+
+function SegmentationContent({ items }: { items: SegmentationItem[] }) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return <p className="text-[12px] text-slate-500">Aucune segmentation générée.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {items.map((seg, i) => (
+        <div key={i} className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 sm:p-4">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h4 className="text-[12px] font-bold text-[#18181B] sm:text-sm">
+              {seg.nom_segment || `Segment ${i + 1}`}
+            </h4>
+            {typeof seg.pourcentage_budget === 'number' && (
+              <span className="shrink-0 rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-bold text-[#6366F1]">
+                {seg.pourcentage_budget}%
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            {seg.villes && seg.villes.length > 0 && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Villes :</span> {seg.villes.join(', ')}
+              </p>
+            )}
+            {seg.ages && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Âges :</span> {seg.ages}
+              </p>
+            )}
+            {seg.interets && seg.interets.length > 0 && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Intérêts :</span> {seg.interets.join(', ')}
+              </p>
+            )}
+            {seg.comportements && seg.comportements.length > 0 && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Comportements :</span> {seg.comportements.join(', ')}
+              </p>
+            )}
+            {typeof seg.budget_conseille === 'number' && seg.budget_conseille > 0 && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Budget conseillé :</span>{' '}
+                <span className="font-bold text-[#6366F1]">{seg.budget_conseille.toLocaleString('fr-FR')}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================
+// RENDERER AD_SETS
+// ============================================
+
+interface AdSetItem {
+  nom_ensemble?: string;
+  objectif?: string;
+  budget_journalier?: number;
+  audience_cible?: string;
+  nombre_creatives?: number;
+  creatives?: string[];
+  duree_recommandee?: string;
+  placement?: string[];
+}
+
+function AdSetsContent({ items }: { items: AdSetItem[] }) {
+  if (!Array.isArray(items) || items.length === 0) {
+    return <p className="text-[12px] text-slate-500">Aucun ensemble publicitaire généré.</p>;
+  }
+
+  return (
+    <div className="space-y-3">
+      {items.map((ad, i) => (
+        <div key={i} className="rounded-lg border border-slate-100 bg-slate-50/60 p-3 sm:p-4">
+          <div className="mb-2 flex items-start justify-between gap-2">
+            <h4 className="text-[12px] font-bold text-[#18181B] sm:text-sm">
+              {ad.nom_ensemble || `Ensemble ${i + 1}`}
+            </h4>
+            {typeof ad.budget_journalier === 'number' && ad.budget_journalier > 0 && (
+              <span className="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-bold text-emerald-700">
+                {ad.budget_journalier.toLocaleString('fr-FR')} / jour
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            {ad.objectif && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Objectif :</span> {ad.objectif}
+              </p>
+            )}
+            {ad.audience_cible && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Audience :</span> {ad.audience_cible}
+              </p>
+            )}
+            {ad.creatives && ad.creatives.length > 0 && (
+              <div className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Créatives ({ad.nombre_creatives || ad.creatives.length}) :</span>
+                <ul className="mt-1 space-y-0.5 pl-4">
+                  {ad.creatives.map((c, j) => (
+                    <li key={j} className="list-disc text-[11px] text-slate-700">{c}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {ad.placement && ad.placement.length > 0 && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Placements :</span> {ad.placement.join(', ')}
+              </p>
+            )}
+            {ad.duree_recommandee && (
+              <p className="text-[11px] leading-relaxed text-slate-700">
+                <span className="font-semibold text-[#18181B]">Durée recommandée :</span> {ad.duree_recommandee}
+              </p>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ============================================
 // COMPOSANT PRINCIPAL
 // ============================================
 
-export function StrategyResult({
-  strategy,
-  strategyType,
-  userPlan,
-}: StrategyResultProps) {
+export function StrategyResult({ strategy, strategyType, userPlan }: StrategyResultProps) {
   const [expandedSections, setExpandedSections] = useState<string[]>([]);
   const [copiedItems, setCopiedItems] = useState<string[]>([]);
   const [upgradeModal, setUpgradeModal] = useState<{
@@ -283,12 +405,11 @@ export function StrategyResult({
   };
 
   const copyToClipboard = (text: string, itemId: string) => {
-    navigator.clipboard.writeText(text);
+    // ✅ Nettoyer les astérisques avant copie aussi
+    const cleanText = text.replace(/\*\*/g, '').replace(/\*/g, '').replace(/_/g, '');
+    navigator.clipboard.writeText(cleanText);
     setCopiedItems((prev) => [...prev, itemId]);
-    setTimeout(
-      () => setCopiedItems((prev) => prev.filter((id) => id !== itemId)),
-      2000
-    );
+    setTimeout(() => setCopiedItems((prev) => prev.filter((id) => id !== itemId)), 2000);
   };
 
   const readinessScore = data.executive_summary?.preparation ?? 50;
@@ -303,28 +424,18 @@ export function StrategyResult({
         </div>
       )}
 
-      {data.executive_summary && (
-        <ExecutiveSummary summary={data.executive_summary} />
-      )}
+      {data.executive_summary && <ExecutiveSummary summary={data.executive_summary} />}
 
       {!data.executive_summary && (
         <div className="rounded-xl border border-slate-200 bg-white p-3.5 sm:p-5">
           <div className="mb-3 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Sparkles className="h-4 w-4 text-[#6366F1]" />
-              <h3 className="text-[13px] font-semibold text-[#18181B] sm:text-sm">
-                Niveau de préparation
-              </h3>
+              <h3 className="text-[13px] font-semibold text-[#18181B] sm:text-sm">Niveau de préparation</h3>
             </div>
           </div>
           <div className="flex justify-center pt-2">
-            <CircularGauge
-              value={readinessScore}
-              max={100}
-              label="Préparation"
-              color={getPreparationColor(readinessScore)}
-              unit="/ 100"
-            />
+            <CircularGauge value={readinessScore} max={100} label="Préparation" color={getPreparationColor(readinessScore)} unit="/ 100" />
           </div>
         </div>
       )}
@@ -334,16 +445,7 @@ export function StrategyResult({
       {data.action_plan && <ActionPlanSection plan={data.action_plan} />}
 
       {availableSections
-        .filter(
-          (s) =>
-            ![
-              'executive_summary',
-              'insights',
-              'priorities',
-              'action_plan',
-              'salutation',
-            ].includes(s.id)
-        )
+        .filter((s) => !['executive_summary', 'insights', 'priorities', 'action_plan', 'salutation'].includes(s.id))
         .map((section) => (
           <SectionRenderer
             key={section.id}
@@ -368,8 +470,7 @@ export function StrategyResult({
           </div>
 
           <p className="text-[11px] leading-relaxed text-slate-500 sm:text-xs">
-            Ces sections sont disponibles dans les plans supérieurs. Débloquez-les
-            pour étendre votre stratégie.
+            Ces sections sont disponibles dans les plans supérieurs. Débloquez-les pour étendre votre stratégie.
           </p>
 
           {lockedSections.map((section) => (
@@ -408,22 +509,12 @@ interface SectionRendererProps {
   onCopy: (text: string, itemId: string) => void;
 }
 
-function SectionRenderer({
-  section,
-  userPlan,
-  data,
-  isExpanded,
-  onToggle,
-  copiedItems,
-  onCopy,
-}: SectionRendererProps) {
+function SectionRenderer({ section, userPlan, data, isExpanded, onToggle, copiedItems, onCopy }: SectionRendererProps) {
   const Icon = section.icon;
   const hasContent = data[section.id] !== undefined && data[section.id] !== null;
   const content = data[section.id];
 
-  if (!hasContent) {
-    return <EmptySection section={section} />;
-  }
+  if (!hasContent) return <EmptySection section={section} />;
 
   return (
     <div
@@ -449,35 +540,19 @@ function SectionRenderer({
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#6366F1]/10 text-[#6366F1] sm:h-8 sm:w-8">
             <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
-          <h3 className="truncate text-[12px] font-semibold text-[#18181B] sm:text-sm">
-            {section.title}
-          </h3>
+          <h3 className="truncate text-[12px] font-semibold text-[#18181B] sm:text-sm">{section.title}</h3>
         </div>
         <div className="flex shrink-0 items-center gap-2">
           {typeof content === 'string' && (
-            <CopyButton
-              text={content}
-              itemId={section.id}
-              copiedItems={copiedItems}
-              onCopy={onCopy}
-            />
+            <CopyButton text={content} itemId={section.id} copiedItems={copiedItems} onCopy={onCopy} />
           )}
-          {isExpanded ? (
-            <ChevronUp className="h-4 w-4 text-slate-400" />
-          ) : (
-            <ChevronDown className="h-4 w-4 text-slate-400" />
-          )}
+          {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
         </div>
       </div>
 
       {isExpanded && (
         <div className="border-t border-slate-100 px-3.5 pb-3.5 pt-3.5 sm:px-4 sm:pb-4 sm:pt-4">
-          <SectionContent
-            section={section}
-            content={content}
-            copiedItems={copiedItems}
-            onCopy={onCopy}
-          />
+          <SectionContent section={section} content={content} copiedItems={copiedItems} onCopy={onCopy} />
         </div>
       )}
     </div>
@@ -510,53 +585,42 @@ function SectionContent({
     );
   }
 
+  if (section.id === 'segmentation' && Array.isArray(content)) {
+    return <SegmentationContent items={content} />;
+  }
+
+  if (section.id === 'ad_sets' && Array.isArray(content)) {
+    return <AdSetsContent items={content} />;
+  }
+
   if (section.id === 'kpis' && Array.isArray(content)) {
     return (
       <div className="space-y-2">
         {content.map((kpi: any, i: number) => (
-          <div
-            key={i}
-            className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 sm:p-3"
-          >
+          <div key={i} className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 sm:p-3">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold text-[#18181B] sm:text-xs">
-                {kpi.nom}
-              </span>
+              <span className="text-[11px] font-semibold text-[#18181B] sm:text-xs">{kpi.nom}</span>
               <span className="rounded-full bg-[#6366F1]/10 px-2 py-0.5 text-[10px] font-semibold text-[#6366F1]">
                 {kpi.objectif}
               </span>
             </div>
-            <p className="mt-1 text-[11px] leading-relaxed text-slate-600">
-              {renderRichText(kpi.pourquoi)}
-            </p>
+            <p className="mt-1 text-[11px] leading-relaxed text-slate-600">{renderRichText(kpi.pourquoi)}</p>
           </div>
         ))}
       </div>
     );
   }
 
-  if (
-    (section.id === 'scripts_whatsapp' || section.id === 'hooks') &&
-    Array.isArray(content)
-  ) {
+  if ((section.id === 'scripts_whatsapp' || section.id === 'hooks') && Array.isArray(content)) {
     return (
       <div className="space-y-2.5 sm:space-y-3">
         {content.map((item: string, i: number) => (
-          <div
-            key={i}
-            className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 sm:p-3"
-          >
+          <div key={i} className="rounded-lg border border-slate-100 bg-slate-50/60 p-2.5 sm:p-3">
             <div className="mb-2 flex items-center justify-between gap-2">
               <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500">
                 {section.id === 'hooks' ? `Variante ${i + 1}` : `Script ${i + 1}`}
               </span>
-              <CopyButton
-                text={item}
-                itemId={`${section.id}-${i}`}
-                copiedItems={copiedItems}
-                onCopy={onCopy}
-                compact
-              />
+              <CopyButton text={item} itemId={`${section.id}-${i}`} copiedItems={copiedItems} onCopy={onCopy} compact />
             </div>
             <div className="text-[11px] leading-relaxed text-[#18181B] sm:text-xs">
               {renderRichText(item)}
@@ -586,13 +650,7 @@ function SectionContent({
 // SOUS-COMPOSANTS
 // ============================================
 
-function CopyButton({
-  text,
-  itemId,
-  copiedItems,
-  onCopy,
-  compact = false,
-}: {
+function CopyButton({ text, itemId, copiedItems, onCopy, compact = false }: {
   text: string;
   itemId: string;
   copiedItems: string[];
@@ -626,31 +684,17 @@ function CopyButton({
   );
 }
 
-function StructuredField({
-  label,
-  values,
-}: {
-  label: string;
-  values?: string[];
-}) {
+function StructuredField({ label, values }: { label: string; values?: string[] }) {
   if (!values || values.length === 0) return null;
   return (
     <div>
-      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">
-        {label}
-      </p>
-      <p className="text-[12px] leading-relaxed text-[#18181B] sm:text-xs">
-        {values.join(', ')}
-      </p>
+      <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-slate-500">{label}</p>
+      <p className="text-[12px] leading-relaxed text-[#18181B] sm:text-xs">{values.join(', ')}</p>
     </div>
   );
 }
 
-// ✅ FIX : Cadre des plans bloqués — CTA toujours visible
-function LockedSection({
-  section,
-  onUpgradeClick,
-}: {
+function LockedSection({ section, onUpgradeClick }: {
   section: SectionConfig;
   onUpgradeClick: (targetPlan: PlanTier, sectionTitle: string) => void;
 }) {
@@ -659,25 +703,18 @@ function LockedSection({
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-      {/* Header */}
       <div className="flex items-center justify-between border-b border-slate-100 p-3.5 sm:p-4">
         <div className="flex min-w-0 items-center gap-2.5 sm:gap-3">
           <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-400 sm:h-8 sm:w-8">
             <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
           </div>
-          <h3 className="truncate text-[12px] font-semibold text-slate-500 sm:text-sm">
-            {section.title}
-          </h3>
+          <h3 className="truncate text-[12px] font-semibold text-slate-500 sm:text-sm">{section.title}</h3>
         </div>
         <Lock className="h-4 w-4 shrink-0 text-slate-400" />
       </div>
 
-      {/* Preview floutée + CTA en flux normal */}
       <div className="p-3.5 sm:p-4">
-        <div
-          className="select-none text-[11px] leading-relaxed text-slate-500 blur-[3px] sm:text-sm"
-          aria-hidden
-        >
+        <div className="select-none text-[11px] leading-relaxed text-slate-500 blur-[3px] sm:text-sm" aria-hidden>
           {section.previewText}
         </div>
 
@@ -711,9 +748,7 @@ function EmptySection({ section }: { section: SectionConfig }) {
           <Icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
         </div>
         <div className="min-w-0">
-          <h3 className="truncate text-[12px] font-semibold text-slate-500 sm:text-sm">
-            {section.title}
-          </h3>
+          <h3 className="truncate text-[12px] font-semibold text-slate-500 sm:text-sm">{section.title}</h3>
           <p className="mt-0.5 text-[10px] text-slate-400 sm:text-[11px]">
             Section non générée pour cette stratégie.
           </p>

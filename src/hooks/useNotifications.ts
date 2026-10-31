@@ -18,6 +18,7 @@ export interface AppNotification {
   read_at: string | null;
   created_at: string;
   expires_at: string | null;
+  target_plan: string | null; // ✅ NOUVEAU
 }
 
 const PAGE_SIZE = 20;
@@ -31,6 +32,7 @@ export function useNotifications() {
   const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [toasts, setToasts] = useState<AppNotification[]>([]);
+  const [userPlan, setUserPlan] = useState<string>('free');
 
   const seenToastIds = useRef<Set<string>>(new Set());
   const offsetRef = useRef(0);
@@ -52,11 +54,23 @@ export function useNotifications() {
         const from = reset ? 0 : offsetRef.current;
         const to = from + PAGE_SIZE - 1;
 
+        // ✅ Récupérer le plan du user
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("plan")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        const currentPlan = profile?.plan || 'free';
+        setUserPlan(currentPlan);
+
+        // ✅ Filtre : notifications ciblées à son plan OU non ciblées
         const { data, error: fetchError } = await supabase
           .from("notifications")
           .select("*")
           .eq("user_id", user.id)
           .or(`expires_at.is.null,expires_at.gt.${new Date().toISOString()}`)
+          .or(`target_plan.is.null,target_plan.eq.${currentPlan}`)
           .order("created_at", { ascending: false })
           .range(from, to);
 
@@ -120,6 +134,12 @@ export function useNotifications() {
         },
         (payload: RealtimePostgresInsertPayload<AppNotification>) => {
           const notif = payload.new;
+
+          // ✅ Filtrer en temps réel aussi : ignorer si ciblée pour un autre plan
+          if (notif.target_plan && notif.target_plan !== userPlan) {
+            return;
+          }
+
           setNotifications((prev) => [notif, ...prev]);
           setUnreadCount((c) => c + 1);
 
@@ -134,7 +154,7 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user, fetchNotifications]);
+  }, [user, fetchNotifications, userPlan]);
 
   const markAsRead = useCallback(
     async (id: string) => {

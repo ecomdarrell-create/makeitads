@@ -2,220 +2,281 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, AlertCircle, Loader2, ShieldCheck } from 'lucide-react';
-import { PhoneInput, isValidPhoneNumber, detectCountry } from '@/components/auth/PhoneInput';
+import {
+  X,
+  Sparkles,
+  TrendingUp,
+  MessageCircle,
+  Users,
+  BookOpen,
+  Loader2,
+  Check,
+  AlertCircle,
+} from 'lucide-react';
 
 interface CommunityInvitePopupProps {
-  isOpen: boolean;
+  firstName?: string;
+  onSuccess: () => void;
   onClose: () => void;
-  onAccept: () => void;
-  userId?: string | null;
-  email?: string | null;
 }
 
-export default function CommunityInvitePopup({ isOpen, onClose, onAccept, userId, email }: CommunityInvitePopupProps) {
+const BENEFITS = [
+  {
+    icon: TrendingUp,
+    title: 'Visibilité business',
+    description: 'Présentez votre activité à la communauté',
+  },
+  {
+    icon: MessageCircle,
+    title: 'Contact direct fondateur',
+    description: 'Échangez directement avec Darrell',
+  },
+  {
+    icon: Users,
+    title: 'Collaborations premium',
+    description: 'Rencontrez d\'autres entrepreneurs',
+  },
+  {
+    icon: BookOpen,
+    title: 'Ressources exclusives',
+    description: 'Accédez aux conseils et playbooks',
+  },
+];
+
+export function CommunityInvitePopup({
+  firstName,
+  onSuccess,
+  onClose,
+}: CommunityInvitePopupProps) {
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+
+  const displayName = firstName?.trim() || null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage('');
+    setError('');
 
-    // ✅ CORRECTION 1 : Utilisation exclusive de la validation existante du projet.
-    // Elle gère automatiquement l'indicatif (avec ou sans '+') et les longueurs internationales variables.
-    if (!isValidPhoneNumber(phone)) {
-      setErrorMessage('Veuillez saisir un numéro valide avec son indicatif (ex: 237 6XX XX XX XX).');
+    if (!phone.trim()) {
+      setError('Entrez votre numéro WhatsApp.');
       return;
     }
     if (!consent) {
-      setErrorMessage('Vous devez accepter les conditions pour recevoir l\'invitation.');
+      setError('Vous devez accepter les conditions.');
       return;
     }
 
-    setStatus('loading');
+    setLoading(true);
 
     try {
-      const country = detectCountry(phone);
-      // ✅ Normalisation propre pour l'API : on s'assure du format E.164 (+237...)
-      const digitsOnly = phone.replace(/\D/g, '');
-      const finalCleanPhone = '+' + digitsOnly;
-
       const response = await fetch('/api/community-invite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          phone_e164: finalCleanPhone,
-          country_code: country?.dial || 'unknown',
+          phone: phone.trim(),
+          firstName: firstName || null,
           consent: true,
-          user_id: userId || null,
-          anonymous_id: userId ? null : (typeof window !== 'undefined' ? (localStorage.getItem('mia_anonymous_id') || crypto.randomUUID()) : crypto.randomUUID()),
-          email: email || null,
         }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        setStatus('success');
-        setTimeout(() => {
-          onAccept();
-        }, 2500);
-      } else {
-        setErrorMessage(data.error || 'Une erreur est survenue. Veuillez réessayer.');
-        setStatus('error');
+      if (!response.ok) {
+        throw new Error(data.error || 'Erreur lors de l\'envoi');
       }
-    } catch (error) {
-      setErrorMessage('Erreur de connexion au serveur. Vérifiez votre connexion.');
-      setStatus('error');
+
+      setSuccess(true);
+      setTimeout(() => {
+        onSuccess();
+      }, 2500);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <AnimatePresence>
-      {isOpen && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.2 }}
+        className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm"
+        onClick={onClose}
+      >
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4"
-          onClick={onClose}
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ type: 'spring', damping: 22, stiffness: 300 }}
+          onClick={(e) => e.stopPropagation()}
+          className="relative w-full max-w-[440px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl"
         >
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className="relative w-full max-w-[360px] sm:max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
+          <button
+            onClick={onClose}
+            aria-label="Fermer"
+            className="absolute right-4 top-4 z-10 flex h-8 w-8 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
           >
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 p-1.5 rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors z-10"
-              aria-label="Fermer la fenêtre"
-            >
-              <X className="h-5 w-5" />
-            </button>
+            <X className="h-4 w-4" strokeWidth={2.5} />
+          </button>
 
-            <div className="p-5 sm:p-6">
-              {status === 'success' ? (
-                <div className="text-center py-6">
-                  <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
-                    <CheckCircle2 className="h-7 w-7 text-emerald-600" />
-                  </div>
-                  <h3 className="text-lg font-bold text-[#0F172A] mb-2">Demande enregistrée !</h3>
-                  <p className="text-sm text-[#64748B] leading-relaxed">
-                    Notre équipe vous transmettra votre invitation sur WhatsApp dès que possible.
-                  </p>
-                </div>
+          <div className="px-6 pt-10 pb-6 sm:px-8">
+            {/* Ligne gradient */}
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ delay: 0.15, duration: 0.5, ease: 'easeOut' }}
+              className="mx-auto mb-5 h-[3px] w-16 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6]"
+            />
+
+            {/* Badge */}
+            <div className="mb-4 flex justify-center">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-white shadow-sm">
+                <Sparkles className="h-3 w-3" />
+                Invitation privée
+              </span>
+            </div>
+
+            {/* Titre avec prénom */}
+            <h1 className="mb-3 text-center text-[24px] font-bold leading-tight tracking-tight text-[#0F172A] sm:text-[26px]">
+              {displayName ? (
+                <>
+                  <span className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
+                    {displayName}
+                  </span>
+                  , votre accès au cercle privé est prêt.
+                </>
               ) : (
                 <>
-                  <div className="mb-4 flex justify-center">
-                    <span className="text-xl font-bold tracking-tight">
-                      <span className="text-[#111827]">MakeIt</span>
-                      <span className="text-[#6366F1]">Ads</span>
-                    </span>
-                  </div>
-
-                  {/* ✅ CORRECTION 2 : Suppression de 'break-words' pour un retour à la ligne naturel et professionnel */}
-                  <div className="text-center mb-4 px-2">
-                    <span className="inline-block px-2.5 py-0.5 rounded-full bg-[#6366F1]/10 text-[#6366F1] text-[9px] font-bold uppercase tracking-wider mb-2">
-                      Invitation exclusive
-                    </span>
-                    <h3 className="text-lg sm:text-xl font-bold text-[#0F172A] mb-2 leading-tight">
-                      Avant de continuer, découvrez un privilège réservé.
-                    </h3>
-                    <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
-                      Rejoignez gratuitement le cercle communautaire MakeItAds et accédez à des opportunités exclusives.
-                    </p>
-                  </div>
-
-                  <div className="bg-slate-50 rounded-xl p-3 mb-4 space-y-2">
-                    {[
-                      "Visibilité pour votre activité",
-                      "Contact direct avec le fondateur",
-                      "Opportunités de collaboration",
-                      "Conseils et ressources exclusives"
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-2 text-xs sm:text-sm text-[#0F172A]">
-                        <CheckCircle2 className="h-3.5 w-3.5 text-[#6366F1] shrink-0 mt-0.5" />
-                        <span className="leading-relaxed">{item}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <form onSubmit={handleSubmit} className="space-y-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-[#0F172A] mb-1">
-                        Où vous envoyer votre invitation ?
-                      </label>
-                      <PhoneInput 
-                        value={phone} 
-                        onChange={setPhone} 
-                        placeholder="237 6XX XX XX XX"
-                      />
-                      <p className="mt-1 text-[10px] text-[#64748B] leading-relaxed">
-                        Notre équipe vous transmettra directement le lien d'accès.
-                      </p>
-                    </div>
-
-                    <label className="flex items-start gap-2 cursor-pointer group">
-                      <div className="relative flex items-center mt-0.5">
-                        <input
-                          type="checkbox"
-                          checked={consent}
-                          onChange={(e) => setConsent(e.target.checked)}
-                          className="peer h-4 w-4 rounded border-slate-300 text-[#6366F1] focus:ring-[#6366F1] cursor-pointer"
-                        />
-                      </div>
-                      <span className="text-[10px] leading-relaxed text-[#64748B] group-hover:text-[#0F172A] transition-colors">
-                        J'accepte que MakeItAds utilise mon numéro pour me transmettre l'invitation. 
-                        <a href="/privacy" className="text-[#6366F1] hover:underline ml-1">Politique</a>.
-                      </span>
-                    </label>
-
-                    {errorMessage && (
-                      <div className="flex items-start gap-2 text-xs text-red-600 bg-red-50 p-2.5 rounded-lg border border-red-100">
-                        <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
-                        <span className="leading-snug">{errorMessage}</span>
-                      </div>
-                    )}
-
-                    <div className="pt-1 space-y-2">
-                      <button
-                        type="submit"
-                        disabled={status === 'loading' || !consent}
-                        className="w-full flex items-center justify-center gap-2 rounded-full bg-[#6366F1] py-2.5 text-xs font-bold text-white shadow-lg shadow-[#6366F1]/20 transition-all hover:bg-[#5558e6] hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
-                      >
-                        {status === 'loading' ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Envoi en cours...
-                          </>
-                        ) : (
-                          <>
-                            <ShieldCheck className="h-4 w-4" />
-                            Recevoir mon invitation
-                          </>
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={onClose}
-                        className="w-full py-2 text-[11px] font-semibold text-[#64748B] hover:text-[#0F172A] transition-colors"
-                      >
-                        Non merci, continuer ma visite
-                      </button>
-                    </div>
-                  </form>
+                  Votre accès au{' '}
+                  <span className="bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] bg-clip-text text-transparent">
+                    cercle privé
+                  </span>{' '}
+                  est prêt.
                 </>
               )}
+            </h1>
+
+            <p className="mb-6 text-center text-[13px] leading-relaxed text-slate-500">
+              Rejoignez gratuitement la communauté MakeItAds et développez votre
+              réseau d&apos;entrepreneurs.
+            </p>
+
+            {/* Cartes bénéfices */}
+            <div className="mb-6 space-y-2">
+              {BENEFITS.map((benefit, i) => {
+                const Icon = benefit.icon;
+                return (
+                  <motion.div
+                    key={benefit.title}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.2 + i * 0.05 }}
+                    className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3"
+                  >
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-[#6366F1]/10 to-[#8B5CF6]/10">
+                      <Icon className="h-4 w-4 text-[#6366F1]" strokeWidth={2.4} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-[12px] font-semibold text-[#0F172A]">
+                        {benefit.title}
+                      </p>
+                      <p className="text-[11px] leading-tight text-slate-500">
+                        {benefit.description}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
-          </motion.div>
+
+            {success ? (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5 text-center"
+              >
+                <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100">
+                  <Check className="h-6 w-6 text-emerald-600" strokeWidth={3} />
+                </div>
+                <p className="text-[14px] font-semibold text-emerald-900">
+                  Demande envoyée !
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-emerald-700">
+                  Notre équipe vous contactera très vite sur WhatsApp.
+                </p>
+              </motion.div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <label className="block text-[12px] font-semibold text-[#0F172A]">
+                  Où vous envoyer votre invitation ?
+                </label>
+
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="+237 6 00 00 00 00"
+                  className="w-full rounded-xl border-2 border-slate-200 bg-white px-4 py-3 text-[14px] font-medium text-[#0F172A] outline-none transition-all placeholder:text-slate-300 focus:border-[#6366F1] focus:ring-4 focus:ring-[#6366F1]/10"
+                />
+
+                <label className="flex cursor-pointer items-start gap-2.5 text-[11px] leading-relaxed text-slate-500">
+                  <input
+                    type="checkbox"
+                    checked={consent}
+                    onChange={(e) => setConsent(e.target.checked)}
+                    className="mt-0.5 h-4 w-4 shrink-0 cursor-pointer rounded border-slate-300 text-[#6366F1] focus:ring-2 focus:ring-[#6366F1]/20"
+                  />
+                  <span>
+                    J&apos;accepte que MakeItAds utilise mon numéro pour me
+                    transmettre l&apos;invitation demandée.
+                  </span>
+                </label>
+
+                {error && (
+                  <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-2.5 text-[11px] text-red-700">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="group relative w-full overflow-hidden rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-6 py-3.5 text-[14px] font-bold text-white shadow-lg shadow-[#6366F1]/25 transition-all hover:shadow-xl hover:shadow-[#6366F1]/30 disabled:opacity-60"
+                >
+                  <span className="relative flex items-center justify-center gap-2">
+                    {loading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Envoi en cours…
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        Recevoir mon invitation
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="w-full py-2 text-center text-[12px] font-medium text-slate-400 transition-colors hover:text-slate-600"
+                >
+                  Non merci, continuer ma visite
+                </button>
+              </form>
+            )}
+          </div>
         </motion.div>
-      )}
+      </motion.div>
     </AnimatePresence>
   );
 }

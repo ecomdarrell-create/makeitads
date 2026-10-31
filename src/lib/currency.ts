@@ -3,202 +3,158 @@
 // Source unique de vérité pour les conversions et formats
 // ======================================================
 
-export type Currency = 'XOF' | 'XAF' | 'EUR' | 'USD';
+export type Currency = string; // ✅ Toutes les devises ISO 4217
 
-// ✅ Devises supportées + symbole + label + taux de conversion (base = 1 XOF)
-// Taux approximatifs — à mettre à jour manuellement si besoin
-export const CURRENCY_INFO: Record<
-  Currency,
-  { symbol: string; label: string; rateFromXOF: number; decimals: number }
-> = {
-  XOF: { symbol: 'FCFA', label: 'Franc CFA (XOF)', rateFromXOF: 1, decimals: 0 },
-  XAF: { symbol: 'FCFA', label: 'Franc CFA (XAF)', rateFromXOF: 1, decimals: 0 },
-  EUR: { symbol: '€', label: 'Euro (EUR)', rateFromXOF: 1 / 655.957, decimals: 2 },
-  USD: { symbol: '$', label: 'Dollar US (USD)', rateFromXOF: 1 / 600, decimals: 2 },
+export type CurrencyInfo = {
+  code: string;
+  symbol: string;
+  label: string;
+  rateFromXOF: number;
+  decimals: number;
+  region: 'africa' | 'europe' | 'america' | 'asia' | 'middle_east' | 'other';
+  flag?: string;
 };
 
-// ✅ Toutes les devises valides
-export const SUPPORTED_CURRENCIES: Currency[] = ['XOF', 'XAF', 'EUR', 'USD'];
+// ✅ Taux approximatifs (base = 1 XOF). À mettre à jour régulièrement.
+export const CURRENCY_INFO: Record<string, CurrencyInfo> = {
+  // ═══ AFRIQUE ═══
+  XOF: { code: 'XOF', symbol: 'FCFA', label: 'Franc CFA (UEMOA)', rateFromXOF: 1, decimals: 0, region: 'africa', flag: '🌍' },
+  XAF: { code: 'XAF', symbol: 'FCFA', label: 'Franc CFA (CEMAC)', rateFromXOF: 1, decimals: 0, region: 'africa', flag: '🌍' },
+  NGN: { code: 'NGN', symbol: '₦', label: 'Naira nigérian', rateFromXOF: 1 / 0.65, decimals: 0, region: 'africa', flag: '🇳🇬' },
+  GHS: { code: 'GHS', symbol: '₵', label: 'Cedi ghanéen', rateFromXOF: 1 / 45, decimals: 2, region: 'africa', flag: '🇬🇭' },
+  KES: { code: 'KES', symbol: 'KSh', label: 'Shilling kényan', rateFromXOF: 1 / 5, decimals: 0, region: 'africa', flag: '🇰🇪' },
+  ZAR: { code: 'ZAR', symbol: 'R', label: 'Rand sud-africain', rateFromXOF: 1 / 35, decimals: 2, region: 'africa', flag: '🇿🇦' },
+  EGP: { code: 'EGP', symbol: 'E£', label: 'Livre égyptienne', rateFromXOF: 1 / 19, decimals: 2, region: 'africa', flag: '🇪🇬' },
+  MAD: { code: 'MAD', symbol: 'DH', label: 'Dirham marocain', rateFromXOF: 1 / 60, decimals: 2, region: 'africa', flag: '🇲🇦' },
+  TND: { code: 'TND', symbol: 'DT', label: 'Dinar tunisien', rateFromXOF: 1 / 190, decimals: 2, region: 'africa', flag: '🇹🇳' },
+  DZD: { code: 'DZD', symbol: 'DA', label: 'Dinar algérien', rateFromXOF: 1 / 4.5, decimals: 2, region: 'africa', flag: '🇩🇿' },
 
-// ======================================================
-// NORMALISATION
-// ======================================================
-export function normalizeCurrency(currency: string | null | undefined): Currency {
+  // ═══ EUROPE ═══
+  EUR: { code: 'EUR', symbol: '€', label: 'Euro', rateFromXOF: 1 / 655.957, decimals: 2, region: 'europe', flag: '🇪🇺' },
+  GBP: { code: 'GBP', symbol: '£', label: 'Livre sterling', rateFromXOF: 1 / 780, decimals: 2, region: 'europe', flag: '🇬🇧' },
+  CHF: { code: 'CHF', symbol: 'CHF', label: 'Franc suisse', rateFromXOF: 1 / 680, decimals: 2, region: 'europe', flag: '🇨🇭' },
+  SEK: { code: 'SEK', symbol: 'kr', label: 'Couronne suédoise', rateFromXOF: 1 / 57, decimals: 2, region: 'europe', flag: '🇸🇪' },
+  NOK: { code: 'NOK', symbol: 'kr', label: 'Couronne norvégienne', rateFromXOF: 1 / 56, decimals: 2, region: 'europe', flag: '🇳🇴' },
+
+  // ═══ AMÉRIQUE ═══
+  USD: { code: 'USD', symbol: '$', label: 'Dollar américain', rateFromXOF: 1 / 600, decimals: 2, region: 'america', flag: '🇺🇸' },
+  CAD: { code: 'CAD', symbol: 'C$', label: 'Dollar canadien', rateFromXOF: 1 / 440, decimals: 2, region: 'america', flag: '🇨🇦' },
+  BRL: { code: 'BRL', symbol: 'R$', label: 'Réal brésilien', rateFromXOF: 1 / 105, decimals: 2, region: 'america', flag: '🇧🇷' },
+  MXN: { code: 'MXN', symbol: 'Mex$', label: 'Peso mexicain', rateFromXOF: 1 / 30, decimals: 2, region: 'america', flag: '🇲🇽' },
+
+  // ═══ ASIE ═══
+  CNY: { code: 'CNY', symbol: '¥', label: 'Yuan chinois', rateFromXOF: 1 / 83, decimals: 2, region: 'asia', flag: '🇨🇳' },
+  JPY: { code: 'JPY', symbol: '¥', label: 'Yen japonais', rateFromXOF: 1 / 4, decimals: 0, region: 'asia', flag: '🇯🇵' },
+  INR: { code: 'INR', symbol: '₹', label: 'Roupie indienne', rateFromXOF: 1 / 7.2, decimals: 2, region: 'asia', flag: '🇮🇳' },
+  KRW: { code: 'KRW', symbol: '₩', label: 'Won coréen', rateFromXOF: 1 / 0.45, decimals: 0, region: 'asia', flag: '🇰🇷' },
+  IDR: { code: 'IDR', symbol: 'Rp', label: 'Roupie indonésienne', rateFromXOF: 1 / 0.038, decimals: 0, region: 'asia', flag: '🇮🇩' },
+  SGD: { code: 'SGD', symbol: 'S$', label: 'Dollar singapourien', rateFromXOF: 1 / 445, decimals: 2, region: 'asia', flag: '🇸🇬' },
+
+  // ═══ MOYEN-ORIENT ═══
+  AED: { code: 'AED', symbol: 'د.إ', label: 'Dirham émirati', rateFromXOF: 1 / 163, decimals: 2, region: 'middle_east', flag: '🇦🇪' },
+  SAR: { code: 'SAR', symbol: '﷼', label: 'Riyal saoudien', rateFromXOF: 1 / 160, decimals: 2, region: 'middle_east', flag: '🇸🇦' },
+  QAR: { code: 'QAR', symbol: 'ر.ق', label: 'Riyal qatari', rateFromXOF: 1 / 165, decimals: 2, region: 'middle_east', flag: '🇶🇦' },
+  ILS: { code: 'ILS', symbol: '₪', label: 'Shekel israélien', rateFromXOF: 1 / 165, decimals: 2, region: 'middle_east', flag: '🇮🇱' },
+  TRY: { code: 'TRY', symbol: '₺', label: 'Livre turque', rateFromXOF: 1 / 18, decimals: 2, region: 'middle_east', flag: '🇹🇷' },
+};
+
+export const SUPPORTED_CURRENCIES: string[] = Object.keys(CURRENCY_INFO);
+
+export const REGION_LABELS: Record<string, string> = {
+  africa: '🌍 Afrique',
+  europe: '🇪🇺 Europe',
+  america: '🌎 Amérique',
+  asia: '🌏 Asie',
+  middle_east: '🕌 Moyen-Orient',
+  other: '🌐 Autres',
+};
+
+// ═══ Helpers ═══
+
+export function normalizeCurrency(currency: string | null | undefined): string {
   if (!currency) return 'XOF';
-
   const upper = currency.toUpperCase().trim();
-
-  // Aliases courants → XAF (CEMAC)
-  if (upper === 'XAF' || upper === 'FCFA-CEMAC') return 'XAF';
-
-  // Aliases courants → XOF (UEMOA)
-  if (upper === 'XOF' || upper === 'FCFA' || upper === 'CFA' || upper === 'FCFA-UEMOA') {
-    return 'XOF';
-  }
-
-  // Devises directes
-  if (upper === 'EUR') return 'EUR';
-  if (upper === 'USD') return 'USD';
-
-  // Fallback par défaut
+  if (CURRENCY_INFO[upper]) return upper;
+  if (upper === 'FCFA' || upper === 'CFA') return 'XOF';
   return 'XOF';
 }
 
-// ======================================================
-// SYMBOLE
-// ======================================================
-export function getCurrencySymbol(currency: Currency | string | null | undefined): string {
+export function getCurrencySymbol(currency: string | null | undefined): string {
   const normalized = normalizeCurrency(currency);
-  return CURRENCY_INFO[normalized].symbol;
+  return CURRENCY_INFO[normalized]?.symbol ?? 'FCFA';
 }
 
-// ======================================================
-// CONVERSION
-// ======================================================
+export function getCurrencyInfo(currency: string | null | undefined): CurrencyInfo {
+  const normalized = normalizeCurrency(currency);
+  return CURRENCY_INFO[normalized];
+}
 
-/**
- * Convertit un montant de la devise source vers la devise cible.
- * Utilise XOF comme pivot si les devises diffèrent.
- */
-export function convertCurrency(
-  amount: number,
-  from: Currency | string,
-  to: Currency | string
-): number {
+export function convertCurrency(amount: number, from: string, to: string): number {
   const fromCur = normalizeCurrency(from);
   const toCur = normalizeCurrency(to);
-
   if (fromCur === toCur) return amount;
-
-  // Pivot en XOF
   const amountInXOF = amount / CURRENCY_INFO[fromCur].rateFromXOF;
-  const result = amountInXOF * CURRENCY_INFO[toCur].rateFromXOF;
-
-  return result;
+  return amountInXOF * CURRENCY_INFO[toCur].rateFromXOF;
 }
 
-/**
- * Convertit un montant depuis XOF (base) vers la devise cible.
- * Pratique quand tous les prix de référence sont en XOF.
- */
-export function convertFromXOF(amountXOF: number, targetCurrency: Currency | string): number {
+export function convertFromXOF(amountXOF: number, targetCurrency: string): number {
   const target = normalizeCurrency(targetCurrency);
   return amountXOF * CURRENCY_INFO[target].rateFromXOF;
 }
 
-// ======================================================
-// FORMATAGE
-// ======================================================
-
-/**
- * Formate un montant avec le bon séparateur + symbole.
- * Ex XOF : "10 000 FCFA"
- * Ex EUR : "15,24 €"
- * Ex USD : "16,67 $"
- */
-export function formatPrice(
-  amount: number,
-  currency: Currency | string | null | undefined
-): string {
+export function formatPrice(amount: number, currency: string | null | undefined): string {
   const cur = normalizeCurrency(currency);
   const info = CURRENCY_INFO[cur];
-
-  // Arrondi selon la devise (0 décimales pour FCFA, 2 pour EUR/USD)
   const rounded = info.decimals === 0 ? Math.round(amount) : Number(amount.toFixed(2));
-
   const formatted = rounded.toLocaleString('fr-FR', {
     minimumFractionDigits: info.decimals,
     maximumFractionDigits: info.decimals,
   });
-
   return `${formatted} ${info.symbol}`;
 }
 
-/**
- * Formate un montant depuis XOF vers la devise cible.
- * Ex : formatPriceFromXOF(10000, 'EUR') → "15,24 €"
- */
-export function formatPriceFromXOF(
-  amountXOF: number,
-  targetCurrency: Currency | string | null | undefined
-): string {
+export function formatPriceFromXOF(amountXOF: number, targetCurrency: string | null | undefined): string {
   const target = normalizeCurrency(targetCurrency);
   const converted = convertFromXOF(amountXOF, target);
   return formatPrice(converted, target);
 }
 
-// ======================================================
-// HELPERS POUR LES PLANS
-// ======================================================
-
-// Prix de base en XOF (source de vérité)
 const BASE_PLAN_PRICES_XOF: Record<string, number> = {
   pro: 10000,
   premium: 25000,
   enterprise: 100000,
 };
 
-/**
- * Formate le prix d'un plan dans la devise cible.
- * @param planId 'pro' | 'premium' | 'enterprise'
- * @param currency devise cible
- * @param period ex: '/an'
- */
 export function formatPlanPrice(
   planId: 'pro' | 'premium' | 'enterprise',
-  currency: Currency | string = 'XOF',
+  currency: string = 'XOF',
   period: string = '/an'
 ): string {
   const base = BASE_PLAN_PRICES_XOF[planId];
   if (!base) return '—';
-
   return `${formatPriceFromXOF(base, currency)}${period}`;
 }
 
-/**
- * Récupère le prix numérique d'un plan dans la devise cible.
- */
 export function getPlanPriceInCurrency(
   planId: 'pro' | 'premium' | 'enterprise',
-  currency: Currency | string = 'XOF'
+  currency: string = 'XOF'
 ): number {
   const base = BASE_PLAN_PRICES_XOF[planId];
   return convertFromXOF(base, currency);
 }
 
-// ======================================================
-// HELPERS POUR LES PACKS DE RECHARGE
-// ======================================================
-
-// Prix de base des packs en XOF (source de vérité)
 const BASE_RECHARGE_PRICES_XOF: Record<number, number> = {
   10: 1500,
   30: 4000,
   80: 9000,
 };
 
-/**
- * Formate le prix d'un pack de recharge dans la devise cible.
- * @param credits nombre de crédits (10, 30, 80)
- */
-export function formatRechargePrice(
-  credits: number,
-  currency: Currency | string = 'XOF'
-): string {
+export function formatRechargePrice(credits: number, currency: string = 'XOF'): string {
   const base = BASE_RECHARGE_PRICES_XOF[credits];
   if (!base) return '—';
-
   return formatPriceFromXOF(base, currency);
 }
 
-// ======================================================
-// PARSING (utile pour lire les prix dans les configs)
-// ======================================================
-
-/**
- * Extrait un montant numérique d'une chaîne comme "10 000 FCFA/an".
- * Retourne null si rien trouvé.
- */
 export function parsePriceFromString(text: string): number | null {
   if (!text) return null;
   const cleaned = text.replace(/[^\d]/g, '');

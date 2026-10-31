@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2, Lock, Crown, CheckCircle2 } from 'lucide-react';
@@ -19,7 +19,6 @@ import { Step8Context } from '@/components/generate/steps/Step8Context';
 import { Summary } from '@/components/generate/Summary';
 import { LoadingGeneration } from '@/components/generate/LoadingGeneration';
 import { PreGenerationModal } from '@/components/generate/PreGenerationModal';
-import { PostFlashUpgradeModal } from '@/components/generate/PostFlashUpgradeModal';
 import { BackButton } from '@/components/ui/BackButton';
 
 const DRAFT_KEY = 'makeitads_draft';
@@ -41,8 +40,9 @@ export default function GeneratePage() {
   const [currency, setCurrency] = useState<string>('XOF');
 
   const [showPreGeneration, setShowPreGeneration] = useState(false);
-  const [showPostFlash, setShowPostFlash] = useState(false);
-  const [lastStrategyId, setLastStrategyId] = useState<string>('');
+
+  // Ajout : ref pour éviter le scroll au tout premier rendu
+  const isFirstRender = useRef(true);
 
   const totalSteps = 8;
   const isFree = currentPlan === 'free';
@@ -159,6 +159,20 @@ export default function GeneratePage() {
     }
     loadCreditsBalance();
   }, []);
+
+  // Ajout : scroll en haut à chaque changement d'étape / summary / génération
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 80);
+
+    return () => clearTimeout(timer);
+  }, [currentStep, showSummary, isGenerating]);
 
   useEffect(() => {
     if (!isFree && strategyType !== 'complete') {
@@ -282,20 +296,8 @@ export default function GeneratePage() {
         localStorage.removeItem(DRAFT_KEY);
         setHasDraft(false);
 
-        const newBalance = typeof data.creditsRemaining === 'number'
-          ? data.creditsRemaining
-          : Math.max(0, safeBalance - generationCost);
-
-        if (
-          strategyType === 'flash' &&
-          newBalance > 0 &&
-          newBalance < CREDIT_COSTS.STRATEGIE_COMPLETE
-        ) {
-          setLastStrategyId(data.strategyId);
-          setShowPostFlash(true);
-        } else {
-          router.push(`/dashboard/strategies/${data.strategyId}`);
-        }
+        // MODIFICATION : suppression du PostFlashUpgradeModal — redirection directe
+        router.push(`/dashboard/strategies/${data.strategyId}`);
       } else {
         let errorMsg = data.error || 'Erreur lors de la génération';
 
@@ -471,10 +473,8 @@ export default function GeneratePage() {
               </span>
             </div>
 
-            {/* ✅ SECTION PREMIUM : 2 COLONNES MOBILE */}
             {isFree ? (
               <div className="grid grid-cols-2 gap-2 sm:gap-4">
-                {/* Option 1 : Diagnostic Flash (Actif et accessible) */}
                 <button
                   type="button"
                   onClick={() => setStrategyType('flash')}
@@ -500,9 +500,7 @@ export default function GeneratePage() {
                   </div>
                 </button>
 
-                {/* Option 2 : Stratégie Complète (Verrouillée Premium) */}
                 <div className="relative flex flex-col justify-between p-2 sm:p-4 rounded-xl border border-slate-200 bg-slate-50/80 text-left overflow-hidden group transition-all duration-200 hover:border-[#6366F1]/30 hover:shadow-md">
-                  {/* Badge PRO en haut à droite */}
                   <div className="absolute top-0 right-0 bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] text-white text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-bl-lg flex items-center gap-1">
                     <Crown className="h-3 w-3" />
                     PRO
@@ -513,7 +511,6 @@ export default function GeneratePage() {
                     <Lock className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-slate-400" />
                   </div>
 
-                  {/* Liste des avantages compacte pour mobile */}
                   <ul className="text-[10px] sm:text-xs text-slate-500 mb-2 sm:mb-4 space-y-1">
                     <li className="flex items-start gap-1">
                       <span className="h-1 w-1 mt-1.5 rounded-full bg-[#6366F1] shrink-0" />
@@ -525,7 +522,6 @@ export default function GeneratePage() {
                     </li>
                   </ul>
 
-                  {/* Bouton d'upgrade incitatif */}
                   <button
                     type="button"
                     onClick={() => router.push('/dashboard/pricing')}
@@ -596,16 +592,6 @@ export default function GeneratePage() {
         plan={currentPlan}
         strategyType={strategyType}
         creditsBalance={safeBalance}
-      />
-
-      <PostFlashUpgradeModal
-        isOpen={showPostFlash}
-        onClose={() => {
-          setShowPostFlash(false);
-          router.push(`/dashboard/strategies/${lastStrategyId}`);
-        }}
-        remainingCredits={safeBalance - generationCost}
-        strategyId={lastStrategyId}
       />
     </div>
   );

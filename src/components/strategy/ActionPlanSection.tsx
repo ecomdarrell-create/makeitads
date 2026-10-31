@@ -1,6 +1,47 @@
 'use client';
 
+import React from 'react';
 import { Calendar, ArrowRight } from 'lucide-react';
+
+function cleanMarkdown(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\*\*\*([^*]+)\*\*\*/g, '$1')
+    .replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1')
+    .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '$1')
+    .replace(/\*/g, '')
+    .replace(/(?<!\w)_(?!\w)/g, '')
+    .replace(/`/g, '')
+    .replace(/^#{1,6}\s+/gm, '');
+}
+
+function renderRichText(text: string): React.ReactNode {
+  if (!text) return null;
+  const normalized = text.replace(/\*\*\*([^*]+)\*\*\*/g, '**$1**');
+  const lines = normalized.split('\n');
+  return lines.map((line, lineIdx) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <React.Fragment key={lineIdx}>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            const innerText = cleanMarkdown(part.slice(2, -2));
+            if (!innerText) return null;
+            return (
+              <strong key={i} className="font-bold text-[#8B5CF6]">
+                {innerText}
+              </strong>
+            );
+          }
+          const cleaned = cleanMarkdown(part);
+          if (!cleaned) return null;
+          return <span key={i}>{cleaned}</span>;
+        })}
+        {lineIdx < lines.length - 1 && <br />}
+      </React.Fragment>
+    );
+  });
+}
 
 interface Phase {
   titre: string;
@@ -40,7 +81,7 @@ export function ActionPlanSection({ plan }: ActionPlanSectionProps) {
                   {index + 1}
                 </div>
                 <h3 className="text-xs font-semibold text-[#18181B]">
-                  {phase.titre}
+                  {renderRichText(phase.titre)}
                 </h3>
               </div>
               <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[9px] font-semibold text-slate-600">
@@ -55,7 +96,7 @@ export function ActionPlanSection({ plan }: ActionPlanSectionProps) {
                   className="flex items-start gap-2 text-[11px] leading-relaxed text-slate-700"
                 >
                   <ArrowRight className="mt-0.5 h-3 w-3 shrink-0 text-[#6366F1]" />
-                  <span>{action}</span>
+                  <span>{renderRichText(action)}</span>
                 </li>
               ))}
             </ul>

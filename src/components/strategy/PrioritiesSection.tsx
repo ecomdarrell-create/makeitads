@@ -1,6 +1,47 @@
 'use client';
 
+import React from 'react';
 import { ListChecks } from 'lucide-react';
+
+function cleanMarkdown(text: string): string {
+  if (!text) return '';
+  return text
+    .replace(/\*\*\*([^*]+)\*\*\*/g, '$1')
+    .replace(/(?<!\*)\*(?!\*)([^*\n]+?)\*(?!\*)/g, '$1')
+    .replace(/(?<!\w)_([^_\n]+?)_(?!\w)/g, '$1')
+    .replace(/\*/g, '')
+    .replace(/(?<!\w)_(?!\w)/g, '')
+    .replace(/`/g, '')
+    .replace(/^#{1,6}\s+/gm, '');
+}
+
+function renderRichText(text: string): React.ReactNode {
+  if (!text) return null;
+  const normalized = text.replace(/\*\*\*([^*]+)\*\*\*/g, '**$1**');
+  const lines = normalized.split('\n');
+  return lines.map((line, lineIdx) => {
+    const parts = line.split(/(\*\*[^*]+\*\*)/g);
+    return (
+      <React.Fragment key={lineIdx}>
+        {parts.map((part, i) => {
+          if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+            const innerText = cleanMarkdown(part.slice(2, -2));
+            if (!innerText) return null;
+            return (
+              <strong key={i} className="font-bold text-[#8B5CF6]">
+                {innerText}
+              </strong>
+            );
+          }
+          const cleaned = cleanMarkdown(part);
+          if (!cleaned) return null;
+          return <span key={i}>{cleaned}</span>;
+        })}
+        {lineIdx < lines.length - 1 && <br />}
+      </React.Fragment>
+    );
+  });
+}
 
 interface Priority {
   niveau: 'Priorité immédiate' | 'À tester' | 'À optimiser' | 'À surveiller';
@@ -60,7 +101,7 @@ export function PrioritiesSection({ priorities }: PrioritiesSectionProps) {
                 <div className="flex items-center gap-2">
                   <span className={`h-2 w-2 rounded-full ${style.dot}`} />
                   <span className="text-xs font-semibold text-[#18181B]">
-                    {String(index + 1).padStart(2, '0')} — {priority.titre}
+                    {String(index + 1).padStart(2, '0')} — {renderRichText(priority.titre)}
                   </span>
                 </div>
                 <span
@@ -76,7 +117,7 @@ export function PrioritiesSection({ priorities }: PrioritiesSectionProps) {
                     Pourquoi
                   </span>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-600">
-                    {priority.pourquoi}
+                    {renderRichText(priority.pourquoi)}
                   </p>
                 </div>
                 <div>
@@ -84,7 +125,7 @@ export function PrioritiesSection({ priorities }: PrioritiesSectionProps) {
                     Action
                   </span>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-[#18181B]">
-                    {priority.action}
+                    {renderRichText(priority.action)}
                   </p>
                 </div>
                 <div className="border-t border-slate-100 pt-2">
@@ -92,7 +133,7 @@ export function PrioritiesSection({ priorities }: PrioritiesSectionProps) {
                     Impact attendu
                   </span>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-700">
-                    {priority.impact_attendu}
+                    {renderRichText(priority.impact_attendu)}
                   </p>
                 </div>
               </div>

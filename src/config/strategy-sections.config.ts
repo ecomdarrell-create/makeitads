@@ -17,12 +17,10 @@ import {
   GraduationCap,
   LineChart,
   FileText,
+  Network,
+  Boxes,
   type LucideIcon,
 } from "lucide-react";
-
-// ============================================
-// TYPES
-// ============================================
 
 export type PlanTier = "free" | "pro" | "premium" | "enterprise";
 
@@ -34,10 +32,6 @@ export interface SectionConfig {
   previewText: string;
 }
 
-// ============================================
-// HIÉRARCHIE DES PLANS
-// ============================================
-
 const PLAN_HIERARCHY: PlanTier[] = ["free", "pro", "premium", "enterprise"];
 
 export function planHasAccess(userPlan: PlanTier, requiredPlan: PlanTier): boolean {
@@ -46,20 +40,12 @@ export function planHasAccess(userPlan: PlanTier, requiredPlan: PlanTier): boole
   return userIndex >= requiredIndex;
 }
 
-// ============================================
-// LABELS COMMERCIAUX
-// ============================================
-
 export const PLAN_LABELS: Record<PlanTier, string> = {
   free: "Démo",
   pro: "Pro",
   premium: "Premium",
   enterprise: "Élite",
 };
-
-// ============================================
-// SECTIONS FLASH (plan Démo)
-// ============================================
 
 export const FLASH_SECTIONS: SectionConfig[] = [
   {
@@ -85,10 +71,6 @@ export const FLASH_SECTIONS: SectionConfig[] = [
   },
 ];
 
-// ============================================
-// SECTIONS COMPLETE (Pro → Élite)
-// ============================================
-
 export const COMPLETE_SECTIONS: SectionConfig[] = [
   // ─── Pro ───
   {
@@ -105,7 +87,16 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Target,
     minPlan: "pro",
     previewText:
-      "Villes prioritaires, tranches d'âge, centres d'intérêt et comportements d'achat pour atteindre précisément les bonnes personnes et maximiser chaque unité investie.",
+      "Villes prioritaires, tranches d'âge, centres d'intérêt et comportements d'achat pour atteindre précisément les bonnes personnes.",
+  },
+  // ✅ NOUVELLE SECTION : Segmentation (Pro)
+  {
+    id: "segmentation",
+    title: "Segmentation précise de l'audience",
+    icon: Network,
+    minPlan: "pro",
+    previewText:
+      "Découpage précis de votre audience en segments distincts, avec pour chacun les villes, âges, intérêts, comportements et le budget conseillé au millimètre.",
   },
   {
     id: "scripts_whatsapp",
@@ -121,7 +112,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Wallet,
     minPlan: "pro",
     previewText:
-      "Répartition détaillée de votre budget sur 7 jours, entre phase de test, optimisation et scaling, avec montants adaptés à votre devise.",
+      "Répartition détaillée de votre budget sur 7 jours, entre phase de test, optimisation et scaling.",
   },
   {
     id: "conseil_expert",
@@ -129,7 +120,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Star,
     minPlan: "pro",
     previewText:
-      "Un conseil stratégique avancé pour maximiser le retour sur vos dépenses publicitaires et accélérer votre rentabilité.",
+      "Un conseil stratégique avancé pour maximiser le retour sur vos dépenses publicitaires.",
   },
   {
     id: "recommandations_plateforme",
@@ -137,7 +128,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Layers,
     minPlan: "pro",
     previewText:
-      "Les plateformes publicitaires à privilégier selon votre secteur et votre audience, avec justification stratégique pour chacune.",
+      "Les plateformes publicitaires à privilégier selon votre secteur et votre audience.",
   },
   {
     id: "guide_creatif",
@@ -145,7 +136,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Palette,
     minPlan: "pro",
     previewText:
-      "Formats de visuels et vidéos à produire, angles créatifs, éléments à mettre en avant et pièges à éviter.",
+      "Formats de visuels et vidéos à produire, angles créatifs, éléments à mettre en avant.",
   },
   {
     id: "kpis",
@@ -153,17 +144,26 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Activity,
     minPlan: "pro",
     previewText:
-      "Les indicateurs à suivre quotidiennement pour piloter votre campagne et détecter rapidement les dérives.",
+      "Les indicateurs à suivre quotidiennement pour piloter votre campagne et détecter les dérives.",
   },
 
   // ─── Premium ───
+  // ✅ NOUVELLE SECTION : Ensembles publicitaires (Premium)
+  {
+    id: "ad_sets",
+    title: "Ensembles publicitaires détaillés",
+    icon: Boxes,
+    minPlan: "premium",
+    previewText:
+      "Structure complète de vos ensembles publicitaires : objectif, audience cible, budget journalier, créatives recommandées, placements et durée optimale. Au millimètre près.",
+  },
   {
     id: "analyse_concurrentielle",
     title: "Analyse concurrentielle",
     icon: Swords,
     minPlan: "premium",
     previewText:
-      "Ce que font vos concurrents directs, leurs angles publicitaires, leurs points faibles et comment vous démarquer durablement sur votre marché.",
+      "Ce que font vos concurrents directs, leurs angles publicitaires, leurs points faibles et comment vous démarquer.",
   },
   {
     id: "hooks",
@@ -171,7 +171,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Zap,
     minPlan: "premium",
     previewText:
-      "Cinq accroches publicitaires testées, chacune construite sur un levier psychologique différent, pour identifier celle qui convertit le mieux pour votre audience.",
+      "Cinq accroches publicitaires testées, chacune construite sur un levier psychologique différent.",
   },
   {
     id: "analyse_audience",
@@ -179,7 +179,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: Users,
     minPlan: "premium",
     previewText:
-      "Comportements d'achat, objections fréquentes, déclencheurs de décision et moment optimal de contact pour chaque segment.",
+      "Comportements d'achat, objections fréquentes, déclencheurs de décision et moment optimal de contact.",
   },
   {
     id: "strategie_croissance",
@@ -187,7 +187,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: TrendingUp,
     minPlan: "premium",
     previewText:
-      "Plan d'action complet sur trois mois avec jalons mensuels, objectifs chiffrés et étapes de scaling pour structurer votre expansion.",
+      "Plan d'action complet sur trois mois avec jalons mensuels, objectifs chiffrés et étapes de scaling.",
   },
 
   // ─── Élite ───
@@ -205,7 +205,7 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: GraduationCap,
     minPlan: "enterprise",
     previewText:
-      "Plan de montée en compétences recommandé pour votre équipe ou pour vous-même, structuré sur plusieurs semaines.",
+      "Plan de montée en compétences recommandé pour votre équipe ou pour vous-même.",
   },
   {
     id: "accompagnement_avance",
@@ -221,19 +221,10 @@ export const COMPLETE_SECTIONS: SectionConfig[] = [
     icon: FileText,
     minPlan: "enterprise",
     previewText:
-      "Structure de rapport professionnel avec métriques clés et narratif prêt à présenter à vos parties prenantes, personnalisable à votre marque.",
+      "Structure de rapport professionnel avec métriques clés et narratif prêt à présenter à vos parties prenantes.",
   },
 ];
 
-// ============================================
-// HELPERS
-// ============================================
-
-/**
- * Retourne toutes les sections à afficher selon le type de stratégie.
- * Pour un Flash : les 3 sections Flash + toutes les sections Complete (verrouillées).
- * Pour une Complete : uniquement les sections Complete.
- */
 export function getSectionsForStrategy(
   strategyType: "flash" | "complete"
 ): SectionConfig[] {
@@ -243,9 +234,6 @@ export function getSectionsForStrategy(
   return COMPLETE_SECTIONS;
 }
 
-/**
- * Vérifie si une section doit être verrouillée pour un plan donné.
- */
 export function isSectionLocked(
   userPlan: PlanTier,
   section: SectionConfig

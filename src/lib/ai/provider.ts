@@ -18,11 +18,7 @@ export const DEFAULT_AI_CONFIG: AIConfig = {
 
 export type PlanTier = 'free' | 'pro' | 'premium' | 'enterprise';
 
-// ============================================
 // ✅ HELPERS DE COERCITION (tolérants aux formats variables)
-// ============================================
-
-// Accepte nombre OU string numérique → convertit en number
 const coerceNumber = z.preprocess(
   (v) => {
     if (typeof v === 'string') {
@@ -36,7 +32,6 @@ const coerceNumber = z.preprocess(
   z.number()
 );
 
-// Accepte tableau OU string → convertit en tableau
 const coerceStringArray = z.preprocess(
   (v) => {
     if (Array.isArray(v)) return v.filter((x) => typeof x === 'string');
@@ -58,9 +53,7 @@ const coerceStringArray = z.preprocess(
 const ExecutiveSummarySchema = z.object({
   synthese: z.string().catch(''),
   preparation: coerceNumber,
-  opportunite: z
-    .enum(['Faible', 'Moyenne', 'Élevée'])
-    .catch('Moyenne'),
+  opportunite: z.enum(['Faible', 'Moyenne', 'Élevée']).catch('Moyenne'),
   risque_principal: z.string().catch(''),
   priorite: z.string().catch(''),
 });
@@ -113,7 +106,6 @@ const ActionPlanSchema = z.object({
     .catch({ titre: 'Optimisation', duree: 'Semaine 2', actions: [] }),
 });
 
-// ✅ Budget ultra-tolérant (accepte strings, missing fields, etc.)
 const BudgetSchema = z.object({
   montant_total: coerceNumber,
   devise: z.string().catch('FCFA'),
@@ -192,6 +184,51 @@ export const EliteCompleteSchema = PremiumCompleteSchema.extend({
   rapports_whitelabel: z.string().catch(''),
 });
 
+// ============================================
+// ✅ NOUVEAU : SCHÉMAS SEGMENTATION + AD_SETS
+// ============================================
+
+const SegmentationItemSchema = z.object({
+  nom_segment: z.string().catch(''),
+  villes: coerceStringArray,
+  ages: z.string().catch(''),
+  interets: coerceStringArray,
+  comportements: coerceStringArray,
+  budget_conseille: coerceNumber,
+  pourcentage_budget: coerceNumber,
+});
+
+const SegmentationSchema = z.array(SegmentationItemSchema).catch([]);
+
+const AdSetItemSchema = z.object({
+  nom_ensemble: z.string().catch(''),
+  objectif: z.string().catch(''),
+  budget_journalier: coerceNumber,
+  audience_cible: z.string().catch(''),
+  nombre_creatives: coerceNumber,
+  creatives: coerceStringArray,
+  duree_recommandee: z.string().catch(''),
+  placement: coerceStringArray,
+});
+
+const AdSetsSchema = z.array(AdSetItemSchema).catch([]);
+
+// Ajout de segmentation à Pro
+export const ProCompleteWithSegmentationSchema = ProCompleteSchema.extend({
+  segmentation: SegmentationSchema,
+});
+
+// Ajout de segmentation + ad_sets à Premium et Elite
+export const PremiumCompleteWithAdSetsSchema = PremiumCompleteSchema.extend({
+  segmentation: SegmentationSchema,
+  ad_sets: AdSetsSchema,
+});
+
+export const EliteCompleteWithAdSetsSchema = EliteCompleteSchema.extend({
+  segmentation: SegmentationSchema,
+  ad_sets: AdSetsSchema,
+});
+
 export type FlashDiagnostic = z.infer<typeof FlashDiagnosticSchema>;
 export type ProComplete = z.infer<typeof ProCompleteSchema>;
 export type PremiumComplete = z.infer<typeof PremiumCompleteSchema>;
@@ -203,15 +240,16 @@ export type EliteComplete = z.infer<typeof EliteCompleteSchema>;
 const STYLE_RULES = `
 RÈGLES DE STYLE ABSOLUES :
 1. Commence TOUJOURS ta réponse par le champ "salutation" qui salue l'utilisateur avec son prénom (fourni dans les données sous "userFirstName"). Exemple : "Bonjour Awa, voici ta stratégie."
-2. N'utilise JAMAIS de tirets longs ni de tirets cadratins. Aucun "—" ou "–".
-3. N'utilise JAMAIS de guillemets droits anglais. Utilise les guillemets français « ».
-4. N'utilise PAS d'astérisques pour le formatage Markdown, sauf **mot clé** pour le gras (1 à 3 par paragraphe maximum).
-5. N'utilise NI backticks, NI dièses (#), NI tirets de liste. Pour les listes, utilise des puces simples avec •
-6. Aère ton texte : sépare tes idées par des sauts de ligne.
-7. Ton direct, expert, chaleureux. Tutoie l'utilisateur.
-8. Pas de jargon marketing creux. Concret et actionnable.
-9. Ne fabrique AUCUN chiffre de ventes/ROAS/taux non fondé. Signale les hypothèses.
-10. Réponds UNIQUEMENT en JSON valide. Aucun texte avant ni après. Aucun bloc markdown.
+2. Le prénom n'apparaît QUE dans le champ "salutation". Les autres champs ne recommencent PAS par le prénom.
+3. N'utilise JAMAIS de tirets longs ni de tirets cadratins. Aucun "—" ou "–".
+4. N'utilise JAMAIS de guillemets droits anglais. Utilise les guillemets français « ».
+5. N'utilise PAS d'astérisques pour le formatage Markdown, sauf **mot clé** pour le gras (1 à 3 par paragraphe maximum).
+6. N'utilise NI backticks, NI dièses (#), NI tirets de liste. Pour les listes, utilise des puces simples avec •
+7. Aère ton texte : sépare tes idées par des sauts de ligne.
+8. Ton direct, expert, chaleureux. Tutoie l'utilisateur.
+9. Pas de jargon marketing creux. Concret et actionnable.
+10. Ne fabrique AUCUN chiffre de ventes/ROAS/taux non fondé. Signale les hypothèses.
+11. Réponds UNIQUEMENT en JSON valide. Aucun texte avant ni après. Aucun bloc markdown.
 
 RÈGLES DE FORMAT JSON (très importantes) :
 - "budget.montant_total" : nombre (ex: 50000), pas une string
@@ -280,6 +318,26 @@ Structure JSON attendue (RESPECTE EXACTEMENT) :
     "interets": ["intérêt 1", "intérêt 2", "intérêt 3"],
     "comportements": ["comportement 1", "comportement 2"]
   },
+  "segmentation": [
+    {
+      "nom_segment": "Segment 1 - nom court",
+      "villes": ["ville 1", "ville 2"],
+      "ages": "25-35 ans",
+      "interets": ["intérêt 1", "intérêt 2"],
+      "comportements": ["comportement 1", "comportement 2"],
+      "budget_conseille": 15000,
+      "pourcentage_budget": 30
+    },
+    {
+      "nom_segment": "Segment 2 - nom court",
+      "villes": ["ville 1"],
+      "ages": "35-45 ans",
+      "interets": ["intérêt 1"],
+      "comportements": ["comportement 1"],
+      "budget_conseille": 20000,
+      "pourcentage_budget": 40
+    }
+  ],
   "scripts_whatsapp": [
     "Script 1 : accueil et qualification",
     "Script 2 : relance après 24h",
@@ -311,7 +369,9 @@ Structure JSON attendue (RESPECTE EXACTEMENT) :
   "avertissements": ["avertissement si nécessaire"]
 }
 
-⚠️ TOUS les nombres doivent être des nombres JSON, PAS des strings.`;
+⚠️ TOUS les nombres doivent être des nombres JSON, PAS des strings.
+⚠️ "segmentation" : tableau de 2 à 4 segments. Chaque segment = une audience distincte avec son propre budget. Le total des "pourcentage_budget" doit faire 100.`;
+
 const PREMIUM_SYSTEM_PROMPT = PRO_SYSTEM_PROMPT + `
 
 CHAMPS ADDITIONNELS (ajoute-les en plus de TOUT ce qui précède) :
@@ -319,8 +379,32 @@ CHAMPS ADDITIONNELS (ajoute-les en plus de TOUT ce qui précède) :
   "analyse_concurrentielle": "Analyse des concurrents. Aéré.",
   "hooks": ["Hook 1 (douleur)", "Hook 2 (curiosité)", "Hook 3 (preuve sociale)", "Hook 4 (urgence)", "Hook 5 (transformation)"],
   "analyse_audience": "Comportements d'achat, objections, déclencheurs. Aéré.",
-  "strategie_croissance": "Plan sur 3 mois avec jalons."
-}`;
+  "strategie_croissance": "Plan sur 3 mois avec jalons.",
+  "ad_sets": [
+    {
+      "nom_ensemble": "Ensemble 1 - nom court",
+      "objectif": "Conversion / Trafic / Messages",
+      "budget_journalier": 5000,
+      "audience_cible": "Segment 1 ciblé",
+      "nombre_creatives": 3,
+      "creatives": ["Format 1 (vidéo 9:16)", "Format 2 (image 1:1)", "Format 3 (carrousel)"],
+      "duree_recommandee": "7 jours",
+      "placement": ["Facebook Feed", "Instagram Feed", "Instagram Reels"]
+    },
+    {
+      "nom_ensemble": "Ensemble 2 - nom court",
+      "objectif": "Conversion",
+      "budget_journalier": 5000,
+      "audience_cible": "Segment 2 ciblé",
+      "nombre_creatives": 2,
+      "creatives": ["Format 1 (vidéo 9:16)", "Format 2 (image 1:1)"],
+      "duree_recommandee": "7 jours",
+      "placement": ["Facebook Feed", "Instagram Reels"]
+    }
+  ]
+}
+
+⚠️ "ad_sets" : tableau de 2 à 5 ensembles publicitaires. Chaque ensemble = une combinaison audience + créatives + budget + placements. Au millimètre près.`;
 
 const ELITE_SYSTEM_PROMPT = PREMIUM_SYSTEM_PROMPT + `
 
@@ -372,10 +456,10 @@ export function getSystemPrompt(
 export function getSchema(type: 'flash' | 'complete', plan: PlanTier = 'free'): z.ZodTypeAny {
   if (type === 'flash') return FlashDiagnosticSchema;
   switch (plan) {
-    case 'pro': return ProCompleteSchema;
-    case 'premium': return PremiumCompleteSchema;
-    case 'enterprise': return EliteCompleteSchema;
-    default: return ProCompleteSchema;
+    case 'pro': return ProCompleteWithSegmentationSchema;
+    case 'premium': return PremiumCompleteWithAdSetsSchema;
+    case 'enterprise': return EliteCompleteWithAdSetsSchema;
+    default: return ProCompleteWithSegmentationSchema;
   }
 }
 
@@ -408,7 +492,6 @@ export async function generateStrategy<T>(
     return validated;
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // ✅ Log ultra-détaillé pour voir exactement ce qui échoue
       console.error('❌ Erreur de validation Zod. Issues:');
       console.error(JSON.stringify(error.issues, null, 2));
       console.error('Réponse IA brute (2000 premiers char):');

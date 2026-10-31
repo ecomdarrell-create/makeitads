@@ -7,7 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 export function useAuth() {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(false);
+  // ✅ FIX : commence à TRUE (attente de la session)
+  const [loading, setLoading] = useState(true);
   const isMounted = useRef(false);
 
   useEffect(() => {
@@ -18,12 +19,14 @@ export function useAuth() {
       if (isMounted.current) {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        setLoading(false); // ✅ FIX : passe à FALSE quand la session est chargée
       }
     }).catch((error: AuthError) => {
       console.error('Erreur session:', error);
       if (isMounted.current) {
         setSession(null);
         setUser(null);
+        setLoading(false); // ✅ FIX : passe à FALSE même en cas d'erreur
       }
     });
 
@@ -31,6 +34,7 @@ export function useAuth() {
       if (isMounted.current) {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
+        setLoading(false); // ✅ FIX : dès qu'on a un event auth
       }
     });
 

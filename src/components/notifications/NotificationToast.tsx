@@ -30,27 +30,49 @@ const COLORS: Record<string, string> = {
   system: "text-slate-600 bg-slate-100",
 };
 
+// MODIFICATION 1 : Catégories qui ne disparaissent jamais automatiquement
+const PERSISTENT_CATEGORIES: Array<AppNotification["category"]> = [
+  "welcome",
+  "credits",
+];
+
 interface NotificationToastProps {
   notification: AppNotification;
   onDismiss: () => void;
   onRead: () => void;
+  // MODIFICATION 6 : callbacks pour ouvrir le panneau au clic
+  onOpenPanel?: () => void;
 }
 
 export function NotificationToast({
   notification,
   onDismiss,
   onRead,
+  onOpenPanel,
 }: NotificationToastProps) {
   const router = useRouter();
   const Icon = ICONS[notification.category] ?? Info;
   const colorClass = COLORS[notification.category] ?? COLORS.system;
 
+  // MODIFICATION 1 : pas d'auto-dismiss pour welcome et credits
+  const isPersistent = PERSISTENT_CATEGORIES.includes(notification.category);
+
   useEffect(() => {
+    if (isPersistent) return;
     const timer = setTimeout(onDismiss, 7000);
     return () => clearTimeout(timer);
-  }, [onDismiss]);
+  }, [onDismiss, isPersistent]);
 
-  const handleAction = () => {
+  // MODIFICATION 6 : clic sur le corps du toast = marquer comme lu + ouvrir le panneau
+  const handleBodyClick = () => {
+    if (!notification.read_at) onRead();
+    onOpenPanel?.();
+    onDismiss();
+  };
+
+  // Bouton "action" (ex: "Voir mes crédits") — comportement préservé
+  const handleAction = (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (!notification.read_at) onRead();
     if (notification.action_path) {
       router.push(notification.action_path);
@@ -64,7 +86,8 @@ export function NotificationToast({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 12, scale: 0.95 }}
       transition={{ duration: 0.22, ease: "easeOut" }}
-      className="pointer-events-auto w-[min(360px,calc(100vw-24px))] rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.12)]"
+      onClick={handleBodyClick}
+      className="pointer-events-auto w-[min(360px,calc(100vw-24px))] cursor-pointer rounded-2xl border border-slate-200 bg-white shadow-[0_12px_40px_rgba(15,23,42,0.12)] transition-all hover:border-slate-300 hover:shadow-[0_16px_48px_rgba(15,23,42,0.16)]"
       role="status"
       aria-live="polite"
     >
@@ -80,13 +103,18 @@ export function NotificationToast({
             <p className="text-[13px] font-semibold leading-tight text-slate-900">
               {notification.title}
             </p>
+
+            {/* MODIFICATION 2 : croix de fermeture plus visible */}
             <button
               type="button"
-              onClick={onDismiss}
-              aria-label="Fermer"
-              className="-mr-1 -mt-1 shrink-0 rounded-full p-1 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDismiss();
+              }}
+              aria-label="Fermer la notification"
+              className="-mr-1 -mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-900 active:scale-90"
             >
-              <X className="h-3.5 w-3.5" />
+              <X className="h-4 w-4" strokeWidth={2.5} />
             </button>
           </div>
 
