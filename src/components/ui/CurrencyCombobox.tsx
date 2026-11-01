@@ -70,8 +70,11 @@ export function CurrencyCombobox({
         className="flex min-h-11 w-full items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-left text-sm outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
       >
         {selected ? (
-          <span className="flex items-center gap-2">
-            <span className="text-base">{selected.flag}</span>
+          <span className="flex items-center gap-2.5 truncate">
+            {/* ✅ Drapeau circulaire */}
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-100 bg-slate-50 shadow-sm text-[12px]">
+              {selected.flag}
+            </span>
             <span className="font-medium text-slate-900">
               {selected.code} · {selected.symbol}
             </span>
@@ -127,11 +130,14 @@ export function CurrencyCombobox({
                       key={c.code}
                       type="button"
                       onClick={() => handleSelect(c.code)}
-                      className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-50 ${
+                      className={`flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-left transition-colors hover:bg-slate-50 ${
                         value === c.code ? 'bg-[#6366F1]/10' : ''
                       }`}
                     >
-                      <span className="text-base">{c.flag}</span>
+                      {/* ✅ Drapeau circulaire dans la liste */}
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-100 bg-slate-50 shadow-sm text-[12px]">
+                        {c.flag}
+                      </span>
                       <span className="flex-1 text-sm text-slate-900">
                         <span className="font-semibold">{c.code}</span>
                         <span className="ml-1.5 text-slate-500">· {c.label}</span>
