@@ -280,7 +280,6 @@ export function PhoneInput({
   const lastCountryCodeRef = useRef<string | null>(null);
 
   // ✅ Reset imageError dès que le pays détecté change
-  // Sinon un drapeau cassé bloque tous les suivants
   useEffect(() => {
     const currentCode = detectedCountry?.code ?? null;
     if (currentCode !== lastCountryCodeRef.current) {
@@ -293,15 +292,10 @@ export function PhoneInput({
     const input = e.target.value;
 
     // ✅ Autorise les chiffres, espaces, tirets, parenthèses
-    // et UN SEUL "+" au tout début (utile pour coller un numéro complet)
+    // et UN SEUL "+" au tout début
     let cleaned = input.replace(/[^\d\s\-()+]/g, '');
-
-    // Ne garde qu'un seul "+" et uniquement en 1ère position
     cleaned = cleaned.replace(/\+/g, (match, offset) => (offset === 0 ? '+' : ''));
 
-    // ✅ Passe la valeur propre au parent (le `+` initial est conservé
-    // pour permettre à detectCountry de fonctionner, et il sera retiré
-    // au moment de la sauvegarde dans signup/page.tsx)
     onChange(cleaned);
   };
 
@@ -309,7 +303,6 @@ export function PhoneInput({
     ? `https://hatscripts.github.io/circle-flags/flags/${detectedCountry.code}.svg`
     : null;
 
-  // Largeur de la zone à gauche : "+", drapeau, marges
   const showFlag = !!(detectedCountry && flagUrl && !imageError);
 
   return (
@@ -322,10 +315,10 @@ export function PhoneInput({
         +
       </span>
 
-      {/* Drapeau */}
+      {/* ✅ Drapeau 100% circulaire */}
       {showFlag && (
         <span
-          className="pointer-events-none absolute left-7 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200"
+          className="pointer-events-none absolute left-7 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center overflow-hidden rounded-full ring-1 ring-slate-200 bg-slate-50"
           aria-label={detectedCountry!.name}
           title={detectedCountry!.name}
         >

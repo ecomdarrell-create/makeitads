@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 import { createClient as createServerClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
-import { AdminInvitationEmail } from '@/emails/AdminInvitationEmail';
 
 export const runtime = 'nodejs';
 
@@ -19,18 +18,11 @@ export async function POST(req: NextRequest) {
     const { phone, firstName, consent } = body;
 
     if (!phone || !consent) {
-      return NextResponse.json({ error: 'Données manquantes ou consentement absent.' }, { status: 400 });
+      return NextResponse.json({ error: 'Données manquantes.' }, { status: 400 });
     }
 
-    // On utilise "Client" par défaut si pas de prénom
     const finalFirstName = (firstName && firstName.trim().length >= 2) ? firstName.trim() : 'Client';
-
     const phone_e164 = phone.startsWith('+') ? phone.replace(/\s/g, '') : `+${phone.replace(/\D/g, '')}`;
-
-    if (phone_e164.length < 8) {
-      return NextResponse.json({ error: 'Format de numéro de téléphone invalide.' }, { status: 400 });
-    }
-
     const countryMatch = phone_e164.match(/^\+(\d{1,3})/);
     const country_code = countryMatch ? countryMatch[1] : 'unknown';
 
@@ -45,36 +37,19 @@ export async function POST(req: NextRequest) {
       if (profile?.plan) userPlan = profile.plan;
     }
 
-    const { data: existingRequest } = await supabaseAdmin
-      .from('community_invite_requests')
-      .select('id')
-      .eq('phone_e164', phone_e164)
-      .in('status', ['pending', 'contacted'])
-      .limit(1)
-      .maybeSingle();
-
-    if (existingRequest) {
-      return NextResponse.json({ error: 'Ce numéro a déjà été enregistré pour une invitation.', isDuplicate: true }, { status: 409 });
-    }
-
     const { data: newRequest, error: dbError } = await supabaseAdmin
       .from('community_invite_requests')
       .insert({
         user_id: userId,
-        anonymous_id: null,
         email: userEmail,
         phone_e164,
         country_code,
         consent_at: new Date().toISOString(),
         status: 'pending',
       })
-      .select()
-      .single();
+      .select().single();
 
-    if (dbError) {
-      console.error('Erreur DB community invite:', dbError);
-      return NextResponse.json({ error: 'Erreur lors de l\'enregistrement.' }, { status: 500 });
-    }
+    if (dbError) throw dbError;
 
     if (userId) {
       await supabaseAdmin
@@ -83,31 +58,55 @@ export async function POST(req: NextRequest) {
         .eq('id', userId);
     }
 
-    // ✅ ENVOI À SUPPORT@MAKEITADS.PRO
+    // ✅ ENVOI DE L'EMAIL À SUPPORT@
     try {
       await resend.emails.send({
         from: 'MakeItAds <notifications@makeitads.pro>',
         to: ['support@makeitads.pro'], 
-        subject: `✨ ${finalFirstName} veut rejoindre la communauté`,
-        react: AdminInvitationEmail({
-          firstName: finalFirstName,
-          phone: phone_e164,
-          email: userEmail,
-          plan: userPlan,
-        }),
-      });
+        subject: `✨ Nouvelle demande d'invitation : ${finalFirstName}`,
+        html: `
+          <div style="font-family: 'Inter', -apple-system, sans-serif; background-color: #F8FAFC; padding: 40px 20px; text-align: center;">
+            <div style="max-width: 500px; margin: 0 auto; background: #FFFFFF; border-radius: 16px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 10px 30px rgba(15,23,42,0.05);">
+              
+              <div style="background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%); padding: 24px;">
+                <h1 style="color: white; margin: 0; font-size: 20px;">Nouvelle Invitation</h1>
+              </div>
 
-      await supabaseAdmin
-        .from('community_invite_requests')
-        .update({ admin_notified_at: new Date().toISOString() })
-        .eq('id', newRequest.id);
+              <div style="padding: 32px; text-align: left;">
+                <p style="color: #475569; margin-top: 0;">Une nouvelle demande d'invitation à la communauté MakeItAds vient d'être enregistrée.</p>
+                
+                <table style="width: 100%; border-collapse: collapse; margin-top: 24px; background: #F8FAFC; border-radius: 12px; overflow: hidden;">
+                  <tr>
+                    <td style="padding: 12px 16px; color: #64748B; font-size: 13px; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Prénom</td>
+                    <td style="padding: 12px 16px; color: #0F172A; font-size: 14px; font-weight: 700; border-bottom: 1px solid #E2E8F0;">${finalFirstName}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; color: #64748B; font-size: 13px; font-weight: 600; border-bottom: 1px solid #E2E8F0;">Numéro WhatsApp</td>
+                    <td style="padding: 12px 16px; color: #0F172A; font-size: 14px; font-weight: 700; border-bottom: 1px solid #E2E8F0;">${phone_e164}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 12px 16px; color: #64748B; font-size: 13px; font-weight: 600;">Email</td>
+                    <td style="padding: 12px 16px; color: #0F172A; font-size: 14px; font-weight: 700;">${userEmail || 'Anonyme'}</td>
+                  </tr>
+                </table>
+
+                <div style="margin-top: 32px; text-align: center;">
+                  <a href="https://wa.me/${phone_e164.replace('+', '')}" style="display: inline-block; background: #25D366; color: white; text-decoration: none; padding: 14px 28px; border-radius: 999px; font-weight: bold; font-size: 14px;">
+                    💬 Contacter sur WhatsApp
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        `,
+      });
     } catch (emailError) {
-      console.error('Erreur envoi email Resend:', emailError);
+      console.error('Erreur Resend:', emailError);
     }
 
-    return NextResponse.json({ success: true, message: 'Demande enregistrée avec succès.' });
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Erreur globale API community-invite:', error);
-    return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: 'Erreur serveur.' }, { status: 500 });
   }
 }

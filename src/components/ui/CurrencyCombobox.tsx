@@ -64,11 +64,9 @@ export function CurrencyCombobox({
       >
         {selected ? (
           <span className="flex items-center gap-2.5 truncate">
-            {/* ✅ DRAPEAU CIRCULAIRE */}
-            <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
-              <span style={{ transform: 'scale(1.5)', display: 'block', lineHeight: 1 }}>
-                {selected.flag}
-              </span>
+            {/* ✅ DRAPEAU CIRCULAIRE (Emoji bien centré) */}
+            <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-50 text-[13px] leading-none">
+              {selected.flag}
             </span>
             <span className="font-medium text-slate-900">
               {selected.code} · {selected.symbol}
@@ -127,10 +125,8 @@ export function CurrencyCombobox({
                       }`}
                     >
                       {/* ✅ DRAPEAU CIRCULAIRE DANS LA LISTE */}
-                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
-                        <span style={{ transform: 'scale(1.5)', display: 'block', lineHeight: 1 }}>
-                          {c.flag}
-                        </span>
+                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-50 text-[13px] leading-none">
+                        {c.flag}
                       </span>
                       <span className="flex-1 text-sm text-slate-900">
                         <span className="font-semibold">{c.code}</span>
