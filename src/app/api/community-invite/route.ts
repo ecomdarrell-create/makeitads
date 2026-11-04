@@ -4,6 +4,8 @@ import { createClient as createServerClient } from '@/lib/supabase/server';
 import { Resend } from 'resend';
 import { AdminInvitationEmail } from '@/emails/AdminInvitationEmail';
 
+export const runtime = 'nodejs';
+
 export async function POST(req: NextRequest) {
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -16,54 +18,33 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { phone, firstName, consent } = body;
 
-    // 1. Validation stricte
     if (!phone || !consent) {
-      return NextResponse.json(
-        { error: 'Données manquantes ou consentement absent.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Données manquantes ou consentement absent.' }, { status: 400 });
     }
 
-    if (!firstName || firstName.trim().length < 2) {
-      return NextResponse.json(
-        { error: 'Le prénom est obligatoire.' },
-        { status: 400 }
-      );
-    }
+    // On utilise "Client" par défaut si pas de prénom
+    const finalFirstName = (firstName && firstName.trim().length >= 2) ? firstName.trim() : 'Client';
 
-    // 2. Normalisation du téléphone
-    const phone_e164 = phone.startsWith('+')
-      ? phone.replace(/\s/g, '')
-      : `+${phone.replace(/\D/g, '')}`;
+    const phone_e164 = phone.startsWith('+') ? phone.replace(/\s/g, '') : `+${phone.replace(/\D/g, '')}`;
 
     if (phone_e164.length < 8) {
-      return NextResponse.json(
-        { error: 'Format de numéro de téléphone invalide.' },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: 'Format de numéro de téléphone invalide.' }, { status: 400 });
     }
 
     const countryMatch = phone_e164.match(/^\+(\d{1,3})/);
     const country_code = countryMatch ? countryMatch[1] : 'unknown';
 
-    // 3. Récupérer le user connecté depuis la session
     const supabaseServer = await createServerClient();
     const { data: { user } } = await supabaseServer.auth.getUser();
     const userId = user?.id || null;
     const userEmail = user?.email || null;
 
-    // 4. Récupérer le plan du user
     let userPlan = 'free';
     if (userId) {
-      const { data: profile } = await supabaseAdmin
-        .from('profiles')
-        .select('plan')
-        .eq('id', userId)
-        .maybeSingle();
+      const { data: profile } = await supabaseAdmin.from('profiles').select('plan').eq('id', userId).maybeSingle();
       if (profile?.plan) userPlan = profile.plan;
     }
 
-    // 5. Anti-doublon
     const { data: existingRequest } = await supabaseAdmin
       .from('community_invite_requests')
       .select('id')
@@ -73,16 +54,9 @@ export async function POST(req: NextRequest) {
       .maybeSingle();
 
     if (existingRequest) {
-      return NextResponse.json(
-        {
-          error: 'Ce numéro a déjà été enregistré pour une invitation.',
-          isDuplicate: true,
-        },
-        { status: 409 }
-      );
+      return NextResponse.json({ error: 'Ce numéro a déjà été enregistré pour une invitation.', isDuplicate: true }, { status: 409 });
     }
 
-    // 6. Insertion en base
     const { data: newRequest, error: dbError } = await supabaseAdmin
       .from('community_invite_requests')
       .insert({
@@ -99,31 +73,24 @@ export async function POST(req: NextRequest) {
 
     if (dbError) {
       console.error('Erreur DB community invite:', dbError);
-      return NextResponse.json(
-        { error: 'Erreur lors de l\'enregistrement.' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Erreur lors de l\'enregistrement.' }, { status: 500 });
     }
 
-    // 7. Mise à jour du profil pour ne plus afficher le popup
     if (userId) {
       await supabaseAdmin
         .from('profiles')
-        .update({
-          has_joined_telegram: true,
-          telegram_phone: phone_e164,
-        })
+        .update({ has_joined_telegram: true, telegram_phone: phone_e164 })
         .eq('id', userId);
     }
 
-    // 8. Envoi de l'email admin premium
+    // ✅ ENVOI À SUPPORT@MAKEITADS.PRO
     try {
       await resend.emails.send({
         from: 'MakeItAds <notifications@makeitads.pro>',
-        to: ['ecomdarrell@gmail.com'],
-        subject: `✨ ${firstName} veut rejoindre la communauté`,
+        to: ['support@makeitads.pro'], 
+        subject: `✨ ${finalFirstName} veut rejoindre la communauté`,
         react: AdminInvitationEmail({
-          firstName: firstName.trim(),
+          firstName: finalFirstName,
           phone: phone_e164,
           email: userEmail,
           plan: userPlan,
@@ -138,15 +105,9 @@ export async function POST(req: NextRequest) {
       console.error('Erreur envoi email Resend:', emailError);
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Demande enregistrée avec succès.',
-    });
+    return NextResponse.json({ success: true, message: 'Demande enregistrée avec succès.' });
   } catch (error) {
     console.error('Erreur globale API community-invite:', error);
-    return NextResponse.json(
-      { error: 'Erreur interne du serveur.' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Erreur interne du serveur.' }, { status: 500 });
   }
 }

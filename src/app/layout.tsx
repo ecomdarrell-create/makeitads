@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { MobileNav } from "@/components/layout/MobileNav";
-import CommunityInviteClient from "@/components/shared/CommunityInviteClient";
+import CommunityWidget from "@/components/shared/CommunityWidget"; // ✅ NOUVEAU WIDGET
 
 const inter = Inter({
   subsets: ["latin"],
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain. Sans abonnement.",
     images: [
       {
-        url: "/images/og-image.png", // ⚠️ Assure-toi que ce fichier existe dans public/images/
+        url: "/images/og-image.png",
         width: 1200,
         height: 630,
         alt: "MakeItAds Dashboard - Stratégie Marketing IA",
@@ -46,7 +46,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
     description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain.",
-    images: ["/images/og-image.png"], // ⚠️ Assure-toi que ce fichier existe
+    images: ["/images/og-image.png"],
   },
   robots: {
     index: true,
@@ -100,7 +100,7 @@ const jsonLd = {
       "@type": "Organization",
       "name": "MakeItAds",
       "url": "https://makeitads.pro",
-      "logo": "https://makeitads.pro/web-app-manifest-512x512.png", // ⚠️ Vérifie que ce fichier existe
+      "logo": "https://makeitads.pro/web-app-manifest-512x512.png",
       "sameAs": ["https://t.me/MakeItAds_CEO"]
     },
     {
@@ -141,7 +141,7 @@ export default function RootLayout({
       lang="fr"
       className={`${inter.variable} antialiased`}
       style={{ colorScheme: "light" }}
-      data-scroll-behavior="smooth" // ✅ AJOUTÉ ICI : Corrige l'avertissement de Next.js
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <head>
@@ -166,8 +166,8 @@ export default function RootLayout({
           <MobileNav />
         </div>
 
-        {/* ✅ SYSTÈME D'INVITATION COMMUNAUTAIRE */}
-        <CommunityInviteClient />
+        {/* ✅ NOUVEAU WIDGET FLOTTANT */}
+        <CommunityWidget />
 
         <div
           id="portal-root"

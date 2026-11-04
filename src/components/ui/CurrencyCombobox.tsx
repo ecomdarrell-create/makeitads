@@ -2,11 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { Search, Check, ChevronDown, X } from 'lucide-react';
-import {
-  CURRENCY_INFO,
-  REGION_LABELS,
-  type CurrencyInfo,
-} from '@/lib/currency';
+import { CURRENCY_INFO, REGION_LABELS, type CurrencyInfo } from '@/lib/currency';
 
 interface CurrencyComboboxProps {
   value: string;
@@ -25,7 +21,6 @@ export function CurrencyCombobox({
 
   const selected = value ? CURRENCY_INFO[value] : null;
 
-  // Groupement par région
   const grouped = useMemo(() => {
     const filtered = Object.values(CURRENCY_INFO).filter((c) => {
       if (!query.trim()) return true;
@@ -44,7 +39,6 @@ export function CurrencyCombobox({
     }, {});
   }, [query]);
 
-  // Fermer au clic extérieur
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
@@ -63,7 +57,6 @@ export function CurrencyCombobox({
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Trigger */}
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -71,9 +64,11 @@ export function CurrencyCombobox({
       >
         {selected ? (
           <span className="flex items-center gap-2.5 truncate">
-            {/* ✅ Drapeau circulaire */}
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-100 bg-slate-50 shadow-sm text-[12px]">
-              {selected.flag}
+            {/* ✅ DRAPEAU CIRCULAIRE */}
+            <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+              <span style={{ transform: 'scale(1.5)', display: 'block', lineHeight: 1 }}>
+                {selected.flag}
+              </span>
             </span>
             <span className="font-medium text-slate-900">
               {selected.code} · {selected.symbol}
@@ -88,10 +83,8 @@ export function CurrencyCombobox({
         />
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-1 max-h-80 w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          {/* Search */}
           <div className="flex items-center gap-2 border-b border-slate-100 px-3 py-2">
             <Search className="h-4 w-4 text-slate-400" />
             <input
@@ -113,7 +106,6 @@ export function CurrencyCombobox({
             )}
           </div>
 
-          {/* Liste groupée */}
           <div className="max-h-64 overflow-y-auto p-1">
             {Object.keys(grouped).length === 0 ? (
               <p className="px-3 py-6 text-center text-xs text-slate-400">
@@ -134,9 +126,11 @@ export function CurrencyCombobox({
                         value === c.code ? 'bg-[#6366F1]/10' : ''
                       }`}
                     >
-                      {/* ✅ Drapeau circulaire dans la liste */}
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-100 bg-slate-50 shadow-sm text-[12px]">
-                        {c.flag}
+                      {/* ✅ DRAPEAU CIRCULAIRE DANS LA LISTE */}
+                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-100">
+                        <span style={{ transform: 'scale(1.5)', display: 'block', lineHeight: 1 }}>
+                          {c.flag}
+                        </span>
                       </span>
                       <span className="flex-1 text-sm text-slate-900">
                         <span className="font-semibold">{c.code}</span>
