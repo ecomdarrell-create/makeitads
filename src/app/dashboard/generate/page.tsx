@@ -284,10 +284,10 @@ export default function GeneratePage() {
 
         {supabaseError && <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{supabaseError}</div>}
 
-        {/* ✅ REFONTE DU MODE DE GÉNÉRATION (Selon Mini CDC) */}
+        {/* ✅ SECTION "MODE DE GÉNÉRATION" REFONDUE SELON LE MINI-CDC */}
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-2xl border border-slate-200/60 bg-[#FAFAFC] p-4 sm:p-5 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
-            {/* En-tête */}
+            {/* En-tête compacte */}
             <div className="mb-4 flex items-start justify-between gap-2">
               <div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
@@ -297,17 +297,17 @@ export default function GeneratePage() {
                   Mode de génération
                 </h2>
               </div>
-              {/* ✅ BADGE DEMO */}
+              {/* Badge Demo (ex-Free) */}
               <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-1">
                 {currentPlan === 'free' ? 'Demo' : currentPlan}
               </span>
             </div>
 
-            {/* Cartes */}
+            {/* Disposition des cartes (Mobile-first) */}
             {isFree ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 
-                {/* Carte Flash */}
+                {/* ✅ CARTE 1 : FLASH */}
                 <button
                   type="button"
                   onClick={() => setStrategyType('flash')}
@@ -331,9 +331,10 @@ export default function GeneratePage() {
                   </div>
                 </button>
 
-                {/* Carte Complète */}
+                {/* ✅ CARTE 2 : COMPLÈTE (PRO) */}
                 <div className="relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left transition-all duration-200 hover:border-slate-300 hover:shadow-sm">
-                  {/* Badge PRO */}
+                  
+                  {/* Badge PRO compact */}
                   <div className="absolute top-0 right-0 rounded-bl-xl rounded-tr-2xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-3 py-1 flex items-center gap-1 shadow-sm">
                     <Crown className="h-3 w-3 text-white" />
                     <span className="text-[9px] font-bold uppercase tracking-wider text-white">Pro</span>
@@ -342,10 +343,18 @@ export default function GeneratePage() {
                   <div className="mb-3 mt-1">
                     <span className="text-sm font-bold text-[#111827]">Complète</span>
                   </div>
+                  
+                  {/* Informations verticales */}
                   <ul className="text-xs text-slate-500 mb-5 space-y-1.5">
-                    <li className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-slate-300" /> 12 sections</li>
-                    <li className="flex items-center gap-1.5"><span className="h-1 w-1 rounded-full bg-slate-300" /> Scripts WhatsApp</li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="h-1 w-1 rounded-full bg-slate-300" /> 12 sections
+                    </li>
+                    <li className="flex items-center gap-1.5">
+                      <span className="h-1 w-1 rounded-full bg-slate-300" /> Scripts WhatsApp
+                    </li>
                   </ul>
+
+                  {/* Bouton plein largeur */}
                   <button
                     type="button"
                     onClick={() => router.push('/dashboard/pricing')}
@@ -370,7 +379,7 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* ✅ CONSEIL DE L'ÉQUIPE */}
+        {/* Note d'expert (remplacé par l'équipe) */}
         {!showSummary && !isGenerating && (
           <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
             <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
