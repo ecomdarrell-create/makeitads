@@ -37,7 +37,7 @@ const coerceStringArray = z.preprocess((v) => {
 
 const ExecutiveSummarySchema = z.object({
   synthese: z.string().catch(''),
-  preparation: coerceNumber, // ✅ Sera variable
+  preparation: coerceNumber,
   opportunite: z.enum(['Faible', 'Moyenne', 'Élevée']).catch('Moyenne'),
   risque_principal: z.string().catch(''),
   priorite: z.string().catch(''),
@@ -87,7 +87,7 @@ export const FlashDiagnosticSchema = z.object({
   avatar_client: z.string().catch(''),
   angle_publicitaire: z.string().catch(''),
   makeitads_teaser: z.string().catch(''),
-  executive_summary: ExecutiveSummarySchema.optional(), // ✅ Ajouté pour le score
+  executive_summary: ExecutiveSummarySchema.optional(),
 });
 
 export const ProCompleteSchema = z.object({
@@ -121,6 +121,12 @@ export const EliteCompleteSchema = PremiumCompleteSchema.extend({
   accompagnement_avance: z.string().catch(''),
   rapports_whitelabel: z.string().catch(''),
 });
+
+// ✅ AJOUT CRUCIAL : Export des types pour StrategyResult.tsx
+export type FlashDiagnostic = z.infer<typeof FlashDiagnosticSchema>;
+export type ProComplete = z.infer<typeof ProCompleteSchema>;
+export type PremiumComplete = z.infer<typeof PremiumCompleteSchema>;
+export type EliteComplete = z.infer<typeof EliteCompleteSchema>;
 
 // ============================================
 // PROMPTS
