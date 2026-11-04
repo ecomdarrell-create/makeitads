@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Home, Plus, BarChart3, Coins, Crown, Gift, User } from 'lucide-react';
+import { useEffect } from 'react';
 
 const AUTH_ROUTES = ['/login', '/signup', '/sign-up', '/register', '/forgot-password', '/reset-password', '/auth'];
 
@@ -19,7 +20,16 @@ const items = [
 
 export function MobileNav() {
   const pathname = usePathname();
+  const router = useRouter();
   const isAuthPage = AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
+
+  // ✅ AJOUT : Précharge les pages en arrière-plan pour une navigation instantanée
+  useEffect(() => {
+    items.forEach((item) => {
+      router.prefetch(item.href);
+    });
+  }, [router]);
+
   if (isAuthPage) return null;
 
   return (
@@ -41,10 +51,11 @@ export function MobileNav() {
               <Link
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 aria-label={item.name}
                 className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
-                {/* ✅ HALO GLISSANT : Framer Motion anime automatiquement la position et la taille */}
+                {/* HALO GLISSANT */}
                 {isActive && (
                   <motion.div
                     layoutId="active-halo-mobile"

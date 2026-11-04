@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { createClient } from '@supabase/supabase-js';
 
-// ✅ CRUCIAL : Force Next.js 16 à utiliser Node.js
 export const runtime = 'nodejs';
 
 const ADMIN_EMAIL = 'ecomdarrell@gmail.com';
@@ -49,7 +48,10 @@ async function fetchReceivedEmail(emailId: string): Promise<any> {
 async function notifyAdminNewSupportMessage(supabaseAdmin: any, params: { threadId: string, messageId: string, fromEmail: string, fromName: string | null, subject: string, bodyText: string }) {
   try {
     const { data: adminProfile } = await supabaseAdmin.from('profiles').select('id').ilike('email', ADMIN_EMAIL).maybeSingle();
-    if (!adminProfile?.id) return;
+    if (!adminProfile?.id) {
+      console.error('[resend-inbound] ⚠️ Admin profile not found for notification');
+      return;
+    }
 
     const senderLabel = params.fromName || params.fromEmail;
     const title = `📩 Nouveau message de ${senderLabel}`;
@@ -57,7 +59,7 @@ async function notifyAdminNewSupportMessage(supabaseAdmin: any, params: { thread
     const preview = previewBody.length > 140 ? previewBody.slice(0, 140) + '…' : previewBody;
     const message = preview ? `${params.subject} — ${preview}` : params.subject;
 
-    await supabaseAdmin.from('notifications').insert({
+    const { error } = await supabaseAdmin.from('notifications').insert({
       user_id: adminProfile.id,
       event_key: `support_msg_${params.messageId}`,
       type: 'support_message',
@@ -68,6 +70,13 @@ async function notifyAdminNewSupportMessage(supabaseAdmin: any, params: { thread
       action_path: `/dashboard/admin/support/${params.threadId}`,
       metadata: { thread_id: params.threadId, from_email: params.fromEmail, from_name: params.fromName },
     });
+
+    if (error) {
+      if (error.code === '23505') console.log('[resend-inbound] ⏭️ Notif admin déjà créée');
+      else console.error('[resend-inbound] ⚠️ Erreur insertion notif:', error.message);
+    } else {
+      console.log(`[resend-inbound] 🔔 Notif admin créée pour ${params.fromEmail}`);
+    }
   } catch (err) {
     console.error('[resend-inbound] ⚠️ Exception notif admin:', err);
   }

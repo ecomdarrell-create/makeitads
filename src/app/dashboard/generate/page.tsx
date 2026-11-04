@@ -297,8 +297,9 @@ export default function GeneratePage() {
                   Mode de génération
                 </h2>
               </div>
+              {/* ✅ BADGE DEMO */}
               <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-1">
-                {currentPlan}
+                {currentPlan === 'free' ? 'Demo' : currentPlan}
               </span>
             </div>
 
@@ -360,7 +361,7 @@ export default function GeneratePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
-                    <p className="text-[11px] text-[#6366F1]/80 mt-0.5">Inclus dans votre plan {currentPlan}</p>
+                    <p className="text-[11px] text-[#6366F1]/80 mt-0.5">Inclus dans votre plan {currentPlan === 'free' ? 'Demo' : currentPlan}</p>
                   </div>
                   <span className="text-sm font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
                 </div>
@@ -369,11 +370,11 @@ export default function GeneratePage() {
           </div>
         )}
 
-        {/* Note d'expert */}
+        {/* ✅ CONSEIL DE L'ÉQUIPE */}
         {!showSummary && !isGenerating && (
           <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
             <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
-              <strong className="text-[#0F172A]">Conseil de l'expert :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels. Les informations détaillées nous permettent de calibrer au mieux votre ciblage, votre budget et vos recommandations.
+              <strong className="text-[#0F172A]">Conseil de l'équipe :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels. Les informations détaillées nous permettent de calibrer au mieux votre ciblage, votre budget et vos recommandations.
             </p>
           </div>
         )}
