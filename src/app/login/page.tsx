@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Headset } from 'lucide-react'; // ✅ Ajout de l'icône Headset
+import { Headset } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
 
@@ -14,20 +14,36 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
+  const [redirectTo, setRedirectTo] = useState('/dashboard');
   const router = useRouter();
 
+  // ✅ Lit le param `redirect` sans useSearchParams (évite le besoin de Suspense)
   useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const r = params.get('redirect');
+      if (r && r.startsWith('/') && !r.startsWith('//')) {
+        setRedirectTo(r);
+      }
+    }
+  }, []);
+
+  // ✅ Vérifie la session une seule fois au mount
+  useEffect(() => {
+    let cancelled = false;
     const checkSession = async () => {
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (session) {
-        router.replace('/dashboard');
+        router.replace(redirectTo);
         return;
       }
       setChecking(false);
     };
     checkSession();
-  }, [router]);
+    return () => { cancelled = true; };
+  }, [router, redirectTo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,9 +60,10 @@ export default function LoginPage() {
         return;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) await new Promise((resolve) => setTimeout(resolve, 300));
-      window.location.href = '/dashboard';
+      // ✅ Force Next.js à recharger la session côté serveur
+      router.refresh();
+      // ✅ Puis hard reload vers la destination (cookies déjà posés par signInWithPassword)
+      window.location.href = redirectTo;
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
@@ -93,7 +110,6 @@ export default function LoginPage() {
             </p>
           </div>
 
-          {/* Si tu veux supprimer les boutons sociaux, supprime les 6 lignes ci-dessous */}
           <AuthProviderButtons />
           <div className="my-3.5 flex items-center gap-3 text-[9px] text-slate-400 sm:text-[10px]">
             <span className="h-px flex-1 bg-slate-100" />
@@ -139,7 +155,6 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            {/* ✅ BOUTON PRINCIPAL */}
             <button
               type="submit"
               disabled={loading}
@@ -148,7 +163,6 @@ export default function LoginPage() {
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
 
-            {/* ✅ NOUVEAU BOUTON SUPPORT (Design Premium) */}
             <Link
               href="mailto:support@makeitads.pro"
               className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"

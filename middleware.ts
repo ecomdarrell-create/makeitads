@@ -25,8 +25,6 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // ✅ Rafraîchit la session + met à jour les cookies
-  // ⚠️ NE PAS RETIRER — c'est cette ligne qui garde le user connecté
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -45,6 +43,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // ✅ Redirection des users connectés depuis les pages auth
+  // ⚠️ On respecte le param `redirect` s'il existe
   const isAuthRoute =
     pathname === '/login' ||
     pathname === '/signup' ||
@@ -52,7 +51,13 @@ export async function middleware(request: NextRequest) {
 
   if (isAuthRoute && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    const safeRedirect =
+      redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : '/dashboard';
+    url.pathname = safeRedirect;
+    url.search = '';
     return NextResponse.redirect(url);
   }
 
@@ -60,7 +65,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Ignore les routes API (webhooks, cron), les fichiers statiques et les images
-  // ⚠️ CRITIQUE : /api/webhooks/* et /api/cron/* ne doivent JAMAIS passer ici
   matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
