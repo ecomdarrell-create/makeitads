@@ -284,106 +284,58 @@ export default function GeneratePage() {
 
         {supabaseError && <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{supabaseError}</div>}
 
-        {/* ✅ SECTION "MODE DE GÉNÉRATION" REFONDUE SELON LE MINI-CDC */}
+        {/* ✅ REFONTE DES CARTES (Version épurée, plus fine) */}
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
-          <div className="mb-5 rounded-2xl border border-slate-200/60 bg-[#FAFAFC] p-4 sm:p-5 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
-            {/* En-tête compacte */}
-            <div className="mb-4 flex items-start justify-between gap-2">
+          <div className="mb-5 rounded-2xl border border-slate-200/60 bg-white p-3 sm:p-4 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
+            <div className="mb-3 flex items-start justify-between gap-2">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                  Type de stratégie
-                </p>
-                <h2 className="mt-1 text-base font-semibold text-[#111827]">
-                  Mode de génération
-                </h2>
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Type de stratégie</p>
+                <h2 className="mt-0.5 text-sm font-semibold text-[#111827]">Mode de génération</h2>
               </div>
-              {/* Badge Demo (ex-Free) */}
-              <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-1">
+              <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-0.5">
                 {currentPlan === 'free' ? 'Demo' : currentPlan}
               </span>
             </div>
 
-            {/* Disposition des cartes (Mobile-first) */}
             {isFree ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                
-                {/* ✅ CARTE 1 : FLASH */}
-                <button
-                  type="button"
-                  onClick={() => setStrategyType('flash')}
-                  className={`relative flex flex-col justify-between rounded-2xl border-2 p-4 text-left transition-all duration-200 ${
-                    strategyType === 'flash'
-                      ? 'border-[#6366F1] bg-[#6366F1]/[0.03] shadow-[0_4px_20px_rgba(99,102,241,0.08)]'
-                      : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <span className="text-sm font-bold text-[#111827]">Flash</span>
-                    {strategyType === 'flash' && (
-                      <CheckCircle2 className="h-5 w-5 text-[#6366F1]" />
-                    )}
-                  </div>
-                  <p className="text-xs text-slate-500 mb-5">4 sections détaillées</p>
-                  <div className="mt-auto">
-                    <span className="text-sm font-semibold text-[#6366F1]">
-                      {CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits
-                    </span>
-                  </div>
-                </button>
+              <div className="flex flex-col gap-2">
+                {/* Bloc 1 : Mode Démo (Sélectionné, Violet) */}
+                <div className="flex items-center justify-between rounded-xl border-2 border-[#6366F1] bg-[#6366F1]/5 px-3 py-2.5">
+                  <span className="text-sm font-bold text-[#6366F1]">Mode Démo</span>
+                  <span className="text-xs font-semibold text-[#6366F1]">{CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits</span>
+                </div>
 
-                {/* ✅ CARTE 2 : COMPLÈTE (PRO) */}
-                <div className="relative flex flex-col justify-between rounded-2xl border border-slate-200 bg-white p-4 text-left transition-all duration-200 hover:border-slate-300 hover:shadow-sm">
-                  
-                  {/* Badge PRO compact */}
-                  <div className="absolute top-0 right-0 rounded-bl-xl rounded-tr-2xl bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-3 py-1 flex items-center gap-1 shadow-sm">
-                    <Crown className="h-3 w-3 text-white" />
-                    <span className="text-[9px] font-bold uppercase tracking-wider text-white">Pro</span>
-                  </div>
-
-                  <div className="mb-3 mt-1">
-                    <span className="text-sm font-bold text-[#111827]">Complète</span>
-                  </div>
-                  
-                  {/* Informations verticales */}
-                  <ul className="text-xs text-slate-500 mb-5 space-y-1.5">
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-slate-300" /> 12 sections
-                    </li>
-                    <li className="flex items-center gap-1.5">
-                      <span className="h-1 w-1 rounded-full bg-slate-300" /> Scripts WhatsApp
-                    </li>
-                  </ul>
-
-                  {/* Bouton plein largeur */}
+                {/* Bloc 2 : Stratégie Complète (Blanc, CTA Upgrade) */}
+                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                  <span className="text-sm font-bold text-[#111827]">Stratégie Complète</span>
                   <button
                     type="button"
                     onClick={() => router.push('/dashboard/pricing')}
-                    className="mt-auto w-full rounded-xl bg-[#111827] py-2.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
+                    className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
                   >
-                    Voir les offres
+                    <Crown className="h-3 w-3" />
+                    Upgrade
                   </button>
                 </div>
               </div>
             ) : (
               /* Si l'utilisateur est déjà PRO */
-              <div className="rounded-xl border-2 border-[#6366F1]/20 bg-[#6366F1]/5 px-4 py-3.5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
-                    <p className="text-[11px] text-[#6366F1]/80 mt-0.5">Inclus dans votre plan {currentPlan === 'free' ? 'Demo' : currentPlan}</p>
-                  </div>
-                  <span className="text-sm font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
+              <div className="rounded-xl border-2 border-[#6366F1]/20 bg-[#6366F1]/5 px-3 py-2.5 flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
+                  <p className="text-[10px] text-[#6366F1]/80 mt-0.5">Plan {currentPlan === 'free' ? 'Demo' : currentPlan}</p>
                 </div>
+                <span className="text-sm font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
               </div>
             )}
           </div>
         )}
 
-        {/* Note d'expert (remplacé par l'équipe) */}
+        {/* Note d'équipe */}
         {!showSummary && !isGenerating && (
           <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
             <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
-              <strong className="text-[#0F172A]">Conseil de l'équipe :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels. Les informations détaillées nous permettent de calibrer au mieux votre ciblage, votre budget et vos recommandations.
+              <strong className="text-[#0F172A]">Conseil de l'équipe :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels.
             </p>
           </div>
         )}

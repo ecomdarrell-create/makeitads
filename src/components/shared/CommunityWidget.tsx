@@ -1,62 +1,100 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Loader2, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, Loader2, CheckCircle2, AlertTriangle, Check } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
-import { PhoneInput } from '@/components/auth/PhoneInput'; // ✅ IMPORT DE TON COMPOSANT
+import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
 export default function CommunityWidget() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
+  const [isPWA, setIsPWA] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
-  
+  const [isAdmin, setIsAdmin] = useState(false);
+
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
+  // ✅ Client Supabase mémoïsé (évite les instances multiples)
+  const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
+  const getSupabase = useCallback(() => {
+    if (!supabaseRef.current) supabaseRef.current = createClient();
+    return supabaseRef.current;
+  }, []);
+
   const hideOnPaths = ['/login', '/signup', '/sign-up', '/auth'];
   const shouldHide = hideOnPaths.some((p) => pathname.startsWith(p));
 
+  // 🔹 Détection PWA
   useEffect(() => {
-    const checkStatus = async () => {
-      if (shouldHide) return;
+    if (typeof window !== 'undefined') {
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        (window.navigator as any).standalone === true;
+      setIsPWA(isStandalone);
+    }
+  }, []);
 
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('has_joined_telegram, first_name')
-          .eq('id', user.id)
-          .maybeSingle();
+  // 🔹 Vérifie le statut (montage + changement de page + retour d'onglet)
+  const refreshStatus = useCallback(async () => {
+    if (shouldHide || isPWA) return;
+    const supabase = getSupabase();
+    const { data: { user } } = await supabase.auth.getUser();
 
-        if (profile) {
-          setFirstName(profile.first_name);
-          if (!profile.has_joined_telegram) {
-            setShowWidget(true);
-          }
-        } else {
-          setShowWidget(true);
-        }
-      } else {
-        setShowWidget(false);
-      }
+    if (!user) {
+      setShowWidget(false);
+      return;
+    }
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('has_joined_telegram, first_name')
+      .eq('id', user.id)
+      .maybeSingle();
+
+    setFirstName(profile?.first_name || 'vous');
+
+    const admin = user.email === 'ecomdarrell@gmail.com';
+    setIsAdmin(admin);
+
+    if (admin) {
+      // Bypass admin : toujours visible pour tester
+      setShowWidget(true);
+    } else {
+      // ✅ Vraie logique de disparition : seulement si le flag DB n'est pas true
+      setShowWidget(profile?.has_joined_telegram !== true);
+    }
+  }, [shouldHide, isPWA, getSupabase]);
+
+  useEffect(() => {
+    refreshStatus();
+  }, [pathname, refreshStatus]);
+
+  // ✅ Re-check quand l'utilisateur revient sur l'onglet (ex: validation sur un autre device)
+  useEffect(() => {
+    if (shouldHide || isPWA) return;
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') refreshStatus();
     };
-
-    checkStatus();
-  }, [pathname, shouldHide]);
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [refreshStatus, shouldHide, isPWA]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phone || !consent) {
-      setError('Veuillez remplir votre numéro et accepter les conditions.');
+    if (!consent) {
+      setError('Veuillez accepter les conditions.');
+      return;
+    }
+    if (!phone || !isValidPhoneNumber(phone)) {
+      setError("Numéro invalide. N'oubliez pas l'indicatif (ex: +237).");
       return;
     }
 
@@ -74,14 +112,39 @@ export default function CommunityWidget() {
         }),
       });
 
-      if (!response.ok) throw new Error('Erreur lors de l\'envoi');
+      if (!response.ok) throw new Error("Erreur lors de l'envoi");
+
+      // ✅ CONFIRMATION SERVEUR : on relit le profil pour vérifier que
+      // has_joined_telegram est bien passé à true côté DB.
+      const supabase = getSupabase();
+      const { data: { user } } = await supabase.auth.getUser();
+      let confirmed = false;
+
+      if (user) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('has_joined_telegram')
+          .eq('id', user.id)
+          .maybeSingle();
+        confirmed = data?.has_joined_telegram === true;
+      }
 
       setSuccess(true);
+
       setTimeout(() => {
         setIsOpen(false);
-        setShowWidget(false);
+        // ✅ On cache le widget pour tous les utilisateurs (sauf admin qui teste)
+        if (!isAdmin) {
+          setShowWidget(false);
+        }
+        // Dev warning si l'API n'a pas persisté le flag
+        if (!confirmed && process.env.NODE_ENV === 'development') {
+          console.warn(
+            '[CommunityWidget] has_joined_telegram non confirmé en DB après /api/community-invite. ' +
+            "Vérifie que l'endpoint met bien le flag à true (sinon le widget revient à la prochaine visite)."
+          );
+        }
       }, 3000);
-
     } catch (err) {
       setError('Une erreur est survenue. Réessayez.');
     } finally {
@@ -89,34 +152,39 @@ export default function CommunityWidget() {
     }
   };
 
-  if (shouldHide || !showWidget) return null;
+  if (shouldHide || !showWidget || isPWA) return null;
+
+  const benefits = [
+    'Conseils publicitaires pour créer des campagnes efficaces.',
+    'Ressources exclusives : guides, astuces et contenus.',
+    'Stratégies marketing pour attirer plus de clients.',
+    "Communauté d'entrepreneurs pour échanger et progresser.",
+  ];
 
   return (
     <>
-      {/* ✅ BOUTON FLOTTANT (Chemin de ton image respecté) */}
+      {/* ✅ BOUTON FLOTTANT */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 2 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-4 z-[90] flex h-[56px] w-[56px] items-center justify-center rounded-full bg-white shadow-[0_8px_30px_rgba(99,102,241,0.25)] border border-slate-100 md:bottom-8 md:right-8 md:h-[64px] md:w-[64px] animate-pulse-slow overflow-hidden"
+        className="fixed bottom-24 right-4 z-[90] flex h-[60px] w-[60px] items-center justify-center md:bottom-8 md:right-8 md:h-[64px] md:w-[64px]"
         aria-label="Rejoindre la communauté MakeItAds"
       >
-        <div className="relative h-full w-full p-2">
-          <Image 
-            src="/logos/community-icon.png" 
-            alt="MakeItAds" 
+        <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full shadow-[0_8px_30px_rgba(99,102,241,0.25)] ring-1 ring-slate-200/50 bg-white">
+          <Image
+            src="/logos/community-icon.png"
+            alt="MakeItAds"
             fill
-            className="object-contain"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-            }}
+            unoptimized
+            className="object-cover"
+            onError={(e) => { e.currentTarget.style.display = 'none'; }}
           />
         </div>
-        {/* Point violet discret (pas de chiffre fictif) */}
-        <span className="absolute top-1 right-1 flex h-3 w-3">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#8B5CF6] opacity-75"></span>
-          <span className="relative inline-flex rounded-full h-3 w-3 bg-[#8B5CF6]"></span>
+        <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center">
+          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"></span>
+          <span className="relative inline-flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-md ring-2 ring-white z-10">1</span>
         </span>
       </motion.button>
 
@@ -128,78 +196,106 @@ export default function CommunityWidget() {
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="relative w-full max-w-[420px] overflow-hidden rounded-3xl bg-white shadow-2xl"
+              className="relative w-full max-w-[370px] max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl"
             >
               <button
                 onClick={() => setIsOpen(false)}
-                className="absolute right-4 top-4 z-10 text-slate-400 hover:text-slate-600 transition-colors"
+                className="absolute right-3 top-3 z-10 text-slate-400 hover:text-slate-600"
+                aria-label="Fermer"
               >
                 <X className="h-5 w-5" />
               </button>
 
-              <div className="p-6 sm:p-8 text-center">
-                <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-slate-50 overflow-hidden">
-                  <Image src="/logos/community-icon.png" alt="Logo" width={32} height={32} className="object-contain" />
+              <div className="p-5 text-center">
+                <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center overflow-hidden rounded-full">
+                  <Image src="/logos/community-icon.png" alt="Logo" width={48} height={48} className="object-contain" unoptimized />
                 </div>
-                
-                <span className="inline-block mb-3 rounded-full bg-[#6366F1]/10 px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-[#6366F1]">
-                  Communauté Privée
-                </span>
 
-                <h2 className="mb-2 text-xl font-bold text-[#0F172A]">
-                  {firstName ? `${firstName}, rejoignez notre cercle privé.` : 'Rejoignez notre cercle privé.'}
+                <h2 className="mb-2 text-[17px] font-bold text-[#0F172A] leading-tight">
+                  {firstName && firstName !== 'vous'
+                    ? `${firstName}, rejoignez le `
+                    : 'Rejoignez le '}
+                  <span className="text-black">MakeIt</span>
+                  <span className="text-[#7C3AED]">Ads</span> Business Club.
                 </h2>
-                
-                <p className="mb-6 text-sm text-slate-500 leading-relaxed">
-                  La plateforme N°1 pour automatiser votre acquisition client en Afrique. Accédez à des conseils exclusifs et des ressources pour structurer votre croissance.
+
+                <p className="text-[13px] font-bold text-[#6366F1] mb-2 leading-snug">
+                  Ne développez plus votre activité au hasard.
+                </p>
+
+                <p className="text-[11px] text-slate-500 mb-4 leading-snug">
+                  Rejoignez <strong className="text-slate-700">gratuitement</strong> notre communauté{' '}
+                  <strong className="text-slate-700">Telegram</strong> et accédez à des ressources pour mieux
+                  comprendre la publicité, attirer des clients et faire grandir votre business.
                 </p>
 
                 {success ? (
-                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+                  <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 mt-2">
                     <CheckCircle2 className="mx-auto h-8 w-8 text-emerald-500 mb-2" />
                     <p className="text-sm font-semibold text-emerald-800">Demande envoyée !</p>
-                    <p className="text-xs text-emerald-600 mt-1">Notre équipe vous contactera très vite sur WhatsApp.</p>
                   </div>
                 ) : (
-                  <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                  <form onSubmit={handleSubmit} className="space-y-3 text-left">
+                    <div className="space-y-1.5 mb-2">
+                      {benefits.map((benefit, i) => (
+                        <div key={i} className="flex items-start gap-2">
+                          <Check className="h-3.5 w-3.5 text-[#6366F1] shrink-0 mt-0.5" />
+                          <span className="text-[10px] text-slate-600 leading-tight">{benefit}</span>
+                        </div>
+                      ))}
+                    </div>
+
                     <div>
-                      <label className="mb-1 block text-xs font-medium text-slate-700">Votre numéro WhatsApp</label>
-                      {/* ✅ INTÉGRATION DE TON COMPOSANT PhoneInput */}
+                      <label className="mb-1 block text-[11px] font-medium text-slate-700">
+                        Numéro WhatsApp *
+                      </label>
                       <PhoneInput
                         id="widget-phone"
                         value={phone}
                         onChange={setPhone}
-                        placeholder="6XX XX XX XX"
+                        placeholder="237 XXXXXXXXX"
                       />
                     </div>
 
-                    <label className="flex cursor-pointer items-start gap-2 text-[11px] text-slate-500 leading-relaxed">
+                    <label className="flex cursor-pointer items-start gap-1.5 text-[10px] text-slate-500 leading-tight">
                       <input
                         type="checkbox"
                         checked={consent}
                         onChange={(e) => setConsent(e.target.checked)}
                         className="mt-0.5 rounded border-slate-300 text-[#6366F1] focus:ring-[#6366F1]"
                       />
-                      <span>J'accepte que MakeItAds utilise mon numéro pour traiter ma demande et me transmettre mon invitation.</span>
+                      <span>J'accepte que MakeItAds utilise mon numéro pour me transmettre mon invitation.</span>
                     </label>
 
                     {error && (
-                      <div className="flex items-center gap-2 rounded-lg bg-red-50 p-2 text-[11px] text-red-600">
+                      <div className="flex items-center gap-1.5 rounded-lg bg-red-50 p-1.5 text-[10px] text-red-600">
                         <AlertTriangle className="h-3 w-3 shrink-0" /> {error}
                       </div>
                     )}
 
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] py-3 text-sm font-semibold text-white hover:bg-[#5558e6] disabled:opacity-50 transition-colors"
-                    >
-                      {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Recevoir mon invitation'}
-                    </button>
-                    
-                    <p className="text-center text-[10px] text-slate-400 mt-2">
-                      Vos informations sont utilisées uniquement dans le cadre de votre demande.
-                    </p>
+                    <div className="flex flex-col gap-2 pt-1">
+                      {/* ✅ CTA principal — plus compact sur mobile */}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] py-1.5 text-[11.5px] font-semibold text-white hover:bg-[#5558e6] disabled:opacity-50 transition-colors sm:py-2.5 sm:text-[13px]"
+                      >
+                        {loading ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          'Recevoir mon invitation'
+                        )}
+                      </button>
+
+                      {/* ✅ "Plus tard" — plus fin sur mobile aussi */}
+                      <button
+                        type="button"
+                        onClick={() => setIsOpen(false)}
+                        className="w-full rounded-full border border-slate-200 bg-white py-1.5 text-[10.5px] font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-700 transition-colors sm:py-2 sm:text-[11.5px]"
+                      >
+                        Plus tard
+                      </button>
+                    </div>
                   </form>
                 )}
               </div>
