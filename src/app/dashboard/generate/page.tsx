@@ -23,6 +23,8 @@ import { BackButton } from '@/components/ui/BackButton';
 
 const DRAFT_KEY = 'makeitads_draft';
 const FIRST_GEN_KEY = 'makeitads_first_generation_seen';
+const MAX_BOOTSTRAP_RETRIES = 2;
+const FETCH_TIMEOUT_MS = 8000;
 
 export default function GeneratePage() {
   const router = useRouter();
@@ -33,6 +35,7 @@ export default function GeneratePage() {
   const [showServiceError, setShowServiceError] = useState(false);
 
   const [creditsBalance, setCreditsBalance] = useState<number | null>(null);
+  const [initialLoadDone, setInitialLoadDone] = useState(false); // ✅ NOUVEAU
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
   const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('flash');
   const [supabaseError, setSupabaseError] = useState('');
@@ -61,17 +64,49 @@ export default function GeneratePage() {
     exhausted: 'border-red-300 bg-red-100 text-red-800',
   }[alertLevel];
 
-  const loadCreditsBalance = async () => {
+  // ✅ FIX BUG : évite la récursion infinie + timeout + état final garanti
+  const loadCreditsBalance = async (retryCount = 0) => {
     setRefreshingCredits(true);
     try {
       const supabase = createClient();
       const { data: { user }, error: authError } = await supabase.auth.getUser();
       if (authError) throw new Error(`Authentification Supabase: ${authError.message}`);
-      if (!user) { setSupabaseError('Aucune session utilisateur active. Reconnectez-vous.'); return; }
+      if (!user) {
+        setSupabaseError('Aucune session utilisateur active. Reconnectez-vous.');
+        return;
+      }
 
-      const { data: profile, error: profileError } = await supabase.from('profiles').select('credits_balance, plan, currency').eq('id', user.id).maybeSingle();
-      if (profileError) { setSupabaseError(`Lecture du profil impossible: ${profileError.message}`); return; }
-      if (!profile) { await fetch('/api/profile/bootstrap', { method: 'POST' }); await loadCreditsBalance(); return; }
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('credits_balance, plan, currency')
+        .eq('id', user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        setSupabaseError(`Lecture du profil impossible: ${profileError.message}`);
+        return;
+      }
+
+      // ✅ FIX : limite les retries pour éviter le spinner infini
+      if (!profile) {
+        if (retryCount >= MAX_BOOTSTRAP_RETRIES) {
+          setSupabaseError(
+            'Impossible de charger votre profil. Veuillez recharger la page ou contacter le support.'
+          );
+          return;
+        }
+        try {
+          await Promise.race([
+            fetch('/api/profile/bootstrap', { method: 'POST' }),
+            new Promise((_, reject) =>
+              setTimeout(() => reject(new Error('bootstrap timeout')), FETCH_TIMEOUT_MS)
+            ),
+          ]);
+        } catch (bootErr) {
+          console.error('🚨 bootstrap failed:', bootErr);
+        }
+        return loadCreditsBalance(retryCount + 1);
+      }
 
       const normalizedPlan = normalizePlanId(profile.plan);
       setCreditsBalance(profile.credits_balance ?? 0);
@@ -89,6 +124,8 @@ export default function GeneratePage() {
       setSupabaseError(`Connexion Supabase impossible : ${error.message}`);
     } finally {
       setRefreshingCredits(false);
+      // ✅ FIX : on marque le premier chargement comme terminé quoi qu'il arrive
+      setInitialLoadDone(true);
     }
   };
 
@@ -97,15 +134,25 @@ export default function GeneratePage() {
     if (savedDraft) {
       try {
         const parsed = JSON.parse(savedDraft);
-        if (Object.values(parsed).some((v) => v && v !== '' && v !== 0)) { setFormData(parsed); setHasDraft(true); }
-        else { localStorage.removeItem(DRAFT_KEY); }
-      } catch { localStorage.removeItem(DRAFT_KEY); }
+        if (Object.values(parsed).some((v) => v && v !== '' && v !== 0)) {
+          setFormData(parsed);
+          setHasDraft(true);
+        } else {
+          localStorage.removeItem(DRAFT_KEY);
+        }
+      } catch {
+        localStorage.removeItem(DRAFT_KEY);
+      }
     }
     loadCreditsBalance();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
-    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     const timer = setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 80);
     return () => clearTimeout(timer);
   }, [currentStep, showSummary, isGenerating]);
@@ -135,11 +182,21 @@ export default function GeneratePage() {
 
   const validateStep = (step: number): boolean => {
     if (step === 1 && (!formData.companyName.trim() || !formData.companyDescription.trim() || !formData.sector)) {
-      alert("Le nom, la description et le secteur sont obligatoires."); return false;
+      alert('Le nom, la description et le secteur sont obligatoires.');
+      return false;
     }
-    if (step === 2 && !formData.mainProduct.trim()) { alert('Indiquez le produit principal.'); return false; }
-    if (step === 3 && (!formData.idealClient.trim() || !formData.country.trim())) { alert('Décrivez votre client idéal et son pays.'); return false; }
-    if (step === 5 && !formData.mainObjective) { alert('Définissez un objectif principal.'); return false; }
+    if (step === 2 && !formData.mainProduct.trim()) {
+      alert('Indiquez le produit principal.');
+      return false;
+    }
+    if (step === 3 && (!formData.idealClient.trim() || !formData.country.trim())) {
+      alert('Décrivez votre client idéal et son pays.');
+      return false;
+    }
+    if (step === 5 && !formData.mainObjective) {
+      alert('Définissez un objectif principal.');
+      return false;
+    }
     return true;
   };
 
@@ -166,13 +223,20 @@ export default function GeneratePage() {
   };
 
   const handleGenerate = async () => {
-    if (!isFree && strategyType === 'flash') { setStrategyType('complete'); return; }
+    if (!isFree && strategyType === 'flash') {
+      setStrategyType('complete');
+      return;
+    }
     setIsGenerating(true);
 
     try {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) { alert('Vous devez être connecté'); setIsGenerating(false); return; }
+      if (!user) {
+        alert('Vous devez être connecté');
+        setIsGenerating(false);
+        return;
+      }
 
       const cleanFormData = {
         ...formData,
@@ -218,11 +282,22 @@ export default function GeneratePage() {
     }
   };
 
-  const updateFormData = (updates: Partial<FormData>) => setFormData((prev) => ({ ...prev, ...updates }));
+  const updateFormData = (updates: Partial<FormData>) =>
+    setFormData((prev) => ({ ...prev, ...updates }));
 
   const renderStep = () => {
     if (isGenerating) return <LoadingGeneration strategyType={strategyType} />;
-    if (showSummary) return <Summary formData={formData} creditsBalance={safeBalance} generationCost={generationCost} onGenerate={handleOpenPreGeneration} isGenerating={isGenerating} currency={currency} />;
+    if (showSummary)
+      return (
+        <Summary
+          formData={formData}
+          creditsBalance={safeBalance}
+          generationCost={generationCost}
+          onGenerate={handleOpenPreGeneration}
+          isGenerating={isGenerating}
+          currency={currency}
+        />
+      );
 
     switch (currentStep) {
       case 1: return <Step1Company formData={formData} updateFormData={updateFormData} />;
@@ -237,6 +312,10 @@ export default function GeneratePage() {
     }
   };
 
+  // ✅ FIX : le spinner ne s'affiche QUE pendant le premier chargement
+  // Pendant un refresh manuel, on garde l'affichage du solde réel
+  const showSpinner = !initialLoadDone && !creditsLoaded;
+
   return (
     <div className="min-h-screen bg-[#F8F8FC]">
       <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6 sm:py-6">
@@ -248,28 +327,84 @@ export default function GeneratePage() {
               {isGenerating ? 'Génération en cours' : showSummary ? 'Résumé' : 'Nouvelle stratégie'}
             </h1>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
-              {isGenerating ? 'Veuillez patienter...' : showSummary ? 'Vérifiez les informations.' : 'Construisez une stratégie adaptée à votre entreprise.'}
+              {isGenerating
+                ? 'Veuillez patienter...'
+                : showSummary
+                ? 'Vérifiez les informations.'
+                : 'Construisez une stratégie adaptée à votre entreprise.'}
             </p>
           </div>
-          <button onClick={loadCreditsBalance} disabled={refreshingCredits} className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${creditsLoaded ? badgeStyle : 'border-slate-200 bg-slate-50 text-slate-500'}`}>
-            {refreshingCredits ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wallet className="h-3.5 w-3.5" />}
-            <span className="text-[11px] font-bold">{creditsLoaded ? safeBalance : '—'}</span>
-            <span className="text-[10px] opacity-80">{creditsLoaded && safeBalance > 1 ? 'crédits' : 'crédit'}</span>
+
+          {/* ✅ BOUTON CRÉDITS CORRIGÉ */}
+          <button
+            onClick={() => loadCreditsBalance()}
+            disabled={showSpinner}
+            aria-busy={refreshingCredits && !initialLoadDone}
+            className={`flex shrink-0 items-center gap-2 rounded-full border px-3 py-1.5 transition-colors ${
+              creditsLoaded
+                ? safeBalance === 0
+                  ? 'border-red-300 bg-red-50 text-red-700'
+                  : badgeStyle
+                : 'border-slate-200 bg-slate-50 text-slate-500'
+            }`}
+          >
+            {showSpinner ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Wallet className="h-3.5 w-3.5" />
+            )}
+            <span className="text-[11px] font-bold">
+              {creditsLoaded ? safeBalance : '—'}
+            </span>
+            <span className="text-[10px] opacity-80">
+              {creditsLoaded && safeBalance > 1 ? 'crédits' : 'crédit'}
+            </span>
           </button>
         </div>
 
         {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
-          <div className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${alertLevel === 'exhausted' ? 'border-red-300 bg-red-50' : alertLevel === 'critical' ? 'border-red-200 bg-red-50/70' : 'border-amber-200 bg-amber-50/70'}`}>
-            {alertLevel === 'attention' ? <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" /> : <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />}
+          <div
+            className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
+              alertLevel === 'exhausted'
+                ? 'border-red-300 bg-red-50'
+                : alertLevel === 'critical'
+                ? 'border-red-200 bg-red-50/70'
+                : 'border-amber-200 bg-amber-50/70'
+            }`}
+          >
+            {alertLevel === 'attention' ? (
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
+            ) : (
+              <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
+            )}
             <div className="min-w-0 flex-1">
-              <p className={`text-xs font-semibold ${alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'}`}>
-                {alertLevel === 'exhausted' ? 'Crédits épuisés' : alertLevel === 'critical' ? 'Crédits critiques' : 'Fin de vos crédits proche'}
+              <p
+                className={`text-xs font-semibold ${
+                  alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'
+                }`}
+              >
+                {alertLevel === 'exhausted'
+                  ? 'Crédits épuisés'
+                  : alertLevel === 'critical'
+                  ? 'Crédits critiques'
+                  : 'Fin de vos crédits proche'}
               </p>
-              <p className={`mt-0.5 text-[11px] leading-relaxed ${alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'}`}>
-                {alertLevel === 'exhausted' ? 'Passez à un plan supérieur.' : `Il vous reste ${creditsPercent}% de vos crédits.`}
+              <p
+                className={`mt-0.5 text-[11px] leading-relaxed ${
+                  alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'
+                }`}
+              >
+                {alertLevel === 'exhausted'
+                  ? 'Passez à un plan supérieur.'
+                  : `Il vous reste ${creditsPercent}% de vos crédits.`}
               </p>
               {(alertLevel === 'exhausted' || alertLevel === 'critical') && (
-                <Link href="/dashboard/pricing" className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white">Voir les plans <ArrowRight className="h-3 w-3" /></Link>
+                <Link
+                  href="/dashboard/pricing"
+                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white"
+                >
+                  Voir les plans <ArrowRight className="h-3 w-3" />
+                </Link>
               )}
             </div>
           </div>
@@ -278,18 +413,28 @@ export default function GeneratePage() {
         {hasDraft && !showSummary && !isGenerating && (
           <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5">
             <p className="text-[11px] text-indigo-900">Un brouillon est en cours.</p>
-            <button onClick={resetDraft} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700"><RotateCcw className="h-3 w-3" /> Réinitialiser</button>
+            <button
+              onClick={resetDraft}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700"
+            >
+              <RotateCcw className="h-3 w-3" /> Réinitialiser
+            </button>
           </div>
         )}
 
-        {supabaseError && <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{supabaseError}</div>}
+        {supabaseError && (
+          <div className="mb-5 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+            {supabaseError}
+          </div>
+        )}
 
-        {/* ✅ REFONTE DES CARTES (Version épurée, plus fine) */}
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-2xl border border-slate-200/60 bg-white p-3 sm:p-4 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
             <div className="mb-3 flex items-start justify-between gap-2">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Type de stratégie</p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+                  Type de stratégie
+                </p>
                 <h2 className="mt-0.5 text-sm font-semibold text-[#111827]">Mode de génération</h2>
               </div>
               <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-0.5">
@@ -299,13 +444,13 @@ export default function GeneratePage() {
 
             {isFree ? (
               <div className="flex flex-col gap-2">
-                {/* Bloc 1 : Mode Démo (Sélectionné, Violet) */}
                 <div className="flex items-center justify-between rounded-xl border-2 border-[#6366F1] bg-[#6366F1]/5 px-3 py-2.5">
                   <span className="text-sm font-bold text-[#6366F1]">Mode Démo</span>
-                  <span className="text-xs font-semibold text-[#6366F1]">{CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits</span>
+                  <span className="text-xs font-semibold text-[#6366F1]">
+                    {CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits
+                  </span>
                 </div>
 
-                {/* Bloc 2 : Stratégie Complète (Blanc, CTA Upgrade) */}
                 <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5">
                   <span className="text-sm font-bold text-[#111827]">Stratégie Complète</span>
                   <button
@@ -319,43 +464,71 @@ export default function GeneratePage() {
                 </div>
               </div>
             ) : (
-              /* Si l'utilisateur est déjà PRO */
               <div className="rounded-xl border-2 border-[#6366F1]/20 bg-[#6366F1]/5 px-3 py-2.5 flex items-center justify-between">
                 <div>
                   <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
-                  <p className="text-[10px] text-[#6366F1]/80 mt-0.5">Plan {currentPlan === 'free' ? 'Demo' : currentPlan}</p>
+                  <p className="text-[10px] text-[#6366F1]/80 mt-0.5">
+                    Plan {currentPlan === 'free' ? 'Demo' : currentPlan}
+                  </p>
                 </div>
-                <span className="text-sm font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
+                <span className="text-sm font-bold text-[#6366F1]">
+                  {CREDIT_COSTS.STRATEGIE_COMPLETE} crédits
+                </span>
               </div>
             )}
           </div>
         )}
 
-        {/* Note d'équipe */}
         {!showSummary && !isGenerating && (
           <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
             <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
-              <strong className="text-[#0F172A]">Conseil de l'équipe :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l'ensemble des champs du formulaire, y compris ceux marqués comme optionnels.
+              <strong className="text-[#0F172A]">Conseil de l&apos;équipe :</strong> Pour obtenir les stratégies les
+              plus précises et adaptées à votre activité, nous vous recommandons de compléter l&apos;ensemble des
+              champs du formulaire, y compris ceux marqués comme optionnels.
             </p>
           </div>
         )}
 
-        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />}
+        {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
+          <WizardProgress currentStep={currentStep} totalSteps={totalSteps} />
+        )}
 
-        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">{renderStep()}</div>
+        <div className="mb-5 rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+          {renderStep()}
+        </div>
 
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="flex items-center justify-between gap-3">
-            <button onClick={handlePrevious} disabled={currentStep === 1} className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold disabled:opacity-40 sm:text-sm">← Retour</button>
+            <button
+              onClick={handlePrevious}
+              disabled={currentStep === 1}
+              className="rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-semibold disabled:opacity-40 sm:text-sm"
+            >
+              ← Retour
+            </button>
             <div className="flex items-center gap-3">
-              <span className="hidden text-[10px] text-slate-500 sm:inline sm:text-xs">Étape {currentStep}/{totalSteps}</span>
-              <button onClick={handleNext} className="rounded-full bg-[#6366F1] px-4 py-2 text-xs font-bold text-white shadow-sm sm:text-sm">{currentStep === totalSteps ? 'Voir le résumé →' : 'Continuer →'}</button>
+              <span className="hidden text-[10px] text-slate-500 sm:inline sm:text-xs">
+                Étape {currentStep}/{totalSteps}
+              </span>
+              <button
+                onClick={handleNext}
+                className="rounded-full bg-[#6366F1] px-4 py-2 text-xs font-bold text-white shadow-sm sm:text-sm"
+              >
+                {currentStep === totalSteps ? 'Voir le résumé →' : 'Continuer →'}
+              </button>
             </div>
           </div>
         )}
       </div>
 
-      <PreGenerationModal isOpen={showPreGeneration} onClose={() => setShowPreGeneration(false)} onContinue={handleConfirmPreGeneration} plan={currentPlan} strategyType={strategyType} creditsBalance={safeBalance} />
+      <PreGenerationModal
+        isOpen={showPreGeneration}
+        onClose={() => setShowPreGeneration(false)}
+        onContinue={handleConfirmPreGeneration}
+        plan={currentPlan}
+        strategyType={strategyType}
+        creditsBalance={safeBalance}
+      />
 
       {showServiceError && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
@@ -368,18 +541,36 @@ export default function GeneratePage() {
             </div>
             <div className="p-6 text-center space-y-4">
               <p className="text-sm leading-relaxed text-slate-600">
-                En raison d'une maintenance imprévue de la part de nos partenaires technologiques, la génération automatique de stratégies est momentanément indisponible.
+                En raison d&apos;une maintenance imprévue de la part de nos partenaires technologiques, la génération
+                automatique de stratégies est momentanément indisponible.
               </p>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
                 <p className="text-xs font-semibold text-[#0F172A] mb-2">Nous tenons à vous rassurer :</p>
                 <ul className="text-xs text-slate-600 space-y-1.5">
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />Votre compte et vos crédits sont en sécurité.</li>
-                  <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />Si une génération était en cours, <strong>aucun crédit n'a été débité</strong>.</li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    Votre compte et vos crédits sont en sécurité.
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                    Si une génération était en cours, <strong>aucun crédit n&apos;a été débité</strong>.
+                  </li>
                 </ul>
               </div>
               <div className="flex flex-col gap-2 pt-2">
-                <a href="mailto:support@makeitads.pro" className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#5558e6]"><MessageSquare className="h-4 w-4" />Contacter le support</a>
-                <button onClick={() => setShowServiceError(false)} className="w-full rounded-full px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">Fermer</button>
+                <a
+                  href="mailto:support@makeitads.pro"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#5558e6]"
+                >
+                  <MessageSquare className="h-4 w-4" />
+                  Contacter le support
+                </a>
+                <button
+                  onClick={() => setShowServiceError(false)}
+                  className="w-full rounded-full px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                >
+                  Fermer
+                </button>
               </div>
             </div>
           </div>

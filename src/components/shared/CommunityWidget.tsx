@@ -9,6 +9,7 @@ import Image from 'next/image';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
 const LOCAL_STORAGE_KEY = 'makeitads_community_widget_submitted';
+const NEW_USER_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
 export default function CommunityWidget() {
   const pathname = usePathname();
@@ -17,6 +18,7 @@ export default function CommunityWidget() {
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [widgetDelay, setWidgetDelay] = useState(2); // ✅ NOUVEAU : délai adaptatif
 
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
@@ -39,8 +41,7 @@ export default function CommunityWidget() {
     const supabase = getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // ✅ CAS 1 : VISITEUR ANONYME (landing, PWA non connecté…)
-    // On affiche le widget pour recruter, sauf s'il a déjà soumis (localStorage).
+    // CAS 1 : VISITEUR ANONYME
     if (!user) {
       const hasSubmittedLocally =
         typeof window !== 'undefined' &&
@@ -55,7 +56,13 @@ export default function CommunityWidget() {
 
     setIsAnonymous(false);
 
-    // ✅ CAS 2 : USER CONNECTÉ → on lit son profil
+    // ✅ NOUVEAU : détecter un nouvel inscrit (< 5 min) pour afficher le widget vite
+    const isNewUser = user.created_at
+      ? new Date(user.created_at).getTime() > Date.now() - NEW_USER_WINDOW_MS
+      : false;
+    setWidgetDelay(isNewUser ? 0.3 : 2);
+
+    // CAS 2 : USER CONNECTÉ
     const { data: profile } = await supabase
       .from('profiles')
       .select('has_joined_telegram, first_name')
@@ -68,7 +75,7 @@ export default function CommunityWidget() {
     setIsAdmin(admin);
 
     if (admin) {
-      setShowWidget(true); // bypass admin pour tester
+      setShowWidget(true);
     } else {
       setShowWidget(profile?.has_joined_telegram !== true);
     }
@@ -78,7 +85,6 @@ export default function CommunityWidget() {
     refreshStatus();
   }, [pathname, refreshStatus]);
 
-  // Re-check au retour d'onglet (validation sur un autre device)
   useEffect(() => {
     if (shouldHide) return;
     const onVisible = () => {
@@ -118,8 +124,6 @@ export default function CommunityWidget() {
       const data = await response.json();
       const serverConfirmed = data?.hasJoinedTelegram === true;
 
-      // Pour les users CONNECTÉS non-admin : on exige la confirmation DB
-      // Pour les ANONYMES : pas de profil à mettre à jour, on utilise localStorage
       if (!serverConfirmed && !isAdmin && !isAnonymous) {
         console.error('[CommunityWidget] API OK mais has_joined_telegram non persisté.');
         setError(
@@ -129,7 +133,6 @@ export default function CommunityWidget() {
         return;
       }
 
-      // Anonyme : on mémorise localement pour ne plus lui afficher
       if (isAnonymous && typeof window !== 'undefined') {
         localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
       }
@@ -147,7 +150,6 @@ export default function CommunityWidget() {
     }
   };
 
-  // ✅ Plus de blocage isPWA : le widget s'affiche partout
   if (shouldHide || !showWidget) return null;
 
   const benefits = [
@@ -159,11 +161,11 @@ export default function CommunityWidget() {
 
   return (
     <>
-      {/* BOUTON FLOTTANT — safe-area iPhone PWA */}
+      {/* BOUTON FLOTTANT — délai adaptatif (0.3s nouvel inscrit, 2s user existant) */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: 'spring', delay: 2 }}
+        transition={{ type: 'spring', delay: widgetDelay }}
         onClick={() => setIsOpen(true)}
         className="fixed right-4 z-[90] flex h-[60px] w-[60px] items-center justify-center md:right-8 md:h-[64px] md:w-[64px]"
         style={{
@@ -218,13 +220,15 @@ export default function CommunityWidget() {
                   <span className="text-[#7C3AED]">Ads</span> Business Club.
                 </h2>
 
-                <p className="text-[13px] font-bold text-[#6366F1] mb-2 leading-snug">
+                {/* ✅ Phrase d'accroche en violet fort */}
+                <p className="text-[13px] font-bold text-[#7C3AED] mb-2 leading-snug">
                   Ne développez plus votre activité au hasard.
                 </p>
 
+                {/* ✅ Mots-clés « gratuitement » et « Telegram » en violet fort */}
                 <p className="text-[11px] text-slate-500 mb-4 leading-snug">
-                  Rejoignez <strong className="text-slate-700">gratuitement</strong> notre communauté{' '}
-                  <strong className="text-slate-700">Telegram</strong> et accédez à des ressources pour mieux
+                  Rejoignez <strong className="text-[#7C3AED] font-bold">gratuitement</strong> notre communauté{' '}
+                  <strong className="text-[#7C3AED] font-bold">Telegram</strong> et accédez à des ressources pour mieux
                   comprendre la publicité, attirer des clients et faire grandir votre business.
                 </p>
 
