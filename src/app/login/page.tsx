@@ -1,12 +1,24 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Headset } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { AuthProviderButtons } from '@/components/auth/AuthProviderButtons';
+import { PasskeyLoginButton } from '@/components/auth/PasskeyLoginButton';
+import { PasskeySetupPrompt } from '@/components/auth/PasskeySetupPrompt';
+import {
+  isPlatformAuthenticatorAvailable,
+  getPasskeyLabel,
+  type PasskeyLabel,
+} from '@/lib/passkey/detect';
+import { registerPasskey, listPasskeys, isPasskeyApiAvailable } from '@/lib/passkey/client';
+import { getPasskeyErrorMessage } from '@/lib/passkey/errors';
+
+const PASSKEY_PROMPT_DISMISSED_KEY = 'makeitads_passkey_prompt_dismissed_until';
+const PROMPT_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000; // 30 jours
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -16,8 +28,19 @@ export default function LoginPage() {
   const [checking, setChecking] = useState(true);
   const [redirectTo, setRedirectTo] = useState('/dashboard');
   const router = useRouter();
+  const emailRef = useRef<HTMLInputElement>(null);
 
-  // ✅ Lit le param `redirect` sans useSearchParams (évite le besoin de Suspense)
+  // Prompt Passkey post-login classique
+  const [setupOpen, setSetupOpen] = useState(false);
+  const [setupLoading, setSetupLoading] = useState(false);
+  const [setupError, setSetupError] = useState('');
+  const [passkeyLabel, setPasskeyLabel] = useState<PasskeyLabel>({
+    label: 'la biométrie',
+    icon: 'fingerprint',
+  });
+  const [pendingRedirect, setPendingRedirect] = useState<string | null>(null);
+
+  // ✅ Lit le param `redirect`
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -28,7 +51,7 @@ export default function LoginPage() {
     }
   }, []);
 
-  // ✅ Vérifie la session une seule fois au mount
+  // ✅ Vérifie la session au mount
   useEffect(() => {
     let cancelled = false;
     const checkSession = async () => {
@@ -42,8 +65,39 @@ export default function LoginPage() {
       setChecking(false);
     };
     checkSession();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [router, redirectTo]);
+
+  /** Redirige vers la destination (avec refresh serveur préalable). */
+  const goToDestination = (destination: string) => {
+    router.refresh();
+    window.location.href = destination;
+  };
+
+  /** Vérifie si l'on doit proposer l'enregistrement d'une passkey après login. */
+  const shouldPromptPasskeySetup = async (): Promise<boolean> => {
+    try {
+      if (typeof window === 'undefined') return false;
+      const dismissedUntil = Number(localStorage.getItem(PASSKEY_PROMPT_DISMISSED_KEY) || 0);
+      if (dismissedUntil > Date.now()) return false;
+
+      const biometricOk = await isPlatformAuthenticatorAvailable();
+      if (!biometricOk) return false;
+
+      const supabase = createClient();
+      if (!isPasskeyApiAvailable(supabase)) return false;
+      const existing = await listPasskeys(supabase);
+      if (existing.length > 0) return false;
+
+      setPasskeyLabel(getPasskeyLabel());
+      return true;
+    } catch {
+      // En cas d'erreur de lecture, on ne dérange pas l'utilisateur
+      return false;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,14 +114,54 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ Force Next.js à recharger la session côté serveur
-      router.refresh();
-      // ✅ Puis hard reload vers la destination (cookies déjà posés par signInWithPassword)
-      window.location.href = redirectTo;
+      // ✅ Proposer la passkey après login classique réussi
+      const prompt = await shouldPromptPasskeySetup();
+      if (prompt) {
+        setPendingRedirect(redirectTo);
+        setSetupOpen(true);
+        setLoading(false);
+        return;
+      }
+
+      goToDestination(redirectTo);
     } catch {
       setError('Une erreur est survenue. Veuillez réessayer.');
       setLoading(false);
     }
+  };
+
+  const handleSetupAccept = async () => {
+    setSetupLoading(true);
+    setSetupError('');
+    try {
+      const supabase = createClient();
+      await registerPasskey(supabase);
+      setSetupOpen(false);
+      goToDestination(pendingRedirect || redirectTo);
+    } catch (err) {
+      setSetupError(getPasskeyErrorMessage(err));
+      setSetupLoading(false);
+    }
+  };
+
+  const handleSetupDismiss = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(
+        PASSKEY_PROMPT_DISMISSED_KEY,
+        String(Date.now() + PROMPT_COOLDOWN_MS)
+      );
+    }
+    setSetupOpen(false);
+    goToDestination(pendingRedirect || redirectTo);
+  };
+
+  const handlePasskeySuccess = () => {
+    goToDestination(redirectTo);
+  };
+
+  const handleUsePassword = () => {
+    // Focus sur le champ email pour reprendre la connexion classique
+    setTimeout(() => emailRef.current?.focus(), 50);
   };
 
   if (checking) {
@@ -103,7 +197,8 @@ export default function LoginPage() {
         <div className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_20px_60px_rgba(15,23,42,0.08)] sm:p-6">
           <div className="mb-4">
             <h2 className="mb-0.5 text-lg font-semibold text-slate-900 sm:text-xl">
-              Bienvenue sur <span className="text-[#111827]">MakeIt</span><span className="text-[#6366F1]">Ads</span>
+              Bienvenue sur <span className="text-[#111827]">MakeIt</span>
+              <span className="text-[#6366F1]">Ads</span>
             </h2>
             <p className="text-[11px] text-slate-600 sm:text-xs">
               Connectez-vous à votre espace marketing.
@@ -125,10 +220,14 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs">
+              <label
+                htmlFor="email"
+                className="mb-1 block text-[11px] font-medium text-gray-700 sm:text-xs"
+              >
                 Email
               </label>
               <input
+                ref={emailRef}
                 id="email"
                 type="email"
                 required
@@ -150,7 +249,10 @@ export default function LoginPage() {
             </div>
 
             <div className="text-right">
-              <Link href="/forgot-password" className="text-[11px] text-gray-600 hover:text-[#6366F1] sm:text-xs">
+              <Link
+                href="/forgot-password"
+                className="text-[11px] text-gray-600 hover:text-[#6366F1] sm:text-xs"
+              >
                 Mot de passe oublié ?
               </Link>
             </div>
@@ -162,15 +264,21 @@ export default function LoginPage() {
             >
               {loading ? 'Connexion...' : 'Se connecter'}
             </button>
-
-            <Link
-              href="mailto:support@makeitads.pro"
-              className="flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"
-            >
-              <Headset className="h-4 w-4" />
-              Contacter le support
-            </Link>
           </form>
+
+          {/* ✅ Connexion biométrique (affichée uniquement si supportée) */}
+          <PasskeyLoginButton
+            onSuccess={handlePasskeySuccess}
+            onUsePassword={handleUsePassword}
+          />
+
+          <Link
+            href="mailto:support@makeitads.pro"
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-semibold text-slate-700 transition-all hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1] sm:text-sm"
+          >
+            <Headset className="h-4 w-4" />
+            Contacter le support
+          </Link>
 
           <div className="mt-5 text-center">
             <p className="text-xs text-gray-600 sm:text-sm">
@@ -182,6 +290,15 @@ export default function LoginPage() {
           </div>
         </div>
       </div>
+
+      <PasskeySetupPrompt
+        open={setupOpen}
+        label={passkeyLabel}
+        loading={setupLoading}
+        error={setupError}
+        onAccept={handleSetupAccept}
+        onDismiss={handleSetupDismiss}
+      />
     </div>
   );
 }

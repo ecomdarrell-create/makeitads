@@ -14,11 +14,13 @@ import {
   MessageSquare,
   ShieldCheck,
   UserRound,
+  Fingerprint,
 } from 'lucide-react';
 import { normalizePlanId } from '@/config/pricing.config';
 import { SettingsProfileForm } from '@/components/dashboard/SettingsProfileForm';
 import { ReferralCard } from '@/components/dashboard/ReferralCard';
 import { DangerZone } from '@/components/dashboard/DangerZone';
+import { PasskeyManager } from '@/components/dashboard/PasskeyManager';
 import { getCurrencySymbol, normalizeCurrency } from '@/lib/currency';
 
 const ADMIN_EMAILS = ['ecomdarrell@gmail.com'];
@@ -249,6 +251,22 @@ export default async function SettingsPage() {
         </div>
       </section>
 
+      {/* ✅ NOUVEAU — Connexion rapide (Passkeys) */}
+      <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm sm:rounded-2xl">
+        <div className="flex items-start gap-2.5 border-b border-slate-50 px-4 py-3.5 sm:gap-3 sm:px-5 sm:py-4">
+          <Fingerprint className="mt-0.5 h-4 w-4 text-indigo-600 sm:h-5 sm:w-5" />
+          <div>
+            <h2 className="text-[13px] font-semibold text-slate-900 sm:text-sm">
+              Connexion rapide (Passkeys)
+            </h2>
+            <p className="mt-0.5 text-[11px] text-slate-500 sm:mt-1 sm:text-xs">
+              Connectez-vous avec Face ID, Touch ID, Windows Hello ou l&apos;empreinte digitale.
+            </p>
+          </div>
+        </div>
+        <PasskeyManager />
+      </section>
+
       {/* Sécurité + Parrainage */}
       <section className="grid gap-3 sm:gap-4 lg:grid-cols-2">
         <article className="rounded-xl border border-slate-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-5">
@@ -276,7 +294,7 @@ export default async function SettingsPage() {
         <ReferralCard code={profile?.referral_code || null} count={profile?.referral_count ?? 0} />
       </section>
 
-      {/* Support — email au lieu de Telegram */}
+      {/* Support */}
       <section className="flex flex-col gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-4 sm:rounded-2xl sm:p-5">
         <div className="flex items-start gap-2.5 sm:gap-3">
           <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm sm:h-10 sm:w-10">
@@ -298,7 +316,6 @@ export default async function SettingsPage() {
         </a>
       </section>
 
-      {/* 🚨 Zone de danger — en bas de page */}
       <DangerZone />
     </div>
   );

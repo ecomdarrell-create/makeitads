@@ -8,13 +8,15 @@ import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
+const LOCAL_STORAGE_KEY = 'makeitads_community_widget_submitted';
+
 export default function CommunityWidget() {
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [showWidget, setShowWidget] = useState(false);
-  const [isPWA, setIsPWA] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
@@ -22,7 +24,6 @@ export default function CommunityWidget() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  // ✅ Client Supabase mémoïsé (évite les instances multiples)
   const supabaseRef = useRef<ReturnType<typeof createClient> | null>(null);
   const getSupabase = useCallback(() => {
     if (!supabaseRef.current) supabaseRef.current = createClient();
@@ -32,27 +33,29 @@ export default function CommunityWidget() {
   const hideOnPaths = ['/login', '/signup', '/sign-up', '/auth'];
   const shouldHide = hideOnPaths.some((p) => pathname.startsWith(p));
 
-  // 🔹 Détection PWA
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const isStandalone =
-        window.matchMedia('(display-mode: standalone)').matches ||
-        (window.navigator as any).standalone === true;
-      setIsPWA(isStandalone);
-    }
-  }, []);
-
-  // 🔹 Vérifie le statut (montage + changement de page + retour d'onglet)
   const refreshStatus = useCallback(async () => {
-    if (shouldHide || isPWA) return;
+    if (shouldHide) return;
+
     const supabase = getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // ✅ CAS 1 : VISITEUR ANONYME (landing, PWA non connecté…)
+    // On affiche le widget pour recruter, sauf s'il a déjà soumis (localStorage).
     if (!user) {
-      setShowWidget(false);
+      const hasSubmittedLocally =
+        typeof window !== 'undefined' &&
+        localStorage.getItem(LOCAL_STORAGE_KEY) === 'true';
+
+      setIsAnonymous(true);
+      setIsAdmin(false);
+      setFirstName(null);
+      setShowWidget(!hasSubmittedLocally);
       return;
     }
 
+    setIsAnonymous(false);
+
+    // ✅ CAS 2 : USER CONNECTÉ → on lit son profil
     const { data: profile } = await supabase
       .from('profiles')
       .select('has_joined_telegram, first_name')
@@ -65,27 +68,25 @@ export default function CommunityWidget() {
     setIsAdmin(admin);
 
     if (admin) {
-      // Bypass admin : toujours visible pour tester
-      setShowWidget(true);
+      setShowWidget(true); // bypass admin pour tester
     } else {
-      // ✅ Vraie logique de disparition : seulement si le flag DB n'est pas true
       setShowWidget(profile?.has_joined_telegram !== true);
     }
-  }, [shouldHide, isPWA, getSupabase]);
+  }, [shouldHide, getSupabase]);
 
   useEffect(() => {
     refreshStatus();
   }, [pathname, refreshStatus]);
 
-  // ✅ Re-check quand l'utilisateur revient sur l'onglet (ex: validation sur un autre device)
+  // Re-check au retour d'onglet (validation sur un autre device)
   useEffect(() => {
-    if (shouldHide || isPWA) return;
+    if (shouldHide) return;
     const onVisible = () => {
       if (document.visibilityState === 'visible') refreshStatus();
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
-  }, [refreshStatus, shouldHide, isPWA]);
+  }, [refreshStatus, shouldHide]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -114,45 +115,40 @@ export default function CommunityWidget() {
 
       if (!response.ok) throw new Error("Erreur lors de l'envoi");
 
-      // ✅ CONFIRMATION SERVEUR : on relit le profil pour vérifier que
-      // has_joined_telegram est bien passé à true côté DB.
-      const supabase = getSupabase();
-      const { data: { user } } = await supabase.auth.getUser();
-      let confirmed = false;
+      const data = await response.json();
+      const serverConfirmed = data?.hasJoinedTelegram === true;
 
-      if (user) {
-        const { data } = await supabase
-          .from('profiles')
-          .select('has_joined_telegram')
-          .eq('id', user.id)
-          .maybeSingle();
-        confirmed = data?.has_joined_telegram === true;
+      // Pour les users CONNECTÉS non-admin : on exige la confirmation DB
+      // Pour les ANONYMES : pas de profil à mettre à jour, on utilise localStorage
+      if (!serverConfirmed && !isAdmin && !isAnonymous) {
+        console.error('[CommunityWidget] API OK mais has_joined_telegram non persisté.');
+        setError(
+          "Ta demande a bien été enregistrée, mais la validation n'a pas pu être confirmée. Réessaie dans un instant."
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Anonyme : on mémorise localement pour ne plus lui afficher
+      if (isAnonymous && typeof window !== 'undefined') {
+        localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
       }
 
       setSuccess(true);
-
       setTimeout(() => {
         setIsOpen(false);
-        // ✅ On cache le widget pour tous les utilisateurs (sauf admin qui teste)
-        if (!isAdmin) {
-          setShowWidget(false);
-        }
-        // Dev warning si l'API n'a pas persisté le flag
-        if (!confirmed && process.env.NODE_ENV === 'development') {
-          console.warn(
-            '[CommunityWidget] has_joined_telegram non confirmé en DB après /api/community-invite. ' +
-            "Vérifie que l'endpoint met bien le flag à true (sinon le widget revient à la prochaine visite)."
-          );
-        }
+        if (!isAdmin) setShowWidget(false);
       }, 3000);
     } catch (err) {
+      console.error('🚨 handleSubmit error:', err);
       setError('Une erreur est survenue. Réessayez.');
     } finally {
       setLoading(false);
     }
   };
 
-  if (shouldHide || !showWidget || isPWA) return null;
+  // ✅ Plus de blocage isPWA : le widget s'affiche partout
+  if (shouldHide || !showWidget) return null;
 
   const benefits = [
     'Conseils publicitaires pour créer des campagnes efficaces.',
@@ -163,13 +159,16 @@ export default function CommunityWidget() {
 
   return (
     <>
-      {/* ✅ BOUTON FLOTTANT */}
+      {/* BOUTON FLOTTANT — safe-area iPhone PWA */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: 2 }}
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-24 right-4 z-[90] flex h-[60px] w-[60px] items-center justify-center md:bottom-8 md:right-8 md:h-[64px] md:w-[64px]"
+        className="fixed right-4 z-[90] flex h-[60px] w-[60px] items-center justify-center md:right-8 md:h-[64px] md:w-[64px]"
+        style={{
+          bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
+        }}
         aria-label="Rejoindre la communauté MakeItAds"
       >
         <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full shadow-[0_8px_30px_rgba(99,102,241,0.25)] ring-1 ring-slate-200/50 bg-white">
@@ -188,7 +187,7 @@ export default function CommunityWidget() {
         </span>
       </motion.button>
 
-      {/* ✅ POPUP PREMIUM */}
+      {/* POPUP */}
       <AnimatePresence>
         {isOpen && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 px-4 backdrop-blur-sm">
@@ -274,7 +273,6 @@ export default function CommunityWidget() {
                     )}
 
                     <div className="flex flex-col gap-2 pt-1">
-                      {/* ✅ CTA principal — plus compact sur mobile */}
                       <button
                         type="submit"
                         disabled={loading}
@@ -287,7 +285,6 @@ export default function CommunityWidget() {
                         )}
                       </button>
 
-                      {/* ✅ "Plus tard" — plus fin sur mobile aussi */}
                       <button
                         type="button"
                         onClick={() => setIsOpen(false)}
