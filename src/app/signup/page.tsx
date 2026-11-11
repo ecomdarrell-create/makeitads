@@ -5,7 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Mail, Headset } from 'lucide-react';
+import { Mail, Headset, Gift, CheckCircle2, X } from 'lucide-react';
 import { AuthPasswordField } from '@/components/auth/AuthPasswordField';
 import { CurrencyCombobox } from '@/components/ui/CurrencyCombobox';
 
@@ -40,6 +40,7 @@ function SignupForm() {
     password: '',
     currency: '',
   });
+  const [manualReferralCode, setManualReferralCode] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -49,7 +50,10 @@ function SignupForm() {
   const router = useRouter();
 
   const redirectTo = searchParams.get('redirect') || '/dashboard';
-  const referralCode = searchParams.get('ref') || null;
+  const urlReferralCode = (searchParams.get('ref') || '').toUpperCase().trim();
+
+  // ✅ Priorité : code saisi manuellement, sinon code URL
+  const effectiveReferralCode = manualReferralCode.trim().toUpperCase() || urlReferralCode;
 
   useEffect(() => {
     const checkSession = async () => {
@@ -69,13 +73,11 @@ function SignupForm() {
     setLoading(true);
     setError('');
 
-    // ✅ Validation stricte du prénom
     if (!formData.firstName.trim() || formData.firstName.trim().length < 2) {
       setError('Le prénom est obligatoire (au moins 2 caractères).');
       setLoading(false);
       return;
     }
-    // ✅ Validation stricte du nom
     if (!formData.lastName.trim() || formData.lastName.trim().length < 2) {
       setError('Le nom est obligatoire (au moins 2 caractères).');
       setLoading(false);
@@ -91,7 +93,6 @@ function SignupForm() {
       setLoading(false);
       return;
     }
-    // ✅ Validation devise (plus de téléphone)
     if (!formData.currency) {
       setError('Merci de sélectionner votre devise.');
       setLoading(false);
@@ -100,6 +101,7 @@ function SignupForm() {
 
     const cleanFirstName = formData.firstName.trim();
     const cleanLastName = formData.lastName.trim();
+    const cleanReferralCode = effectiveReferralCode;
 
     try {
       const supabase = createClient();
@@ -114,6 +116,7 @@ function SignupForm() {
             currency: formData.currency,
             plan_type: 'free',
             credits_balance: 10,
+            referral_code: cleanReferralCode || null,
           },
         },
       });
@@ -141,19 +144,27 @@ function SignupForm() {
         return;
       }
 
-      if (referralCode && data.user?.id) {
+      // ✅ Enregistrement du parrainage (URL ou code manuel)
+      if (cleanReferralCode && data.user?.id) {
         try {
-          await fetch('/api/referral', {
+          const refResponse = await fetch('/api/referral', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ referral_code: referralCode, referee_id: data.user.id }),
+            body: JSON.stringify({
+              referral_code: cleanReferralCode,
+              referee_id: data.user.id,
+            }),
           });
+          if (!refResponse.ok) {
+            const refData = await refResponse.json().catch(() => ({}));
+            console.warn('[signup] Parrainage non enregistré:', refData?.error || refResponse.status);
+          }
         } catch (refError) {
           console.warn('Erreur parrainage:', refError);
         }
       }
 
-      // ✅ S'assurer que first_name, last_name et currency sont bien dans profiles
+      // S'assurer que le prénom/nom/devise sont bien dans profiles
       if (data.user?.id) {
         try {
           await supabase.from('profiles').update({
@@ -244,10 +255,15 @@ function SignupForm() {
             <p className="text-[11px] text-slate-600 sm:text-xs">Commencez à construire de meilleures stratégies publicitaires.</p>
           </div>
 
-          {referralCode && (
+          {(urlReferralCode || manualReferralCode.trim()) && (
             <div className="mb-3 rounded-xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-2.5">
-              <p className="text-[10px] font-medium text-[#6366F1] sm:text-[11px]">Vous avez été invité par un membre MakeItAds</p>
-              <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">Votre parrain recevra un bonus dès votre premier paiement.</p>
+              <p className="flex items-center gap-1.5 text-[10px] font-medium text-[#6366F1] sm:text-[11px]">
+                <Gift className="h-3 w-3" />
+                {urlReferralCode ? 'Vous avez été invité par un membre MakeItAds' : 'Code parrain renseigné'}
+              </p>
+              <p className="mt-0.5 text-[9px] text-slate-600 sm:text-[10px]">
+                Votre parrain recevra un bonus dès votre premier paiement.
+              </p>
             </div>
           )}
 
@@ -330,6 +346,45 @@ function SignupForm() {
                 onChange={(currency) => setFormData((prev) => ({ ...prev, currency }))}
                 placeholder="Sélectionnez votre devise…"
               />
+            </div>
+
+            {/* ✅ NOUVEAU — Code parrainage (optionnel) */}
+            <div>
+              <label htmlFor="referralCode" className="mb-1 flex items-center gap-1.5 text-[11px] font-medium text-gray-700 sm:text-xs">
+                <Gift className="h-3 w-3 text-[#6366F1]" />
+                Code de parrainage <span className="text-slate-400">(optionnel)</span>
+              </label>
+              <div className="relative">
+                <input
+                  id="referralCode"
+                  type="text"
+                  value={manualReferralCode}
+                  onChange={(e) => setManualReferralCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12))}
+                  disabled={!!urlReferralCode}
+                  className="min-h-10 w-full rounded-xl border border-slate-200 px-3 py-2.5 font-mono text-xs uppercase tracking-wider outline-none transition-colors focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50 disabled:text-slate-500 sm:min-h-11 sm:text-sm"
+                  placeholder={urlReferralCode ? `Code détecté : ${urlReferralCode}` : 'Ex : ABC123XY'}
+                  maxLength={12}
+                  autoComplete="off"
+                />
+                {manualReferralCode && !urlReferralCode && (
+                  <button
+                    type="button"
+                    onClick={() => setManualReferralCode('')}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                    aria-label="Effacer le code"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                )}
+                {urlReferralCode && (
+                  <CheckCircle2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-emerald-500" />
+                )}
+              </div>
+              <p className="mt-1 text-[10px] leading-relaxed text-slate-500 sm:text-[11px]">
+                {urlReferralCode
+                  ? 'Un code parrain a été détecté depuis votre lien d\'invitation.'
+                  : 'Si un proche vous a invité, saisissez son code pour lui permettre de recevoir ses crédits bonus.'}
+              </p>
             </div>
 
             <button

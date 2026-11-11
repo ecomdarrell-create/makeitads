@@ -10,29 +10,28 @@ export default async function ReferralPage() {
 
   if (!user) redirect('/login');
 
-  // S'assurer que le profil existe
   await ensureUserProfile(user);
 
-  // Récupérer les champs de parrainage (avec fallback si erreur)
   let referralCode: string | null = null;
   let referralCount = 0;
+  let firstName: string | null = null;
 
   try {
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
-      .select('referral_code, referral_count')
+      .select('referral_code, referral_count, first_name')
       .eq('id', user.id)
       .maybeSingle();
 
     if (!profileError && profile) {
       referralCode = profile.referral_code || null;
       referralCount = profile.referral_count || 0;
+      firstName = profile.first_name || null;
     }
   } catch (e) {
     console.warn('Colonnes parrainage non disponibles:', e);
   }
 
-  // Récupérer les parrainages (avec fallback si table inexistante)
   let enrichedReferrals: Array<{
     id: string;
     credits_awarded: number;
@@ -82,7 +81,7 @@ export default async function ReferralPage() {
           Parrainage
         </h1>
         <p className="text-xs text-slate-600 sm:text-sm">
-          Invite tes amis et gagne des crédits gratuits.
+          Invitez vos proches et gagnez des crédits bonus à chaque inscription validée.
         </p>
       </div>
 
@@ -90,6 +89,7 @@ export default async function ReferralPage() {
         initialCode={referralCode}
         initialCount={referralCount}
         referrals={enrichedReferrals}
+        firstName={firstName}
       />
     </div>
   );

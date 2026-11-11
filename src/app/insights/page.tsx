@@ -1,78 +1,71 @@
-import { blogPosts } from "@/data/blogPosts";
-import GlobalNavbar from "@/components/shared/GlobalNavbar";
-import GlobalFooter from "@/components/shared/GlobalFooter";
-import Link from "next/link";
-import { ArrowLeft, Clock } from "lucide-react";
+import type { Metadata } from 'next';
+import { createClient } from '@/lib/supabase/server';
+import { BookOpen } from 'lucide-react';
+import GlobalNavbar from '@/components/shared/GlobalNavbar';
+import GlobalFooter from '@/components/shared/GlobalFooter';
+import { BlogCard } from '@/components/academy/BlogCard';
+import type { BlogPost } from '@/lib/academy/types';
 
-export const metadata = {
-  title: "Marketing Insights & Strategies | MakeItAds",
-  description: "Deep dives into competitor analysis, SaaS growth, and AI marketing strategies.",
+export const metadata: Metadata = {
+  title: 'Academy — Ressources publicitaires pour entrepreneurs africains',
+  description:
+    "Guides, études de cas et outils concrets pour structurer vos campagnes publicitaires sur le marché africain.",
+  alternates: { canonical: 'https://makeitads.pro/insights' },
 };
 
-export default function InsightsPage() {
+export const revalidate = 300; // ISR 5 min
+
+export default async function InsightsIndexPage() {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from('blog_posts')
+    .select('*')
+    .eq('status', 'published')
+    .order('published_at', { ascending: false });
+
+  const posts = (data ?? []) as BlogPost[];
+
   return (
-    <div className="min-h-screen bg-[#FAFAFC] flex flex-col">
+    <main className="min-h-screen bg-[#F7F7F8] text-[#18181B]">
       <GlobalNavbar />
 
-      <main className="flex-grow pt-32 pb-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          
-          {/* Bouton Retour */}
-          <Link 
-            href="/" 
-            className="inline-flex items-center gap-2 text-sm text-[#64748B] hover:text-[#6366f1] transition-colors mb-8 group font-medium"
-          >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            Back to Home
-          </Link>
+      {/* HERO */}
+      <section className="border-b border-[#E7E7EB] bg-white">
+        <div className="mx-auto max-w-4xl px-4 py-10 text-center sm:px-6 sm:py-14">
+          <div className="mx-auto mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#6366F1]/20 bg-[#6366F1]/5 px-3 py-1">
+            <BookOpen className="h-3 w-3 text-[#6366F1]" />
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6366F1]">
+              Academy
+            </span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#18181B] sm:text-3xl md:text-4xl">
+            Ressources pour entrepreneurs africains
+          </h1>
+          <p className="mx-auto mt-3 max-w-xl text-[13px] leading-relaxed text-slate-500 sm:text-sm">
+            Guides, études de cas et outils concrets pour structurer vos campagnes
+            publicitaires et développer votre activité.
+          </p>
+        </div>
+      </section>
 
-          {/* En-tête de la page */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-[#111827] mb-4">
-              Marketing <span className="text-[#6366f1]">Intelligence</span>
-            </h1>
-            <p className="text-lg text-[#64748B] max-w-2xl mx-auto">
-              Expert insights, data-driven frameworks, and actionable strategies to help you outsmart the competition.
+      {/* ARTICLES */}
+      <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-12">
+        {posts.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-slate-200 bg-white p-10 text-center">
+            <p className="text-sm text-slate-500">
+              Aucun article publié pour le moment. Revenez bientôt.
             </p>
           </div>
-
-          {/* Liste des articles */}
-          <div className="space-y-6">
-            {blogPosts.map((post) => (
-              <Link 
-                key={post.slug} 
-                href={`/insights/${post.slug}`}
-                className="group block bg-white rounded-2xl border border-[#E5E7EB] p-6 sm:p-8 hover:shadow-lg hover:border-[#6366f1]/30 transition-all duration-300"
-              >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="px-2.5 py-1 rounded-md bg-[#EEF2FF] text-[#6366f1] text-xs font-bold uppercase tracking-wider">
-                        {post.category}
-                      </span>
-                      <span className="flex items-center gap-1.5 text-xs text-[#94A3B8]">
-                        <Clock className="h-3.5 w-3.5" /> {post.readTime}
-                      </span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-[#111827] mb-2 group-hover:text-[#6366f1] transition-colors">
-                      {post.title}
-                    </h2>
-                    <p className="text-[#64748B] line-clamp-2">
-                      {post.excerpt}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-2 text-[#6366f1] font-semibold shrink-0 group-hover:gap-3 transition-all">
-                    Read article <ArrowLeft className="h-4 w-4 rotate-180" />
-                  </div>
-                </div>
-              </Link>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <BlogCard key={post.id} post={post} />
             ))}
           </div>
-
-        </div>
-      </main>
+        )}
+      </section>
 
       <GlobalFooter />
-    </div>
+    </main>
   );
 }

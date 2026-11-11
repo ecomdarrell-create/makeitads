@@ -1,57 +1,46 @@
 import type { MetadataRoute } from 'next';
+import { createClient } from '@supabase/supabase-js';
 
-export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = 'https://makeitads.pro';
-  const currentDate = new Date();
+const BASE_URL = 'https://makeitads.pro';
 
-  return [
-    {
-      url: baseUrl,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 1.0,
-    },
-    {
-      url: `${baseUrl}/#how-it-works`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/#fonctionnalites`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.9,
-    },
-    {
-      url: `${baseUrl}/#avis`,
-      lastModified: currentDate,
-      changeFrequency: 'weekly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/#pricing`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.95,
-    },
-    {
-      url: `${baseUrl}/#faq`,
-      lastModified: currentDate,
-      changeFrequency: 'monthly',
-      priority: 0.8,
-    },
-    {
-      url: `${baseUrl}/signup`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.7,
-    },
-    {
-      url: `${baseUrl}/login`,
-      lastModified: currentDate,
-      changeFrequency: 'yearly',
-      priority: 0.5,
-    },
+export const revalidate = 3600;
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  let posts: Array<{ slug: string; updated_at: string; published_at: string | null }> = [];
+  if (url && anon) {
+    try {
+      const supabase = createClient(url, anon, { auth: { persistSession: false } });
+      const { data } = await supabase
+        .from('blog_posts')
+        .select('slug, updated_at, published_at')
+        .eq('status', 'published')
+        .order('published_at', { ascending: false });
+      posts = data ?? [];
+    } catch {
+      posts = [];
+    }
+  }
+
+  const staticRoutes: MetadataRoute.Sitemap = [
+    { url: `${BASE_URL}/`, changeFrequency: 'weekly', priority: 1 },
+    { url: `${BASE_URL}/insights`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${BASE_URL}/pricing`, changeFrequency: 'monthly', priority: 0.8 },
+    { url: `${BASE_URL}/contact`, changeFrequency: 'yearly', priority: 0.6 },
+    { url: `${BASE_URL}/about`, changeFrequency: 'yearly', priority: 0.5 },
+    { url: `${BASE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${BASE_URL}/cookies`, changeFrequency: 'yearly', priority: 0.3 },
   ];
+
+  const postRoutes: MetadataRoute.Sitemap = posts.map((p) => ({
+    url: `${BASE_URL}/insights/${p.slug}`,
+    lastModified: p.updated_at ? new Date(p.updated_at) : undefined,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }));
+
+  return [...staticRoutes, ...postRoutes];
 }
