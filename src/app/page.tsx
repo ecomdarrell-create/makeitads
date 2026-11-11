@@ -4,7 +4,7 @@ import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, Check, ChevronDown, ArrowUp } from "lucide-react";
-import { useState, Fragment, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   SiMeta,
   SiGoogle,
@@ -24,6 +24,7 @@ import HeroSection from "@/components/HeroSection";
 import WhyChooseSection from "../components/WhyChooseSection";
 import EntrepreneursCarousel from "../components/EntrepreneursCarousel";
 import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/components/TrustpilotCarousel";
+import { AcademyCarousel } from "@/components/academy/AcademyCarousel";
 
 import { createClient } from "@/lib/supabase/client";
 import { formatPlanPrice } from "@/config/pricing.config";
@@ -245,7 +246,6 @@ export default function LandingPage() {
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currency, setCurrency] = useState<Currency>("XOF");
 
-  // ✅ AJOUT : Force le scroll tout en haut de la page au chargement
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -289,7 +289,7 @@ export default function LandingPage() {
       <GlobalNavbar />
       <HeroSection />
 
-      {/* ── Barre de logos officiels (collée sous le hero) ── */}
+      {/* ── Barre de logos officiels ── */}
       <section className="relative z-10 border-y border-gray-100 bg-[#F8F8FC] py-5 md:py-6 overflow-hidden">
         <div className="max-w-5xl mx-auto px-4 mb-3 md:mb-4">
           <p className="text-[10px] uppercase tracking-[0.2em] text-[#6366f1] font-bold text-left">
@@ -326,7 +326,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ SECTION AVIS — avec id pour redirection depuis le menu burger */}
+      {/* ✅ SECTION AVIS */}
       <section id="avis" className="scroll-mt-24">
         <TrustpilotCarousel
           reviews={section1Reviews}
@@ -450,6 +450,9 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      {/* ✅ CARROUSEL ACADEMY — articles du blog */}
+      <AcademyCarousel />
 
       <EntrepreneursCarousel />
 

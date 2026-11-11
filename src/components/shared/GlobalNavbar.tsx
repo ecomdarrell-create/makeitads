@@ -19,6 +19,7 @@ const navLinks = [
   { name: "Comment ça marche ?", href: "#how-it-works" },
   { name: "Fonctionnalités", href: "#fonctionnalites" },
   { name: "Résultats", href: "#avis" },
+  { name: "Academy", href: "/insights", isExternal: true },
   { name: "Tarifs", href: "#pricing" },
   { name: "FAQ", href: "#faq" },
   { name: "Dashboard", href: "/dashboard", isExternal: true },
@@ -35,6 +36,7 @@ const searchIndex = [
   { label: "Mes crédits", href: "/dashboard/credits", keywords: "crédits solde historique" },
   { label: "Ressources", href: "/dashboard/resources", keywords: "aide tutoriel guide" },
   { label: "Parrainage", href: "/dashboard/referral", keywords: "parrainage filleuls" },
+  { label: "Academy", href: "/insights", keywords: "blog articles academy ressources contenu" },
   { label: "Support", href: "mailto:support@makeitads.pro", keywords: "aide contact support" },
 ];
 
@@ -563,7 +565,6 @@ export default function Navbar() {
         )}
       </AnimatePresence>
 
-      {/* MODIFICATION 6 : passage de onOpenPanel pour ouvrir le panneau au clic sur un toast */}
       {user && (
         <NotificationToaster
           toasts={toasts}

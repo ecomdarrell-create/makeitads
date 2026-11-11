@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Home, Plus, BarChart3, Coins, Crown, Gift, User } from 'lucide-react';
+import { Home, Plus, BarChart3, Coins, BookOpen, Gift, User } from 'lucide-react';
 import { useEffect } from 'react';
 
 const AUTH_ROUTES = ['/login', '/signup', '/sign-up', '/register', '/forgot-password', '/reset-password', '/auth'];
@@ -12,8 +12,8 @@ const items = [
   { name: 'Accueil', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: Plus },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Credits', href: '/dashboard/credits', icon: Coins },
-  { name: 'Plan', href: '/dashboard/pricing', icon: Crown },
+  { name: 'Crédits', href: '/dashboard/credits', icon: Coins },
+  { name: 'Academy', href: '/insights', icon: BookOpen },
   { name: 'Parrainage', href: '/dashboard/referral', icon: Gift },
   { name: 'Settings', href: '/dashboard/settings', icon: User },
 ];
@@ -23,7 +23,6 @@ export function MobileNav() {
   const router = useRouter();
   const isAuthPage = AUTH_ROUTES.some((route) => pathname === route || pathname.startsWith(`${route}/`));
 
-  // ✅ AJOUT : Précharge les pages en arrière-plan pour une navigation instantanée
   useEffect(() => {
     items.forEach((item) => {
       router.prefetch(item.href);
@@ -44,7 +43,11 @@ export function MobileNav() {
       >
         <div className="flex w-full items-center justify-around">
           {items.map((item) => {
-            const isActive = item.href === '/' ? pathname === '/' : pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+            const isActive =
+              item.href === '/'
+                ? pathname === '/'
+                : pathname === item.href ||
+                  (item.href !== '/dashboard' && pathname.startsWith(item.href));
             const Icon = item.icon;
 
             return (
@@ -55,7 +58,6 @@ export function MobileNav() {
                 aria-label={item.name}
                 className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
-                {/* HALO GLISSANT */}
                 {isActive && (
                   <motion.div
                     layoutId="active-halo-mobile"
@@ -63,7 +65,7 @@ export function MobileNav() {
                     transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
                   />
                 )}
-                
+
                 <Icon
                   className={`relative z-10 h-[22px] w-[22px] transition-colors duration-150 ${
                     isActive ? 'text-[#6366F1]' : 'text-[#0F172A]'
