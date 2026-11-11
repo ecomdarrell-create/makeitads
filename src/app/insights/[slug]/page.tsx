@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Clock, ArrowLeft } from 'lucide-react';
+import { Clock, ArrowLeft, Calendar, User } from 'lucide-react';
 import GlobalNavbar from '@/components/shared/GlobalNavbar';
 import GlobalFooter from '@/components/shared/GlobalFooter';
 import { formatDateFR } from '@/lib/academy/helpers';
@@ -89,6 +89,9 @@ export default async function InsightsArticlePage({
     },
   };
 
+  // Initiale de l'auteur pour l'avatar
+  const authorInitial = post.author_name.trim().charAt(0).toUpperCase() || 'M';
+
   return (
     <main className="min-h-screen bg-white text-[#18181B]">
       <GlobalNavbar />
@@ -98,63 +101,101 @@ export default async function InsightsArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <article className="mx-auto max-w-3xl px-4 pb-16 pt-8 sm:px-6 sm:pt-12">
-        <Link
-          href="/insights"
-          className="mb-6 inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-[#6366F1] sm:text-sm"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Retour à l&apos;Academy
-        </Link>
+      {/* ═══════════════════════════════════════════ */}
+      {/* HERO — fond dégradé léger + breadcrumb */}
+      {/* ═══════════════════════════════════════════ */}
+      <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-[#FAFBFF] to-white">
+        <div className="mx-auto max-w-3xl px-4 pb-10 pt-8 sm:px-6 sm:pb-12 sm:pt-12">
+          {/* Breadcrumb */}
+          <nav className="mb-6 flex items-center gap-1.5 text-xs text-slate-400 sm:text-sm">
+            <Link href="/insights" className="inline-flex items-center gap-1.5 font-medium text-slate-500 transition-colors hover:text-[#6366F1]">
+              <ArrowLeft className="h-3.5 w-3.5" />
+              Academy
+            </Link>
+            <span className="text-slate-300">/</span>
+            <span className="truncate font-medium text-slate-500">{CATEGORY_LABELS[post.category]}</span>
+          </nav>
 
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-medium ring-1 ring-inset ${CATEGORY_COLORS[post.category]}`}
-          >
-            {CATEGORY_LABELS[post.category]}
-          </span>
-          <span className="flex items-center gap-1 text-[11px] text-slate-400">
-            <Clock className="h-3 w-3" /> {post.reading_time_minutes} min de lecture
-          </span>
-          <span className="text-[11px] text-slate-400">
-            {formatDateFR(post.published_at)}
-          </span>
+          {/* Catégorie + lecture + date */}
+          <div className="mb-5 flex flex-wrap items-center gap-2.5">
+            <span
+              className={`inline-flex items-center rounded-full px-2.5 py-1 text-[10.5px] font-semibold ring-1 ring-inset ${CATEGORY_COLORS[post.category]}`}
+            >
+              {CATEGORY_LABELS[post.category]}
+            </span>
+            <span className="flex items-center gap-1 text-[11px] text-slate-500">
+              <Clock className="h-3 w-3" /> {post.reading_time_minutes} min
+            </span>
+            <span className="h-1 w-1 rounded-full bg-slate-300" />
+            <span className="flex items-center gap-1 text-[11px] text-slate-500">
+              <Calendar className="h-3 w-3" /> {formatDateFR(post.published_at)}
+            </span>
+          </div>
+
+          {/* Titre */}
+          <h1 className="mb-4 text-[1.65rem] font-extrabold leading-[1.15] tracking-tight text-[#0F172A] sm:text-4xl md:text-[2.75rem]">
+            {post.title}
+          </h1>
+
+          {/* Excerpt */}
+          <p className="mb-6 text-[14.5px] leading-relaxed text-slate-600 sm:text-base md:text-[17px]">
+            {post.excerpt}
+          </p>
+
+          {/* Auteur */}
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-[13px] font-bold text-white shadow-sm">
+              {authorInitial}
+            </div>
+            <div>
+              <p className="text-[12px] font-semibold text-[#0F172A] sm:text-[13px]">
+                {post.author_name}
+              </p>
+              <p className="text-[10.5px] text-slate-500 sm:text-[11px]">
+                MakeItAds · Academy
+              </p>
+            </div>
+          </div>
         </div>
+      </section>
 
-        <h1 className="mb-3 text-2xl font-bold leading-tight text-[#18181B] sm:text-3xl md:text-4xl">
-          {post.title}
-        </h1>
-        <p className="mb-6 text-[14px] leading-relaxed text-slate-600 sm:text-base">
-          {post.excerpt}
-        </p>
-
-        <p className="mb-8 text-[11px] font-medium text-slate-500">
-          Par {post.author_name}
-        </p>
-
-        {post.cover_url && (
-          <div className="relative mb-8 aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100">
+      {/* ═══════════════════════════════════════════ */}
+      {/* COVER IMAGE */}
+      {/* ═══════════════════════════════════════════ */}
+      {post.cover_url && (
+        <div className="mx-auto max-w-4xl px-4 pt-8 sm:px-6 sm:pt-10">
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)]">
             <Image
               src={post.cover_url}
               alt={post.title}
               fill
               priority
-              sizes="(max-width: 768px) 100vw, 768px"
+              sizes="(max-width: 768px) 100vw, 1024px"
               className="object-cover"
             />
           </div>
-        )}
+        </div>
+      )}
 
+      {/* ═══════════════════════════════════════════ */}
+      {/* CONTENU ARTICLE (rendu premium) */}
+      {/* ═══════════════════════════════════════════ */}
+      <article className="mx-auto max-w-3xl px-4 pb-12 pt-10 sm:px-6 sm:pt-12">
         <div
-          className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-[#18181B] prose-h2:mt-8 prose-h2:mb-3 prose-h2:text-xl prose-h3:mt-6 prose-h3:text-lg prose-p:leading-relaxed prose-p:text-slate-700 prose-a:text-[#6366F1] prose-a:underline prose-strong:text-[#18181B] prose-ul:my-4 prose-li:my-1 prose-img:rounded-xl prose-img:my-6"
+          className="article-content"
           dangerouslySetInnerHTML={{ __html: post.content }}
         />
 
+        {/* Tags */}
         {post.tags.length > 0 && (
-          <div className="mt-10 flex flex-wrap gap-1.5 border-t border-slate-100 pt-6">
+          <div className="mt-12 flex flex-wrap items-center gap-1.5 border-t border-slate-100 pt-8">
+            <span className="mr-1 text-[10.5px] font-semibold uppercase tracking-wider text-slate-400">
+              Tags
+            </span>
             {post.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full bg-slate-100 px-2.5 py-0.5 text-[10.5px] font-medium text-slate-600"
+                className="rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10.5px] font-medium text-slate-600 transition-colors hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700"
               >
                 #{tag}
               </span>
@@ -162,19 +203,43 @@ export default async function InsightsArticlePage({
           </div>
         )}
 
-        <div className="mt-10 rounded-2xl border border-[#6366F1]/20 bg-[#6366F1]/5 p-5 text-center">
-          <p className="mb-2 text-sm font-semibold text-[#18181B]">
-            Passez à la pratique avec MakeItAds
-          </p>
-          <p className="mb-4 text-[12.5px] leading-relaxed text-slate-600">
-            Générez votre première stratégie publicitaire complète en quelques minutes.
-          </p>
-          <Link
-            href="/signup"
-            className="inline-flex items-center justify-center rounded-full bg-[#6366F1] px-4 py-2 text-xs font-semibold text-white hover:bg-[#5558e6] sm:text-sm"
-          >
-            Créer un compte gratuit
-          </Link>
+        {/* ═══════════════════════════════════════════ */}
+        {/* CTA FINAL PREMIUM */}
+        {/* ═══════════════════════════════════════════ */}
+        <div className="relative mt-12 overflow-hidden rounded-2xl border border-[#6366F1]/20 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#FAF5FF] p-6 sm:p-8">
+          {/* Halo décoratif */}
+          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#8B5CF6]/10 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-[#6366F1]/10 blur-3xl" />
+
+          <div className="relative">
+            <div className="mb-2 inline-flex items-center gap-1.5 rounded-full bg-white/80 px-2.5 py-1 backdrop-blur-sm">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#6366F1]" />
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1]">
+                Passez à l&apos;action
+              </span>
+            </div>
+            <h3 className="mb-2 text-lg font-bold leading-tight text-[#0F172A] sm:text-xl">
+              Générez votre stratégie publicitaire en 5 minutes
+            </h3>
+            <p className="mb-5 max-w-md text-[12.5px] leading-relaxed text-slate-600 sm:text-sm">
+              MakeItAds analyse votre activité et produit une stratégie complète : ciblage, hooks, scripts WhatsApp et budget alloué. Paiement unique, sans abonnement.
+            </p>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Link
+                href="/signup"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-5 py-2.5 text-[12.5px] font-semibold text-white shadow-[0_8px_20px_-6px_rgba(99,102,241,0.5)] transition-all hover:shadow-[0_12px_28px_-6px_rgba(99,102,241,0.6)] hover:brightness-110 sm:text-[13px]"
+              >
+                Créer un compte gratuit
+                <ArrowLeft className="h-3.5 w-3.5 rotate-180" />
+              </Link>
+              <Link
+                href="/insights"
+                className="inline-flex items-center justify-center gap-1.5 rounded-full border border-slate-300 bg-white/70 px-4 py-2.5 text-[12px] font-medium text-slate-700 transition-colors hover:bg-white sm:text-[12.5px]"
+              >
+                Lire d&apos;autres articles
+              </Link>
+            </div>
+          </div>
         </div>
       </article>
 
