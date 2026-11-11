@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/client';
 import Image from 'next/image';
 import { PhoneInput, isValidPhoneNumber } from '@/components/auth/PhoneInput';
 
-const LOCAL_STORAGE_KEY = 'makeitads_community_widget_submitted';
 const NEW_USER_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
 
 export default function CommunityWidget() {
@@ -17,8 +16,8 @@ export default function CommunityWidget() {
   const [showWidget, setShowWidget] = useState(false);
   const [firstName, setFirstName] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [isAnonymous, setIsAnonymous] = useState(false);
-  const [widgetDelay, setWidgetDelay] = useState(2); // ✅ NOUVEAU : délai adaptatif
+  const [widgetDelay, setWidgetDelay] = useState(2);
+  const [ready, setReady] = useState(false);
 
   const [phone, setPhone] = useState('');
   const [consent, setConsent] = useState(false);
@@ -41,35 +40,36 @@ export default function CommunityWidget() {
     const supabase = getSupabase();
     const { data: { user } } = await supabase.auth.getUser();
 
-    // CAS 1 : VISITEUR ANONYME
+    // ✅ PAS DE WIDGET POUR LES ANONYMES
+    // On a besoin du prénom pour personnaliser → visiteur non connecté = pas de popup
     if (!user) {
-      const hasSubmittedLocally =
-        typeof window !== 'undefined' &&
-        localStorage.getItem(LOCAL_STORAGE_KEY) === 'true';
-
-      setIsAnonymous(true);
       setIsAdmin(false);
       setFirstName(null);
-      setShowWidget(!hasSubmittedLocally);
+      setShowWidget(false);
+      setReady(true);
       return;
     }
 
-    setIsAnonymous(false);
-
-    // ✅ NOUVEAU : détecter un nouvel inscrit (< 5 min) pour afficher le widget vite
+    // ✅ Détecter un nouvel inscrit → popup rapide
     const isNewUser = user.created_at
       ? new Date(user.created_at).getTime() > Date.now() - NEW_USER_WINDOW_MS
       : false;
     setWidgetDelay(isNewUser ? 0.3 : 2);
 
-    // CAS 2 : USER CONNECTÉ
+    // Lecture du profil
     const { data: profile } = await supabase
       .from('profiles')
       .select('has_joined_telegram, first_name')
       .eq('id', user.id)
       .maybeSingle();
 
-    setFirstName(profile?.first_name || 'vous');
+    // ✅ FIX PRÉNOM : fallback sur user_metadata si le profil est vide
+    const metaFirst =
+      (user.user_metadata?.first_name as string | undefined) ||
+      (user.user_metadata?.firstName as string | undefined) ||
+      null;
+    const cleanFirst = (profile?.first_name || metaFirst || '').trim();
+    setFirstName(cleanFirst || null);
 
     const admin = user.email === 'ecomdarrell@gmail.com';
     setIsAdmin(admin);
@@ -79,6 +79,7 @@ export default function CommunityWidget() {
     } else {
       setShowWidget(profile?.has_joined_telegram !== true);
     }
+    setReady(true);
   }, [shouldHide, getSupabase]);
 
   useEffect(() => {
@@ -124,17 +125,13 @@ export default function CommunityWidget() {
       const data = await response.json();
       const serverConfirmed = data?.hasJoinedTelegram === true;
 
-      if (!serverConfirmed && !isAdmin && !isAnonymous) {
+      if (!serverConfirmed && !isAdmin) {
         console.error('[CommunityWidget] API OK mais has_joined_telegram non persisté.');
         setError(
           "Ta demande a bien été enregistrée, mais la validation n'a pas pu être confirmée. Réessaie dans un instant."
         );
         setLoading(false);
         return;
-      }
-
-      if (isAnonymous && typeof window !== 'undefined') {
-        localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
       }
 
       setSuccess(true);
@@ -150,7 +147,7 @@ export default function CommunityWidget() {
     }
   };
 
-  if (shouldHide || !showWidget) return null;
+  if (shouldHide || !ready || !showWidget) return null;
 
   const benefits = [
     'Conseils publicitaires pour créer des campagnes efficaces.',
@@ -161,16 +158,14 @@ export default function CommunityWidget() {
 
   return (
     <>
-      {/* BOUTON FLOTTANT — délai adaptatif (0.3s nouvel inscrit, 2s user existant) */}
+      {/* BOUTON FLOTTANT — safe-area iPhone PWA + délai adaptatif */}
       <motion.button
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: 'spring', delay: widgetDelay }}
         onClick={() => setIsOpen(true)}
         className="fixed right-4 z-[90] flex h-[60px] w-[60px] items-center justify-center md:right-8 md:h-[64px] md:w-[64px]"
-        style={{
-          bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))',
-        }}
+        style={{ bottom: 'calc(6rem + env(safe-area-inset-bottom, 0px))' }}
         aria-label="Rejoindre la communauté MakeItAds"
       >
         <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-full shadow-[0_8px_30px_rgba(99,102,241,0.25)] ring-1 ring-slate-200/50 bg-white">
@@ -212,10 +207,9 @@ export default function CommunityWidget() {
                   <Image src="/logos/community-icon.png" alt="Logo" width={48} height={48} className="object-contain" unoptimized />
                 </div>
 
+                {/* ✅ TITRE avec prénom réel (fallback metadata) */}
                 <h2 className="mb-2 text-[17px] font-bold text-[#0F172A] leading-tight">
-                  {firstName && firstName !== 'vous'
-                    ? `${firstName}, rejoignez le `
-                    : 'Rejoignez le '}
+                  {firstName ? `${firstName}, rejoignez le ` : 'Rejoignez le '}
                   <span className="text-black">MakeIt</span>
                   <span className="text-[#7C3AED]">Ads</span> Business Club.
                 </h2>
@@ -225,11 +219,14 @@ export default function CommunityWidget() {
                   Ne développez plus votre activité au hasard.
                 </p>
 
-                {/* ✅ Mots-clés « gratuitement » et « Telegram » en violet fort */}
+                {/* ✅ Mots-clés violet fort */}
                 <p className="text-[11px] text-slate-500 mb-4 leading-snug">
-                  Rejoignez <strong className="text-[#7C3AED] font-bold">gratuitement</strong> notre communauté{' '}
-                  <strong className="text-[#7C3AED] font-bold">Telegram</strong> et accédez à des ressources pour mieux
-                  comprendre la publicité, attirer des clients et faire grandir votre business.
+                  Rejoignez{' '}
+                  <strong className="text-[#7C3AED] font-bold">gratuitement</strong>{' '}
+                  notre communauté{' '}
+                  <strong className="text-[#7C3AED] font-bold">Telegram</strong>{' '}
+                  et accédez à des ressources pour mieux comprendre la publicité,
+                  attirer des clients et faire grandir votre business.
                 </p>
 
                 {success ? (

@@ -16,15 +16,11 @@ type ProfileShape = {
   credits_balance: number;
 };
 
-/**
- * Récupère (ou crée) le profil utilisateur.
- * ⚠️ Ne throw JAMAIS : en cas d'erreur, on retourne un fallback pour ne pas
- * crasher le dashboard (un Server Component qui throw = page blanche).
- */
-export async function ensureUserProfile(user: AuthUserProfile): Promise<ProfileShape & { plan: ReturnType<typeof normalizePlanId> }> {
+export async function ensureUserProfile(
+  user: AuthUserProfile
+): Promise<ProfileShape & { plan: ReturnType<typeof normalizePlanId> }> {
   const metadata = user.user_metadata || {};
 
-  // Fallback en cas d'erreur DB totale
   const fallback: ProfileShape = {
     id: user.id,
     first_name: typeof metadata.first_name === 'string' ? metadata.first_name : null,
@@ -91,14 +87,45 @@ export async function ensureUserProfile(user: AuthUserProfile): Promise<ProfileS
       console.error('🚨 [ensureUserProfile] Exception INSERT profile :', err);
       return { ...fallback, plan: normalizePlanId(fallback.plan) };
     }
+  } else {
+    // ─── ✅ FIX CAUSE RACINE PRÉNOM ───
+    // Le profil existe, mais first_name est vide → on hydrate depuis user_metadata
+    const metaFirst = typeof metadata.first_name === 'string' ? metadata.first_name.trim() : '';
+    const metaLast = typeof metadata.last_name === 'string' ? metadata.last_name.trim() : '';
+    const metaCurrency = typeof metadata.currency === 'string' ? metadata.currency : '';
+
+    const needsFirstName = !profile.first_name && metaFirst;
+    const needsLastName = !profile.last_name && metaLast;
+    const needsCurrency = !profile.currency && metaCurrency;
+
+    if (needsFirstName || needsLastName || needsCurrency) {
+      const updates: Record<string, string> = {};
+      if (needsFirstName) updates.first_name = metaFirst;
+      if (needsLastName) updates.last_name = metaLast;
+      if (needsCurrency) updates.currency = metaCurrency;
+
+      try {
+        const { error: updErr } = await supabase
+          .from('profiles')
+          .update(updates)
+          .eq('id', user.id);
+
+        if (updErr) {
+          console.error('🚨 [ensureUserProfile] UPDATE profil partiel error :', updErr);
+        } else {
+          profile = { ...profile, ...updates };
+        }
+      } catch (err) {
+        console.error('🚨 [ensureUserProfile] Exception UPDATE profil :', err);
+      }
+    }
   }
 
-  // ─── 3. Bonus démo (welcome_bonus) — idempotent et safe ───
+  // ─── 3. Bonus démo (welcome_bonus) ───
   const plan = normalizePlanId(profile.plan);
 
   if (plan === 'free') {
     try {
-      // Vérifie si le bonus a déjà été appliqué
       const { data: welcomeTx, error: readErr } = await supabase
         .from('credit_transactions')
         .select('id')
@@ -112,11 +139,8 @@ export async function ensureUserProfile(user: AuthUserProfile): Promise<ProfileS
         const currentBalance = profile.credits_balance ?? 0;
         const welcomeAmount = Math.max(0, 10 - currentBalance);
 
-        // Si on est déjà à 10+ crédits, on marque comme "bonus déjà appliqué"
-        // en insérant une transaction à 0 (pour ne plus repasser ici)
         if (welcomeAmount > 0) {
           const newBalance = currentBalance + welcomeAmount;
-
           const { error: balanceErr } = await supabase
             .from('profiles')
             .update({ credits_balance: newBalance })
@@ -129,7 +153,6 @@ export async function ensureUserProfile(user: AuthUserProfile): Promise<ProfileS
           }
         }
 
-        // Insertion de la transaction (amount 0 si bonus déjà couvert)
         const { error: txErr } = await supabase
           .from('credit_transactions')
           .insert({
@@ -145,8 +168,6 @@ export async function ensureUserProfile(user: AuthUserProfile): Promise<ProfileS
 
         if (txErr) {
           console.error('🚨 [ensureUserProfile] INSERT welcome_bonus error :', txErr);
-          // On ne rollback PAS le balance (déjà commité), mais on log.
-          // Au pire, la transaction sera rejouée au prochain login — pas de crash.
         }
       }
     } catch (err) {

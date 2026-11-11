@@ -4,6 +4,91 @@ import { useState, useMemo, useRef, useEffect } from 'react';
 import { Search, Check, ChevronDown, X } from 'lucide-react';
 import { CURRENCY_INFO, REGION_LABELS, type CurrencyInfo } from '@/lib/currency';
 
+// ═══════════════════════════════════════════════════════════
+// UTILITAIRES — Drapeaux circulaires (même pattern que PhoneInput)
+// ═══════════════════════════════════════════════════════════
+
+/**
+ * Convertit un emoji drapeau (🇫🇷) en code pays ISO 3166-1 alpha-2 (fr).
+ * Les emojis drapeaux sont composés de 2 "regional indicator symbols"
+ * (U+1F1E6 à U+1F1FF) qui encodent le code pays.
+ *
+ * ✅ Accepte `string | undefined` pour être compatible avec `CurrencyInfo.flag`.
+ */
+function flagEmojiToCountryCode(flag: string | undefined): string | null {
+  if (!flag) return null;
+  const chars = [...flag];
+  if (chars.length !== 2) return null;
+  const codes = chars.map((c) => c.codePointAt(0) ?? 0);
+  const letters = codes.map((code) => {
+    if (code >= 0x1f1e6 && code <= 0x1f1ff) {
+      return String.fromCharCode(0x41 + (code - 0x1f1e6));
+    }
+    return '';
+  });
+  const code = letters.join('').toLowerCase();
+  return code.length === 2 ? code : null;
+}
+
+function getFlagUrl(currency: CurrencyInfo): string | null {
+  const countryCode = flagEmojiToCountryCode(currency.flag);
+  if (!countryCode) return null;
+  return `https://hatscripts.github.io/circle-flags/flags/${countryCode}.svg`;
+}
+
+/** Drapeau circulaire parfaitement rogné + fallback emoji si l'image échoue */
+function CircularFlag({
+  currency,
+  size = 20,
+}: {
+  currency: CurrencyInfo;
+  size?: number;
+}) {
+  const [error, setError] = useState(false);
+  const url = getFlagUrl(currency);
+
+  useEffect(() => {
+    setError(false);
+  }, [currency.code]);
+
+  // Fallback : emoji dans un cercle (si l'API ne répond pas ou si le flag est absent)
+  if (!url || error) {
+    return (
+      <span
+        className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200"
+        style={{ width: size, height: size, fontSize: size * 0.6 }}
+        aria-hidden="true"
+      >
+        {currency.flag ?? currency.code}
+      </span>
+    );
+  }
+
+  return (
+    <span
+      className="flex shrink-0 items-center justify-center overflow-hidden rounded-full bg-slate-50 ring-1 ring-slate-200"
+      style={{ width: size, height: size }}
+      aria-hidden="true"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={url}
+        alt=""
+        width={size}
+        height={size}
+        loading="lazy"
+        decoding="async"
+        onError={() => setError(true)}
+        className="h-full w-full rounded-full object-cover"
+      />
+    </span>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ═══════════════════════════════════════════════════════════
+
 interface CurrencyComboboxProps {
   value: string;
   onChange: (value: string) => void;
@@ -64,10 +149,7 @@ export function CurrencyCombobox({
       >
         {selected ? (
           <span className="flex items-center gap-2.5 truncate">
-            {/* ✅ DRAPEAU CIRCULAIRE (Emoji bien centré) */}
-            <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-50 text-[13px] leading-none">
-              {selected.flag}
-            </span>
+            <CircularFlag currency={selected} size={20} />
             <span className="font-medium text-slate-900">
               {selected.code} · {selected.symbol}
             </span>
@@ -77,7 +159,9 @@ export function CurrencyCombobox({
           <span className="text-slate-400">{placeholder}</span>
         )}
         <ChevronDown
-          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-4 w-4 shrink-0 text-slate-400 transition-transform ${
+            open ? 'rotate-180' : ''
+          }`}
         />
       </button>
 
@@ -124,10 +208,7 @@ export function CurrencyCombobox({
                         value === c.code ? 'bg-[#6366F1]/10' : ''
                       }`}
                     >
-                      {/* ✅ DRAPEAU CIRCULAIRE DANS LA LISTE */}
-                      <span className="relative flex h-5 w-5 shrink-0 items-center justify-center rounded-full overflow-hidden border border-slate-200 shadow-sm bg-slate-50 text-[13px] leading-none">
-                        {c.flag}
-                      </span>
+                      <CircularFlag currency={c} size={20} />
                       <span className="flex-1 text-sm text-slate-900">
                         <span className="font-semibold">{c.code}</span>
                         <span className="ml-1.5 text-slate-500">· {c.label}</span>
