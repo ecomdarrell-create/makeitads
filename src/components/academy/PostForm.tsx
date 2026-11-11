@@ -3,7 +3,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Loader2, Upload, X, Save, Send, Check, Copy } from 'lucide-react';
+import {
+  Loader2, Upload, X, Save, Send, Check, Copy, Code2, FileText,
+} from 'lucide-react';
 import { AcademyEditor } from './AcademyEditor';
 import { slugify } from '@/lib/academy/helpers';
 import {
@@ -13,6 +15,8 @@ import {
 interface Props {
   initial?: BlogPost | null;
 }
+
+type EditorMode = 'visual' | 'html';
 
 export function PostForm({ initial }: Props) {
   const router = useRouter();
@@ -29,6 +33,7 @@ export function PostForm({ initial }: Props) {
   const [authorName, setAuthorName] = useState(initial?.author_name || 'Équipe MakeItAds');
   const [metaTitle, setMetaTitle] = useState(initial?.meta_title || '');
   const [metaDescription, setMetaDescription] = useState(initial?.meta_description || '');
+  const [editorMode, setEditorMode] = useState<EditorMode>('visual');
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState('');
@@ -153,9 +158,66 @@ export function PostForm({ initial }: Props) {
         <p className="mt-1 text-[10px] text-slate-400">{excerpt.length}/250</p>
       </div>
 
+      {/* ✅ CONTENU avec toggle visuel / HTML brut */}
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
-        <label className="mb-2 block text-xs font-medium text-slate-700">Contenu *</label>
-        <AcademyEditor value={content} onChange={setContent} />
+        <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <label className="text-xs font-medium text-slate-700">Contenu *</label>
+          <div className="inline-flex items-center gap-1 rounded-full bg-slate-100 p-0.5">
+            <button
+              type="button"
+              onClick={() => setEditorMode('visual')}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                editorMode === 'visual'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <FileText className="h-3 w-3" />
+              Éditeur visuel
+            </button>
+            <button
+              type="button"
+              onClick={() => setEditorMode('html')}
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium transition-colors ${
+                editorMode === 'html'
+                  ? 'bg-white text-slate-900 shadow-sm'
+                  : 'text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Code2 className="h-3 w-3" />
+              HTML brut
+            </button>
+          </div>
+        </div>
+
+        {editorMode === 'visual' ? (
+          <AcademyEditor value={content} onChange={setContent} />
+        ) : (
+          <div>
+            <p className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+              ⚠️ Mode HTML brut : collez votre code HTML directement. Il sera sauvegardé{' '}
+              <strong>tel quel</strong> sans transformation. Idéal pour préserver les balises
+              &lt;h2&gt;, &lt;blockquote&gt;, &lt;strong&gt; et les styles premium.
+            </p>
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={20}
+              spellCheck={false}
+              placeholder={`<p>Votre premier paragraphe…</p>\n\n<h2>Un titre de section</h2>\n\n<p>Du contenu avec <strong>du gras</strong> et un <a href="/signup">lien</a>.</p>`}
+              className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 p-3 font-mono text-[12px] leading-relaxed text-slate-800 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+            />
+            <div className="mt-2 flex items-center justify-between text-[10px] text-slate-400">
+              <span>{content.length} caractères</span>
+              <span>
+                Balises détectées :{' '}
+                {['h2', 'h3', 'p', 'ul', 'ol', 'blockquote', 'strong', 'em', 'a'].filter((tag) =>
+                  content.includes(`<${tag}`)
+                ).join(', ') || '—'}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="rounded-2xl border border-slate-200 bg-white p-4 sm:p-5">
