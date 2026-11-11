@@ -4,6 +4,7 @@ import Link from 'next/link';
 import {
   ArrowUpRight,
   BadgeCheck,
+  BookOpen,
   CalendarClock,
   CreditCard,
   Crown,
@@ -133,10 +134,16 @@ export default async function SettingsPage() {
         </article>
       </section>
 
-      {/* Section admin */}
+      {/* Section admin — 4 cartes responsive */}
       {isAdmin && (
-        <section aria-label="Administration" className="grid grid-cols-1 gap-2.5 sm:grid-cols-3 sm:gap-3">
-          <Link href="/dashboard/admin" className="flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
+        <section
+          aria-label="Administration"
+          className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 lg:grid-cols-4 sm:gap-3"
+        >
+          <Link
+            href="/dashboard/admin"
+            className="flex items-center gap-3 rounded-xl border border-amber-200 bg-gradient-to-br from-amber-50 to-orange-50 p-3.5 shadow-sm transition-all hover:border-amber-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F59E0B] to-[#F97316] text-white shadow-sm sm:h-10 sm:w-10">
               <Crown className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
@@ -147,7 +154,10 @@ export default async function SettingsPage() {
             <ArrowUpRight className="h-4 w-4 shrink-0 text-amber-600" />
           </Link>
 
-          <Link href="/admin/announcements" className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-3.5 shadow-sm transition-all hover:border-indigo-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
+          <Link
+            href="/admin/announcements"
+            className="flex items-center gap-3 rounded-xl border border-indigo-200 bg-gradient-to-br from-indigo-50 to-violet-50 p-3.5 shadow-sm transition-all hover:border-indigo-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#6366F1] to-[#8B5CF6] text-white shadow-sm sm:h-10 sm:w-10">
               <Megaphone className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
@@ -158,7 +168,25 @@ export default async function SettingsPage() {
             <ArrowUpRight className="h-4 w-4 shrink-0 text-indigo-600" />
           </Link>
 
-          <Link href="/dashboard/admin/support" className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3.5 shadow-sm transition-all hover:border-emerald-400 active:scale-[0.99] sm:rounded-2xl sm:p-4">
+          {/* ✅ NOUVEAU — Academy */}
+          <Link
+            href="/admin/academy"
+            className="flex items-center gap-3 rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50 to-purple-50 p-3.5 shadow-sm transition-all hover:border-violet-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#8B5CF6] to-[#7C3AED] text-white shadow-sm sm:h-10 sm:w-10">
+              <BookOpen className="h-4 w-4 sm:h-5 sm:w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="text-[13px] font-semibold text-violet-900 sm:text-sm">Academy</p>
+              <p className="mt-0.5 text-[11px] text-violet-700 sm:text-xs">Rédiger des articles</p>
+            </div>
+            <ArrowUpRight className="h-4 w-4 shrink-0 text-violet-600" />
+          </Link>
+
+          <Link
+            href="/dashboard/admin/support"
+            className="flex items-center gap-3 rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-3.5 shadow-sm transition-all hover:border-emerald-400 active:scale-[0.99] sm:rounded-2xl sm:p-4"
+          >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#10B981] to-[#0D9488] text-white shadow-sm sm:h-10 sm:w-10">
               <MessageSquare className="h-4 w-4 sm:h-5 sm:w-5" />
             </span>
@@ -251,7 +279,7 @@ export default async function SettingsPage() {
         </div>
       </section>
 
-      {/* ✅ NOUVEAU — Connexion rapide (Passkeys) */}
+      {/* Connexion rapide (Passkeys) */}
       <section className="overflow-hidden rounded-xl border border-slate-100 bg-white shadow-sm sm:rounded-2xl">
         <div className="flex items-start gap-2.5 border-b border-slate-50 px-4 py-3.5 sm:gap-3 sm:px-5 sm:py-4">
           <Fingerprint className="mt-0.5 h-4 w-4 text-indigo-600 sm:h-5 sm:w-5" />
