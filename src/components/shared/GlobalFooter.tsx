@@ -35,6 +35,11 @@ export default function GlobalFooter() {
               </Link>
             </li>
             <li>
+              <Link href="/insights" className="hover:text-[#6366F1] transition-colors">
+                À la une
+              </Link>
+            </li>
+            <li>
               <Link href="/dashboard" className="hover:text-[#6366F1] transition-colors">
                 Dashboard
               </Link>

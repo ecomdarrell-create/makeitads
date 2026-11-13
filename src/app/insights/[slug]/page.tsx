@@ -119,7 +119,7 @@ export default async function InsightsArticlePage({
           <nav className="mb-6 flex items-center gap-1.5 text-xs text-slate-400 sm:text-sm">
             <Link href="/insights" className="inline-flex items-center gap-1.5 font-medium text-slate-500 transition-colors hover:text-[#6366F1]">
               <ArrowLeft className="h-3.5 w-3.5" />
-              Academy
+              À la une
             </Link>
             <span className="text-slate-300">/</span>
             <span className="truncate font-medium text-slate-500">{CATEGORY_LABELS[post.category]}</span>
@@ -161,7 +161,7 @@ export default async function InsightsArticlePage({
                 {post.author_name}
               </p>
               <p className="text-[10.5px] text-slate-500 sm:text-[11px]">
-                MakeItAds · Academy
+                MakeItAds · À la une
               </p>
             </div>
           </div>

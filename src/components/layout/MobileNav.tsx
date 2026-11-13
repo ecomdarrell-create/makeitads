@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Home, Plus, BarChart3, Coins, BookOpen, Gift, User } from 'lucide-react';
+import { Home, Plus, Coins, Crown, BookOpen, Gift, User } from 'lucide-react';
 import { useEffect } from 'react';
 
 const AUTH_ROUTES = ['/login', '/signup', '/sign-up', '/register', '/forgot-password', '/reset-password', '/auth'];
@@ -11,11 +10,11 @@ const AUTH_ROUTES = ['/login', '/signup', '/sign-up', '/register', '/forgot-pass
 const items = [
   { name: 'Accueil', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: Plus },
-  { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
   { name: 'Crédits', href: '/dashboard/credits', icon: Coins },
-  { name: 'Academy', href: '/insights', icon: BookOpen },
+  { name: 'Tarifs', href: '/dashboard/pricing', icon: Crown },
+  { name: 'À la une', href: '/insights', icon: BookOpen },
   { name: 'Parrainage', href: '/dashboard/referral', icon: Gift },
-  { name: 'Settings', href: '/dashboard/settings', icon: User },
+  { name: 'Profil', href: '/dashboard/settings', icon: User },
 ];
 
 export function MobileNav() {
@@ -58,16 +57,18 @@ export function MobileNav() {
                 aria-label={item.name}
                 className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
-                {isActive && (
-                  <motion.div
-                    layoutId="active-halo-mobile"
-                    className="absolute inset-0 rounded-full bg-gradient-to-br from-[#6366F1]/14 to-[#8B5CF6]/14"
-                    transition={{ type: 'spring', bounce: 0.2, duration: 0.4 }}
-                  />
-                )}
-
+                {/* ✅ Halo instantané (CSS au lieu de Framer Motion) */}
+                <span
+                  aria-hidden="true"
+                  className={`absolute inset-0 rounded-full transition-opacity duration-100 ${
+                    isActive ? 'opacity-100' : 'opacity-0'
+                  }`}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.14), rgba(139,92,246,0.14))',
+                  }}
+                />
                 <Icon
-                  className={`relative z-10 h-[22px] w-[22px] transition-colors duration-150 ${
+                  className={`relative z-10 h-[22px] w-[22px] transition-colors duration-75 ${
                     isActive ? 'text-[#6366F1]' : 'text-[#0F172A]'
                   }`}
                   strokeWidth={isActive ? 2.8 : 2.2}

@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { ArrowRight, Loader2 } from 'lucide-react';
+import { useState, useEffect, useTransition } from 'react';
 
 function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
   const [display, setDisplay] = useState('');
@@ -61,12 +61,31 @@ function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
 }
 
 export default function HeroSection() {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    router.prefetch('/dashboard');
+  }, [router]);
+
+  const handleDemoClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    startTransition(() => {
+      router.push('/dashboard');
+    });
+  };
+
+  const handleHowItWorksClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const el = document.getElementById('how-it-works');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
   return (
     <section className="relative w-full bg-white">
       <div className="mx-auto w-full max-w-7xl px-4 pt-20 sm:px-6 sm:pt-24 lg:px-8 lg:pt-28">
         <div className="flex flex-col gap-8 lg:grid lg:grid-cols-2 lg:gap-x-14 lg:gap-y-0 xl:gap-x-20">
 
-          {/* TITRE + SOUS-TITRE */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -85,13 +104,11 @@ export default function HeroSection() {
               </span>
             </h1>
 
-            {/* ✅ Nouveau sous-titre en un bloc */}
             <p className="mx-auto max-w-xl text-sm leading-relaxed text-slate-500 sm:text-base lg:mx-0 lg:mt-4 lg:max-w-lg lg:text-[1.0625rem]">
               MakeItAds analyse votre activité, votre audience et votre marché pour construire la stratégie publicitaire complète derrière votre prochaine campagne, prête à copier-coller.
             </p>
           </motion.div>
 
-          {/* IMAGE */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -107,7 +124,6 @@ export default function HeroSection() {
             />
           </motion.div>
 
-          {/* CTA */}
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -117,14 +133,26 @@ export default function HeroSection() {
             <div className="flex flex-col items-stretch gap-2.5 sm:flex-row sm:items-center sm:justify-center lg:justify-start lg:gap-3">
               <Link
                 href="/dashboard"
+                onClick={handleDemoClick}
+                aria-busy={isPending}
                 className="group inline-flex items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-2 text-xs font-semibold text-white shadow-md shadow-[#6366F1]/25 transition-all hover:bg-[#5558e6] hover:scale-[1.02] sm:px-5 sm:py-2.5 sm:text-sm"
               >
-                Obtenir une démo
-                <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin sm:h-4 sm:w-4" />
+                    Chargement…
+                  </>
+                ) : (
+                  <>
+                    Obtenir une démo
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 sm:h-4 sm:w-4" />
+                  </>
+                )}
               </Link>
 
               <a
                 href="#how-it-works"
+                onClick={handleHowItWorksClick}
                 className="inline-flex items-center justify-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-medium text-[#0A0A0F] transition-all hover:border-slate-300 hover:bg-slate-50 sm:px-5 sm:py-2.5 sm:text-sm"
               >
                 Voir comment ça marche

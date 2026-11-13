@@ -80,10 +80,7 @@ export function AcademyCarousel() {
           <div className="h-7 w-64 rounded bg-slate-100 animate-pulse mb-8" />
           <div className="flex gap-4 overflow-hidden">
             {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="flex-shrink-0 w-[280px] sm:w-[320px] h-[340px] rounded-2xl bg-slate-50 animate-pulse"
-              />
+              <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px] h-[340px] rounded-2xl bg-slate-50 animate-pulse" />
             ))}
           </div>
         </div>
@@ -96,11 +93,10 @@ export function AcademyCarousel() {
   return (
     <section className="relative py-16 md:py-20 bg-white overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        {/* Header */}
         <div className="flex items-end justify-between gap-4 mb-8 md:mb-10">
           <div>
             <p className="text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] text-[#6366F1] mb-2">
-              Academy
+              À la une
             </p>
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B]">
               Ressources pour <span className="text-[#6366F1]">entrepreneurs</span>
@@ -129,7 +125,6 @@ export function AcademyCarousel() {
           </div>
         </div>
 
-        {/* Carousel */}
         <div
           ref={scrollRef}
           className="flex gap-4 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-4 px-4 sm:mx-0 sm:px-0"
@@ -154,9 +149,7 @@ export function AcademyCarousel() {
               )}
               <div className="flex flex-1 flex-col p-4">
                 <div className="mb-2 flex items-center gap-2">
-                  <span
-                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${CATEGORY_COLORS[post.category]}`}
-                  >
+                  <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ring-1 ring-inset ${CATEGORY_COLORS[post.category]}`}>
                     {CATEGORY_LABELS[post.category]}
                   </span>
                   <span className="flex items-center gap-1 text-[10px] text-slate-400">
@@ -178,7 +171,6 @@ export function AcademyCarousel() {
           ))}
         </div>
 
-        {/* Footer link */}
         <div className="mt-8 flex justify-center">
           <Link
             href="/insights"
