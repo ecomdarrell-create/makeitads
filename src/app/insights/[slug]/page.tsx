@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/server';
-import { Clock, ArrowLeft, Calendar, User } from 'lucide-react';
+import { Clock, ArrowLeft, Calendar } from 'lucide-react';
 import GlobalNavbar from '@/components/shared/GlobalNavbar';
 import GlobalFooter from '@/components/shared/GlobalFooter';
 import { formatDateFR } from '@/lib/academy/helpers';
@@ -33,7 +33,12 @@ export async function generateMetadata({
 
   const title = post.meta_title || post.title;
   const description = post.meta_description || post.excerpt;
-  const image = post.og_image_url || post.cover_url || '/images/og-image.png';
+  
+  // ✅ CORRECTION ICI : On s'assure que l'image est un lien absolu pour WhatsApp/Telegram
+  const rawImage = post.og_image_url || post.cover_url;
+  const image = rawImage
+    ? (rawImage.startsWith('http') ? rawImage : `https://makeitads.pro${rawImage}`)
+    : 'https://makeitads.pro/images/og-image.png';
 
   return {
     title,
@@ -44,7 +49,14 @@ export async function generateMetadata({
       title,
       description,
       url: `https://makeitads.pro/insights/${post.slug}`,
-      images: [{ url: image }],
+      images: [
+        {
+          url: image,
+          width: 1600,
+          height: 900,
+          alt: title,
+        },
+      ],
       publishedTime: post.published_at || undefined,
       authors: [post.author_name],
     },
@@ -89,7 +101,6 @@ export default async function InsightsArticlePage({
     },
   };
 
-  // Initiale de l'auteur pour l'avatar
   const authorInitial = post.author_name.trim().charAt(0).toUpperCase() || 'M';
 
   return (
@@ -101,11 +112,9 @@ export default async function InsightsArticlePage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* ═══════════════════════════════════════════ */}
       {/* HERO — fond dégradé léger + breadcrumb */}
-      {/* ═══════════════════════════════════════════ */}
       <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-b from-[#FAFBFF] to-white">
-        <div className="mx-auto max-w-3xl px-4 pb-10 pt-8 sm:px-6 sm:pb-12 sm:pt-12">
+        <div className="mx-auto max-w-3xl px-4 pb-10 pt-24 sm:px-6 sm:pb-12 sm:pt-28">
           {/* Breadcrumb */}
           <nav className="mb-6 flex items-center gap-1.5 text-xs text-slate-400 sm:text-sm">
             <Link href="/insights" className="inline-flex items-center gap-1.5 font-medium text-slate-500 transition-colors hover:text-[#6366F1]">
@@ -159,9 +168,7 @@ export default async function InsightsArticlePage({
         </div>
       </section>
 
-      {/* ═══════════════════════════════════════════ */}
       {/* COVER IMAGE */}
-      {/* ═══════════════════════════════════════════ */}
       {post.cover_url && (
         <div className="mx-auto max-w-4xl px-4 pt-8 sm:px-6 sm:pt-10">
           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.15)]">
@@ -177,9 +184,7 @@ export default async function InsightsArticlePage({
         </div>
       )}
 
-      {/* ═══════════════════════════════════════════ */}
       {/* CONTENU ARTICLE (rendu premium) */}
-      {/* ═══════════════════════════════════════════ */}
       <article className="mx-auto max-w-3xl px-4 pb-12 pt-10 sm:px-6 sm:pt-12">
         <div
           className="article-content"
@@ -203,11 +208,8 @@ export default async function InsightsArticlePage({
           </div>
         )}
 
-        {/* ═══════════════════════════════════════════ */}
         {/* CTA FINAL PREMIUM */}
-        {/* ═══════════════════════════════════════════ */}
         <div className="relative mt-12 overflow-hidden rounded-2xl border border-[#6366F1]/20 bg-gradient-to-br from-[#EEF2FF] via-[#F5F3FF] to-[#FAF5FF] p-6 sm:p-8">
-          {/* Halo décoratif */}
           <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#8B5CF6]/10 blur-3xl" />
           <div className="pointer-events-none absolute -bottom-16 -left-16 h-40 w-40 rounded-full bg-[#6366F1]/10 blur-3xl" />
 
