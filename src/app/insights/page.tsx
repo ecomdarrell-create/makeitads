@@ -54,11 +54,9 @@ export default async function InsightsIndexPage() {
             </p>
           </div>
         ) : (
-          <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4 sm:mx-0 sm:px-0">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
             {posts.map((post) => (
-              <div key={post.id} className="flex-shrink-0 w-[280px] sm:w-[320px] snap-start">
-                <BlogCard post={post} />
-              </div>
+              <BlogCard key={post.id} post={post} />
             ))}
           </div>
         )}

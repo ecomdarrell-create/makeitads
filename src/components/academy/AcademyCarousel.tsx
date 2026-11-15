@@ -31,7 +31,7 @@ export function AcademyCarousel() {
           .select('id, slug, title, excerpt, cover_url, category, reading_time_minutes, published_at')
           .eq('status', 'published')
           .order('published_at', { ascending: false })
-          .limit(6);
+          .limit(4); // ✅ Limité à 4 articles sur la landing
         setPosts((data || []) as CarouselPost[]);
       } catch (err) {
         console.error('[AcademyCarousel] load error:', err);
@@ -79,7 +79,7 @@ export function AcademyCarousel() {
           <div className="h-4 w-32 rounded bg-slate-100 animate-pulse mb-3" />
           <div className="h-7 w-64 rounded bg-slate-100 animate-pulse mb-8" />
           <div className="flex gap-4 overflow-hidden">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex-shrink-0 w-[280px] sm:w-[320px] h-[340px] rounded-2xl bg-slate-50 animate-pulse" />
             ))}
           </div>
@@ -171,14 +171,15 @@ export function AcademyCarousel() {
           ))}
         </div>
 
+        {/* ✅ Bouton renforcé "Voir tous les articles" */}
         <div className="mt-8 flex justify-center">
           <Link
             href="/insights"
-            className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-5 py-2.5 text-xs md:text-sm font-semibold text-[#18181B] transition-colors hover:border-[#6366F1] hover:bg-[#6366F1]/5 hover:text-[#6366F1]"
+            className="group inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-[#6366F1] to-[#8B5CF6] px-6 py-3 text-sm font-semibold text-white shadow-[0_10px_25px_-5px_rgba(99,102,241,0.5)] transition-all hover:shadow-[0_15px_35px_-5px_rgba(99,102,241,0.6)] hover:brightness-110"
           >
-            <BookOpen className="h-3.5 w-3.5" />
+            <BookOpen className="h-4 w-4" />
             Voir tous les articles
-            <ArrowRight className="h-3.5 w-3.5" />
+            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
           </Link>
         </div>
       </div>
