@@ -54,7 +54,10 @@ export default async function InsightsIndexPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div
+            className="grid grid-cols-2 gap-3 sm:gap-5"
+            style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
+          >
             {posts.map((post) => (
               <BlogCard key={post.id} post={post} />
             ))}
