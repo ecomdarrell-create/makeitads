@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useTransition } from 'react';
-import { ArrowRight, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
+import { ArrowRight } from 'lucide-react';
 
 interface HeroActionCardProps {
   plan?: string;
@@ -11,7 +11,6 @@ interface HeroActionCardProps {
 
 export function HeroActionCard({ plan = 'free' }: HeroActionCardProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   const isFree = plan === 'free';
   const generateHref = isFree
@@ -26,9 +25,12 @@ export function HeroActionCard({ plan = 'free' }: HeroActionCardProps) {
 
   const handlePrimaryClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    startTransition(() => {
-      router.push(generateHref);
-    });
+    router.push(generateHref);
+  };
+
+  const handleHowClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push('/dashboard/resources#how-it-works');
   };
 
   return (
@@ -48,26 +50,15 @@ export function HeroActionCard({ plan = 'free' }: HeroActionCardProps) {
         <Link
           href={generateHref}
           onClick={handlePrimaryClick}
-          data-tour="hero-create-btn"
-          aria-busy={isPending}
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full bg-indigo-600 px-3 py-2 text-[11px] font-semibold text-white transition-colors hover:bg-indigo-700 sm:flex-none sm:px-4 sm:text-sm"
         >
-          {isPending ? (
-            <>
-              <Loader2 className="h-3 w-3 shrink-0 animate-spin sm:h-3.5 sm:w-3.5" />
-              <span className="truncate">Chargement…</span>
-            </>
-          ) : (
-            <>
-              <span className="truncate">{ctaLabel}</span>
-              <ArrowRight className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
-            </>
-          )}
+          <span className="truncate">{ctaLabel}</span>
+          <ArrowRight className="h-3 w-3 shrink-0 sm:h-3.5 sm:w-3.5" />
         </Link>
 
         <Link
           href="/dashboard/resources#how-it-works"
-          data-tour="hero-how-btn"
+          onClick={handleHowClick}
           className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-2 text-[11px] font-medium text-slate-700 transition-colors hover:bg-slate-50 sm:flex-none sm:px-4 sm:text-sm"
         >
           <span className="truncate">Comment ça marche</span>

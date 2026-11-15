@@ -28,6 +28,13 @@ export function MobileNav() {
     });
   }, [router]);
 
+  const handleHomeClick = (e: React.MouseEvent) => {
+    if (pathname === '/') {
+      e.preventDefault();
+      window.location.reload();
+    }
+  };
+
   if (isAuthPage) return null;
 
   return (
@@ -55,12 +62,13 @@ export function MobileNav() {
                 href={item.href}
                 prefetch={true}
                 aria-label={item.name}
+                onClick={item.href === '/' ? handleHomeClick : undefined}
                 className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
-                {/* ✅ Halo instantané (CSS au lieu de Framer Motion) */}
+                {/* Halo instantané (CSS au lieu de Framer Motion) */}
                 <span
                   aria-hidden="true"
-                  className={`absolute inset-0 rounded-full transition-opacity duration-100 ${
+                  className={`absolute inset-0 rounded-full transition-opacity duration-75 ${
                     isActive ? 'opacity-100' : 'opacity-0'
                   }`}
                   style={{

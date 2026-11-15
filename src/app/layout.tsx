@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { MobileNav } from "@/components/layout/MobileNav";
-import CommunityWidget from "@/components/shared/CommunityWidget"; // ✅ NOUVEAU WIDGET
+import CommunityWidget from "@/components/shared/CommunityWidget";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -15,10 +15,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: {
     default: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
-    template: "%s | MakeItAds"
+    template: "%s | MakeItAds",
   },
-  description: "Arrêtez de deviner. MakeItAds analyse votre marché et génère des stratégies publicitaires clés en main, calibrées pour l'Afrique. Paiement unique via Mobile Money.",
-  keywords: ["marketing digital Afrique", "stratégie publicitaire IA", "Facebook Ads Afrique", "Mobile Money", "MakeItAds", "croissance entreprise"],
+  description:
+    "Arrêtez de deviner. MakeItAds analyse votre marché et génère des stratégies publicitaires clés en main, calibrées pour l'Afrique. Paiement unique via Mobile Money.",
+  keywords: [
+    "marketing digital Afrique",
+    "stratégie publicitaire IA",
+    "Facebook Ads Afrique",
+    "Mobile Money",
+    "MakeItAds",
+    "croissance entreprise",
+  ],
   authors: [{ name: "MakeItAds" }],
   creator: "MakeItAds",
   publisher: "MakeItAds",
@@ -32,7 +40,8 @@ export const metadata: Metadata = {
     url: "https://makeitads.pro",
     siteName: "MakeItAds",
     title: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
-    description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain. Sans abonnement.",
+    description:
+      "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain. Sans abonnement.",
     images: [
       {
         url: "/images/og-image.png",
@@ -45,7 +54,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "MakeItAds - Stratégies Publicitaires IA pour l'Afrique",
-    description: "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain.",
+    description:
+      "Obtenez des stratégies publicitaires clés en main, calibrées pour le marché africain.",
     images: ["/images/og-image.png"],
   },
   robots: {
@@ -62,11 +72,19 @@ export const metadata: Metadata = {
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
       { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
     ],
+    shortcut: "/favicon.ico",
     apple: [
       { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "mask-icon",
+        url: "/favicon.svg",
+        color: "#6366F1",
+      },
     ],
   },
   manifest: "/site.webmanifest",
@@ -98,37 +116,38 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "Organization",
-      "name": "MakeItAds",
-      "url": "https://makeitads.pro",
-      "logo": "https://makeitads.pro/web-app-manifest-512x512.png",
-      "sameAs": ["https://t.me/MakeItAds_CEO"]
+      name: "MakeItAds",
+      url: "https://makeitads.pro",
+      logo: "https://makeitads.pro/web-app-manifest-512x512.png",
+      sameAs: ["https://t.me/MakeItAds_CEO"],
     },
     {
       "@type": "SoftwareApplication",
-      "name": "MakeItAds",
-      "applicationCategory": "BusinessApplication",
-      "operatingSystem": "Web",
-      "description": "Plateforme d'intelligence artificielle générant des stratégies publicitaires clés en main pour le marché africain.",
-      "url": "https://makeitads.pro",
-      "offers": {
+      name: "MakeItAds",
+      applicationCategory: "BusinessApplication",
+      operatingSystem: "Web",
+      description:
+        "Plateforme d'intelligence artificielle générant des stratégies publicitaires clés en main pour le marché africain.",
+      url: "https://makeitads.pro",
+      offers: {
         "@type": "AggregateOffer",
-        "priceCurrency": "XOF",
-        "lowPrice": "2500",
-        "highPrice": "15000"
-      }
+        priceCurrency: "XOF",
+        lowPrice: "2500",
+        highPrice: "15000",
+      },
     },
     {
       "@type": "Person",
-      "name": "Darrell Kamga",
-      "jobTitle": "Fondateur & CEO",
-      "worksFor": {
+      name: "Darrell Kamga",
+      jobTitle: "Fondateur & CEO",
+      worksFor: {
         "@type": "Organization",
-        "name": "MakeItAds"
+        name: "MakeItAds",
       },
-      "url": "https://www.linkedin.com/in/darrell-kamga-547b24275",
-      "sameAs": ["https://www.linkedin.com/in/darrell-kamga-547b24275"]
-    }
-  ]
+      url: "https://www.linkedin.com/in/darrell-kamga-547b24275",
+      sameAs: ["https://www.linkedin.com/in/darrell-kamga-547b24275"],
+    },
+  ],
 };
 
 export default function RootLayout({
@@ -166,7 +185,6 @@ export default function RootLayout({
           <MobileNav />
         </div>
 
-        {/* ✅ NOUVEAU WIDGET FLOTTANT */}
         <CommunityWidget />
 
         <div
