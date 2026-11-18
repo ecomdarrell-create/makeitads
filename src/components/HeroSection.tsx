@@ -115,21 +115,21 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
             className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
+            {/* 
+              On n'a plus besoin de mix-blend-multiply ni de mask-image
+              car le fichier .webm aura un canal alpha natif (transparent).
+            */}
             <video
               autoPlay
               loop
               muted
               playsInline
               preload="metadata"
-              poster="/videos/hero-poster.jpg"
-              className="block h-auto w-full select-none mix-blend-multiply"
-              style={{
-                // ✅ L'astuce est ici : on crée un masque circulaire qui rend les bords de la vidéo transparents
-                maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
-                WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
-              }}
+              className="block h-auto w-full select-none"
             >
-              <source src="/videos/makeitads-hero.webm" type="video/webm" />
+              {/* On charge en priorité la version transparente WebM */}
+              <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
+              {/* Fallback pour les anciens navigateurs (montrera le fond) */}
               <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
               Votre navigateur ne supporte pas la vidéo.
             </video>
