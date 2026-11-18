@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { ArrowRight, Loader2 } from 'lucide-react';
-import { useState, useEffect, useTransition } from 'react';
+import { useState, useEffect, useTransition, useRef } from 'react';
 
 function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
   const [display, setDisplay] = useState('');
@@ -63,10 +63,20 @@ function TypewriterWord({ text = 'stratégie.' }: { text?: string }) {
 export default function HeroSection() {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     router.prefetch('/dashboard');
   }, [router]);
+
+  // ✅ FORCE LA LECTURE SUR MOBILE (iOS)
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.play().catch((e) => {
+        console.log("Autoplay bloqué par le navigateur", e);
+      });
+    }
+  }, []);
 
   const handleDemoClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -124,16 +134,15 @@ export default function HeroSection() {
               className="w-full"
             >
               <video
+                ref={videoRef}
                 autoPlay
                 loop
                 muted
                 playsInline
-                preload="metadata"
-                className="block h-auto w-full select-none"
+                preload="auto"
+                className="block h-auto w-full select-none pointer-events-none"
               >
-                {/* Chrome / Firefox / Edge liront le WebM transparent */}
                 <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
-                {/* Safari (iPhone) lira le MP4 au fond blanc pur, et le CSS le rendra invisible */}
                 <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
                 Votre navigateur ne supporte pas la vidéo.
               </video>

@@ -19,7 +19,7 @@ const navLinks = [
   { name: "Comment ça marche ?", href: "#how-it-works" },
   { name: "Fonctionnalités", href: "#fonctionnalites" },
   { name: "Résultats", href: "#avis" },
-  { name: "À la une", href: "/insights", isExternal: true },
+  { name: "À la une", href: "#a-la-une" }, // ✅ Modifié pour défiler vers la section
   { name: "Tarifs", href: "#pricing" },
   { name: "FAQ", href: "#faq" },
   { name: "Dashboard", href: "/dashboard", isExternal: true },
@@ -188,6 +188,7 @@ export default function Navbar() {
   const handleNavClick = (e: React.MouseEvent, href: string, isExternal?: boolean) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
+    
     if (isExternal) {
       router.push(href);
     } else if (href.startsWith("#")) {
@@ -395,7 +396,7 @@ export default function Navbar() {
             >
               <div className="flex w-full flex-col rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-xl backdrop-blur-2xl">
                 <div className="mb-4 flex w-full flex-col">
-                  {/* ✅ MODIFICATION ICI : LOGO + ICÔNES RÉSEAUX SOCIAUX */}
+                  {/* ✅ LOGO + RÉSEAUX SOCIAUX */}
                   <div className="mb-2 flex w-full items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold tracking-tight text-gray-900">
