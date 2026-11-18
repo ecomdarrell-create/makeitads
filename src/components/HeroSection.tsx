@@ -113,23 +113,21 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-            className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
+            // ✅ AJOUT DE "isolate" ICI pour forcer Safari (iPhone) à respecter le mélange de couleurs
+            className="relative isolate mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
-            {/* 
-              On n'a plus besoin de mix-blend-multiply ni de mask-image
-              car le fichier .webm aura un canal alpha natif (transparent).
-            */}
             <video
               autoPlay
               loop
               muted
               playsInline
               preload="metadata"
-              className="block h-auto w-full select-none"
+              // ✅ Remise du mix-blend-multiply pour rendre le fond du .mp4 invisible sur mobile
+              className="block h-auto w-full select-none mix-blend-multiply"
             >
-              {/* On charge en priorité la version transparente WebM */}
+              {/* Sur PC/Mac/Android : utilise le WebM transparent */}
               <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
-              {/* Fallback pour les anciens navigateurs (montrera le fond) */}
+              {/* Sur iPhone : utilise le .mp4 mais le CSS le rend transparent */}
               <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
               Votre navigateur ne supporte pas la vidéo.
             </video>
