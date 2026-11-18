@@ -130,12 +130,10 @@ export default function HeroSection() {
                 playsInline
                 preload="metadata"
                 className="block h-auto w-full select-none"
-                style={{
-                  WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
-                  maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
-                }}
               >
+                {/* Chrome / Firefox / Edge liront le WebM transparent */}
                 <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
+                {/* Safari (iPhone) lira le MP4 au fond blanc pur, et le CSS le rendra invisible */}
                 <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
                 Votre navigateur ne supporte pas la vidéo.
               </video>

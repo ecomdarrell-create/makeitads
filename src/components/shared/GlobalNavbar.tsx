@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useNotifications } from "@/hooks/useNotifications";
 import { createClient } from "@/lib/supabase/client";
 import { User, LogOut, Search, X, Mail } from "lucide-react";
-import { SiTelegram } from "react-icons/si";
+import { SiTelegram, SiFacebook, SiInstagram, SiX } from "react-icons/si";
 import { motion, AnimatePresence } from "framer-motion";
 import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { NotificationPanel } from "@/components/notifications/NotificationPanel";
@@ -395,10 +395,24 @@ export default function Navbar() {
             >
               <div className="flex w-full flex-col rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-xl backdrop-blur-2xl">
                 <div className="mb-4 flex w-full flex-col">
-                  <div className="mb-1 flex w-full items-center justify-between">
-                    <span className="text-sm font-semibold tracking-tight text-gray-900">
-                      MakeIt<span className="text-[#6366F1]">Ads</span>
-                    </span>
+                  {/* ✅ MODIFICATION ICI : LOGO + ICÔNES RÉSEAUX SOCIAUX */}
+                  <div className="mb-2 flex w-full items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-semibold tracking-tight text-gray-900">
+                        MakeIt<span className="text-[#6366F1]">Ads</span>
+                      </span>
+                      <div className="flex items-center gap-2.5 border-l border-gray-200 pl-3">
+                        <a href="https://www.facebook.com/share/18Yyo6pAvA/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#6366F1] transition-colors" aria-label="Facebook">
+                          <SiFacebook size={14} />
+                        </a>
+                        <a href="https://www.instagram.com/makeitads_26?knvt=Y2s2cHVnNXNlcnF2&utm_source=qr" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#6366F1] transition-colors" aria-label="Instagram">
+                          <SiInstagram size={14} />
+                        </a>
+                        <a href="https://x.com/makeitads?s=11" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-[#6366F1] transition-colors" aria-label="X (Twitter)">
+                          <SiX size={13} />
+                        </a>
+                      </div>
+                    </div>
                     <button
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="rounded-full p-1.5 text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900"

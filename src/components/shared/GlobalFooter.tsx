@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Mail, MessageCircle, HelpCircle } from 'lucide-react';
+import { SiFacebook, SiInstagram, SiX } from 'react-icons/si';
 
 export default function GlobalFooter() {
   const slogan = 'La plateforme N°1 pour automatiser votre acquisition client en Afrique.';
@@ -8,7 +9,7 @@ export default function GlobalFooter() {
     <footer className="bg-[#F7F7F8] border-t border-[#E7E7EB] pt-9 pb-7 px-4 sm:px-6 sm:pt-10 sm:pb-8">
       <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-7 sm:gap-8 mb-8">
 
-        {/* Logo + slogan */}
+        {/* Logo + slogan + réseaux sociaux */}
         <div className="col-span-1">
           <Link href="/" className="text-[15px] font-semibold text-[#18181B] tracking-tight sm:text-base">
             MakeIt<span className="text-[#6366F1]">Ads</span>
@@ -16,6 +17,35 @@ export default function GlobalFooter() {
           <p className="text-[10.5px] text-[#71717A] mt-2 leading-relaxed max-w-[240px] sm:text-[11px]">
             {slogan}
           </p>
+          <div className="flex items-center gap-3 mt-4">
+            <a
+              href="https://www.facebook.com/share/18Yyo6pAvA/?mibextid=wwXIfr"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook MakeItAds"
+              className="text-slate-400 hover:text-[#6366F1] transition-colors"
+            >
+              <SiFacebook size={16} />
+            </a>
+            <a
+              href="https://www.instagram.com/makeitads_26?knvt=Y2s2cHVnNXNlcnF2&utm_source=qr"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram MakeItAds"
+              className="text-slate-400 hover:text-[#6366F1] transition-colors"
+            >
+              <SiInstagram size={16} />
+            </a>
+            <a
+              href="https://x.com/makeitads?s=11"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X (Twitter) MakeItAds"
+              className="text-slate-400 hover:text-[#6366F1] transition-colors"
+            >
+              <SiX size={15} />
+            </a>
+          </div>
         </div>
 
         {/* Navigation */}
