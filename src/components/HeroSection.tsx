@@ -113,15 +113,26 @@ export default function HeroSection() {
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-            className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none"
+            className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/hero-main.png"
-              alt="MakeItAds sur iPhone — Dashboard stratégie et Analytics"
-              className="block h-auto w-full select-none"
-              draggable={false}
-            />
+            {/* 
+              Remplacement de l'image par la vidéo motion logo.
+              - mix-blend-multiply : rend le fond blanc de la vidéo transparent 
+              - autoPlay, loop, muted, playsInline : pour une lecture fluide sur PC et mobile (iOS)
+            */}
+            <video
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              poster="/videos/hero-poster.jpg"
+              className="block h-auto w-full select-none mix-blend-multiply"
+            >
+              <source src="/videos/makeitads-hero.webm" type="video/webm" />
+              <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
+              Votre navigateur ne supporte pas la vidéo.
+            </video>
           </motion.div>
 
           <motion.div
