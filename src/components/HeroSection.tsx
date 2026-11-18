@@ -115,11 +115,6 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
             className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
-            {/* 
-              Remplacement de l'image par la vidéo motion logo.
-              - mix-blend-multiply : rend le fond blanc de la vidéo transparent 
-              - autoPlay, loop, muted, playsInline : pour une lecture fluide sur PC et mobile (iOS)
-            */}
             <video
               autoPlay
               loop
@@ -128,6 +123,11 @@ export default function HeroSection() {
               preload="metadata"
               poster="/videos/hero-poster.jpg"
               className="block h-auto w-full select-none mix-blend-multiply"
+              style={{
+                // ✅ L'astuce est ici : on crée un masque circulaire qui rend les bords de la vidéo transparents
+                maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
+                WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
+              }}
             >
               <source src="/videos/makeitads-hero.webm" type="video/webm" />
               <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
