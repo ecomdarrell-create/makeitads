@@ -109,28 +109,37 @@ export default function HeroSection() {
             </p>
           </motion.div>
 
+          {/* CONTENEUR VIDÉO */}
           <motion.div
             initial={{ opacity: 0, scale: 0.96 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
-            // ✅ AJOUT DE "isolate" ICI pour forcer Safari (iPhone) à respecter le mélange de couleurs
-            className="relative isolate mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
+            className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
-            <video
-              autoPlay
-              loop
-              muted
-              playsInline
-              preload="metadata"
-              // ✅ Remise du mix-blend-multiply pour rendre le fond du .mp4 invisible sur mobile
-              className="block h-auto w-full select-none mix-blend-multiply"
+            <div
+              style={{
+                isolation: 'isolate',
+                mixBlendMode: 'multiply',
+              }}
+              className="w-full"
             >
-              {/* Sur PC/Mac/Android : utilise le WebM transparent */}
-              <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
-              {/* Sur iPhone : utilise le .mp4 mais le CSS le rend transparent */}
-              <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
-              Votre navigateur ne supporte pas la vidéo.
-            </video>
+              <video
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                className="block h-auto w-full select-none"
+                style={{
+                  WebkitMaskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
+                  maskImage: 'radial-gradient(ellipse at center, black 60%, transparent 95%)',
+                }}
+              >
+                <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
+                <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
+                Votre navigateur ne supporte pas la vidéo.
+              </video>
+            </div>
           </motion.div>
 
           <motion.div
