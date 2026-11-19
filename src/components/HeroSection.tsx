@@ -67,16 +67,14 @@ export default function HeroSection() {
 
   useEffect(() => {
     router.prefetch('/dashboard');
-  }, [router]);
-
-  // ✅ FORCE LA LECTURE SUR MOBILE (iOS)
-  useEffect(() => {
+    
+    // Force la lecture de la vidéo sur iOS (Safari bloque parfois l'autoplay)
     if (videoRef.current) {
       videoRef.current.play().catch((e) => {
-        console.log("Autoplay bloqué par le navigateur", e);
+        console.log("Autoplay bloqué par iOS, tentative de fallback", e);
       });
     }
-  }, []);
+  }, [router]);
 
   const handleDemoClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -126,10 +124,15 @@ export default function HeroSection() {
             transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }}
             className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center"
           >
+            {/* 
+              isolation: isolate + mixBlendMode: multiply sur le parent 
+              sont les clés pour que Safari iOS fasse disparaître le fond blanc.
+            */}
             <div
               style={{
                 isolation: 'isolate',
                 mixBlendMode: 'multiply',
+                WebkitTransform: 'translate3d(0,0,0)', // Force le rendu matériel sur iOS
               }}
               className="w-full"
             >
@@ -142,7 +145,7 @@ export default function HeroSection() {
                 preload="auto"
                 className="block h-auto w-full select-none pointer-events-none"
               >
-                <source src="/videos/makeitads-hero-transparent.webm" type="video/webm" />
+                {/* ✅ ON UTILISE UNIQUEMENT LE MP4 (fond blanc) */}
                 <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
                 Votre navigateur ne supporte pas la vidéo.
               </video>

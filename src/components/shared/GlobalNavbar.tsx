@@ -19,7 +19,7 @@ const navLinks = [
   { name: "Comment ça marche ?", href: "#how-it-works" },
   { name: "Fonctionnalités", href: "#fonctionnalites" },
   { name: "Résultats", href: "#avis" },
-  { name: "À la une", href: "#a-la-une" }, // ✅ Modifié pour défiler vers la section
+  { name: "À la une", href: "#a-la-une" }, // ✅ Modifié pour défiler
   { name: "Tarifs", href: "#pricing" },
   { name: "FAQ", href: "#faq" },
   { name: "Dashboard", href: "/dashboard", isExternal: true },
@@ -116,6 +116,21 @@ export default function Navbar() {
     setNotifOpen(false);
   }, [pathname]);
 
+  // ✅ Gère le défilement si on arrive avec un lien direct (ex: makeitads.pro/#a-la-une)
+  useEffect(() => {
+    if (pathname === "/" && window.location.hash) {
+      const id = window.location.hash;
+      setTimeout(() => {
+        const el = document.querySelector(id);
+        if (el) {
+          const yOffset = -80; // Décalage pour ne pas être caché par la navbar
+          const y = el.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        }
+      }, 100);
+    }
+  }, [pathname]);
+
   useEffect(() => {
     if (isMobileMenuOpen) {
       document.body.style.overflow = "hidden";
@@ -193,11 +208,18 @@ export default function Navbar() {
       router.push(href);
     } else if (href.startsWith("#")) {
       if (pathname !== "/") {
+        // Si on est sur une autre page, on navigue vers l'accueil avec le hash
         router.push(`/${href}`);
       } else {
+        // Si on est sur l'accueil, on scrolle avec un décalage
         const element = document.querySelector(href);
-        if (element) element.scrollIntoView({ behavior: "smooth" });
-        else router.push(`/${href}`);
+        if (element) {
+          const yOffset = -80; // Décalage pour la navbar
+          const y = element.getBoundingClientRect().top + window.scrollY + yOffset;
+          window.scrollTo({ top: y, behavior: "smooth" });
+        } else {
+          router.push(`/${href}`);
+        }
       }
     }
   };
@@ -396,7 +418,7 @@ export default function Navbar() {
             >
               <div className="flex w-full flex-col rounded-2xl border border-gray-100 bg-white/95 p-4 shadow-xl backdrop-blur-2xl">
                 <div className="mb-4 flex w-full flex-col">
-                  {/* ✅ LOGO + RÉSEAUX SOCIAUX */}
+                  {/* ✅ LOGO + RÉSEAUX SOCIAUX DANS LE MENU BURGER */}
                   <div className="mb-2 flex w-full items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="text-sm font-semibold tracking-tight text-gray-900">

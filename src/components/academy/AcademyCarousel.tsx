@@ -31,7 +31,7 @@ export function AcademyCarousel() {
           .select('id, slug, title, excerpt, cover_url, category, reading_time_minutes, published_at')
           .eq('status', 'published')
           .order('published_at', { ascending: false })
-          .limit(4); // ✅ Limité à 4 articles sur la landing
+          .limit(4);
         setPosts((data || []) as CarouselPost[]);
       } catch (err) {
         console.error('[AcademyCarousel] load error:', err);
@@ -91,7 +91,8 @@ export function AcademyCarousel() {
   if (posts.length === 0) return null;
 
   return (
-    <section className="relative py-16 md:py-20 bg-white overflow-hidden">
+    // ✅ L'ID "a-la-une" est ici, c'est lui qui reçoit le scroll
+    <section id="a-la-une" className="relative py-16 md:py-20 bg-white overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-end justify-between gap-4 mb-8 md:mb-10">
           <div>
@@ -171,7 +172,6 @@ export function AcademyCarousel() {
           ))}
         </div>
 
-        {/* ✅ Bouton renforcé "Voir tous les articles" */}
         <div className="mt-8 flex justify-center">
           <Link
             href="/insights"
