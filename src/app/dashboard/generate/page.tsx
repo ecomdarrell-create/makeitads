@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2, Lock, Crown, CheckCircle2, MessageSquare } from 'lucide-react';
+import { Wallet, AlertTriangle, AlertCircle, ArrowRight, RotateCcw, Loader2, Crown, CheckCircle2, MessageSquare, Coins } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { FormData, initialFormData } from '@/components/generate/types';
 import { WizardProgress } from '@/components/generate/WizardProgress';
@@ -35,9 +35,8 @@ export default function GeneratePage() {
   const [showServiceError, setShowServiceError] = useState(false);
 
   const [creditsBalance, setCreditsBalance] = useState<number | null>(null);
-  const [initialLoadDone, setInitialLoadDone] = useState(false); // ✅ NOUVEAU
+  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const [currentPlan, setCurrentPlan] = useState<PlanId>('free');
-  const [strategyType, setStrategyType] = useState<'flash' | 'complete'>('flash');
   const [supabaseError, setSupabaseError] = useState('');
   const [hasDraft, setHasDraft] = useState(false);
   const [refreshingCredits, setRefreshingCredits] = useState(false);
@@ -46,9 +45,10 @@ export default function GeneratePage() {
 
   const isFirstRender = useRef(true);
   const totalSteps = 8;
-  const isFree = currentPlan === 'free';
-
-  const generationCost = strategyType === 'complete' ? CREDIT_COSTS.STRATEGIE_COMPLETE : CREDIT_COSTS.DIAGNOSTIC_FLASH;
+  
+  // ✅ FORCE le type sur 'complete' et calcule le coût en conséquence
+  const strategyType: 'complete' = 'complete';
+  const generationCost = CREDIT_COSTS.STRATEGIE_COMPLETE;
   const planCreditsCap = PRICING_CONFIG[currentPlan]?.monthlyCredits || 10;
   const creditsLoaded = creditsBalance !== null;
   const safeBalance = creditsBalance ?? 0;
@@ -64,7 +64,6 @@ export default function GeneratePage() {
     exhausted: 'border-red-300 bg-red-100 text-red-800',
   }[alertLevel];
 
-  // ✅ FIX BUG : évite la récursion infinie + timeout + état final garanti
   const loadCreditsBalance = async (retryCount = 0) => {
     setRefreshingCredits(true);
     try {
@@ -87,20 +86,15 @@ export default function GeneratePage() {
         return;
       }
 
-      // ✅ FIX : limite les retries pour éviter le spinner infini
       if (!profile) {
         if (retryCount >= MAX_BOOTSTRAP_RETRIES) {
-          setSupabaseError(
-            'Impossible de charger votre profil. Veuillez recharger la page ou contacter le support.'
-          );
+          setSupabaseError('Impossible de charger votre profil. Veuillez recharger la page ou contacter le support.');
           return;
         }
         try {
           await Promise.race([
             fetch('/api/profile/bootstrap', { method: 'POST' }),
-            new Promise((_, reject) =>
-              setTimeout(() => reject(new Error('bootstrap timeout')), FETCH_TIMEOUT_MS)
-            ),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('bootstrap timeout')), FETCH_TIMEOUT_MS)),
           ]);
         } catch (bootErr) {
           console.error('🚨 bootstrap failed:', bootErr);
@@ -109,22 +103,22 @@ export default function GeneratePage() {
       }
 
       const normalizedPlan = normalizePlanId(profile.plan);
+      
+      // ✅ BLOCAGE STRICT : Redirection si l'utilisateur n'a pas de plan payant
+      if (normalizedPlan === 'free' || normalizedPlan === 'demo') {
+        router.push('/dashboard/pricing');
+        return;
+      }
+
       setCreditsBalance(profile.credits_balance ?? 0);
       setCurrentPlan(normalizedPlan);
       setSupabaseError('');
       if (profile.currency) setCurrency(profile.currency);
 
-      if (normalizedPlan !== 'free') {
-        setStrategyType('complete');
-      } else {
-        const requestedType = new URLSearchParams(window.location.search).get('type');
-        if (requestedType === 'complete' || requestedType === 'flash') setStrategyType(requestedType);
-      }
     } catch (error: any) {
       setSupabaseError(`Connexion Supabase impossible : ${error.message}`);
     } finally {
       setRefreshingCredits(false);
-      // ✅ FIX : on marque le premier chargement comme terminé quoi qu'il arrive
       setInitialLoadDone(true);
     }
   };
@@ -156,10 +150,6 @@ export default function GeneratePage() {
     const timer = setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 80);
     return () => clearTimeout(timer);
   }, [currentStep, showSummary, isGenerating]);
-
-  useEffect(() => {
-    if (!isFree && strategyType !== 'complete') setStrategyType('complete');
-  }, [isFree, strategyType]);
 
   useEffect(() => {
     const handleBack = () => setShowSummary(false);
@@ -223,10 +213,6 @@ export default function GeneratePage() {
   };
 
   const handleGenerate = async () => {
-    if (!isFree && strategyType === 'flash') {
-      setStrategyType('complete');
-      return;
-    }
     setIsGenerating(true);
 
     try {
@@ -253,7 +239,7 @@ export default function GeneratePage() {
       const response = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id, strategyType, formData: cleanFormData }),
+        body: JSON.stringify({ userId: user.id, strategyType: 'complete', formData: cleanFormData }),
       });
 
       const data = await response.json();
@@ -286,7 +272,7 @@ export default function GeneratePage() {
     setFormData((prev) => ({ ...prev, ...updates }));
 
   const renderStep = () => {
-    if (isGenerating) return <LoadingGeneration strategyType={strategyType} />;
+    if (isGenerating) return <LoadingGeneration strategyType="complete" />;
     if (showSummary)
       return (
         <Summary
@@ -312,8 +298,6 @@ export default function GeneratePage() {
     }
   };
 
-  // ✅ FIX : le spinner ne s'affiche QUE pendant le premier chargement
-  // Pendant un refresh manuel, on garde l'affichage du solde réel
   const showSpinner = !initialLoadDone && !creditsLoaded;
 
   return (
@@ -324,18 +308,17 @@ export default function GeneratePage() {
         <div className="mb-6 flex items-start justify-between gap-4">
           <div className="min-w-0 flex-1">
             <h1 className="text-lg font-semibold text-[#111827] sm:text-xl">
-              {isGenerating ? 'Génération en cours' : showSummary ? 'Résumé' : 'Nouvelle stratégie'}
+              {isGenerating ? 'Génération en cours' : showSummary ? 'Résumé' : 'Nouvelle stratégie complète'}
             </h1>
             <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
               {isGenerating
                 ? 'Veuillez patienter...'
                 : showSummary
                 ? 'Vérifiez les informations.'
-                : 'Construisez une stratégie adaptée à votre entreprise.'}
+                : 'Construisez une stratégie détaillée adaptée à votre entreprise.'}
             </p>
           </div>
 
-          {/* ✅ BOUTON CRÉDITS CORRIGÉ */}
           <button
             onClick={() => loadCreditsBalance()}
             disabled={showSpinner}
@@ -363,46 +346,21 @@ export default function GeneratePage() {
         </div>
 
         {creditsLoaded && !isGenerating && !showSummary && alertLevel !== 'normal' && (
-          <div
-            className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${
-              alertLevel === 'exhausted'
-                ? 'border-red-300 bg-red-50'
-                : alertLevel === 'critical'
-                ? 'border-red-200 bg-red-50/70'
-                : 'border-amber-200 bg-amber-50/70'
-            }`}
-          >
+          <div className={`mb-5 flex items-start gap-3 rounded-xl border p-3.5 ${alertLevel === 'exhausted' ? 'border-red-300 bg-red-50' : alertLevel === 'critical' ? 'border-red-200 bg-red-50/70' : 'border-amber-200 bg-amber-50/70'}`}>
             {alertLevel === 'attention' ? (
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600" />
             ) : (
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-600" />
             )}
             <div className="min-w-0 flex-1">
-              <p
-                className={`text-xs font-semibold ${
-                  alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'
-                }`}
-              >
-                {alertLevel === 'exhausted'
-                  ? 'Crédits épuisés'
-                  : alertLevel === 'critical'
-                  ? 'Crédits critiques'
-                  : 'Fin de vos crédits proche'}
+              <p className={`text-xs font-semibold ${alertLevel === 'attention' ? 'text-amber-900' : 'text-red-900'}`}>
+                {alertLevel === 'exhausted' ? 'Crédits épuisés' : alertLevel === 'critical' ? 'Crédits critiques' : 'Fin de vos crédits proche'}
               </p>
-              <p
-                className={`mt-0.5 text-[11px] leading-relaxed ${
-                  alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'
-                }`}
-              >
-                {alertLevel === 'exhausted'
-                  ? 'Passez à un plan supérieur.'
-                  : `Il vous reste ${creditsPercent}% de vos crédits.`}
+              <p className={`mt-0.5 text-[11px] leading-relaxed ${alertLevel === 'attention' ? 'text-amber-800' : 'text-red-800'}`}>
+                {alertLevel === 'exhausted' ? 'Passez à un plan supérieur ou rechargez.' : `Il vous reste ${creditsPercent}% de vos crédits.`}
               </p>
               {(alertLevel === 'exhausted' || alertLevel === 'critical') && (
-                <Link
-                  href="/dashboard/pricing"
-                  className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white"
-                >
+                <Link href="/dashboard/pricing" className="mt-2.5 inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3.5 py-1.5 text-[11px] font-semibold text-white">
                   Voir les plans <ArrowRight className="h-3 w-3" />
                 </Link>
               )}
@@ -413,10 +371,7 @@ export default function GeneratePage() {
         {hasDraft && !showSummary && !isGenerating && (
           <div className="mb-5 flex items-center justify-between gap-3 rounded-xl border border-indigo-200 bg-indigo-50/60 px-3.5 py-2.5">
             <p className="text-[11px] text-indigo-900">Un brouillon est en cours.</p>
-            <button
-              onClick={resetDraft}
-              className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700"
-            >
+            <button onClick={resetDraft} className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-indigo-200 bg-white px-3 py-1 text-[10px] font-semibold text-indigo-700">
               <RotateCcw className="h-3 w-3" /> Réinitialiser
             </button>
           </div>
@@ -428,63 +383,32 @@ export default function GeneratePage() {
           </div>
         )}
 
+        {/* ✅ NOUVELLE UI : Affichage propre du plan payant, sans mention du mode Démo */}
         {!showSummary && !isGenerating && (!creditsLoaded || alertLevel !== 'exhausted') && (
           <div className="mb-5 rounded-2xl border border-slate-200/60 bg-white p-3 sm:p-4 shadow-[0_2px_12px_rgba(15,23,42,0.02)]">
             <div className="mb-3 flex items-start justify-between gap-2">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
-                  Type de stratégie
-                </p>
+                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">Type de stratégie</p>
                 <h2 className="mt-0.5 text-sm font-semibold text-[#111827]">Mode de génération</h2>
               </div>
-              <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-slate-600 shadow-sm mt-0.5">
-                {currentPlan === 'free' ? 'Demo' : currentPlan}
+              <span className="shrink-0 rounded-full border border-[#6366F1]/20 bg-[#6366F1]/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[#6366F1] shadow-sm mt-0.5">
+                {currentPlan}
               </span>
             </div>
-
-            {isFree ? (
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center justify-between rounded-xl border-2 border-[#6366F1] bg-[#6366F1]/5 px-3 py-2.5">
-                  <span className="text-sm font-bold text-[#6366F1]">Mode Démo</span>
-                  <span className="text-xs font-semibold text-[#6366F1]">
-                    {CREDIT_COSTS.DIAGNOSTIC_FLASH} crédits
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5">
-                  <span className="text-sm font-bold text-[#111827]">Stratégie Complète</span>
-                  <button
-                    type="button"
-                    onClick={() => router.push('/dashboard/pricing')}
-                    className="flex items-center gap-1.5 rounded-lg bg-[#111827] px-3 py-1.5 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
-                  >
-                    <Crown className="h-3 w-3" />
-                    Upgrade
-                  </button>
-                </div>
+            <div className="rounded-xl border-2 border-[#6366F1]/20 bg-[#6366F1]/5 px-3 py-2.5 flex items-center justify-between">
+              <div>
+                <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
+                <p className="text-[10px] text-[#6366F1]/80 mt-0.5">Analyse détaillée, scripts et budget</p>
               </div>
-            ) : (
-              <div className="rounded-xl border-2 border-[#6366F1]/20 bg-[#6366F1]/5 px-3 py-2.5 flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-[#6366F1]">Stratégie complète</p>
-                  <p className="text-[10px] text-[#6366F1]/80 mt-0.5">
-                    Plan {currentPlan === 'free' ? 'Demo' : currentPlan}
-                  </p>
-                </div>
-                <span className="text-sm font-bold text-[#6366F1]">
-                  {CREDIT_COSTS.STRATEGIE_COMPLETE} crédits
-                </span>
-              </div>
-            )}
+              <span className="text-sm font-bold text-[#6366F1]">{CREDIT_COSTS.STRATEGIE_COMPLETE} crédits</span>
+            </div>
           </div>
         )}
 
         {!showSummary && !isGenerating && (
           <div className="mb-5 rounded-xl border border-indigo-200 bg-indigo-50/40 px-4 py-3">
             <p className="text-[12px] leading-relaxed text-slate-600 sm:text-[13px]">
-              <strong className="text-[#0F172A]">Conseil de l&apos;équipe :</strong> Pour obtenir les stratégies les
-              plus précises et adaptées à votre activité, nous vous recommandons de compléter l&apos;ensemble des
-              champs du formulaire, y compris ceux marqués comme optionnels.
+              <strong className="text-[#0F172A]">Conseil de l&apos;équipe :</strong> Pour obtenir les stratégies les plus précises et adaptées à votre activité, nous vous recommandons de compléter l&apos;ensemble des champs du formulaire, y compris ceux marqués comme optionnels.
             </p>
           </div>
         )}
@@ -526,7 +450,7 @@ export default function GeneratePage() {
         onClose={() => setShowPreGeneration(false)}
         onContinue={handleConfirmPreGeneration}
         plan={currentPlan}
-        strategyType={strategyType}
+        strategyType="complete"
         creditsBalance={safeBalance}
       />
 
@@ -541,8 +465,7 @@ export default function GeneratePage() {
             </div>
             <div className="p-6 text-center space-y-4">
               <p className="text-sm leading-relaxed text-slate-600">
-                En raison d&apos;une maintenance imprévue de la part de nos partenaires technologiques, la génération
-                automatique de stratégies est momentanément indisponible.
+                En raison d&apos;une maintenance imprévue de la part de nos partenaires technologiques, la génération automatique de stratégies est momentanément indisponible.
               </p>
               <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-left">
                 <p className="text-xs font-semibold text-[#0F172A] mb-2">Nous tenons à vous rassurer :</p>
@@ -558,17 +481,11 @@ export default function GeneratePage() {
                 </ul>
               </div>
               <div className="flex flex-col gap-2 pt-2">
-                <a
-                  href="mailto:support@makeitads.pro"
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#5558e6]"
-                >
+                <a href="mailto:support@makeitads.pro" className="flex w-full items-center justify-center gap-2 rounded-full bg-[#6366F1] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#5558e6]">
                   <MessageSquare className="h-4 w-4" />
                   Contacter le support
                 </a>
-                <button
-                  onClick={() => setShowServiceError(false)}
-                  className="w-full rounded-full px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
-                >
+                <button onClick={() => setShowServiceError(false)} className="w-full rounded-full px-4 py-3 text-sm font-medium text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700">
                   Fermer
                 </button>
               </div>

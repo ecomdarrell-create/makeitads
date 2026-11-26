@@ -10,10 +10,10 @@ const navItems = [
   { name: 'Accueil', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: Plus },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart3 },
-  { name: 'Credits', href: '/dashboard/credits', icon: Coins },
-  { name: 'Plan', href: '/dashboard/pricing', icon: Crown },
+  { name: 'Crédits', href: '/dashboard/credits', icon: Coins },
+  { name: 'Mon Plan', href: '/dashboard/pricing', icon: Crown }, // ✅ Icône Couronne
   { name: 'Parrainage', href: '/dashboard/referral', icon: Gift },
-  { name: 'Settings', href: '/dashboard/settings', icon: User },
+  { name: 'Paramètres', href: '/dashboard/settings', icon: User },
 ];
 
 const adminItems = [
@@ -52,7 +52,6 @@ export function Sidebar() {
               href={item.href}
               className="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg touch-manipulation"
             >
-              {/* ✅ HALO GLISSANT PRINCIPAL */}
               {isActive && (
                 <motion.div
                   layoutId="active-halo-desktop"
@@ -80,7 +79,6 @@ export function Sidebar() {
                   href={item.href}
                   className="relative flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg touch-manipulation"
                 >
-                  {/* ✅ HALO GLISSANT ADMIN (layoutId différent pour éviter les conflits) */}
                   {isActive && (
                     <motion.div
                       layoutId="active-halo-admin"

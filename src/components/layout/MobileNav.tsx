@@ -11,7 +11,7 @@ const items = [
   { name: 'Accueil', href: '/', icon: Home },
   { name: 'Dashboard', href: '/dashboard', icon: Plus },
   { name: 'Crédits', href: '/dashboard/credits', icon: Coins },
-  { name: 'Tarifs', href: '/dashboard/pricing', icon: Crown },
+  { name: 'Mon Plan', href: '/dashboard/pricing', icon: Crown }, // ✅ Icône Couronne
   { name: 'À la une', href: '/insights', icon: BookOpen },
   { name: 'Parrainage', href: '/dashboard/referral', icon: Gift },
   { name: 'Profil', href: '/dashboard/settings', icon: User },
@@ -65,7 +65,6 @@ export function MobileNav() {
                 onClick={item.href === '/' ? handleHomeClick : undefined}
                 className="relative flex items-center justify-center rounded-full p-2 touch-manipulation"
               >
-                {/* Halo instantané (CSS au lieu de Framer Motion) */}
                 <span
                   aria-hidden="true"
                   className={`absolute inset-0 rounded-full transition-opacity duration-75 ${

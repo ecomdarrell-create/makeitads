@@ -1,11 +1,8 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
-  const response = NextResponse.next({
-    request: { headers: request.headers },
-  });
+  let supabaseResponse = NextResponse.next({ request });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -16,42 +13,51 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll();
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
+          cookiesToSet.forEach(({ name, value }) =>
+            request.cookies.set(name, value)
+          );
+          supabaseResponse = NextResponse.next({ request });
+          cookiesToSet.forEach(({ name, value, options }) =>
+            supabaseResponse.cookies.set(name, value, options)
+          );
         },
       },
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
+  const { pathname } = request.nextUrl;
 
-  const path = request.nextUrl.pathname;
+  const isDashboardRoute = pathname.startsWith('/dashboard');
+  const isAdminRoute = pathname.startsWith('/admin');
 
-  // Routes protégées : dashboard + pages de paiement
-  const protectedPaths = ['/dashboard'];
-  const isProtected = protectedPaths.some((p) => path.startsWith(p));
-
-  if (isProtected && !user) {
+  if ((isDashboardRoute || isAdminRoute) && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/signup';
-    url.searchParams.set('redirect', path);
+    url.pathname = '/login';
+    url.searchParams.set('redirect', pathname);
     return NextResponse.redirect(url);
   }
 
-  // Si déjà connecté et visite /login ou /signup → rediriger vers dashboard
-  if ((path === '/login' || path === '/signup') && user) {
+  const isAuthRoute =
+    pathname === '/login' ||
+    pathname === '/signup' ||
+    pathname === '/forgot-password';
+
+  if (isAuthRoute && user) {
     const url = request.nextUrl.clone();
-    url.pathname = '/dashboard';
+    const redirectParam = request.nextUrl.searchParams.get('redirect');
+    const safeRedirect =
+      redirectParam && redirectParam.startsWith('/') && !redirectParam.startsWith('//')
+        ? redirectParam
+        : '/dashboard';
+    url.pathname = safeRedirect;
     url.search = '';
     return NextResponse.redirect(url);
   }
 
-  return response;
+  return supabaseResponse;
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|images|.*\\..*).*)'],
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };

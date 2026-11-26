@@ -7,31 +7,14 @@ import { createClient } from '@/lib/supabase/client';
 import { formatPlanPrice } from '@/config/pricing.config';
 import { normalizeCurrency, type Currency } from '@/lib/currency';
 
-// ✅ Les prix sont maintenant calculés dynamiquement selon la devise du user
 const pricingPlans = [
-  {
-    id: 'demo',
-    name: 'MakeItAds Démo',
-    basePrice: 0, // en XOF
-    isFree: true,
-    features: ['10 crédits de bienvenue (offre unique)', '2 Diagnostics Flash', 'Aperçu rapide de votre activité', 'Support communautaire'],
-    popular: false,
-    ctaText: 'Commencer',
-    link: '/dashboard',
-    isInternal: true,
-    checkColor: 'text-emerald-500',
-    ctaBg: 'bg-emerald-500',
-    ctaHover: 'hover:bg-emerald-600',
-    ctaTextCol: 'text-white',
-    bgCard: 'bg-white',
-  },
   {
     id: 'pro',
     name: 'MakeItAds Pro',
-    basePrice: 10000, // XOF
+    basePrice: 10000,
     durationNote: "12 mois d'accès",
     features: ['50 crédits renouvelés chaque mois', '5 Stratégies Complètes / mois', '12 sections détaillées', 'Scripts WhatsApp prêts à l\'emploi', 'Allocation budgétaire sur 7 jours', 'Ciblage précis par ville', 'Guide créatif', 'Support email (48h)'],
-    popular: true,
+    popular: false,
     ctaText: 'Choisir le Plan Pro',
     link: 'https://makeitads.mychariow.com/plan-pro/checkout',
     isInternal: false,
@@ -44,10 +27,10 @@ const pricingPlans = [
   {
     id: 'premium',
     name: 'MakeItAds Premium',
-    basePrice: 25000, // XOF
+    basePrice: 25000,
     durationNote: "12 mois d'accès",
     features: ['150 crédits renouvelés chaque mois', '15 Stratégies Complètes / mois', 'Analyse concurrentielle', '5 variantes de hooks', 'Analyse d\'audience avancée', 'Stratégie de croissance 3 mois', 'Support prioritaire (12h)', 'Rapports avancés'],
-    popular: false,
+    popular: true,
     ctaText: 'Choisir le Plan Premium',
     link: 'https://makeitads.mychariow.com/plan-prem/checkout',
     isInternal: false,
@@ -60,7 +43,7 @@ const pricingPlans = [
   {
     id: 'elite',
     name: 'MakeItAds Élite',
-    basePrice: 100000, // XOF
+    basePrice: 100000,
     durationNote: "12 mois d'accès",
     features: ['500 crédits renouvelés chaque mois', '50 Stratégies Complètes / mois', 'Consulting stratégique mensuel', 'Formation personnalisée', 'Accompagnement avancé', 'Rapports white-label', 'Support prioritaire 24/7', 'Accès API'],
     popular: false,
@@ -97,12 +80,7 @@ const faqData = [
   { q: 'Puis-je annuler mon abonnement à tout moment ?', a: 'Oui, vous pouvez mettre fin à votre abonnement à tout moment sans frais cachés ni pénalité.' },
 ];
 
-// ✅ Construit l'URL Chariow en y ajoutant les infos du user
-function buildCheckoutUrl(
-  baseUrl: string,
-  userId: string | null,
-  userEmail: string | null
-): string {
+function buildCheckoutUrl(baseUrl: string, userId: string | null, userEmail: string | null): string {
   if (!baseUrl.startsWith('http')) return baseUrl;
   try {
     const url = new URL(baseUrl);
@@ -114,31 +92,12 @@ function buildCheckoutUrl(
   }
 }
 
-function PricingCard({
-  plan,
-  userId,
-  userEmail,
-  currency,
-}: {
-  plan: (typeof pricingPlans)[number];
-  userId: string | null;
-  userEmail: string | null;
-  currency: Currency;
-}) {
-  const isWide = plan.id === 'premium' || plan.id === 'elite';
+function PricingCard({ plan, userId, userEmail, currency }: { plan: any, userId: string | null, userEmail: string | null, currency: Currency }) {
+  // ✅ CORRECTION FORCÉE : Seule la carte 'elite' est large. 'pro' et 'premium' ont strictement la même structure.
+  const isWide = plan.id === 'elite';
   const isExternal = !plan.isInternal;
-  const finalHref = isExternal
-    ? buildCheckoutUrl(plan.link, userId, userEmail)
-    : plan.link;
-
-  // ✅ FIX : "Gratuit" au lieu de "0 FCFA" pour le plan Démo
-  const displayPrice = plan.isFree
-    ? 'Gratuit'
-    : formatPlanPrice(
-        plan.id as 'pro' | 'premium' | 'enterprise',
-        currency,
-        '/an'
-      );
+  const finalHref = isExternal ? buildCheckoutUrl(plan.link, userId, userEmail) : plan.link;
+  const displayPrice = formatPlanPrice(plan.id as 'pro' | 'premium' | 'enterprise', currency, '/an');
 
   return (
     <motion.div
@@ -146,33 +105,27 @@ function PricingCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
+      // ✅ 'h-full' et 'flex flex-col' garantissent que les cartes s'alignent à la même hauteur dans la grille
       className={`relative group rounded-2xl border p-4 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
-        plan.popular
-          ? 'border-[#6366F1]/40 shadow-[0_8px_30px_-12px_rgba(99,102,241,0.2)]'
-          : 'border-gray-200 shadow-sm'
+        plan.popular ? 'border-rose-200 shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]' : 'border-gray-200 shadow-sm'
       } ${isWide ? 'md:flex-row md:items-center md:gap-6' : ''}`}
     >
       {plan.popular && (
-        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider shadow-sm bg-[#6366F1] whitespace-nowrap z-10">
+        <div className="absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-3 py-1 text-[9px] md:text-[10px] font-bold text-white uppercase tracking-wider shadow-sm bg-rose-500 whitespace-nowrap z-10">
           Le plus choisi
         </div>
       )}
 
       <div className={`${isWide ? 'md:w-1/3 md:border-r md:border-gray-100 md:pr-5 mb-3 md:mb-0' : 'mb-3'}`}>
-        <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">
-          {plan.name}
-        </h3>
+        <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">{plan.name}</h3>
         <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">
-            {displayPrice}
-          </span>
+          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
         </div>
         {plan.durationNote && (
           <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
             {plan.durationNote}
           </span>
         )}
-
         <a
           href={finalHref}
           target={isExternal ? '_blank' : undefined}
@@ -184,7 +137,8 @@ function PricingCard({
       </div>
 
       <div className={`flex-1 ${isWide ? 'md:w-2/3' : ''}`}>
-        <ul className={`grid ${isWide ? 'grid-cols-2 md:grid-cols-3' : 'grid-cols-1'} gap-x-3 gap-y-2`}>
+        {/* ✅ CORRECTION FORCÉE : Toujours 1 seule colonne pour les listes de Pro et Premium */}
+        <ul className="grid grid-cols-1 gap-x-3 gap-y-2">
           {plan.features.map((feature: string, i: number) => (
             <li key={i} className="flex items-start gap-1.5 text-[11px] md:text-xs text-[#475569] leading-snug">
               <Check className={`mt-0.5 flex-shrink-0 h-3.5 w-3.5 ${plan.checkColor}`} strokeWidth={3} />
@@ -197,47 +151,18 @@ function PricingCard({
   );
 }
 
-function FaqItem({
-  question,
-  answer,
-  isOpen,
-  onClick,
-}: {
-  question: string;
-  answer: string;
-  isOpen: boolean;
-  onClick: () => void;
-}) {
+function FaqItem({ question, answer, isOpen, onClick }: { question: string; answer: string; isOpen: boolean; onClick: () => void }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      className="rounded-2xl border border-gray-100 bg-[#F8F8FC] overflow-hidden"
-    >
-      <button
-        onClick={onClick}
-        className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-gray-50/50 transition-colors"
-      >
-        <span className="text-xs md:text-sm font-semibold text-[#18181B] pr-4 leading-snug">
-          {question}
-        </span>
-        <motion.div
-          animate={{ rotate: isOpen ? 180 : 0 }}
-          transition={{ duration: 0.3, ease: 'easeInOut' }}
-        >
+    <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="rounded-2xl border border-gray-100 bg-[#F8F8FC] overflow-hidden">
+      <button onClick={onClick} className="w-full flex items-center justify-between p-4 md:p-5 text-left hover:bg-gray-50/50 transition-colors">
+        <span className="text-xs md:text-sm font-semibold text-[#18181B] pr-4 leading-snug">{question}</span>
+        <motion.div animate={{ rotate: isOpen ? 180 : 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }}>
           <ChevronDown className="h-4 w-4 md:h-5 md:w-5 text-[#6366F1] flex-shrink-0" />
         </motion.div>
       </button>
       <AnimatePresence initial={false}>
         {isOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.3, ease: 'easeInOut' }}
-            className="overflow-hidden"
-          >
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }} className="overflow-hidden">
             <div className="px-4 md:px-5 pb-4 md:pb-5">
               <p className="text-xs md:text-sm text-[#71717A] leading-relaxed">{answer}</p>
             </div>
@@ -254,29 +179,17 @@ export default function PricingPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [currency, setCurrency] = useState<Currency>('XOF');
 
-  // ✅ Récupère user + devise depuis profiles
   useEffect(() => {
     const loadUser = async () => {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
-
         setUserId(user.id);
         setUserEmail(user.email ?? null);
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('currency')
-          .eq('id', user.id)
-          .maybeSingle();
-
-        if (profile?.currency) {
-          setCurrency(normalizeCurrency(profile.currency));
-        }
-      } catch {
-        // Silencieux — fallback XOF
-      }
+        const { data: profile } = await supabase.from('profiles').select('currency').eq('id', user.id).maybeSingle();
+        if (profile?.currency) setCurrency(normalizeCurrency(profile.currency));
+      } catch {}
     };
     loadUser();
   }, []);
@@ -285,12 +198,7 @@ export default function PricingPage() {
     <main className="min-h-screen bg-[#F8F8FC]">
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-left mb-6 md:mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="text-left mb-6 md:mb-10">
             <h1 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Investissez dans votre <span className="text-[#6366F1]">croissance</span>
             </h1>
@@ -305,21 +213,13 @@ export default function PricingPage() {
             <div className="md:col-span-2">
               <PricingCard plan={pricingPlans[2]} userId={userId} userEmail={userEmail} currency={currency} />
             </div>
-            <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[3]} userId={userId} userEmail={userEmail} currency={currency} />
-            </div>
           </div>
         </div>
       </section>
 
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6 bg-white border-t border-gray-100">
         <div className="max-w-5xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-6 md:mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Comparez les <span className="text-[#6366F1]">formules</span>
             </h2>
@@ -331,45 +231,23 @@ export default function PricingPage() {
           <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
             <div className="min-w-[640px] md:min-w-0 rounded-2xl border border-gray-200 bg-white shadow-sm overflow-hidden">
               <div className="grid grid-cols-4 bg-gray-50 border-b border-gray-200">
-                <div className="p-4 md:p-5 border-r border-gray-100">
-                  <span className="text-xs md:text-sm font-bold text-[#18181B]">Fonctionnalités</span>
-                </div>
-                <div className="p-4 md:p-5 border-r border-gray-100 text-center">
-                  <span className="text-xs md:text-sm font-bold text-gray-600">Pro</span>
-                </div>
-                <div className="p-4 md:p-5 border-r border-gray-100 bg-[#6366F1]/5 text-center">
-                  <span className="text-xs md:text-sm font-bold text-[#6366F1]">Premium</span>
-                </div>
-                <div className="p-4 md:p-5 text-center">
-                  <span className="text-xs md:text-sm font-bold text-amber-500">Élite</span>
-                </div>
+                <div className="p-4 md:p-5 border-r border-gray-100"><span className="text-xs md:text-sm font-bold text-[#18181B]">Fonctionnalités</span></div>
+                <div className="p-4 md:p-5 border-r border-gray-100 text-center"><span className="text-xs md:text-sm font-bold text-gray-600">Pro</span></div>
+                <div className="p-4 md:p-5 border-r border-gray-100 bg-[#6366F1]/5 text-center"><span className="text-xs md:text-sm font-bold text-[#6366F1]">Premium</span></div>
+                <div className="p-4 md:p-5 text-center"><span className="text-xs md:text-sm font-bold text-amber-500">Élite</span></div>
               </div>
               {comparisonRows.map((row, i) => (
                 <Fragment key={i}>
                   <div className={`grid grid-cols-4 ${i < comparisonRows.length - 1 ? 'border-b border-gray-100' : ''}`}>
-                    <div className="p-4 md:p-5 border-r border-gray-100 flex items-center">
-                      <span className="text-xs md:text-sm font-medium text-[#18181B]">{row.feature}</span>
-                    </div>
+                    <div className="p-4 md:p-5 border-r border-gray-100 flex items-center"><span className="text-xs md:text-sm font-medium text-[#18181B]">{row.feature}</span></div>
                     <div className="p-4 md:p-5 border-r border-gray-100 flex items-center justify-center">
-                      {typeof row.pro === 'boolean' ? (
-                        row.pro ? <Check className="w-4 h-4 text-[#6366F1]" /> : <span className="text-gray-300">—</span>
-                      ) : (
-                        <span className="text-xs md:text-sm text-[#475569] font-medium text-center">{row.pro}</span>
-                      )}
+                      {typeof row.pro === 'boolean' ? (row.pro ? <Check className="w-4 h-4 text-[#6366F1]" /> : <span className="text-gray-300">—</span>) : <span className="text-xs md:text-sm text-[#475569] font-medium text-center">{row.pro}</span>}
                     </div>
                     <div className="p-4 md:p-5 border-r border-[#6366F1]/10 bg-[#6366F1]/5 flex items-center justify-center">
-                      {typeof row.premium === 'boolean' ? (
-                        row.premium ? <Check className="w-4 h-4 text-[#6366F1]" /> : <span className="text-gray-300">—</span>
-                      ) : (
-                        <span className="text-xs md:text-sm font-semibold text-[#6366F1] text-center">{row.premium}</span>
-                      )}
+                      {typeof row.premium === 'boolean' ? (row.premium ? <Check className="w-4 h-4 text-[#6366F1]" /> : <span className="text-gray-300">—</span>) : <span className="text-xs md:text-sm font-semibold text-[#6366F1] text-center">{row.premium}</span>}
                     </div>
                     <div className="p-4 md:p-5 flex items-center justify-center">
-                      {typeof row.enterprise === 'boolean' ? (
-                        row.enterprise ? <Check className="w-4 h-4 text-amber-500" /> : <span className="text-gray-300">—</span>
-                      ) : (
-                        <span className="text-xs md:text-sm font-semibold text-amber-600 text-center">{row.enterprise}</span>
-                      )}
+                      {typeof row.enterprise === 'boolean' ? (row.enterprise ? <Check className="w-4 h-4 text-amber-500" /> : <span className="text-gray-300">—</span>) : <span className="text-xs md:text-sm font-semibold text-amber-600 text-center">{row.enterprise}</span>}
                     </div>
                   </div>
                 </Fragment>
@@ -381,12 +259,7 @@ export default function PricingPage() {
 
       <section className="relative z-10 py-10 md:py-16 px-4 sm:px-6">
         <div className="max-w-3xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-left mb-6 md:mb-10"
-          >
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="text-left mb-6 md:mb-10">
             <h2 className="text-lg md:text-2xl font-semibold leading-tight text-[#18181B] mb-2">
               Questions sur les <span className="text-[#6366F1]">formules</span>
             </h2>
@@ -396,13 +269,7 @@ export default function PricingPage() {
           </motion.div>
           <div className="space-y-3">
             {faqData.map((faq, index) => (
-              <FaqItem
-                key={index}
-                question={faq.q}
-                answer={faq.a}
-                isOpen={openFaq === index}
-                onClick={() => setOpenFaq(openFaq === index ? null : index)}
-              />
+              <FaqItem key={index} question={faq.q} answer={faq.a} isOpen={openFaq === index} onClick={() => setOpenFaq(openFaq === index ? null : index)} />
             ))}
           </div>
         </div>

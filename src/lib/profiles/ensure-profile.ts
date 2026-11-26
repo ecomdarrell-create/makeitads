@@ -56,7 +56,7 @@ export async function ensureUserProfile(
     console.error('🚨 [ensureUserProfile] Exception SELECT profile :', err);
   }
 
-  // ─── 2. Créer le profil s'il n'existe pas ───
+  // ─── 2. Créer le profil s'il n'existe pas (avec 0 crédits) ───
   if (!profile) {
     if (!user.email) {
       console.error('🚨 [ensureUserProfile] User sans email, impossible de créer le profil.');
@@ -73,7 +73,7 @@ export async function ensureUserProfile(
           last_name: typeof metadata.last_name === 'string' ? metadata.last_name : null,
           currency: typeof metadata.currency === 'string' ? metadata.currency : 'XOF',
           plan: normalizePlanId(typeof metadata.plan_type === 'string' ? metadata.plan_type : 'free'),
-          credits_balance: 0,
+          credits_balance: 0,  // ✅ 0 crédits — plus de free tier
         })
         .select('id, first_name, last_name, currency, plan, credits_balance')
         .single();
@@ -88,20 +88,24 @@ export async function ensureUserProfile(
       return { ...fallback, plan: normalizePlanId(fallback.plan) };
     }
   } else {
-    // ─── ✅ FIX CAUSE RACINE PRÉNOM ───
-    // Le profil existe, mais first_name est vide → on hydrate depuis user_metadata
+    // ─── Hydratation du profil existant (prénom/nom/devise) ───
     const metaFirst = typeof metadata.first_name === 'string' ? metadata.first_name.trim() : '';
     const metaLast = typeof metadata.last_name === 'string' ? metadata.last_name.trim() : '';
     const metaCurrency = typeof metadata.currency === 'string' ? metadata.currency : '';
 
-    const needsFirstName = !profile.first_name && metaFirst;
-    const needsLastName = !profile.last_name && metaLast;
+    // ✅ Fallback Google OAuth : extrait depuis full_name si pas de first_name
+    const fullName = typeof metadata.full_name === 'string' ? metadata.full_name.trim() : (typeof metadata.name === 'string' ? metadata.name.trim() : '');
+    const fullNameFirst = fullName ? fullName.split(' ')[0] : '';
+    const fullNameLast = fullName ? fullName.split(' ').slice(1).join(' ') : '';
+
+    const needsFirstName = !profile.first_name && (metaFirst || fullNameFirst);
+    const needsLastName = !profile.last_name && (metaLast || fullNameLast);
     const needsCurrency = !profile.currency && metaCurrency;
 
     if (needsFirstName || needsLastName || needsCurrency) {
       const updates: Record<string, string> = {};
-      if (needsFirstName) updates.first_name = metaFirst;
-      if (needsLastName) updates.last_name = metaLast;
+      if (needsFirstName) updates.first_name = metaFirst || fullNameFirst;
+      if (needsLastName) updates.last_name = metaLast || fullNameLast;
       if (needsCurrency) updates.currency = metaCurrency;
 
       try {
@@ -121,59 +125,9 @@ export async function ensureUserProfile(
     }
   }
 
-  // ─── 3. Bonus démo (welcome_bonus) ───
+  // ─── 3. Plus de welcome_bonus : aucune distribution automatique de crédits ───
+  // Le plan free reste à 0 crédits jusqu'à ce que l'utilisateur paie.
+
   const plan = normalizePlanId(profile.plan);
-
-  if (plan === 'free') {
-    try {
-      const { data: welcomeTx, error: readErr } = await supabase
-        .from('credit_transactions')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('type', 'welcome_bonus')
-        .maybeSingle();
-
-      if (readErr) {
-        console.error('🚨 [ensureUserProfile] SELECT welcome_bonus error :', readErr);
-      } else if (!welcomeTx) {
-        const currentBalance = profile.credits_balance ?? 0;
-        const welcomeAmount = Math.max(0, 10 - currentBalance);
-
-        if (welcomeAmount > 0) {
-          const newBalance = currentBalance + welcomeAmount;
-          const { error: balanceErr } = await supabase
-            .from('profiles')
-            .update({ credits_balance: newBalance })
-            .eq('id', user.id);
-
-          if (balanceErr) {
-            console.error('🚨 [ensureUserProfile] UPDATE credits_balance error :', balanceErr);
-          } else {
-            profile = { ...profile, credits_balance: newBalance };
-          }
-        }
-
-        const { error: txErr } = await supabase
-          .from('credit_transactions')
-          .insert({
-            user_id: user.id,
-            type: 'welcome_bonus',
-            amount: welcomeAmount,
-            balance_after: profile.credits_balance ?? currentBalance,
-            description:
-              welcomeAmount > 0
-                ? 'Bonus Démo unique à la création du compte'
-                : 'Bonus Démo déjà présent dans le solde initial',
-          });
-
-        if (txErr) {
-          console.error('🚨 [ensureUserProfile] INSERT welcome_bonus error :', txErr);
-        }
-      }
-    } catch (err) {
-      console.error('🚨 [ensureUserProfile] Exception welcome_bonus :', err);
-    }
-  }
-
   return { ...profile, plan };
 }

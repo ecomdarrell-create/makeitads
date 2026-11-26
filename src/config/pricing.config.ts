@@ -1,7 +1,5 @@
 // ======================================================
 // PRICING CONFIGURATION - SOURCE UNIQUE DE VÉRITÉ
-// ⚠️ Tous les prix sont exprimés en XOF (base)
-// La conversion vers EUR/USD se fait à l'affichage via lib/currency.ts
 // ======================================================
 
 import {
@@ -16,8 +14,8 @@ export interface PricingPlan {
   id: string;
   name: string;
   description: string;
-  monthlyPrice: number; // ⚠️ en XOF
-  yearlyPrice: number;  // ⚠️ en XOF
+  monthlyPrice: number;
+  yearlyPrice: number;
   welcomeCredits: number;
   monthlyCredits: number;
   stripePriceId: string | null;
@@ -56,10 +54,6 @@ export interface PricingPlan {
   cta: string;
 }
 
-// ✅ Coûts en crédits ajustés
-// Diagnostic Flash = 4 crédits → le user Démo (10 crédits) peut en faire 2,
-// puis il lui reste 2 crédits → insuffisant pour une stratégie complète (10)
-// → On le pousse vers l'upgrade sans le décourager.
 export const CREDIT_COSTS = {
   DIAGNOSTIC_FLASH: 4,
   STRATEGIE_COMPLETE: 10,
@@ -73,7 +67,7 @@ export type CreditAction = keyof typeof CREDIT_COSTS;
 export interface RechargePack {
   id: string;
   credits: number;
-  price: number; // ⚠️ en XOF
+  price: number;
   label: string;
   description: string;
   popular?: boolean;
@@ -109,23 +103,21 @@ export const RECHARGE_PACKS: RechargePack[] = [
 ];
 
 export const PRICING_CONFIG: Record<string, PricingPlan> = {
+  // ⚠️ Le plan "free" n'est PLUS une offre commerciale.
+  // Il sert uniquement d'état par défaut pour les comptes sans abonnement.
+  // Aucun crédit, aucune feature. L'utilisateur doit choisir un plan payant.
   free: {
     id: 'free',
-    name: 'Démo',
-    description: 'Découvrez la qualité de l\'intelligence MakeItAds.',
+    name: 'Sans plan',
+    description: 'Choisissez un plan pour commencer à générer des stratégies.',
     monthlyPrice: 0,
     yearlyPrice: 0,
-    welcomeCredits: 10,
+    welcomeCredits: 0,
     monthlyCredits: 0,
     stripePriceId: null,
-    features: [
-      '10 crédits de bienvenue (offre unique)',
-      '1 Diagnostic Flash inclus',
-      'Aperçu rapide de votre activité',
-      'Support communautaire',
-    ],
+    features: [],
     limits: {
-      businesses: 1,
+      businesses: 0,
       competitorIntelligence: false,
       trendIntelligence: false,
       predictiveTrends: false,
@@ -137,7 +129,7 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       growthForecast: false,
       keywordOpportunities: false,
       advertisingIntelligence: false,
-      strategyFlash: true,
+      strategyFlash: false,
       strategyCompleteBasic: false,
       strategyCompleteAdvanced: false,
       strategyCompleteElite: false,
@@ -154,7 +146,7 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
       multiBrandManagement: false,
       ssoSaml: false,
     },
-    cta: 'Commencer',
+    cta: 'Choisir un plan',
   },
 
   pro: {
@@ -167,7 +159,6 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
     monthlyCredits: 50,
     stripePriceId: 'price_pro_monthly',
     features: [
-      'Tout le plan Démo',
       '50 crédits renouvelés chaque mois',
       '5 Stratégies Complètes / mois',
       '12 sections détaillées par stratégie',
@@ -318,7 +309,7 @@ export const PRICING_CONFIG: Record<string, PricingPlan> = {
 export type PlanId = keyof typeof PRICING_CONFIG;
 
 export const PLAN_LABELS: Record<PlanId, string> = {
-  free: 'Démo',
+  free: 'Sans plan',
   pro: 'Pro',
   premium: 'Premium',
   enterprise: 'Élite',
@@ -327,11 +318,9 @@ export const PLAN_LABELS: Record<PlanId, string> = {
 export function normalizePlanId(planId?: string | null): PlanId {
   const normalized = (planId || 'free').toLowerCase().trim();
   const validPlans: PlanId[] = ['free', 'pro', 'premium', 'enterprise'];
-
   if (normalized === 'elite' || normalized === 'élite') {
     return 'enterprise';
   }
-
   return validPlans.includes(normalized as PlanId) ? (normalized as PlanId) : 'free';
 }
 
@@ -351,19 +340,13 @@ export function getPrice(planId: PlanId, isYearly: boolean): number {
   return isYearly ? plan.yearlyPrice : plan.monthlyPrice;
 }
 
-export function hasPermission(
-  userPlanId: string,
-  feature: keyof PricingPlan['limits']
-): boolean {
+export function hasPermission(userPlanId: string, feature: keyof PricingPlan['limits']): boolean {
   const plan = PRICING_CONFIG[userPlanId];
   if (!plan) return false;
   return plan.limits[feature] === true;
 }
 
-export function getLimit(
-  userPlanId: string,
-  feature: 'monthlyCredits' | 'businesses'
-): number {
+export function getLimit(userPlanId: string, feature: 'monthlyCredits' | 'businesses'): number {
   const plan = PRICING_CONFIG[normalizePlanId(userPlanId)];
   if (!plan) return 0;
   return feature === 'monthlyCredits' ? plan.monthlyCredits : plan.limits.businesses;
@@ -417,76 +400,33 @@ export function getRemainingGenerations(credits: number, type: 'flash' | 'comple
   return Math.floor(credits / cost);
 }
 
-// ======================================================
-// ✅ HELPERS DEVISES — Utiliser ces fonctions dans les composants
-// ======================================================
-
-/**
- * Retourne le prix d'un plan dans la devise cible (converti depuis XOF).
- * @example getPlanPriceInCurrency('pro', 'EUR') // → 15.24
- */
-export function getPlanPriceInCurrency(
-  planId: PlanId | string,
-  currency: Currency | string = 'XOF',
-  isYearly: boolean = true
-): number {
+export function getPlanPriceInCurrency(planId: PlanId | string, currency: Currency | string = 'XOF', isYearly: boolean = true): number {
   const plan = PRICING_CONFIG[normalizePlanId(planId)];
   if (!plan) return 0;
   const baseXOF = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
   return convertFromXOF(baseXOF, currency);
 }
 
-/**
- * Formate le prix d'un plan prêt à afficher.
- * @example formatPlanPrice('pro', 'EUR') // → "15,24 € /an"
- */
-export function formatPlanPrice(
-  planId: PlanId | string,
-  currency: Currency | string = 'XOF',
-  period: string = '/an',
-  isYearly: boolean = true
-): string {
+export function formatPlanPrice(planId: PlanId | string, currency: Currency | string = 'XOF', period: string = '/an', isYearly: boolean = true): string {
   const plan = PRICING_CONFIG[normalizePlanId(planId)];
   if (!plan) return '—';
   const baseXOF = isYearly ? plan.yearlyPrice : plan.monthlyPrice;
   if (baseXOF === 0) return '0 FCFA';
-
   return `${formatPriceFromXOF(baseXOF, currency)}${period}`;
 }
 
-/**
- * Retourne le prix d'un pack de recharge dans la devise cible.
- * @example getRechargePrice(10, 'EUR') // → 2.29
- */
-export function getRechargePrice(
-  credits: number,
-  currency: Currency | string = 'XOF'
-): number {
+export function getRechargePrice(credits: number, currency: Currency | string = 'XOF'): number {
   const pack = RECHARGE_PACKS.find((p) => p.credits === credits);
   if (!pack) return 0;
   return convertFromXOF(pack.price, currency);
 }
 
-/**
- * Formate le prix d'un pack de recharge.
- * @example formatRechargePrice(10, 'EUR') // → "2,29 €"
- */
-export function formatRechargePrice(
-  credits: number,
-  currency: Currency | string = 'XOF'
-): string {
+export function formatRechargePrice(credits: number, currency: Currency | string = 'XOF'): string {
   const pack = RECHARGE_PACKS.find((p) => p.credits === credits);
   if (!pack) return '—';
   return formatPriceFromXOF(pack.price, currency);
 }
 
-/**
- * Formate un montant arbitraire exprimé en XOF vers la devise du user.
- * Utile pour les crédits utilisés, revenus, etc.
- */
-export function formatAmountFromXOF(
-  amountXOF: number,
-  currency: Currency | string = 'XOF'
-): string {
+export function formatAmountFromXOF(amountXOF: number, currency: Currency | string = 'XOF'): string {
   return formatPriceFromXOF(amountXOF, currency);
 }

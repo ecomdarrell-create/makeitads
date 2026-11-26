@@ -15,11 +15,10 @@ interface Feature {
 }
 
 const featuresConfig: Record<string, Feature[]> = {
+  // MODIFICATION : Mise à jour des textes pour le plan free afin de refléter 0 crédit et l'absence de fonctionnalités
   free: [
-    { name: '10 crédits de bienvenue (offre unique)', available: true },
-    { name: '2 Diagnostics Flash', available: true },
-    { name: 'Aperçu rapide de votre activité', available: true },
-    { name: 'Support communautaire', available: true },
+    { name: '0 crédit inclus (nécessite un plan payant)', available: false, required: 'pro' },
+    { name: 'Génération de stratégies bloquée', available: false, required: 'pro' },
     { name: 'Stratégie complète 360°', available: false, required: 'pro' },
     { name: 'Analyse concurrentielle', available: false, required: 'premium' },
     { name: 'Génération de hooks avancée', available: false, required: 'premium' },
@@ -64,32 +63,20 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
   const normalizedPlan = normalizePlanId(currentPlan);
   const safeCurrency = normalizeCurrency(currency);
 
-  // ✅ Prix dynamique selon la devise du user
   let dynamicPrice: string;
   if (normalizedPlan === 'free') {
     dynamicPrice = 'Gratuit';
   } else {
-    dynamicPrice = formatPlanPrice(
-      normalizedPlan as 'pro' | 'premium' | 'enterprise',
-      safeCurrency,
-      '/an'
-    );
+    dynamicPrice = formatPlanPrice(normalizedPlan as 'pro' | 'premium' | 'enterprise', safeCurrency, '/an');
   }
 
-  const planName =
-    normalizedPlan === 'free'
-      ? 'Démo'
-      : normalizedPlan === 'enterprise'
-        ? 'Élite'
-        : normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1);
+  // MODIFICATION : Remplacement de 'Démo' par 'Plan Gratuit'
+  const planName = normalizedPlan === 'free' ? 'Plan Gratuit' : normalizedPlan === 'enterprise' ? 'Élite' : normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1);
 
   const planFeatures = featuresConfig[normalizedPlan] || featuresConfig.free;
 
   return (
-    <div
-      data-tour="plan-features"
-      className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm"
-    >
+    <div data-tour="plan-features" className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-xs sm:text-sm font-semibold text-[#111827]">
@@ -112,10 +99,7 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
 
       <div className="space-y-2">
         {planFeatures.map((feature, index) => (
-          <div
-            key={index}
-            className={`flex items-start gap-2 ${!feature.available ? 'opacity-40' : ''}`}
-          >
+          <div key={index} className={`flex items-start gap-2 ${!feature.available ? 'opacity-40' : ''}`}>
             {feature.available ? (
               <Check className="w-3.5 h-3.5 text-green-600 flex-shrink-0 mt-0.5" />
             ) : (
@@ -126,10 +110,7 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
               {!feature.available && feature.required && (
                 <span className="block text-[9px] text-gray-500 mt-0.5">
                   Disponible avec le plan{' '}
-                  {feature.required === 'enterprise'
-                    ? 'Élite'
-                    : feature.required.charAt(0).toUpperCase() +
-                      feature.required.slice(1)}
+                  {feature.required === 'enterprise' ? 'Élite' : feature.required.charAt(0).toUpperCase() + feature.required.slice(1)}
                 </span>
               )}
             </span>
