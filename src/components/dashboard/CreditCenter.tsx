@@ -1,10 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-// MODIFICATION : Remplacement de Lock par Crown
 import { Wallet, Zap, ArrowRight, TrendingDown, Zap as Flash, FileText, Crown } from 'lucide-react';
 import { CREDIT_COSTS, PRICING_CONFIG, normalizePlanId } from '@/config/pricing.config';
-import { getCurrencySymbol } from '@/lib/currency';
+// MODIFICATION : Suppression de l'import getCurrencySymbol car il n'est plus utilisé
 import { StatRing } from './StatRing';
 
 interface CreditCenterProps {
@@ -32,14 +31,14 @@ export function CreditCenter({
   const normalizedPlan = normalizePlanId(plan);
   const planCreditsCap = PRICING_CONFIG[normalizedPlan]?.monthlyCredits || 50;
   
-  // MODIFICATION : Le plan free a désormais 0 crédit max, pas 10.
+  // Le plan free a désormais 0 crédit max, pas 10.
   const maxCap = normalizedPlan === 'free' ? 0 : planCreditsCap;
 
   const isFree = normalizedPlan === 'free';
   const isLow = balance < CREDIT_COSTS.STRATEGIE_COMPLETE * 2;
   const isEmpty = balance === 0;
 
-  const currencySymbol = getCurrencySymbol(currency);
+  // MODIFICATION : Suppression de la déclaration de currencySymbol
 
   return (
     <div data-tour="credit-center" className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
@@ -50,7 +49,7 @@ export function CreditCenter({
           </div>
           <h3 className="text-xs font-semibold text-[#18181B]">Crédits</h3>
         </div>
-        <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">{currencySymbol}</span>
+        {/* MODIFICATION : Suppression de l'affichage du symbole de devise ({currencySymbol}) */}
       </div>
 
       <div data-tour="credit-balance" className="mb-4 flex flex-col items-center">
@@ -101,7 +100,6 @@ export function CreditCenter({
           href="/dashboard/pricing"
           className="flex w-full items-center justify-center gap-1.5 rounded-full bg-[#111827] px-3 py-2 text-xs font-semibold text-white transition-colors hover:bg-slate-800"
         >
-          {/* MODIFICATION : Remplacement de Lock par Crown */}
           <Crown className="h-3.5 w-3.5" />
           Choisir un plan
           <ArrowRight className="h-3 w-3" />

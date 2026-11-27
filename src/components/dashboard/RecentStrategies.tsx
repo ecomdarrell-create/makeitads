@@ -14,15 +14,9 @@ interface RecentStrategiesProps {
 }
 
 export function RecentStrategies({ strategies }: RecentStrategiesProps) {
+  // MODIFICATION : Suppression du bloc "Vous n'avez encore créé aucune stratégie"
   if (strategies.length === 0) {
-    return (
-      <div className="bg-white rounded-xl border border-gray-200 p-6 sm:p-8 text-center">
-        <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3">Vous n'avez encore créé aucune stratégie.</p>
-        <Link href="/dashboard/generate" className="text-xs sm:text-sm font-medium text-[#6366F1] hover:text-[#5558e6]">
-          Créer ma première stratégie →
-        </Link>
-      </div>
-    );
+    return null;
   }
 
   return (

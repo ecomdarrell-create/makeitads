@@ -135,8 +135,6 @@ const aboutBlocks = [
 ];
 
 function PricingCard({ plan, currency }: { plan: any, currency: Currency }) {
-  // ✅ MODIFICATION : isWide est maintenant UNIQUEMENT vrai pour le plan Élite. 
-  // Le plan Premium aura donc exactement la même taille et disposition que le plan Pro.
   const isWide = plan.id === "elite";
   const displayPrice = formatPlanPrice(plan.id as "pro" | "premium" | "enterprise", currency, "/an");
 
@@ -175,7 +173,6 @@ function PricingCard({ plan, currency }: { plan: any, currency: Currency }) {
       </div>
 
       <div className={`flex-1 ${isWide ? "md:w-2/3" : ""}`}>
-        {/* ✅ MODIFICATION : La grille des fonctionnalités est maintenant toujours en 1 colonne pour Pro et Premium */}
         <ul className="grid grid-cols-1 gap-x-3 gap-y-2">
           {plan.features.map((feature: string, i: number) => (
             <li key={i} className="flex items-start gap-1.5 text-[11px] md:text-xs text-[#475569] leading-snug">
@@ -375,6 +372,49 @@ export default function LandingPage() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ✅ MODIFICATION : Ajout du bloc "Mot du fondateur" juste avant la section Pricing */}
+      <section className="relative z-10 py-16 md:py-24 bg-white overflow-hidden border-t border-gray-100">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
+            
+            <p className="text-sm md:text-base text-slate-400 font-serif italic mb-2">
+              Une lettre de notre fondateur
+            </p>
+            <h2 className="text-3xl md:text-5xl font-serif text-[#18181B] leading-tight mb-8">
+              L'exigence au service de <span className="text-[#6366F1]">l'Afrique</span>
+            </h2>
+
+            <div className="space-y-5 text-left text-[15px] md:text-[16px] text-slate-600 leading-relaxed">
+              <p>
+                J'ai passé des années aux urgences de l'hôpital. Dans ce milieu, l'improvisation n'existe pas. On pose un diagnostic, on analyse les faits, on prescrit la solution la plus rigoureuse.
+              </p>
+              <p>
+                En arrivant dans le monde de l'entrepreneuriat en Afrique, j'ai vu des entrepreneurs talentueux brûler leur capital par manque de méthode. Ils faisaient confiance à des agences ou des outils pensés pour le marché américain, totalement déconnectés de notre réalité.
+              </p>
+              <p>
+                MakeItAds est né de cette conviction : vous ne méritez pas des promesses non tenues, vous méritez des <strong className="text-slate-900">protocoles d'action clairs</strong>. Chaque stratégie que nous générons est conçue avec la même rigueur que celle que j'appliquais pour sauver des vies : des données précises, un ciblage chirurgical et une exécution sans faille.
+              </p>
+              <p>
+                Nous ne vendons pas des "likes" ou de la visibilité. Nous construisons l'infrastructure qui permet à votre entreprise de croître de manière prévisible et rentable, en utilisant les leviers qui fonctionnent réellement ici : WhatsApp, Mobile Money et la confiance locale.
+              </p>
+            </div>
+
+            {/* Signature stylisée */}
+            <div className="mt-12 flex flex-col items-center justify-center">
+              <span 
+                className="text-4xl md:text-5xl text-[#18181B]" 
+                style={{ fontFamily: 'var(--font-caveat, cursive)', transform: 'rotate(-3deg)' }}
+              >
+                Darrell Kamga
+              </span>
+              <span className="mt-3 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">
+                Fondateur & CEO de MakeItAds
+              </span>
+            </div>
+          </motion.div>
         </div>
       </section>
 

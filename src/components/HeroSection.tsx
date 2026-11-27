@@ -52,9 +52,24 @@ export default function HeroSection() {
   useEffect(() => {
     router.prefetch('/signup');
     router.prefetch('/pricing');
-    if (videoRef.current) {
-      videoRef.current.play().catch((e) => console.log("Autoplay bloqué", e));
-    }
+    
+    // ✅ Force la lecture de la vidéo (contourne les blocages iOS)
+    const forcePlay = () => {
+      if (videoRef.current) {
+        videoRef.current.play().catch((e) => console.log("Autoplay bloqué", e));
+      }
+    };
+
+    forcePlay();
+    
+    // ✅ Relance la vidéo si elle se fige en revenant sur l'onglet
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') forcePlay();
+    });
+
+    return () => {
+      document.removeEventListener('visibilitychange', forcePlay);
+    };
   }, [router]);
 
   const handleStartClick = (e: React.MouseEvent) => {
@@ -86,7 +101,17 @@ export default function HeroSection() {
 
           <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, delay: 0.15, ease: 'easeOut' }} className="relative mx-auto w-full max-w-md lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:mx-0 lg:max-w-none flex items-center justify-center">
             <div style={{ isolation: 'isolate', mixBlendMode: 'multiply' }} className="w-full">
-              <video ref={videoRef} autoPlay loop muted playsInline preload="auto" className="block h-auto w-full select-none pointer-events-none">
+              <video 
+                ref={videoRef} 
+                autoPlay 
+                loop 
+                muted 
+                playsInline 
+                preload="auto" 
+                className="block h-auto w-full select-none pointer-events-none"
+                // ✅ Ajout du poster pour éviter le rectangle noir sur iOS
+                poster="/videos/hero-poster.jpg" 
+              >
                 <source src="/videos/makeitads-hero.mp4" type="video/mp4" />
               </video>
             </div>

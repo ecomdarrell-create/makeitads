@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Caveat } from "next/font/google"; // ✅ Ajout de Caveat
 import "./globals.css";
 import { MobileNav } from "@/components/layout/MobileNav";
 import CommunityWidget from "@/components/shared/CommunityWidget";
@@ -10,6 +10,13 @@ const inter = Inter({
   variable: "--font-inter",
   fallback: ["system-ui", "-apple-system", "sans-serif"],
   preload: true,
+});
+
+const caveat = Caveat({ // ✅ Nouvelle police signature
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-caveat",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -60,7 +67,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${inter.variable} antialiased`} style={{ colorScheme: "light" }} suppressHydrationWarning>
+    <html lang="fr" className={`${inter.variable} ${caveat.variable} antialiased`} style={{ colorScheme: "light" }} suppressHydrationWarning>
       <body className={`${inter.className} bg-white text-[#111827] min-h-screen overflow-x-hidden antialiased`} suppressHydrationWarning>
         <div id="app-root" className="relative min-h-screen w-full max-w-full overflow-x-hidden bg-white">
           {children}

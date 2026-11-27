@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, ReactNode } from "react";
-import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 
 interface Review {
   rating: number;
@@ -13,22 +12,16 @@ interface Review {
 
 interface TrustpilotCarouselProps {
   reviews: Review[];
-  title: ReactNode;
+  title: React.ReactNode;
   footerNote: string;
 }
 
 function StarRating({ rating }: { rating: number }) {
-  const starPath =
-    "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+  const starPath = "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((star) => (
-        <svg
-          key={star}
-          viewBox="0 0 24 24"
-          className="w-3.5 h-3.5"
-          fill={star <= rating ? "#00B67A" : "#DCDCE6"}
-        >
+        <svg key={star} viewBox="0 0 24 24" className="w-3.5 h-3.5" fill={star <= rating ? "#00B67A" : "#DCDCE6"}>
           <path d={starPath} />
         </svg>
       ))}
@@ -36,121 +29,98 @@ function StarRating({ rating }: { rating: number }) {
   );
 }
 
-export default function TrustpilotCarousel({
-  reviews,
-  title,
-  footerNote,
-}: TrustpilotCarouselProps) {
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-
-  const scroll = (direction: "left" | "right") => {
-    if (scrollContainerRef.current) {
-      const firstCard =
-        scrollContainerRef.current.querySelector<HTMLElement>(".snap-start");
-      const styles = window.getComputedStyle(scrollContainerRef.current);
-      const gap = Number.parseFloat(styles.columnGap || styles.gap) || 0;
-      const scrollAmount = firstCard ? firstCard.offsetWidth + gap : 340;
-      const currentScroll = scrollContainerRef.current.scrollLeft;
-      const targetScroll =
-        direction === "left"
-          ? currentScroll - scrollAmount
-          : currentScroll + scrollAmount;
-      scrollContainerRef.current.scrollTo({
-        left: targetScroll,
-        behavior: "smooth",
-      });
-    }
-  };
-
+function ReviewCard({ review }: { review: Review }) {
   return (
-    <section className="relative z-10 w-full py-12 md:py-16 bg-[#FFFFFF]">
-      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6">
-        <h2 className="text-xl md:text-3xl font-semibold text-[#18181B] mb-6 md:mb-8 text-left leading-tight">
-          {title}
-        </h2>
-
-        <div className="relative group">
-          <button
-            onClick={() => scroll("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 md:-translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
-            aria-label="Avis précédent"
-          >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-
-          <div
-            ref={scrollContainerRef}
-            className="flex gap-3 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4 md:gap-4"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            <style jsx>{`
-              .scrollbar-hide::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-
-            {reviews.map((review, index) => (
-              <div
-                key={index}
-                className="flex-shrink-0 w-[280px] h-[280px] sm:w-[300px] sm:h-[300px] snap-start bg-white border border-[#E8E8E8] rounded-2xl p-5 flex flex-col shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all duration-300 hover:shadow-[0_4px_16px_rgba(0,0,0,0.08)] hover:-translate-y-0.5"
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <StarRating rating={review.rating} />
-                  <div className="flex items-center gap-1">
-                    <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                    <span className="text-[10px] font-semibold text-blue-600">
-                      Certifié
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className="text-xs md:text-sm font-bold text-[#1A1A1A] mb-2 leading-snug">
-                  {review.title}
-                </h3>
-
-                <p className="text-[11px] md:text-xs text-[#4A4A4A] leading-relaxed flex-1 overflow-hidden">
-                  {review.text}
-                </p>
-
-                <div className="border-t border-[#F0F0F0] pt-3 mt-3">
-                  <p className="text-[10px] md:text-[11px] text-[#6B6B6B] font-medium mb-0.5 truncate">
-                    {review.author}
-                  </p>
-                  <p className="text-[10px] text-[#9CA3AF]">{review.time}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <button
-            onClick={() => scroll("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 md:translate-x-4 z-10 w-9 h-9 md:w-10 md:h-10 rounded-full bg-white border border-[#E8E8E8] shadow-sm flex items-center justify-center text-[#1A1A1A] hover:bg-[#F5F5F5] transition-all opacity-100 md:opacity-0 md:group-hover:opacity-100"
-            aria-label="Avis suivant"
-          >
-            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-        </div>
-
-        <div className="mt-8 flex flex-col items-start gap-2 text-left md:flex-row md:items-center md:gap-3">
-          <p className="text-xs md:text-sm text-[#4A4A4A] font-medium">
-            {footerNote}
-          </p>
-          <span className="text-[#00B67A] font-bold text-base md:text-lg tracking-tight flex items-center gap-1">
-            <svg
-              viewBox="0 0 24 24"
-              className="w-4 h-4 md:w-5 md:h-5"
-              fill="currentColor"
-            >
-              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-            </svg>
-            Trustpilot
-          </span>
+    <div className="flex-shrink-0 w-[280px] sm:w-[320px] bg-white border border-[#E8E8E8] rounded-2xl p-5 flex flex-col shadow-[0_2px_12px_rgba(0,0,0,0.04)] mx-2">
+      <div className="flex items-center justify-between mb-3">
+        <StarRating rating={review.rating} />
+        <div className="flex items-center gap-1">
+          <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
+          <span className="text-[10px] font-semibold text-blue-600">Certifié</span>
         </div>
       </div>
+      <h3 className="text-xs md:text-sm font-bold text-[#1A1A1A] mb-2 leading-snug">{review.title}</h3>
+      <p className="text-[11px] md:text-xs text-[#4A4A4A] leading-relaxed flex-1 line-clamp-3">{review.text}</p>
+      <div className="border-t border-[#F0F0F0] pt-3 mt-3">
+        <p className="text-[10px] md:text-[11px] text-[#6B6B6B] font-medium truncate">{review.author}</p>
+        <p className="text-[10px] text-[#9CA3AF]">{review.time}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function TrustpilotCarousel({ reviews, title, footerNote }: TrustpilotCarouselProps) {
+  // Diviser les 15 avis en 2 lignes (8 et 7)
+  const row1 = reviews.slice(0, 8);
+  const row2 = reviews.slice(8, 15);
+
+  return (
+    <section className="relative z-10 w-full py-12 md:py-16 bg-[#FFFFFF] overflow-hidden">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 mb-8 text-left">
+        <h2 className="text-xl md:text-3xl font-semibold text-[#18181B] leading-tight">{title}</h2>
+      </div>
+
+      {/* RANGÉE 1 (Défile vers la gauche) */}
+      <div className="marquee-container mb-4">
+        <div className="marquee-content animate-marquee-left">
+          {[...row1, ...row1].map((review, i) => (
+            <ReviewCard key={`r1-${i}`} review={review} />
+          ))}
+        </div>
+      </div>
+
+      {/* RANGÉE 2 (Défile vers la droite) */}
+      <div className="marquee-container">
+        <div className="marquee-content animate-marquee-right">
+          {[...row2, ...row2].map((review, i) => (
+            <ReviewCard key={`r2-${i}`} review={review} />
+          ))}
+        </div>
+      </div>
+
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 mt-8 flex flex-col items-start gap-2 text-left md:flex-row md:items-center md:gap-3">
+        <p className="text-xs md:text-sm text-[#4A4A4A] font-medium">{footerNote}</p>
+        <span className="text-[#00B67A] font-bold text-base md:text-lg tracking-tight flex items-center gap-1">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 md:w-5 md:h-5" fill="currentColor">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+          </svg>
+          Trustpilot
+        </span>
+      </div>
+
+      <style jsx>{`
+        .marquee-container {
+          width: 100%;
+          overflow: hidden;
+          display: flex;
+        }
+        .marquee-content {
+          display: flex;
+          width: max-content;
+        }
+        @keyframes marquee-left {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        @keyframes marquee-right {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0); }
+        }
+        .animate-marquee-left {
+          animation: marquee-left 40s linear infinite;
+        }
+        .animate-marquee-right {
+          animation: marquee-right 45s linear infinite;
+        }
+        .marquee-container:hover .marquee-content {
+          animation-play-state: paused;
+        }
+      `}</style>
     </section>
   );
 }
 
+// ✅ TOUS TES AVIS SONT ICI
 export const section1Reviews: Review[] = [
   { rating: 5, title: "Exactement ce dont j'avais besoin!", text: "En moins de 24h j'avais une stratégie complète pour mes publicités Meta. Ciblage précis, messages clairs, budget bien réparti.", author: "Aminata Diallo, E-commerce - Sénégal", time: "Il y a 2 jours" },
   { rating: 4, title: "Très bonne approche!", text: "J'étais sceptique au départ mais la stratégie reçue était vraiment personnalisée. Pas du tout générique.", author: "Kwame Asante, Coach - Ghana", time: "Il y a 5 jours" },

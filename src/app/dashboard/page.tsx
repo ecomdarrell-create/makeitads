@@ -3,10 +3,9 @@ import { redirect } from 'next/navigation';
 import { TrendingDown, TrendingUp, Coins, Lightbulb } from 'lucide-react';
 import { Header } from '@/components/dashboard/Header';
 import { normalizePlanId, CREDIT_COSTS } from '@/config/pricing.config';
-import { HeroActionCard } from '@/components/dashboard/HeroActionCard';
+import { HeroActionCard } from '@/components/dashboard/HeroActionCard'; // ✅ RÉIMPORTÉ
 import { CreditCenter } from '@/components/dashboard/CreditCenter';
 import { HealthScore } from '@/components/dashboard/HealthScore';
-import { NextBestAction } from '@/components/dashboard/NextBestAction';
 import { RecentStrategies } from '@/components/dashboard/RecentStrategies';
 import { PlanFeatures } from '@/components/dashboard/PlanFeatures';
 import { DashboardTour } from '@/components/dashboard/DashboardTour';
@@ -16,14 +15,6 @@ import { ActivityChart } from '@/components/dashboard/analytics/ActivityChart';
 import { ActivityBreakdown } from '@/components/dashboard/analytics/ActivityBreakdown';
 import { ensureUserProfile } from '@/lib/profiles/ensure-profile';
 import { type Currency } from '@/lib/currency';
-
-type NextAction = {
-  title: string;
-  description: string;
-  action: string;
-  href: string;
-  cost: number;
-};
 
 interface Advice {
   tone: 'success' | 'info' | 'warning';
@@ -126,38 +117,9 @@ export default async function DashboardPage() {
   const currentPlan = normalizePlanId(profile?.plan);
 
   const profileComplete = Boolean(profile?.first_name && profile?.currency);
-  const healthScore = (profileComplete ? 50 : 0) + (totalStrategies > 0 ? 50 : 0);
-
-  const completeCost = CREDIT_COSTS.STRATEGIE_COMPLETE;
-  const isPaidPlan = currentPlan !== 'free' && currentPlan !== 'demo';
-
-  let nextAction: NextAction;
-
-  if (!isPaidPlan) {
-    nextAction = {
-      title: 'Débloquez les stratégies complètes',
-      description: 'Choisissez un plan Pro, Premium ou Élite pour accéder à l\'intégralité des fonctionnalités.',
-      action: 'Voir les plans',
-      href: '/dashboard/pricing',
-      cost: 0,
-    };
-  } else if (creditsBalance < completeCost) {
-    nextAction = {
-      title: 'Rechargez vos crédits',
-      description: 'Votre solde actuel ne couvre pas le coût d\'une stratégie complète.',
-      action: 'Recharger',
-      href: '/dashboard/credits',
-      cost: 0,
-    };
-  } else {
-    nextAction = {
-      title: 'Créez une stratégie complète',
-      description: 'Votre solde permet une génération complète, basée sur les informations de votre activité.',
-      action: 'Créer une stratégie',
-      href: '/dashboard/generate?type=complete',
-      cost: completeCost,
-    };
-  }
+  
+  // ✅ MODIFICATION : L'indice de préparation est forcé à 0 pour le plan gratuit
+  const healthScore = currentPlan === 'free' ? 0 : (profileComplete ? 50 : 0) + (totalStrategies > 0 ? 50 : 0);
 
   const [transactionsRes, referralsRes] = await Promise.all([
     supabase.from('credit_transactions').select('id, amount, created_at').eq('user_id', user.id).order('created_at', { ascending: false }),
@@ -228,13 +190,12 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 sm:gap-6">
         <div className="lg:col-span-2 space-y-5 sm:space-y-6">
+          {/* ✅ RÉINTÉGRATION DE LA CARTE D'ACTION PRINCIPALE */}
           <HeroActionCard plan={currentPlan} />
-          <NextBestAction data={nextAction} />
           <RecentStrategies strategies={recentStrategies} />
         </div>
 
         <div className="space-y-5 sm:space-y-6">
-          {/* ✅ CORRECTION : Ajout de flashCount={0} pour satisfaire TypeScript */}
           <CreditCenter balance={creditsBalance} used={creditsUsed} flashCount={0} completeCount={completeCount} currency={userCurrency} plan={currentPlan} />
           <PlanFeatures currentPlan={currentPlan} currency={userCurrency} />
           <HealthScore score={healthScore} profileComplete={profileComplete} strategyCount={totalStrategies} />

@@ -17,7 +17,8 @@ export function Header({ firstName, credits, plan, currency }: HeaderProps) {
   const quoteIndex = (firstName?.length || 0) % businessQuotes.length;
   const subtitle = businessQuotes[quoteIndex];
 
-  const displayPlan = !plan || plan === 'free' ? 'Démo' : plan === 'enterprise' ? 'Élite' : plan;
+  const displayPlan = !plan || plan === 'free' ? 'Sans plan' : plan === 'enterprise' ? 'Élite' : plan;
+  const isFree = !plan || plan === 'free'; // ✅ Détecte le plan gratuit
 
   return (
     <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
@@ -29,18 +30,22 @@ export function Header({ firstName, credits, plan, currency }: HeaderProps) {
           &ldquo;{subtitle}&rdquo;
         </p>
       </div>
-      <div
-        data-tour="header-badge"
-        className="flex items-center gap-2 sm:gap-3 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-sm"
-      >
-        <span className="text-[10px] sm:text-xs font-medium text-gray-600 capitalize">
-          {displayPlan}
-        </span>
-        <span className="w-px h-3 bg-gray-300"></span>
-        <span className="text-[10px] sm:text-xs font-semibold text-[#6366F1]">
-          {credits} crédits {currency ? `(${currency})` : ''}
-        </span>
-      </div>
+      
+      {/* ✅ On masque toute la zone de crédits si l'utilisateur est en plan gratuit */}
+      {!isFree && (
+        <div
+          data-tour="header-badge"
+          className="flex items-center gap-2 sm:gap-3 bg-white px-2.5 py-1.5 rounded-lg border border-gray-200 shadow-sm"
+        >
+          <span className="text-[10px] sm:text-xs font-medium text-gray-600 capitalize">
+            {displayPlan}
+          </span>
+          <span className="w-px h-3 bg-gray-300"></span>
+          <span className="text-[10px] sm:text-xs font-semibold text-[#6366F1]">
+            {credits} crédits
+          </span>
+        </div>
+      )}
     </div>
   );
 }
