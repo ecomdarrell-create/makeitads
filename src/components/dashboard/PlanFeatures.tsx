@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { Check, Lock } from 'lucide-react';
+import { Check, Lock, Crown, ArrowRight } from 'lucide-react';
 import { normalizePlanId, formatPlanPrice } from '@/config/pricing.config';
 import { normalizeCurrency, getCurrencySymbol } from '@/lib/currency';
 
@@ -15,9 +15,8 @@ interface Feature {
 }
 
 const featuresConfig: Record<string, Feature[]> = {
-  // MODIFICATION : Mise à jour des textes pour le plan free afin de refléter 0 crédit et l'absence de fonctionnalités
   free: [
-    { name: '0 crédit inclus (nécessite un plan payant)', available: false, required: 'pro' },
+    { name: '0 crédit inclus', available: false, required: 'pro' },
     { name: 'Génération de stratégies bloquée', available: false, required: 'pro' },
     { name: 'Stratégie complète 360°', available: false, required: 'pro' },
     { name: 'Analyse concurrentielle', available: false, required: 'premium' },
@@ -62,17 +61,16 @@ const featuresConfig: Record<string, Feature[]> = {
 export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
   const normalizedPlan = normalizePlanId(currentPlan);
   const safeCurrency = normalizeCurrency(currency);
+  const isFree = normalizedPlan === 'free';
 
   let dynamicPrice: string;
-  if (normalizedPlan === 'free') {
-    dynamicPrice = 'Gratuit';
+  if (isFree) {
+    dynamicPrice = 'Aucun plan actif'; // ✅ Remplacement de "Gratuit"
   } else {
     dynamicPrice = formatPlanPrice(normalizedPlan as 'pro' | 'premium' | 'enterprise', safeCurrency, '/an');
   }
 
-  // MODIFICATION : Remplacement de 'Démo' par 'Plan Gratuit'
-  const planName = normalizedPlan === 'free' ? 'Plan Gratuit' : normalizedPlan === 'enterprise' ? 'Élite' : normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1);
-
+  const planName = isFree ? 'Aucun plan actif' : normalizedPlan === 'enterprise' ? 'Élite' : normalizedPlan.charAt(0).toUpperCase() + normalizedPlan.slice(1);
   const planFeatures = featuresConfig[normalizedPlan] || featuresConfig.free;
 
   return (
@@ -80,19 +78,23 @@ export function PlanFeatures({ currentPlan, currency }: PlanFeaturesProps) {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-xs sm:text-sm font-semibold text-[#111827]">
-            Votre plan : {planName}
+            Votre plan
           </h3>
-          <p className="text-[10px] sm:text-xs text-gray-600 mt-0.5">
-            {dynamicPrice}
+          <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 font-medium">
+            {planName} {!isFree && `— ${dynamicPrice}`}
           </p>
         </div>
-        {normalizedPlan === 'free' && (
+        
+        {/* ✅ NOUVEAU BOUTON PILULE SOLIDE */}
+        {isFree && (
           <Link
             href="/dashboard/pricing"
-            data-tour="plan-upgrade-cta"
-            className="text-[10px] sm:text-xs font-medium text-[#6366F1] bg-indigo-50 px-2.5 py-1 rounded hover:bg-indigo-100 transition-colors"
+            prefetch={true}
+            className="inline-flex items-center gap-1.5 rounded-full bg-[#6366F1] px-3 py-1.5 text-[10px] sm:text-[11px] font-bold text-white shadow-sm transition-colors hover:bg-[#5558e6]"
           >
-            Upgrader
+            <Crown className="h-3 w-3" />
+            Souscrire
+            <ArrowRight className="h-2.5 w-2.5" />
           </Link>
         )}
       </div>

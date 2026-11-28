@@ -30,7 +30,12 @@ function SignupForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const redirectTo = searchParams.get('redirect') || '/dashboard/pricing';
+  // ✅ MODIFICATION : Gestion sécurisée de la redirection. 
+  // Si l'URL contient ?redirect=plan-pro, on redirige vers /dashboard/pricing 
+  // pour que l'utilisateur puisse cliquer sur le bouton (maintenant qu'il est connecté).
+  const rawRedirect = searchParams.get('redirect') || '/dashboard/pricing';
+  const redirectTo = rawRedirect.startsWith('plan-') ? '/dashboard/pricing' : rawRedirect;
+  
   const urlReferralCode = (searchParams.get('ref') || '').toUpperCase().trim();
   const effectiveReferralCode = manualReferralCode.trim().toUpperCase() || urlReferralCode;
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Caveat } from "next/font/google"; // ✅ Ajout de Caveat
+import { Inter, Caveat } from "next/font/google";
 import "./globals.css";
 import { MobileNav } from "@/components/layout/MobileNav";
 import CommunityWidget from "@/components/shared/CommunityWidget";
@@ -12,7 +12,7 @@ const inter = Inter({
   preload: true,
 });
 
-const caveat = Caveat({ // ✅ Nouvelle police signature
+const caveat = Caveat({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-caveat",

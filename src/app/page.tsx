@@ -3,7 +3,8 @@
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Check, ChevronDown, ArrowUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ArrowRight, Check, ChevronDown, ArrowUp, Tag } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import {
   SiMeta, SiGoogle, SiTiktok, SiInstagram, SiWhatsapp,
@@ -20,7 +21,7 @@ import TrustpilotCarousel, { section1Reviews, section2Reviews } from "@/componen
 import { AcademyCarousel } from "@/components/academy/AcademyCarousel";
 
 import { createClient } from "@/lib/supabase/client";
-import { formatPlanPrice } from "@/config/pricing.config";
+import { formatPlanPrice, formatPlanSavings, formatAmountFromXOF } from "@/config/pricing.config";
 import { normalizeCurrency, type Currency } from "@/lib/currency";
 
 const partnerLogos = [
@@ -67,6 +68,7 @@ const pricingPlans = [
     ctaTextCol: "text-white",
     bgCard: "bg-white",
     isExternal: true,
+    badgeBg: "bg-[#6366F1]",
   },
   {
     id: "premium",
@@ -82,6 +84,7 @@ const pricingPlans = [
     ctaTextCol: "text-white",
     bgCard: "bg-white",
     isExternal: true,
+    badgeBg: "bg-rose-500",
   },
   {
     id: "elite",
@@ -97,6 +100,7 @@ const pricingPlans = [
     ctaTextCol: "text-white",
     bgCard: "bg-white",
     isExternal: true,
+    badgeBg: "bg-amber-500",
   },
 ];
 
@@ -134,9 +138,34 @@ const aboutBlocks = [
   { badge: "03", title: "Notre engagement", text: "Nous ne vendons pas de la publicité. Nous construisons l'infrastructure qui permet à chaque entrepreneur africain de prendre des décisions éclairées, armé de données, de méthode et d'intelligence." },
 ];
 
-function PricingCard({ plan, currency }: { plan: any, currency: Currency }) {
+function PricingCard({ plan, currency, currentUser, router }: { plan: any, currency: Currency, currentUser: any, router: any }) {
   const isWide = plan.id === "elite";
   const displayPrice = formatPlanPrice(plan.id as "pro" | "premium" | "enterprise", currency, "/an");
+  const savings = formatPlanSavings(plan.id as "pro" | "premium" | "enterprise", currency);
+  
+  const originalPrice = {
+    pro: 15000,
+    premium: 40000,
+    elite: 150000
+  }[plan.id as "pro" | "premium" | "elite"] || 0;
+  
+  const originalDisplayPrice = formatAmountFromXOF(originalPrice, currency);
+
+  const handlePlanClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!currentUser) {
+      router.push(`/signup?redirect=plan-${plan.id}`);
+    } else {
+      let url = plan.link;
+      try {
+        const parsedUrl = new URL(url);
+        parsedUrl.searchParams.set('userId', currentUser.id);
+        if (currentUser.email) parsedUrl.searchParams.set('email', currentUser.email);
+        url = parsedUrl.toString();
+      } catch {}
+      window.location.href = url;
+    }
+  };
 
   return (
     <motion.div
@@ -154,22 +183,54 @@ function PricingCard({ plan, currency }: { plan: any, currency: Currency }) {
 
       <div className={`${isWide ? "md:w-1/3 md:border-r md:border-gray-100 md:pr-5 mb-3 md:mb-0" : "mb-3"}`}>
         <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">{plan.name}</h3>
-        <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
+        
+        <div className="flex flex-col gap-1.5 mb-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
+            {savings && (
+              <span className="text-xs md:text-sm text-slate-400 line-through decoration-slate-400/70 font-medium">
+                {originalDisplayPrice}/an
+              </span>
+            )}
+          </div>
+          
+          {savings && (
+            <span className={`inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[9px] md:text-[10px] font-bold text-white shadow-sm ${plan.badgeBg}`}>
+              <Tag className="h-2.5 w-2.5" />
+              Économisez {savings}
+            </span>
+          )}
         </div>
+
         {plan.durationNote && (
-          <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
+          <span className="inline-block mt-1 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
             {plan.durationNote}
           </span>
         )}
-        <Link
-          href={plan.link}
-          target={plan.isExternal ? "_blank" : undefined}
-          rel={plan.isExternal ? "noopener noreferrer" : undefined}
+        
+        <button
+          onClick={handlePlanClick}
           className={`block w-full mt-4 rounded-full py-2.5 text-center text-[11px] md:text-xs font-bold transition-all duration-200 ${plan.ctaBg} ${plan.ctaHover} ${plan.ctaTextCol} shadow-sm flex items-center justify-center min-h-[38px]`}
         >
           {plan.ctaText}
-        </Link>
+        </button>
+
+        {/* ✅ NOUVEAU BLOC : Achat de crédits à l'unité (Cahier des charges) */}
+        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 flex flex-col items-center text-center">
+          <p className="text-[10px] md:text-[11px] text-slate-500 mb-2 font-medium">
+            Vous préférez tester avec un petit budget ?
+          </p>
+          <Link
+            href="/dashboard/credits/recharge"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#6366F1]/30 bg-[#6366F1]/5 px-4 py-2 text-[10px] md:text-[11px] font-semibold text-[#6366F1] transition-all hover:bg-[#6366F1]/10 hover:border-[#6366F1]/50"
+          >
+            Acheter des crédits à l'unité
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+          <p className="text-[9px] text-slate-400 mt-2 max-w-[220px] leading-tight">
+            Sans abonnement, achetez uniquement les crédits dont vous avez besoin.
+          </p>
+        </div>
       </div>
 
       <div className={`flex-1 ${isWide ? "md:w-2/3" : ""}`}>
@@ -187,10 +248,12 @@ function PricingCard({ plan, currency }: { plan: any, currency: Currency }) {
 }
 
 export default function LandingPage() {
+  const router = useRouter();
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [activeStep, setActiveStep] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [currency, setCurrency] = useState<Currency>("XOF");
+  const [currentUser, setCurrentUser] = useState<any>(null);
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
@@ -203,16 +266,17 @@ export default function LandingPage() {
   }, []);
 
   useEffect(() => {
-    const loadCurrency = async () => {
+    const loadUserAndCurrency = async () => {
       try {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
+        if (user) setCurrentUser(user);
         if (!user) return;
         const { data: profile } = await supabase.from("profiles").select("currency").eq("id", user.id).maybeSingle();
         if (profile?.currency) setCurrency(normalizeCurrency(profile.currency));
       } catch {}
     };
-    loadCurrency();
+    loadUserAndCurrency();
   }, []);
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
@@ -375,39 +439,21 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ✅ MODIFICATION : Ajout du bloc "Mot du fondateur" juste avant la section Pricing */}
       <section className="relative z-10 py-16 md:py-24 bg-white overflow-hidden border-t border-gray-100">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            
-            <p className="text-sm md:text-base text-slate-400 font-serif italic mb-2">
-              Une lettre de notre fondateur
-            </p>
+            <p className="text-sm md:text-base text-slate-400 font-serif italic mb-2">Une lettre de notre fondateur</p>
             <h2 className="text-3xl md:text-5xl font-serif text-[#18181B] leading-tight mb-8">
               L'exigence au service de <span className="text-[#6366F1]">l'Afrique</span>
             </h2>
-
             <div className="space-y-5 text-left text-[15px] md:text-[16px] text-slate-600 leading-relaxed">
-              <p>
-                J'ai passé des années aux urgences de l'hôpital. Dans ce milieu, l'improvisation n'existe pas. On pose un diagnostic, on analyse les faits, on prescrit la solution la plus rigoureuse.
-              </p>
-              <p>
-                En arrivant dans le monde de l'entrepreneuriat en Afrique, j'ai vu des entrepreneurs talentueux brûler leur capital par manque de méthode. Ils faisaient confiance à des agences ou des outils pensés pour le marché américain, totalement déconnectés de notre réalité.
-              </p>
-              <p>
-                MakeItAds est né de cette conviction : vous ne méritez pas des promesses non tenues, vous méritez des <strong className="text-slate-900">protocoles d'action clairs</strong>. Chaque stratégie que nous générons est conçue avec la même rigueur que celle que j'appliquais pour sauver des vies : des données précises, un ciblage chirurgical et une exécution sans faille.
-              </p>
-              <p>
-                Nous ne vendons pas des "likes" ou de la visibilité. Nous construisons l'infrastructure qui permet à votre entreprise de croître de manière prévisible et rentable, en utilisant les leviers qui fonctionnent réellement ici : WhatsApp, Mobile Money et la confiance locale.
-              </p>
+              <p>J'ai passé des années aux urgences de l'hôpital. Dans ce milieu, l'improvisation n'existe pas. On pose un diagnostic, on analyse les faits, on prescrit la solution la plus rigoureuse.</p>
+              <p>En arrivant dans le monde de l'entrepreneuriat en Afrique, j'ai vu des entrepreneurs talentueux brûler leur capital par manque de méthode. Ils faisaient confiance à des agences ou des outils pensés pour le marché américain, totalement déconnectés de notre réalité.</p>
+              <p>MakeItAds est né de cette conviction : vous ne méritez pas des promesses non tenues, vous méritez des <strong className="text-slate-900">protocoles d'action clairs</strong>. Chaque stratégie que nous générons est conçue avec la même rigueur que celle que j'appliquais pour sauver des vies : des données précises, un ciblage chirurgical et une exécution sans faille.</p>
+              <p>Nous ne vendons pas des "likes" ou de la visibilité. Nous construisons l'infrastructure qui permet à votre entreprise de croître de manière prévisible et rentable, en utilisant les leviers qui fonctionnent réellement ici : WhatsApp, Mobile Money et la confiance locale.</p>
             </div>
-
-            {/* Signature stylisée */}
             <div className="mt-12 flex flex-col items-center justify-center">
-              <span 
-                className="text-4xl md:text-5xl text-[#18181B]" 
-                style={{ fontFamily: 'var(--font-caveat, cursive)', transform: 'rotate(-3deg)' }}
-              >
+              <span className="text-4xl md:text-5xl text-[#18181B]" style={{ fontFamily: 'var(--font-caveat, cursive)', transform: 'rotate(-3deg)' }}>
                 Darrell Kamga
               </span>
               <span className="mt-3 text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">
@@ -429,10 +475,10 @@ export default function LandingPage() {
             </p>
           </motion.div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-5 w-full">
-            <PricingCard plan={pricingPlans[0]} currency={currency} />
-            <PricingCard plan={pricingPlans[1]} currency={currency} />
+            <PricingCard plan={pricingPlans[0]} currency={currency} currentUser={currentUser} router={router} />
+            <PricingCard plan={pricingPlans[1]} currency={currency} currentUser={currentUser} router={router} />
             <div className="md:col-span-2">
-              <PricingCard plan={pricingPlans[2]} currency={currency} />
+              <PricingCard plan={pricingPlans[2]} currency={currency} currentUser={currentUser} router={router} />
             </div>
           </div>
         </div>

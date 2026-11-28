@@ -1,17 +1,17 @@
 'use client';
 
 import { useState, useEffect, Fragment } from 'react';
+import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, ChevronDown } from 'lucide-react';
+import { Check, ChevronDown, Tag, ArrowRight } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import { formatPlanPrice } from '@/config/pricing.config';
+import { formatPlanPrice, formatPlanSavings, formatAmountFromXOF } from '@/config/pricing.config';
 import { normalizeCurrency, type Currency } from '@/lib/currency';
 
 const pricingPlans = [
   {
     id: 'pro',
     name: 'MakeItAds Pro',
-    basePrice: 10000,
     durationNote: "12 mois d'accès",
     features: ['50 crédits renouvelés chaque mois', '5 Stratégies Complètes / mois', '12 sections détaillées', 'Scripts WhatsApp prêts à l\'emploi', 'Allocation budgétaire sur 7 jours', 'Ciblage précis par ville', 'Guide créatif', 'Support email (48h)'],
     popular: false,
@@ -23,11 +23,11 @@ const pricingPlans = [
     ctaHover: 'hover:bg-[#5558e6]',
     ctaTextCol: 'text-white',
     bgCard: 'bg-white',
+    badgeBg: 'bg-[#6366F1]',
   },
   {
     id: 'premium',
     name: 'MakeItAds Premium',
-    basePrice: 25000,
     durationNote: "12 mois d'accès",
     features: ['150 crédits renouvelés chaque mois', '15 Stratégies Complètes / mois', 'Analyse concurrentielle', '5 variantes de hooks', 'Analyse d\'audience avancée', 'Stratégie de croissance 3 mois', 'Support prioritaire (12h)', 'Rapports avancés'],
     popular: true,
@@ -39,11 +39,11 @@ const pricingPlans = [
     ctaHover: 'hover:bg-rose-600',
     ctaTextCol: 'text-white',
     bgCard: 'bg-white',
+    badgeBg: 'bg-rose-500',
   },
   {
     id: 'elite',
     name: 'MakeItAds Élite',
-    basePrice: 100000,
     durationNote: "12 mois d'accès",
     features: ['500 crédits renouvelés chaque mois', '50 Stratégies Complètes / mois', 'Consulting stratégique mensuel', 'Formation personnalisée', 'Accompagnement avancé', 'Rapports white-label', 'Support prioritaire 24/7', 'Accès API'],
     popular: false,
@@ -55,6 +55,7 @@ const pricingPlans = [
     ctaHover: 'hover:bg-amber-600',
     ctaTextCol: 'text-white',
     bgCard: 'bg-white',
+    badgeBg: 'bg-amber-500',
   },
 ];
 
@@ -93,11 +94,19 @@ function buildCheckoutUrl(baseUrl: string, userId: string | null, userEmail: str
 }
 
 function PricingCard({ plan, userId, userEmail, currency }: { plan: any, userId: string | null, userEmail: string | null, currency: Currency }) {
-  // ✅ CORRECTION FORCÉE : Seule la carte 'elite' est large. 'pro' et 'premium' ont strictement la même structure.
   const isWide = plan.id === 'elite';
   const isExternal = !plan.isInternal;
   const finalHref = isExternal ? buildCheckoutUrl(plan.link, userId, userEmail) : plan.link;
   const displayPrice = formatPlanPrice(plan.id as 'pro' | 'premium' | 'enterprise', currency, '/an');
+  const savings = formatPlanSavings(plan.id as 'pro' | 'premium' | 'enterprise', currency);
+
+  const originalPrice = {
+    pro: 15000,
+    premium: 40000,
+    elite: 250000
+  }[plan.id as 'pro' | 'premium' | 'elite'] || 0;
+  
+  const originalDisplayPrice = formatAmountFromXOF(originalPrice, currency);
 
   return (
     <motion.div
@@ -105,7 +114,6 @@ function PricingCard({ plan, userId, userEmail, currency }: { plan: any, userId:
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      // ✅ 'h-full' et 'flex flex-col' garantissent que les cartes s'alignent à la même hauteur dans la grille
       className={`relative group rounded-2xl border p-4 md:p-5 flex flex-col transition-all duration-300 h-full ${plan.bgCard} ${
         plan.popular ? 'border-rose-200 shadow-[0_8px_30px_-12px_rgba(244,63,94,0.25)]' : 'border-gray-200 shadow-sm'
       } ${isWide ? 'md:flex-row md:items-center md:gap-6' : ''}`}
@@ -118,11 +126,27 @@ function PricingCard({ plan, userId, userEmail, currency }: { plan: any, userId:
 
       <div className={`${isWide ? 'md:w-1/3 md:border-r md:border-gray-100 md:pr-5 mb-3 md:mb-0' : 'mb-3'}`}>
         <h3 className="text-sm md:text-base font-bold text-[#18181B] mb-1.5 leading-tight">{plan.name}</h3>
-        <div className="flex items-baseline gap-1 flex-wrap">
-          <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
+        
+        <div className="flex flex-col gap-1.5 mb-2">
+          <div className="flex items-baseline gap-2 flex-wrap">
+            <span className="text-lg md:text-2xl font-bold text-[#18181B] leading-none">{displayPrice}</span>
+            {savings && (
+              <span className="text-xs md:text-sm text-slate-400 line-through decoration-slate-400/70 font-medium">
+                {originalDisplayPrice}/an
+              </span>
+            )}
+          </div>
+
+          {savings && (
+            <span className={`inline-flex w-fit items-center gap-1 rounded-full px-2 py-0.5 text-[9px] md:text-[10px] font-bold text-white shadow-sm ${plan.badgeBg}`}>
+              <Tag className="h-2.5 w-2.5" />
+              Économisez {savings}
+            </span>
+          )}
         </div>
+
         {plan.durationNote && (
-          <span className="inline-block mt-2 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
+          <span className="inline-block mt-1 px-2.5 py-1 rounded-full text-[10px] md:text-[11px] font-bold text-white bg-gray-800 whitespace-nowrap">
             {plan.durationNote}
           </span>
         )}
@@ -134,10 +158,26 @@ function PricingCard({ plan, userId, userEmail, currency }: { plan: any, userId:
         >
           {plan.ctaText}
         </a>
+
+        {/* ✅ NOUVEAU BLOC : Achat de crédits à l'unité (Cahier des charges) */}
+        <div className="mt-4 pt-4 border-t border-dashed border-slate-200 flex flex-col items-center text-center">
+          <p className="text-[10px] md:text-[11px] text-slate-500 mb-2 font-medium">
+            Vous préférez tester avec un petit budget ?
+          </p>
+          <Link
+            href="/dashboard/credits/recharge"
+            className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#6366F1]/30 bg-[#6366F1]/5 px-4 py-2 text-[10px] md:text-[11px] font-semibold text-[#6366F1] transition-all hover:bg-[#6366F1]/10 hover:border-[#6366F1]/50"
+          >
+            Acheter des crédits à l'unité
+            <ArrowRight className="h-3 w-3" />
+          </Link>
+          <p className="text-[9px] text-slate-400 mt-2 max-w-[220px] leading-tight">
+            Sans abonnement, achetez uniquement les crédits dont vous avez besoin.
+          </p>
+        </div>
       </div>
 
       <div className={`flex-1 ${isWide ? 'md:w-2/3' : ''}`}>
-        {/* ✅ CORRECTION FORCÉE : Toujours 1 seule colonne pour les listes de Pro et Premium */}
         <ul className="grid grid-cols-1 gap-x-3 gap-y-2">
           {plan.features.map((feature: string, i: number) => (
             <li key={i} className="flex items-start gap-1.5 text-[11px] md:text-xs text-[#475569] leading-snug">
@@ -223,7 +263,7 @@ export default function PricingPage() {
             <h2 className="text-xl md:text-3xl font-semibold leading-tight text-[#18181B] mb-2">
               Comparez les <span className="text-[#6366F1]">formules</span>
             </h2>
-            <p className="text-xs md:text-sm leading-relaxed text-[#71717A]">
+            <p className="text-xs md:text-sm leading-relaxed text-[#71717A">
               Comprenez rapidement ce que chaque niveau débloque.
             </p>
           </motion.div>
